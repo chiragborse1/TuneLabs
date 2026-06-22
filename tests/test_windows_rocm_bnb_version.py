@@ -1,5 +1,5 @@
-# Unsloth - 2x faster, 60% less VRAM LLM training and finetuning
-# Copyright 2023-present Daniel Han-Chen, Michael Han-Chen & the Unsloth team. All rights reserved.
+# TuneLabs - 2x faster, 60% less VRAM LLM training and finetuning
+# Copyright 2023-present Daniel Han-Chen, Michael Han-Chen & the TuneLabs team. All rights reserved.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -22,12 +22,12 @@ from pathlib import Path
 
 import pytest
 
-_IMPORT_FIXES_PATH = Path(__file__).resolve().parent.parent / "unsloth" / "import_fixes.py"
+_IMPORT_FIXES_PATH = Path(__file__).resolve().parent.parent / "tunelabs" / "import_fixes.py"
 
 
 def _load_import_fixes():
     spec = importlib.util.spec_from_file_location(
-        "unsloth_import_fixes_under_test", _IMPORT_FIXES_PATH
+        "tunelabs_import_fixes_under_test", _IMPORT_FIXES_PATH
     )
     module = importlib.util.module_from_spec(spec)
     assert spec is not None and spec.loader is not None
@@ -46,15 +46,15 @@ def clean_env(monkeypatch):
     os.environ directly, which monkeypatch does not auto-revert."""
     for var in (
         "BNB_ROCM_VERSION",
-        "UNSLOTH_SKIP_BNB_ROCM_VERSION",
-        "UNSLOTH_BNB_ROCM_VERSION_SOURCE",
+        "TUNELABS_SKIP_BNB_ROCM_VERSION",
+        "TUNELABS_BNB_ROCM_VERSION_SOURCE",
     ):
         monkeypatch.delenv(var, raising = False)
     yield monkeypatch
     for var in (
         "BNB_ROCM_VERSION",
-        "UNSLOTH_SKIP_BNB_ROCM_VERSION",
-        "UNSLOTH_BNB_ROCM_VERSION_SOURCE",
+        "TUNELABS_SKIP_BNB_ROCM_VERSION",
+        "TUNELABS_BNB_ROCM_VERSION_SOURCE",
     ):
         os.environ.pop(var, None)
 
@@ -109,7 +109,7 @@ def test_sets_bnb_version_on_windows_rocm(import_fixes, clean_env):
     _force(import_fixes, clean_env, win = True, rocm = True, detected = "72")
     assert import_fixes.maybe_set_windows_rocm_bnb_version() == "72"
     assert os.environ["BNB_ROCM_VERSION"] == "72"
-    assert os.environ["UNSLOTH_BNB_ROCM_VERSION_SOURCE"] == "detected"
+    assert os.environ["TUNELABS_BNB_ROCM_VERSION_SOURCE"] == "detected"
 
 
 def test_noop_off_windows(import_fixes, clean_env):
@@ -140,7 +140,7 @@ def test_respects_user_provided_value(import_fixes, clean_env):
 
 
 def test_explicit_opt_out(import_fixes, clean_env):
-    clean_env.setenv("UNSLOTH_SKIP_BNB_ROCM_VERSION", "1")
+    clean_env.setenv("TUNELABS_SKIP_BNB_ROCM_VERSION", "1")
     _force(import_fixes, clean_env, win = True, rocm = True, detected = "72")
     assert import_fixes.maybe_set_windows_rocm_bnb_version() is None
     assert "BNB_ROCM_VERSION" not in os.environ
@@ -149,27 +149,27 @@ def test_explicit_opt_out(import_fixes, clean_env):
 def test_redetects_sitecustomize_seeded_default(import_fixes, clean_env):
     # A sitecustomize-seeded default must be redetected (the wheel may have changed).
     clean_env.setenv("BNB_ROCM_VERSION", "72")
-    clean_env.setenv("UNSLOTH_BNB_ROCM_VERSION_SOURCE", "sitecustomize")
+    clean_env.setenv("TUNELABS_BNB_ROCM_VERSION_SOURCE", "sitecustomize")
     _force(import_fixes, clean_env, win = True, rocm = True, detected = "713")
     assert import_fixes.maybe_set_windows_rocm_bnb_version() == "713"
     assert os.environ["BNB_ROCM_VERSION"] == "713"
-    assert os.environ["UNSLOTH_BNB_ROCM_VERSION_SOURCE"] == "detected"
+    assert os.environ["TUNELABS_BNB_ROCM_VERSION_SOURCE"] == "detected"
 
 
 def test_sitecustomize_default_kept_when_no_dll_found(import_fixes, clean_env):
     # A failed redetect must not discard the seeded value.
     clean_env.setenv("BNB_ROCM_VERSION", "72")
-    clean_env.setenv("UNSLOTH_BNB_ROCM_VERSION_SOURCE", "sitecustomize")
+    clean_env.setenv("TUNELABS_BNB_ROCM_VERSION_SOURCE", "sitecustomize")
     _force(import_fixes, clean_env, win = True, rocm = True, detected = None)
     assert import_fixes.maybe_set_windows_rocm_bnb_version() is None
     assert os.environ["BNB_ROCM_VERSION"] == "72"
-    assert os.environ["UNSLOTH_BNB_ROCM_VERSION_SOURCE"] == "sitecustomize"
+    assert os.environ["TUNELABS_BNB_ROCM_VERSION_SOURCE"] == "sitecustomize"
 
 
 def test_user_value_with_non_sitecustomize_marker_untouched(import_fixes, clean_env):
     # Only the sitecustomize marker makes a value redetectable.
     clean_env.setenv("BNB_ROCM_VERSION", "999")
-    clean_env.setenv("UNSLOTH_BNB_ROCM_VERSION_SOURCE", "detected")
+    clean_env.setenv("TUNELABS_BNB_ROCM_VERSION_SOURCE", "detected")
     _force(import_fixes, clean_env, win = True, rocm = True, detected = "72")
     assert import_fixes.maybe_set_windows_rocm_bnb_version() is None
     assert os.environ["BNB_ROCM_VERSION"] == "999"
@@ -178,18 +178,18 @@ def test_user_value_with_non_sitecustomize_marker_untouched(import_fixes, clean_
 def test_opt_out_unseats_sitecustomize_seeded_value(import_fixes, clean_env):
     # Opt-out must also drop a sitecustomize-seeded default so bnb never sees it.
     clean_env.setenv("BNB_ROCM_VERSION", "72")
-    clean_env.setenv("UNSLOTH_BNB_ROCM_VERSION_SOURCE", "sitecustomize")
-    clean_env.setenv("UNSLOTH_SKIP_BNB_ROCM_VERSION", "1")
+    clean_env.setenv("TUNELABS_BNB_ROCM_VERSION_SOURCE", "sitecustomize")
+    clean_env.setenv("TUNELABS_SKIP_BNB_ROCM_VERSION", "1")
     _force(import_fixes, clean_env, win = True, rocm = True, detected = "713")
     assert import_fixes.maybe_set_windows_rocm_bnb_version() is None
     assert "BNB_ROCM_VERSION" not in os.environ
-    assert "UNSLOTH_BNB_ROCM_VERSION_SOURCE" not in os.environ
+    assert "TUNELABS_BNB_ROCM_VERSION_SOURCE" not in os.environ
 
 
 def test_opt_out_keeps_explicit_user_value(import_fixes, clean_env):
     # Opt-out must never remove a value the user set themselves (no marker).
     clean_env.setenv("BNB_ROCM_VERSION", "999")
-    clean_env.setenv("UNSLOTH_SKIP_BNB_ROCM_VERSION", "1")
+    clean_env.setenv("TUNELABS_SKIP_BNB_ROCM_VERSION", "1")
     _force(import_fixes, clean_env, win = True, rocm = True, detected = "72")
     assert import_fixes.maybe_set_windows_rocm_bnb_version() is None
     assert os.environ["BNB_ROCM_VERSION"] == "999"

@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 # coding: utf-8
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team.
+# Copyright 2026-present the TuneLabs AI Inc. team.
 """
-Static + lightweight-dynamic validator for unslothai/notebooks.
+Static + lightweight-dynamic validator for tunelabsai/notebooks.
 
 Built to catch the bug classes that landed in (at minimum):
-- unslothai/notebooks#258  (Colab torchao 0.10 vs peft 0.19 floor)
-- unslothai/notebooks#260  (DONT_UPDATE_EXCEPTIONS coverage drift)
-- unslothai/notebooks#261  (torch/torchcodec ABI; --no-deps tokenizers)
-- unslothai/notebooks#264  (transformers/tokenizers window with --no-deps)
-- unslothai/notebooks#221  (removed unsloth APIs in user cells, git+ install)
-- unslothai/notebooks  commit 51b1462 (template/notebook drift)
+- tunelabsai/notebooks#258  (Colab torchao 0.10 vs peft 0.19 floor)
+- tunelabsai/notebooks#260  (DONT_UPDATE_EXCEPTIONS coverage drift)
+- tunelabsai/notebooks#261  (torch/torchcodec ABI; --no-deps tokenizers)
+- tunelabsai/notebooks#264  (transformers/tokenizers window with --no-deps)
+- tunelabsai/notebooks#221  (removed tunelabs APIs in user cells, git+ install)
+- tunelabsai/notebooks  commit 51b1462 (template/notebook drift)
 
-CPU-only by design: never imports torch / unsloth at module load. The
-api subcommand introspects unsloth under the existing
+CPU-only by design: never imports torch / tunelabs at module load. The
+api subcommand introspects tunelabs under the existing
 tests/_zoo_aggressive_cuda_spoof.py harness (PR #5312) so it works on
 ubuntu-latest without a GPU.
 
@@ -113,8 +113,8 @@ GIT_PLUS_ALLOWLIST = (
     "github.com/SparkAudio/Spark-TTS",
     "github.com/state-spaces/mamba",
     "github.com/Dao-AILab/causal-conv1d",
-    "github.com/unslothai/unsloth-zoo",
-    "github.com/unslothai/unsloth",
+    "github.com/tunelabsai/tunelabs-zoo",
+    "github.com/tunelabsai/tunelabs",
 )
 
 # ----- Findings ----- #
@@ -731,7 +731,7 @@ class _APIScanner(ast.NodeVisitor):
                             cell = self.cell_idx,
                             line = kw.value.lineno,
                             severity = "warning",
-                            message = "`optim='adamw_torch_fused'` is suboptimal under Unsloth's memory-efficient training",
+                            message = "`optim='adamw_torch_fused'` is suboptimal under TuneLabs's memory-efficient training",
                             hint = 'use `optim="adamw_8bit"` (or `"paged_adamw_8bit"` for GRPO)',
                         )
                     )
@@ -1039,8 +1039,8 @@ def cmd_api(args: argparse.Namespace) -> int:
                                 file = str(py.name),
                                 line = node.lineno,
                                 severity = "error",
-                                message = f"`{base.id}.{node.func.attr}` is not in the live API surface for the pinned unsloth tag",
-                                hint = "check the unsloth changelog for a renamed/removed API",
+                                message = f"`{base.id}.{node.func.attr}` is not in the live API surface for the pinned tunelabs tag",
+                                hint = "check the tunelabs changelog for a renamed/removed API",
                             )
                         )
     _emit(findings)

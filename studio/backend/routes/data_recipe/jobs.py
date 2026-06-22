@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Job lifecycle endpoints for data recipe."""
 
@@ -248,7 +248,7 @@ def _inject_local_structured_response_format(
         # internal opt-in flag rides through the OpenAI SDK's extra_body
         # passthrough alongside response_format and re-enables the ```json
         # markdown fence that data_designer's structured-output parser expects.
-        extra_body["_unsloth_guided_fence"] = True
+        extra_body["_tunelabs_guided_fence"] = True
         params["extra_body"] = extra_body
         new_configs.append(clone)
         column["model_alias"] = clone_alias
@@ -259,7 +259,7 @@ def _inject_local_structured_response_format(
 
 def _inject_local_providers(recipe: dict[str, Any], request: Request) -> Optional[int]:
     """Mutate recipe in-place: point is_local providers at this server and mint
-    a short-lived internal sk-unsloth-* key for workflow auth.
+    a short-lived internal sk-tunelabs-* key for workflow auth.
 
     Returns the minted key's row id (for the caller to revoke on completion), or
     ``None`` when no local provider is reachable from an LLM column.
@@ -304,12 +304,12 @@ def _inject_local_providers(recipe: dict[str, Any], request: Request) -> Optiona
 
         from auth import storage  # deferred: avoids circular import
 
-        # Mint an internal sk-unsloth-* key scoped to this run via the unified
+        # Mint an internal sk-tunelabs-* key scoped to this run via the unified
         # API-key path. Marked internal so it's hidden from the user's key list;
         # the caller revokes it when the job terminates.
         expires_at = (datetime.now(timezone.utc) + timedelta(hours = 24)).isoformat()
         token, row = storage.create_api_key(
-            username = "unsloth",
+            username = "tunelabs",
             name = "data-recipe workflow",
             expires_at = expires_at,
             internal = True,

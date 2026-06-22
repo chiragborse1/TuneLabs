@@ -26,7 +26,7 @@ pub(crate) fn render_report(
     let mut warnings = Vec::new();
     let mut raw = String::new();
 
-    raw.push_str("Unsloth Studio Support Diagnostics\n");
+    raw.push_str("TuneLabs Studio Support Diagnostics\n");
     raw.push_str(&format!("diag_report_schema={SCHEMA_VERSION}\n"));
     raw.push_str(&format!("created_at_ms={}\n", now_ms()));
     raw.push_str(&format!("app_version={}\n", env!("CARGO_PKG_VERSION")));
@@ -596,11 +596,11 @@ mod tests {
     #[test]
     fn tail_handles_missing_and_non_utf8() {
         let missing =
-            std::env::temp_dir().join(format!("unsloth-missing-tail-{}", std::process::id()));
+            std::env::temp_dir().join(format!("tunelabs-missing-tail-{}", std::process::id()));
         assert!(read_tail(&missing, 10, 100).is_err());
 
         let path =
-            std::env::temp_dir().join(format!("unsloth-nonutf8-tail-{}", std::process::id()));
+            std::env::temp_dir().join(format!("tunelabs-nonutf8-tail-{}", std::process::id()));
         fs::write(&path, [0xff, b'a', b'\n', b'b']).unwrap();
         let tail = read_tail(&path, 10, 100).unwrap();
         assert!(tail.text.contains('�'));

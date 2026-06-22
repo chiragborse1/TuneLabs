@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Pydantic schemas for the Hub download manager (/api/hub/downloads/*)."""
 
@@ -18,7 +18,7 @@ class DownloadModelRequest(BaseModel):
 
     repo_id: str = Field(
         ...,
-        description = "HuggingFace repo ID, e.g. 'unsloth/Qwen3-4B-GGUF'",
+        description = "HuggingFace repo ID, e.g. 'tunelabs/Qwen3-4B-GGUF'",
     )
     gguf_variant: Optional[str] = Field(
         None,

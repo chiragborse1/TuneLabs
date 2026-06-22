@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { createEmptyRecipePayload } from "@/features/recipe-studio";
 import { normalizeNonEmptyName } from "@/utils";
@@ -7,7 +7,7 @@ import Dexie, { type EntityTable, liveQuery } from "dexie";
 import { useEffect, useState } from "react";
 import type { RecipeRecord, SaveRecipeInput } from "../types";
 
-const db = new Dexie("unsloth-data-recipes") as Dexie & {
+const db = new Dexie("tunelabs-data-recipes") as Dexie & {
   recipes: EntityTable<RecipeRecord, "id">;
 };
 

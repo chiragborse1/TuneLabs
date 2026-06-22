@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import asyncio
 import importlib.util
@@ -281,7 +281,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
         ):
             # FP16 inference: 8GB * 1.3 = 10.4GB
             required_gb, metadata = estimate_required_model_memory_gb(
-                "unsloth/test",
+                "tunelabs/test",
                 load_in_4bit = False,
             )
             self.assertAlmostEqual(required_gb, 10.4, places = 3)
@@ -290,14 +290,14 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
             # 4bit inference: base_4bit = 8/3.2 = 2.5GB
             # required = 2.5 + max(2.5*0.3, 2.0) = 2.5 + 2.0 = 4.5GB
             required_gb, _ = estimate_required_model_memory_gb(
-                "unsloth/test",
+                "tunelabs/test",
                 load_in_4bit = True,
             )
             self.assertAlmostEqual(required_gb, 4.5, places = 2)
 
             # Full FT fallback: model_size * 3.5 + overhead
             required_gb, metadata = estimate_required_model_memory_gb(
-                "unsloth/test", training_type = "Full Finetuning"
+                "tunelabs/test", training_type = "Full Finetuning"
             )
             self.assertEqual(metadata.get("estimation_mode"), "fallback")
             self.assertGreater(required_gb, 25.0)
@@ -305,7 +305,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
 
             # LoRA fp16 fallback: model_size + lora_overhead + activations + overhead
             required_gb, metadata = estimate_required_model_memory_gb(
-                "unsloth/test",
+                "tunelabs/test",
                 training_type = "LoRA/QLoRA",
                 load_in_4bit = False,
             )
@@ -315,7 +315,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
 
             # QLoRA 4-bit fallback: compressed weights + lora overhead + activations + overhead
             required_gb, metadata = estimate_required_model_memory_gb(
-                "unsloth/test",
+                "tunelabs/test",
                 training_type = "LoRA/QLoRA",
                 load_in_4bit = True,
             )
@@ -330,7 +330,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
             return_value = (sixteen_gb, "config"),
         ):
             required_gb, _ = estimate_required_model_memory_gb(
-                "unsloth/test",
+                "tunelabs/test",
                 training_type = "LoRA/QLoRA",
                 load_in_4bit = True,
             )
@@ -343,7 +343,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
         with (
             patch(
                 "utils.hardware.hardware._resolve_model_identifier_for_gpu_estimate",
-                return_value = "unsloth/test",
+                return_value = "tunelabs/test",
             ),
             patch(
                 "utils.hardware.hardware._get_hf_safetensors_total_params",
@@ -366,7 +366,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
                 return_value = 1234,
             ),
         ):
-            model_size_bytes, source = _hw_module.estimate_fp16_model_size_bytes("unsloth/test")
+            model_size_bytes, source = _hw_module.estimate_fp16_model_size_bytes("tunelabs/test")
 
         self.assertEqual(model_size_bytes, 1234)
         self.assertEqual(source, "vllm_utils")
@@ -394,7 +394,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
                 return_value = fake_devices,
             ),
         ):
-            selected, metadata = auto_select_gpu_ids("unsloth/test")
+            selected, metadata = auto_select_gpu_ids("tunelabs/test")
 
         self.assertEqual(selected, [0, 1])
         self.assertEqual(metadata["selection_mode"], "auto")
@@ -423,7 +423,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
                 return_value = fake_devices,
             ),
         ):
-            selected, metadata = auto_select_gpu_ids("unsloth/test")
+            selected, metadata = auto_select_gpu_ids("tunelabs/test")
 
         self.assertEqual(selected, [0, 1])
         self.assertEqual(metadata["selection_mode"], "fallback_all")
@@ -440,7 +440,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
         ):
             selected, metadata = prepare_gpu_selection(
                 [2, 3],
-                model_name = "unsloth/test",
+                model_name = "tunelabs/test",
             )
 
         self.assertEqual(selected, [2, 3])
@@ -454,7 +454,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
         ) as mock_auto_select:
             selected, metadata = prepare_gpu_selection(
                 [],
-                model_name = "unsloth/test",
+                model_name = "tunelabs/test",
             )
 
         self.assertEqual(selected, [0, 1])
@@ -474,7 +474,7 @@ class TestGpuAutoSelection(_GpuCacheResetMixin, unittest.TestCase):
         ):
             selected, metadata = prepare_gpu_selection(
                 None,
-                model_name = "unsloth/test",
+                model_name = "tunelabs/test",
             )
 
         self.assertIsNone(selected)
@@ -514,7 +514,7 @@ class TestPreSpawnGpuResolution(_GpuCacheResetMixin, unittest.TestCase):
         ):
             backend.start_training(
                 job_id = "test-job-1",
-                model_name = "unsloth/test",
+                model_name = "tunelabs/test",
                 training_type = "LoRA/QLoRA",
                 gpu_ids = [1, 2],
             )
@@ -555,7 +555,7 @@ class TestPreSpawnGpuResolution(_GpuCacheResetMixin, unittest.TestCase):
         ):
             backend.start_training(
                 job_id = "test-job-2",
-                model_name = "unsloth/test",
+                model_name = "tunelabs/test",
                 training_type = "LoRA/QLoRA",
                 gpu_ids = None,
             )
@@ -600,7 +600,7 @@ class TestPreSpawnGpuResolution(_GpuCacheResetMixin, unittest.TestCase):
         ):
             backend.start_training(
                 job_id = "test-job-uuid-auto",
-                model_name = "unsloth/test",
+                model_name = "tunelabs/test",
                 training_type = "LoRA/QLoRA",
                 gpu_ids = None,
             )
@@ -621,7 +621,7 @@ class TestPreSpawnGpuResolution(_GpuCacheResetMixin, unittest.TestCase):
             from core.inference.orchestrator import InferenceOrchestrator
             orchestrator = InferenceOrchestrator()
 
-        config = SimpleNamespace(identifier = "unsloth/test", gguf_variant = None)
+        config = SimpleNamespace(identifier = "tunelabs/test", gguf_variant = None)
 
         with (
             patch(
@@ -656,7 +656,7 @@ class TestPreSpawnGpuResolution(_GpuCacheResetMixin, unittest.TestCase):
             from core.inference.orchestrator import InferenceOrchestrator
             orchestrator = InferenceOrchestrator()
 
-        config = SimpleNamespace(identifier = "unsloth/test", gguf_variant = None)
+        config = SimpleNamespace(identifier = "tunelabs/test", gguf_variant = None)
 
         with (
             patch(
@@ -684,7 +684,7 @@ class TestRouteErrors(unittest.TestCase):
     def test_prepare_gpu_selection_rejects_gpu_ids_on_non_cuda_backend(self):
         with patch("utils.hardware.hardware.get_device", return_value = DeviceType.CPU):
             with self.assertRaises(ValueError) as exc_info:
-                prepare_gpu_selection([0], model_name = "unsloth/test")
+                prepare_gpu_selection([0], model_name = "tunelabs/test")
 
         self.assertIn("only supported on CUDA devices", str(exc_info.exception))
 
@@ -693,7 +693,7 @@ class TestRouteErrors(unittest.TestCase):
             "inference_route_module_for_gguf_gpu_ids_test",
             "routes/inference.py",
         )
-        request = LoadRequest(model_path = "unsloth/test.gguf", gpu_ids = [0, 1])
+        request = LoadRequest(model_path = "tunelabs/test.gguf", gpu_ids = [0, 1])
         model_config = SimpleNamespace(
             is_gguf = True,
             is_lora = False,
@@ -701,8 +701,8 @@ class TestRouteErrors(unittest.TestCase):
             gguf_file = "/tmp/test.gguf",
             gguf_mmproj_file = None,
             gguf_variant = None,
-            identifier = "unsloth/test.gguf",
-            display_name = "unsloth/test.gguf",
+            identifier = "tunelabs/test.gguf",
+            display_name = "tunelabs/test.gguf",
             is_vision = False,
             is_audio = False,
             audio_type = None,
@@ -736,7 +736,7 @@ class TestRouteErrors(unittest.TestCase):
             "routes/training.py",
         )
         request = TrainingStartRequest(
-            model_name = "unsloth/test",
+            model_name = "tunelabs/test",
             training_type = "LoRA/QLoRA",
             format_type = "alpaca",
             gpu_ids = [99],
@@ -774,7 +774,7 @@ class TestRouteErrors(unittest.TestCase):
             "routes/training.py",
         )
         request = TrainingStartRequest(
-            model_name = "unsloth/test",
+            model_name = "tunelabs/test",
             training_type = "LoRA/QLoRA",
             format_type = "alpaca",
             gpu_ids = [1],
@@ -813,13 +813,13 @@ class TestRouteErrors(unittest.TestCase):
             "inference_route_module_for_test",
             "routes/inference.py",
         )
-        request = LoadRequest(model_path = "unsloth/test", gpu_ids = [99])
+        request = LoadRequest(model_path = "tunelabs/test", gpu_ids = [99])
         model_config = SimpleNamespace(
             is_gguf = False,
             is_lora = False,
             path = None,
-            identifier = "unsloth/test",
-            display_name = "unsloth/test",
+            identifier = "tunelabs/test",
+            display_name = "tunelabs/test",
             is_vision = False,
             is_audio = False,
             audio_type = None,
@@ -875,13 +875,13 @@ class TestRouteErrors(unittest.TestCase):
             "inference_route_module_for_uuid_parent_visibility_test",
             "routes/inference.py",
         )
-        request = LoadRequest(model_path = "unsloth/test", gpu_ids = [1])
+        request = LoadRequest(model_path = "tunelabs/test", gpu_ids = [1])
         model_config = SimpleNamespace(
             is_gguf = False,
             is_lora = False,
             path = None,
-            identifier = "unsloth/test",
-            display_name = "unsloth/test",
+            identifier = "tunelabs/test",
+            display_name = "tunelabs/test",
             is_vision = False,
             is_audio = False,
             audio_type = None,
@@ -1015,7 +1015,7 @@ class TestPerGpuFitGuardAllCounts(unittest.TestCase):
             ),
             patch(
                 "utils.hardware.hardware._resolve_model_identifier_for_gpu_estimate",
-                return_value = "unsloth/test",
+                return_value = "tunelabs/test",
             ),
             patch(
                 "utils.hardware.hardware._load_config_for_gpu_estimate",
@@ -1036,7 +1036,7 @@ class TestPerGpuFitGuardAllCounts(unittest.TestCase):
             patch("utils.hardware.hardware.get_visible_gpu_count", return_value = 1),
         ):
             _, metadata = estimate_required_model_memory_gb(
-                "unsloth/test",
+                "tunelabs/test",
                 training_type = "LoRA/QLoRA",
                 load_in_4bit = True,
             )
@@ -1053,7 +1053,7 @@ class TestPerGpuFitGuardAllCounts(unittest.TestCase):
             ),
             patch(
                 "utils.hardware.hardware._resolve_model_identifier_for_gpu_estimate",
-                return_value = "unsloth/test",
+                return_value = "tunelabs/test",
             ),
             patch(
                 "utils.hardware.hardware._load_config_for_gpu_estimate",
@@ -1074,7 +1074,7 @@ class TestPerGpuFitGuardAllCounts(unittest.TestCase):
             patch("utils.hardware.hardware.get_visible_gpu_count", return_value = 1),
         ):
             _, metadata = estimate_required_model_memory_gb(
-                "unsloth/test",
+                "tunelabs/test",
                 training_type = "LoRA/QLoRA",
                 load_in_4bit = True,
             )
@@ -1103,7 +1103,7 @@ class TestPerGpuFitGuardAllCounts(unittest.TestCase):
             return "eager"
 
         with patch(
-            "unsloth.models._utils.resolve_attention_implementation",
+            "tunelabs.models._utils.resolve_attention_implementation",
             side_effect = _stub_resolver,
         ):
             hardware_module._determine_attention_impl_for_gpu_estimate(config)
@@ -1134,7 +1134,7 @@ class TestPerGpuFitGuardAllCounts(unittest.TestCase):
             patch.object(AutoModelForCausalLM, "_model_mapping", new = None),
             patch.object(AutoModel, "_model_mapping", new = None),
             patch(
-                "unsloth.models._utils.resolve_attention_implementation",
+                "tunelabs.models._utils.resolve_attention_implementation",
                 side_effect = _stub_resolver,
             ),
         ):
@@ -1174,7 +1174,7 @@ class TestPerGpuFitGuardAllCounts(unittest.TestCase):
             return "eager"
 
         with patch(
-            "unsloth.models._utils.resolve_attention_implementation",
+            "tunelabs.models._utils.resolve_attention_implementation",
             side_effect = _stub_resolver,
         ):
             hardware_module._determine_attention_impl_for_gpu_estimate(config)
@@ -1191,7 +1191,7 @@ class TestPerGpuFitGuardAllCounts(unittest.TestCase):
             ),
             patch(
                 "utils.hardware.hardware._resolve_model_identifier_for_gpu_estimate",
-                return_value = "unsloth/test",
+                return_value = "tunelabs/test",
             ),
             patch(
                 "utils.hardware.hardware._load_config_for_gpu_estimate",
@@ -1208,7 +1208,7 @@ class TestPerGpuFitGuardAllCounts(unittest.TestCase):
             patch("utils.hardware.hardware.get_visible_gpu_count", return_value = 6),
         ):
             _, metadata = estimate_required_model_memory_gb(
-                "unsloth/test",
+                "tunelabs/test",
                 training_type = "LoRA/QLoRA",
                 load_in_4bit = True,
             )
@@ -1240,7 +1240,7 @@ class TestAutoSelectWithNoneRequired(_GpuCacheResetMixin, unittest.TestCase):
                 return_value = [0, 1],
             ),
         ):
-            selected, metadata = auto_select_gpu_ids("unsloth/test")
+            selected, metadata = auto_select_gpu_ids("tunelabs/test")
 
         self.assertEqual(selected, [0, 1])
         self.assertEqual(metadata["selection_mode"], "fallback_all")
@@ -1249,7 +1249,7 @@ class TestAutoSelectWithNoneRequired(_GpuCacheResetMixin, unittest.TestCase):
 class TestXpuRejection(_GpuCacheResetMixin, unittest.TestCase):
     def test_auto_select_returns_non_cuda_for_xpu(self):
         with patch("utils.hardware.hardware.get_device", return_value = DeviceType.XPU):
-            selected, metadata = auto_select_gpu_ids("unsloth/test")
+            selected, metadata = auto_select_gpu_ids("tunelabs/test")
 
         self.assertIsNone(selected)
         self.assertEqual(metadata["selection_mode"], "non_cuda")
@@ -1257,7 +1257,7 @@ class TestXpuRejection(_GpuCacheResetMixin, unittest.TestCase):
     def test_prepare_gpu_selection_rejects_explicit_ids_on_xpu(self):
         with patch("utils.hardware.hardware.get_device", return_value = DeviceType.XPU):
             with self.assertRaisesRegex(ValueError, "only supported on CUDA"):
-                prepare_gpu_selection([0], model_name = "unsloth/test")
+                prepare_gpu_selection([0], model_name = "tunelabs/test")
 
 
 class TestEstimateFp16ModelSizeBytesPrefersLocalWeights(unittest.TestCase):

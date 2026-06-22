@@ -1,4 +1,4 @@
-"""Negative-path validation tests for unsloth.chat_templates.construct_chat_template.
+"""Negative-path validation tests for tunelabs.chat_templates.construct_chat_template.
 
 Regression coverage for the no-match guards added in the PR #5763 follow-up:
 missing placeholders or unrecoverable two-example structures must raise
@@ -9,7 +9,7 @@ the cases CPU-only (no HF_TOKEN, no gated download).
 
 import pytest
 
-from unsloth.chat_templates import construct_chat_template
+from tunelabs.chat_templates import construct_chat_template
 
 
 class _FakeTokenizer:

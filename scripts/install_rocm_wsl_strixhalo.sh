@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 #
 # ──────────────────────────────────────────────────────────────────────────────
 # Enable ROCm-on-WSL for AMD Strix Halo (Radeon 8060S / gfx1151)
@@ -33,17 +33,17 @@
 set -euo pipefail
 
 # ── Tunables (override via env) ──────────────────────────────────────────────
-ROCM_VER="${UNSLOTH_WSL_ROCM_VER:-7.2.1}"            # ROCm release to install
+ROCM_VER="${TUNELABS_WSL_ROCM_VER:-7.2.1}"            # ROCm release to install
 GFX="gfx1151"
-LIBROCDXG_REF="${UNSLOTH_LIBROCDXG_REF:-develop}"    # ROCm/librocdxg git ref to build
+LIBROCDXG_REF="${TUNELABS_LIBROCDXG_REF:-develop}"    # ROCm/librocdxg git ref to build
 # AMD's gfx1151 wheel index (same one install.sh uses); only for the smoke test.
-TORCH_INDEX="${UNSLOTH_AMD_ROCM_MIRROR:-https://repo.amd.com/rocm/whl}/${GFX}/"
+TORCH_INDEX="${TUNELABS_AMD_ROCM_MIRROR:-https://repo.amd.com/rocm/whl}/${GFX}/"
 # Optional torch smoke test (throwaway venv). OFF by default: install.sh installs
 # torch itself into the real venv right after, so a duplicate download is wasteful.
-SMOKE_TEST="${UNSLOTH_WSL_SMOKE_TEST:-0}"
+SMOKE_TEST="${TUNELABS_WSL_SMOKE_TEST:-0}"
 # REQUIRED constraint -- without it pip prefers PyPI's newer CUDA torch over the
 # gfx1151 ROCm wheel. 2.11 carries AMD's real gfx1151 fix (matches install.sh).
-TORCH_CONSTRAINT="${UNSLOTH_WSL_TORCH_CONSTRAINT:-torch>=2.11.0,<2.12.0}"
+TORCH_CONSTRAINT="${TUNELABS_WSL_TORCH_CONSTRAINT:-torch>=2.11.0,<2.12.0}"
 ROCM_DIR=""                                          # resolved after install
 
 say()  { printf '\n\033[1;36m== %s\033[0m\n' "$*"; }
@@ -76,9 +76,9 @@ _find_win_sdk() {
 # Best-effort: install the Windows 11 SDK on the Windows HOST via winget so the
 # build has its headers with no manual step. Elevates -> ONE UAC prompt; headers
 # appear under /mnt/c immediately (no reboot). Never fatal -- failure falls
-# through to a manual-install message. Opt out: UNSLOTH_SKIP_WIN_SDK_INSTALL=1.
+# through to a manual-install message. Opt out: TUNELABS_SKIP_WIN_SDK_INSTALL=1.
 _install_windows_sdk_via_winget() {
-    [ "${UNSLOTH_SKIP_WIN_SDK_INSTALL:-0}" = "1" ] && { note "Skipping Windows SDK auto-install (UNSLOTH_SKIP_WIN_SDK_INSTALL=1)."; return 0; }
+    [ "${TUNELABS_SKIP_WIN_SDK_INSTALL:-0}" = "1" ] && { note "Skipping Windows SDK auto-install (TUNELABS_SKIP_WIN_SDK_INSTALL=1)."; return 0; }
     command -v powershell.exe >/dev/null 2>&1 || return 0
     # `command -v` succeeds even with WSL interop OFF (.exe on PATH but fails
     # with "Exec format error"); verify it actually executes.
@@ -89,7 +89,7 @@ _install_windows_sdk_via_winget() {
     fi
     say "Installing the Windows 11 SDK on the Windows host via winget"
     note "librocdxg needs its headers. Approve the UAC prompt on the Windows desktop."
-    note "One-time (~1-3 GB download); opt out with UNSLOTH_SKIP_WIN_SDK_INSTALL=1."
+    note "One-time (~1-3 GB download); opt out with TUNELABS_SKIP_WIN_SDK_INSTALL=1."
     # Newest SDK first, then a fallback. Header presence is the source of truth
     # (re-check each attempt), not winget's exit code. </dev/null so winget never
     # consumes a piped `curl | sh` stdin.
@@ -166,7 +166,7 @@ if [ -n "$_real" ] && [ ! -L /opt/rocm ] && [ -d /opt/rocm ]; then
     else
         note "Moving stray /opt/rocm stub aside -> $_real (not deleting it)"
         $SUDO cp -an /opt/rocm/. "$_real"/ 2>/dev/null || true
-        $SUDO mv /opt/rocm "/opt/rocm.unsloth-stub-bak.$(date +%s)" 2>/dev/null || true
+        $SUDO mv /opt/rocm "/opt/rocm.tunelabs-stub-bak.$(date +%s)" 2>/dev/null || true
         [ -e /opt/rocm ] || $SUDO ln -s "$_real" /opt/rocm
     fi
 elif [ -n "$_real" ] && [ ! -e /opt/rocm ]; then
@@ -192,7 +192,7 @@ else
     fi
     [ -n "$_win_sdk" ] || die "Windows 11 SDK headers not found under 'C:\\Program Files (x86)\\Windows Kits\\10\\Include\\*\\shared', and the automatic winget install did not complete. Install it on the Windows host (e.g. 'winget install Microsoft.WindowsSDK.10.0.26100') and re-run."
     note "Windows SDK: ${_win_sdk}"
-    _src="${HOME}/.unsloth/librocdxg"
+    _src="${HOME}/.tunelabs/librocdxg"
     rm -rf "$_src"
     git clone --depth 1 --branch "$LIBROCDXG_REF" https://github.com/ROCm/librocdxg.git "$_src" \
         || git clone "https://github.com/ROCm/librocdxg.git" "$_src"
@@ -218,17 +218,17 @@ $SUDO ldconfig
 
 # ── Step 4: persist environment (system-wide so Studio's worker inherits it) ──
 say "Persisting ROCm-on-WSL environment"
-_envfile="/etc/profile.d/unsloth-rocm-wsl.sh"
+_envfile="/etc/profile.d/tunelabs-rocm-wsl.sh"
 $SUDO tee "$_envfile" >/dev/null <<EOF
-# >>> Unsloth ROCm-on-WSL (gfx1151) >>>
+# >>> TuneLabs ROCm-on-WSL (gfx1151) >>>
 export HSA_ENABLE_DXG_DETECTION=1
 export TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1
 export PATH="${ROCM_DIR}/bin:\${PATH}"
 export LD_LIBRARY_PATH="${ROCM_DIR}/lib:\${LD_LIBRARY_PATH:-}"
-# <<< Unsloth ROCm-on-WSL (gfx1151) <<<
+# <<< TuneLabs ROCm-on-WSL (gfx1151) <<<
 EOF
 # also drop into ~/.bashrc for interactive shells
-if [ -n "${HOME:-}" ] && ! grep -q "Unsloth ROCm-on-WSL" "${HOME}/.bashrc" 2>/dev/null; then
+if [ -n "${HOME:-}" ] && ! grep -q "TuneLabs ROCm-on-WSL" "${HOME}/.bashrc" 2>/dev/null; then
     cat "$_envfile" >> "${HOME}/.bashrc"
 fi
 # export into the current process so verification below works immediately
@@ -255,7 +255,7 @@ note "ROCm-on-WSL runtime is live for ${GFX}."
 # ── Step 6 (optional): torch smoke test from the gfx1151 index ───────────────
 if [ "$SMOKE_TEST" = "1" ]; then
     say "Smoke-testing PyTorch on ${GFX} (throwaway venv)"
-    _venv="${HOME}/.unsloth/rocm-smoketest"
+    _venv="${HOME}/.tunelabs/rocm-smoketest"
     rm -rf "$_venv"; python3 -m venv "$_venv"
     "$_venv/bin/pip" install --quiet --upgrade pip
     # gfx1151 index is primary (torch + triton); PyPI only an extra for pure-py
@@ -284,6 +284,6 @@ PY
 fi
 
 say "Done."
-note "ROCm-on-WSL is ready for ${GFX}. If you ran this standalone, install Unsloth"
+note "ROCm-on-WSL is ready for ${GFX}. If you ran this standalone, install TuneLabs"
 note "in THIS distro and it will detect the GPU automatically:"
-note "  curl -fsSL https://unsloth.ai/install.sh | sh"
+note "  curl -fsSL https://tunelabs.ai/install.sh | sh"

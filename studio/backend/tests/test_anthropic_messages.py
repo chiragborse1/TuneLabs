@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 """Tests for Anthropic Messages API schemas and translation layer (no server/GPU)."""
 
@@ -1672,7 +1672,7 @@ class TestAnthropicMessagesToolRouting:
         assert backend.calls[0][0] == "plain"
 
     def test_disable_tools_policy_overrides_server_tool_alias(self, monkeypatch):
-        # CLI `unsloth run --disable-tools` sets policy=False. A request with
+        # CLI `tunelabs run --disable-tools` sets policy=False. A request with
         # a Studio server-tool alias must NOT enter the agentic loop then.
         backend = _mock_backend(monkeypatch)
         set_tool_policy(False)

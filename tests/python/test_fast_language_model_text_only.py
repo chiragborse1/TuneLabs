@@ -8,9 +8,9 @@ import pytest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-LOADER_PATH = REPO_ROOT / "unsloth" / "models" / "loader.py"
-VISION_PATH = REPO_ROOT / "unsloth" / "models" / "vision.py"
-UTILS_PATH = REPO_ROOT / "unsloth" / "models" / "_utils.py"
+LOADER_PATH = REPO_ROOT / "tunelabs" / "models" / "loader.py"
+VISION_PATH = REPO_ROOT / "tunelabs" / "models" / "vision.py"
+UTILS_PATH = REPO_ROOT / "tunelabs" / "models" / "_utils.py"
 
 
 def _source(path):
@@ -63,7 +63,7 @@ def _param_default(method, name):
 
 
 def _load_text_only_namespace():
-    # Exec the _utils text-only helpers into one namespace (no unsloth import),
+    # Exec the _utils text-only helpers into one namespace (no tunelabs import),
     # in dependency order so cross-references resolve.
     source = _source(UTILS_PATH)
     import transformers

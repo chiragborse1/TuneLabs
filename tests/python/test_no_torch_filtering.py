@@ -279,41 +279,41 @@ class TestRealRequirementsFiltering:
 
 
 class TestNoTorchConstant:
-    """Verify NO_TORCH is derived correctly from UNSLOTH_NO_TORCH env var."""
+    """Verify NO_TORCH is derived correctly from TUNELABS_NO_TORCH env var."""
 
     def _reimport_no_torch(self) -> bool:
-        return os.environ.get("UNSLOTH_NO_TORCH", "false").lower() in ("1", "true")
+        return os.environ.get("TUNELABS_NO_TORCH", "false").lower() in ("1", "true")
 
     def test_true_lowercase(self):
-        with mock.patch.dict(os.environ, {"UNSLOTH_NO_TORCH": "true"}):
+        with mock.patch.dict(os.environ, {"TUNELABS_NO_TORCH": "true"}):
             assert self._reimport_no_torch() is True
 
     def test_true_one(self):
-        with mock.patch.dict(os.environ, {"UNSLOTH_NO_TORCH": "1"}):
+        with mock.patch.dict(os.environ, {"TUNELABS_NO_TORCH": "1"}):
             assert self._reimport_no_torch() is True
 
     def test_true_uppercase(self):
-        with mock.patch.dict(os.environ, {"UNSLOTH_NO_TORCH": "TRUE"}):
+        with mock.patch.dict(os.environ, {"TUNELABS_NO_TORCH": "TRUE"}):
             assert self._reimport_no_torch() is True
 
     def test_false_string(self):
-        with mock.patch.dict(os.environ, {"UNSLOTH_NO_TORCH": "false"}):
+        with mock.patch.dict(os.environ, {"TUNELABS_NO_TORCH": "false"}):
             assert self._reimport_no_torch() is False
 
     def test_false_zero(self):
-        with mock.patch.dict(os.environ, {"UNSLOTH_NO_TORCH": "0"}):
+        with mock.patch.dict(os.environ, {"TUNELABS_NO_TORCH": "0"}):
             assert self._reimport_no_torch() is False
 
     def test_not_set(self):
         env = os.environ.copy()
-        env.pop("UNSLOTH_NO_TORCH", None)
+        env.pop("TUNELABS_NO_TORCH", None)
         with mock.patch.dict(os.environ, env, clear = True):
             assert self._reimport_no_torch() is False
 
     def test_infer_no_torch_on_intel_mac(self):
         """_infer_no_torch falls back to platform detection when env var is unset."""
         env = os.environ.copy()
-        env.pop("UNSLOTH_NO_TORCH", None)
+        env.pop("TUNELABS_NO_TORCH", None)
         with (
             mock.patch.dict(os.environ, env, clear = True),
             mock.patch.object(ips, "IS_MAC_INTEL", True),
@@ -321,9 +321,9 @@ class TestNoTorchConstant:
             assert ips._infer_no_torch() is True
 
     def test_infer_no_torch_respects_explicit_false_on_intel_mac(self):
-        """Explicit UNSLOTH_NO_TORCH=false overrides platform detection."""
+        """Explicit TUNELABS_NO_TORCH=false overrides platform detection."""
         with (
-            mock.patch.dict(os.environ, {"UNSLOTH_NO_TORCH": "false"}),
+            mock.patch.dict(os.environ, {"TUNELABS_NO_TORCH": "false"}),
             mock.patch.object(ips, "IS_MAC_INTEL", True),
         ):
             assert ips._infer_no_torch() is False
@@ -331,7 +331,7 @@ class TestNoTorchConstant:
     def test_infer_no_torch_linux_unset(self):
         """On Linux with env var unset, _infer_no_torch returns False."""
         env = os.environ.copy()
-        env.pop("UNSLOTH_NO_TORCH", None)
+        env.pop("TUNELABS_NO_TORCH", None)
         with (
             mock.patch.dict(os.environ, env, clear = True),
             mock.patch.object(ips, "IS_MAC_INTEL", False),
@@ -571,13 +571,13 @@ class TestInstallShNoTorchFlag:
         assert "_NO_TORCH_FLAG" in self.source, "_NO_TORCH_FLAG not referenced in SKIP_TORCH logic"
         assert "MAC_INTEL" in self.source, "MAC_INTEL not referenced in SKIP_TORCH logic"
 
-    def test_unsloth_no_torch_uses_skip_torch(self):
-        """UNSLOTH_NO_TORCH must reference $SKIP_TORCH, not $MAC_INTEL."""
+    def test_tunelabs_no_torch_uses_skip_torch(self):
+        """TUNELABS_NO_TORCH must reference $SKIP_TORCH, not $MAC_INTEL."""
         import re
 
-        matches = re.findall(r'UNSLOTH_NO_TORCH="\$(\w+)"', self.source)
+        matches = re.findall(r'TUNELABS_NO_TORCH="\$(\w+)"', self.source)
         for var in matches:
-            assert var == "SKIP_TORCH", f"UNSLOTH_NO_TORCH references ${var} instead of $SKIP_TORCH"
+            assert var == "SKIP_TORCH", f"TUNELABS_NO_TORCH references ${var} instead of $SKIP_TORCH"
 
     def test_cpu_hint_message_exists(self):
         """CPU hint message must exist in install.sh."""
@@ -590,7 +590,7 @@ class TestInstallShNoTorchFlag:
             _NO_TORCH_FLAG=false
             _next_is_package=false
             STUDIO_LOCAL_INSTALL=false
-            PACKAGE_NAME="unsloth"
+            PACKAGE_NAME="tunelabs"
             for arg in "$@"; do
                 if [ "$_next_is_package" = true ]; then
                     PACKAGE_NAME="$arg"
@@ -620,7 +620,7 @@ class TestInstallShNoTorchFlag:
             _NO_TORCH_FLAG=false
             _next_is_package=false
             STUDIO_LOCAL_INSTALL=false
-            PACKAGE_NAME="unsloth"
+            PACKAGE_NAME="tunelabs"
             for arg in "$@"; do
                 if [ "$_next_is_package" = true ]; then
                     PACKAGE_NAME="$arg"

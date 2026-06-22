@@ -1,15 +1,15 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Bind-host trust policy for the Studio backend.
 
 Stdlib only -- safe to import without the rest of the backend.
 
-`is_external_host` mirrors the CLI's `unsloth_cli/_tool_policy.py`: a loopback
+`is_external_host` mirrors the CLI's `tunelabs_cli/_tool_policy.py`: a loopback
 bind is the user's own machine, any other address is network-reachable. The
 logic is duplicated rather than shared because the backend is self-contained
 (see run.py: "can be moved to any directory") and runs from a venv that may not
-have `unsloth_cli` on sys.path. Keep the two in sync.
+have `tunelabs_cli` on sys.path. Keep the two in sync.
 """
 
 from __future__ import annotations
@@ -41,13 +41,13 @@ def apply_stdio_mcp_loopback_default(host: str, *, is_colab: bool = False) -> No
     Tauri desktop app relies on (see main.py, which also binds 127.0.0.1 and
     setdefaults this var). Colab is excluded: even its loopback is a hosted VM
     reachable through Colab's proxy, so it stays off unless opted in. An explicit
-    operator value wins: a pre-set `UNSLOTH_STUDIO_ALLOW_STDIO_MCP=0`
+    operator value wins: a pre-set `TUNELABS_STUDIO_ALLOW_STDIO_MCP=0`
     force-disables and `=1` opts in, including on a network bind. We only ever
     set or clear a default we applied ourselves, so reusing run_server with a
     public host after a loopback one does not leave the gate on.
     """
     global _auto_enabled
-    current = os.environ.get("UNSLOTH_STUDIO_ALLOW_STDIO_MCP")
+    current = os.environ.get("TUNELABS_STUDIO_ALLOW_STDIO_MCP")
     # If our prior auto-default was changed out from under us (in-process reuse),
     # relinquish ownership: an explicit =0 is then honored below as a sticky
     # force-disable, while a cleared var falls back to the host default like a
@@ -59,10 +59,10 @@ def apply_stdio_mcp_loopback_default(host: str, *, is_colab: bool = False) -> No
         return
     if is_colab or is_external_host(host):
         if _auto_enabled:
-            os.environ.pop("UNSLOTH_STUDIO_ALLOW_STDIO_MCP", None)
+            os.environ.pop("TUNELABS_STUDIO_ALLOW_STDIO_MCP", None)
             _auto_enabled = False
     else:
-        os.environ["UNSLOTH_STUDIO_ALLOW_STDIO_MCP"] = "1"
+        os.environ["TUNELABS_STUDIO_ALLOW_STDIO_MCP"] = "1"
         _auto_enabled = True
 
 

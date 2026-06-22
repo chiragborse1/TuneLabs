@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { isTauri, setApiBase } from "@/lib/api-base";
@@ -56,23 +56,23 @@ function wait(ms: number) {
 function externalConflictMessage(preflight: DesktopPreflightResult) {
   if (preflight.reason === "desktop_owned_backend_active") {
     return preflight.port
-      ? `A desktop-owned Unsloth server for this install is already running on port ${preflight.port}. Quit the other desktop app instance, then try again.`
-      : "A desktop-owned Unsloth server for this install is already running. Quit the other desktop app instance, then try again.";
+      ? `A desktop-owned TuneLabs server for this install is already running on port ${preflight.port}. Quit the other desktop app instance, then try again.`
+      : "A desktop-owned TuneLabs server for this install is already running. Quit the other desktop app instance, then try again.";
   }
 
   if (preflight.reason === "desktop_owned_backend_starting") {
-    return "The desktop-owned Unsloth backend is still starting. Wait a moment, then try again.";
+    return "The desktop-owned TuneLabs backend is still starting. Wait a moment, then try again.";
   }
 
   if (preflight.reason?.startsWith("desktop_owned_backend_unmanageable:")) {
     return preflight.port
-      ? `A desktop-owned Unsloth backend on port ${preflight.port} cannot be safely controlled by this desktop app. Stop that backend, then reopen Unsloth.`
-      : "A desktop-owned Unsloth backend cannot be safely controlled by this desktop app. Stop that backend, then reopen Unsloth.";
+      ? `A desktop-owned TuneLabs backend on port ${preflight.port} cannot be safely controlled by this desktop app. Stop that backend, then reopen TuneLabs.`
+      : "A desktop-owned TuneLabs backend cannot be safely controlled by this desktop app. Stop that backend, then reopen TuneLabs.";
   }
 
   return preflight.port
-    ? `A Unsloth server for this install is already running from a terminal on port ${preflight.port}. Stop that server, or run \`unsloth studio update\` from that terminal before using the desktop app.`
-    : "A Unsloth server for this install is already running from a terminal. Stop that server, or run `unsloth studio update` from that terminal before using the desktop app.";
+    ? `A TuneLabs server for this install is already running from a terminal on port ${preflight.port}. Stop that server, or run \`tunelabs studio update\` from that terminal before using the desktop app.`
+    : "A TuneLabs server for this install is already running from a terminal. Stop that server, or run `tunelabs studio update` from that terminal before using the desktop app.";
 }
 
 async function waitForManagedServerReady(
@@ -248,8 +248,8 @@ export function useTauriBackend() {
           } else {
             setBackendError(
               preflight.disposition === "owned_stale"
-                ? "Desktop-owned Unsloth backend is too old for this desktop app. Run `unsloth studio update`, then restart Unsloth."
-                : "Managed Unsloth install is too old. Run `unsloth studio update`.",
+                ? "Desktop-owned TuneLabs backend is too old for this desktop app. Run `tunelabs studio update`, then restart TuneLabs."
+                : "Managed TuneLabs install is too old. Run `tunelabs studio update`.",
             );
           }
           return;
@@ -304,7 +304,7 @@ export function useTauriBackend() {
       if (msg.includes("already running")) {
         startingRef.current = false;
         setBackendError(
-          "Managed server is already running but did not report a port. Restart Unsloth and try again.",
+          "Managed server is already running but did not report a port. Restart TuneLabs and try again.",
         );
         return;
       }
@@ -596,7 +596,7 @@ export function useTauriBackend() {
       const detail =
         event instanceof CustomEvent && typeof event.detail === "string"
           ? event.detail
-          : "Desktop authentication failed. Update or repair the managed Unsloth install, then restart Unsloth.";
+          : "Desktop authentication failed. Update or repair the managed TuneLabs install, then restart TuneLabs.";
       setAuthFailure(detail);
     };
     window.addEventListener("tauri-auth-failed", onAuthFailed);

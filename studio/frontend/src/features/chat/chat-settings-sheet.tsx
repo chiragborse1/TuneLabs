@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import {
   Alert,
@@ -271,7 +271,7 @@ function ParamSlider({
   );
 }
 
-const COLLAPSIBLE_STATE_KEY = "unsloth_chat_collapsible_state";
+const COLLAPSIBLE_STATE_KEY = "tunelabs_chat_collapsible_state";
 
 function loadCollapsibleState(): Record<string, boolean> {
   if (!canUseStorage()) return {};
@@ -1797,7 +1797,7 @@ function AutoHealToolCallsToggle() {
           Auto-Healing Tool Calls
         </span>
         <InfoHint>
-          Unsloth auto-fixes broken tool calls so inference output is never
+          TuneLabs auto-fixes broken tool calls so inference output is never
           broken.
         </InfoHint>
       </div>

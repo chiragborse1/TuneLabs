@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 // Curated list of sloth emoji stickers offered as profile pictures.
 //
@@ -31,6 +31,6 @@ export const SLOTH_AVATARS: readonly string[] = [
   "Sloth emojis/sloth on phone.png",
   "Sloth emojis/sloth magnify final.png",
   "Sloth emojis/Sloth loca pc.png",
-  "Sloth emojis/UnSloth GPU Front square.png",
-  "Sloth emojis/UnSloth Sparkling large.png",
+  "Sloth emojis/TuneLabs GPU Front square.png",
+  "Sloth emojis/TuneLabs Sparkling large.png",
 ];

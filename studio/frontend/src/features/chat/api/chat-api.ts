@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { authFetch } from "@/features/auth";
 import { consumeNativePathToken } from "@/features/native-intents/api";
@@ -26,7 +26,7 @@ import type {
   ValidateModelResponse,
 } from "../types/api";
 
-export const CHAT_HISTORY_UPDATED_EVENT = "unsloth-chat-history-updated";
+export const CHAT_HISTORY_UPDATED_EVENT = "tunelabs-chat-history-updated";
 
 export function notifyChatHistoryUpdated(): void {
   if (typeof window !== "undefined") {

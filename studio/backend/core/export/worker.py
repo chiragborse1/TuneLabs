@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Export subprocess entry point.
 
@@ -194,9 +194,9 @@ def _handle_load(backend, cmd: dict, resp_queue: Any) -> None:
         _cp_lower = checkpoint_path.lower()
         if (
             any(sub in _cp_lower for sub in _NEMOTRON_TRUST_SUBSTRINGS)
-            and (_cp_lower.startswith("unsloth/") or _cp_lower.startswith("nvidia/"))
+            and (_cp_lower.startswith("tunelabs/") or _cp_lower.startswith("nvidia/"))
             # Genuine first-party Hub repo only (not a local/spoof name starting
-            # with "unsloth/"); authenticated so private repos resolve.
+            # with "tunelabs/"); authenticated so private repos resolve.
             and is_trusted_org_repo(checkpoint_path, hf_token = cmd.get("hf_token"))
         ):
             trust_remote_code = True
@@ -451,7 +451,7 @@ def run_export_process(*, cmd_queue: Any, resp_queue: Any, config: dict) -> None
         warnings.filterwarnings("ignore")
 
     LogConfig.setup_logging(
-        service_name = "unsloth-studio-export-worker",
+        service_name = "tunelabs-studio-export-worker",
         env = os.getenv("ENVIRONMENT_TYPE", "production"),
     )
 
@@ -486,7 +486,7 @@ def run_export_process(*, cmd_queue: Any, resp_queue: Any, config: dict) -> None
 
     # ── 1c. Stub torchao on Windows ROCm ──
     # See core/_torchao_stub.py: torchao crashes on Windows ROCm (RCCL absent).
-    # No-op off Windows ROCm. Must run before importing transformers / unsloth_zoo.
+    # No-op off Windows ROCm. Must run before importing transformers / tunelabs_zoo.
     from core._torchao_stub import install_torchao_windows_rocm_stub
 
     install_torchao_windows_rocm_stub()
@@ -497,7 +497,7 @@ def run_export_process(*, cmd_queue: Any, resp_queue: Any, config: dict) -> None
             resp_queue,
             {
                 "type": "status",
-                "message": "Importing Unsloth...",
+                "message": "Importing TuneLabs...",
                 "ts": time.time(),
             },
         )
@@ -506,10 +506,10 @@ def run_export_process(*, cmd_queue: Any, resp_queue: Any, config: dict) -> None
         if backend_path not in sys.path:
             sys.path.insert(0, backend_path)
 
-        # Recover from any namespace-package shadow before importing Unsloth.
+        # Recover from any namespace-package shadow before importing TuneLabs.
         from core.import_guards import ensure_real_packages
 
-        ensure_real_packages("unsloth_zoo", "unsloth")
+        ensure_real_packages("tunelabs_zoo", "tunelabs")
 
         from core.export.export import ExportBackend
 

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """
 Pydantic schemas for Training API
@@ -91,7 +91,7 @@ class TrainingStartRequest(BaseModel):
 
     # Model parameters
     model_name: str = Field(
-        ..., description = "Model identifier (e.g., 'unsloth/llama-3-8b-bnb-4bit')"
+        ..., description = "Model identifier (e.g., 'tunelabs/llama-3-8b-bnb-4bit')"
     )
     training_type: Literal["LoRA/QLoRA", "Full Finetuning", "Continued Pretraining"] = Field(
         ...,
@@ -357,7 +357,7 @@ class TrainingStartRequest(BaseModel):
         3407,
         description = (
             "Random seed; matches the Studio backend / MLX worker default "
-            "and unsloth's historical recommended value."
+            "and tunelabs's historical recommended value."
         ),
     )
     packing: bool = Field(False, description = "Enable sequence packing")

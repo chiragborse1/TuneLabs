@@ -145,7 +145,7 @@ def make_artifact(asset_name, **overrides):
 
 def make_release(artifacts, **overrides):
     defaults = dict(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = "v1.0",
         upstream_tag = "b8508",
         source_repo = None,
@@ -166,7 +166,7 @@ def make_release(artifacts, **overrides):
 
 def make_checksums(asset_names):
     return ApprovedReleaseChecksums(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = "v1.0",
         upstream_tag = "b8508",
         source_repo = None,
@@ -180,7 +180,7 @@ def make_checksums(asset_names):
             name: ApprovedArtifactHash(
                 asset_name = name,
                 sha256 = "a" * 64,
-                repo = "unslothai/llama.cpp",
+                repo = "tunelabsai/llama.cpp",
                 kind = "prebuilt",
             )
             for name in asset_names
@@ -205,7 +205,7 @@ def make_checksums_with_source(
             name: ApprovedArtifactHash(
                 asset_name = name,
                 sha256 = "a" * 64,
-                repo = "unslothai/llama.cpp",
+                repo = "tunelabsai/llama.cpp",
                 kind = "prebuilt",
             )
             for name in asset_names
@@ -228,7 +228,7 @@ def make_checksums_with_source(
             )
         )
     return ApprovedReleaseChecksums(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = release_tag,
         upstream_tag = upstream_tag,
         source_repo = source_repo,
@@ -720,7 +720,7 @@ class TestApplyApprovedHashes:
             source_label = "upstream",
         )
         checksums = ApprovedReleaseChecksums(
-            repo = "unslothai/llama.cpp",
+            repo = "tunelabsai/llama.cpp",
             release_tag = "r1",
             upstream_tag = "b9000",
             artifacts = {
@@ -745,7 +745,7 @@ class TestApplyApprovedHashes:
             source_label = "upstream",
         )
         checksums = ApprovedReleaseChecksums(
-            repo = "unslothai/llama.cpp",
+            repo = "tunelabsai/llama.cpp",
             release_tag = "r1",
             upstream_tag = "b9000",
             artifacts = {
@@ -770,7 +770,7 @@ class TestApplyApprovedHashes:
             source_label = "upstream",
         )
         checksums = ApprovedReleaseChecksums(
-            repo = "unslothai/llama.cpp",
+            repo = "tunelabsai/llama.cpp",
             release_tag = "r1",
             upstream_tag = "b9000",
             artifacts = {
@@ -825,7 +825,7 @@ class TestPublishedReleaseResolution:
             fake_load,
         )
 
-        resolved = resolve_published_release("latest", "unslothai/llama.cpp")
+        resolved = resolve_published_release("latest", "tunelabsai/llama.cpp")
         assert resolved.bundle.release_tag == "v1.0"
         assert resolved.bundle.upstream_tag == "b8999"
         assert resolved.checksums.release_tag == "v1.0"
@@ -847,7 +847,7 @@ class TestPublishedReleaseResolution:
             ),
         )
 
-        assert resolve_requested_install_tag("b8508", "", "unslothai/llama.cpp") == "b8508"
+        assert resolve_requested_install_tag("b8508", "", "tunelabsai/llama.cpp") == "b8508"
 
     def test_concrete_tag_without_matching_release_raises(self, monkeypatch):
         release = make_release([], release_tag = "release-b9000", upstream_tag = "b9000")
@@ -858,7 +858,7 @@ class TestPublishedReleaseResolution:
         )
 
         with pytest.raises(PrebuiltFallback, match = "matched upstream tag b8508"):
-            resolve_requested_install_tag("b8508", "", "unslothai/llama.cpp")
+            resolve_requested_install_tag("b8508", "", "tunelabsai/llama.cpp")
 
     def test_pinned_release_must_match_requested_upstream_tag(self, monkeypatch):
         bundle = make_release([], release_tag = "llama-prebuilt-latest", upstream_tag = "b9000")
@@ -881,7 +881,7 @@ class TestPublishedReleaseResolution:
             resolve_requested_install_tag(
                 "b8508",
                 "llama-prebuilt-latest",
-                "unslothai/llama.cpp",
+                "tunelabsai/llama.cpp",
             )
 
     def test_request_matches_requested_source_ref(self, monkeypatch):
@@ -909,7 +909,7 @@ class TestPublishedReleaseResolution:
             ),
         )
 
-        resolved = resolve_published_release("main", "unslothai/llama.cpp")
+        resolved = resolve_published_release("main", "tunelabsai/llama.cpp")
         assert resolved.bundle.release_tag == "release-main"
 
     def test_request_matches_source_commit(self, monkeypatch):
@@ -937,7 +937,7 @@ class TestPublishedReleaseResolution:
             ),
         )
 
-        resolved = resolve_published_release(commit, "unslothai/llama.cpp")
+        resolved = resolve_published_release(commit, "tunelabsai/llama.cpp")
         assert resolved.bundle.release_tag == "release-commit"
 
 
@@ -995,7 +995,7 @@ class TestSourceBuildPlanResolution:
             lambda requested_tag, published_repo, published_release_tag = "": resolved,
         )
 
-        plan = resolve_source_build_plan("main", "unslothai/llama.cpp")
+        plan = resolve_source_build_plan("main", "tunelabsai/llama.cpp")
         assert plan.source_url == "https://github.com/example/custom-llama.cpp"
         assert plan.source_ref_kind == "commit"
         assert plan.source_ref == commit
@@ -1031,7 +1031,7 @@ class TestSourceBuildPlanResolution:
             lambda requested_tag, published_repo, published_release_tag = "": resolved,
         )
 
-        plan = resolve_source_build_plan("main", "unslothai/llama.cpp")
+        plan = resolve_source_build_plan("main", "tunelabsai/llama.cpp")
         assert plan.source_url == "https://github.com/example/custom-llama.cpp"
         assert plan.source_ref_kind == "branch"
         assert plan.source_ref == "main"
@@ -1046,7 +1046,7 @@ class TestSourceBuildPlanResolution:
             ),
         )
 
-        plan = resolve_source_build_plan("main", "unslothai/llama.cpp")
+        plan = resolve_source_build_plan("main", "tunelabsai/llama.cpp")
         assert plan.source_url == "https://github.com/ggml-org/llama.cpp"
         assert plan.source_ref_kind == "branch"
         assert plan.source_ref == "main"
@@ -1122,7 +1122,7 @@ class TestValidatedChecksumsForBundle:
         checksums.artifacts[bundle.manifest_asset_name] = ApprovedArtifactHash(
             asset_name = bundle.manifest_asset_name,
             sha256 = "b" * 64,
-            repo = "unslothai/llama.cpp",
+            repo = "tunelabsai/llama.cpp",
             kind = "published-manifest",
         )
         monkeypatch.setattr(
@@ -1132,7 +1132,7 @@ class TestValidatedChecksumsForBundle:
         )
 
         with pytest.raises(PrebuiltFallback, match = "manifest checksum"):
-            validated_checksums_for_bundle("unslothai/llama.cpp", bundle)
+            validated_checksums_for_bundle("tunelabsai/llama.cpp", bundle)
 
     def test_rejects_exact_source_without_repo(self, monkeypatch):
         # An exact source archive with no repo to clone from would silently fall back
@@ -1148,7 +1148,7 @@ class TestValidatedChecksumsForBundle:
         )
 
         with pytest.raises(PrebuiltFallback, match = "exact source archive"):
-            validated_checksums_for_bundle("unslothai/llama.cpp", bundle)
+            validated_checksums_for_bundle("tunelabsai/llama.cpp", bundle)
 
     def test_accepts_exact_source_when_only_bundle_has_repo(self, monkeypatch):
         # The source repo can live only in the manifest bundle, not the checksums;
@@ -1169,7 +1169,7 @@ class TestValidatedChecksumsForBundle:
             lambda repo, release_tag: checksums,
         )
 
-        assert validated_checksums_for_bundle("unslothai/llama.cpp", bundle) is checksums
+        assert validated_checksums_for_bundle("tunelabsai/llama.cpp", bundle) is checksums
         plan = INSTALL_LLAMA_PREBUILT.source_build_plan_for_release(
             INSTALL_LLAMA_PREBUILT.ResolvedPublishedRelease(bundle = bundle, checksums = checksums)
         )
@@ -1648,7 +1648,7 @@ class TestResolveInstallAttempts:
         requested_tag, resolved_tag, attempts, approved = resolve_install_attempts(
             "latest",
             host,
-            "unslothai/llama.cpp",
+            "tunelabsai/llama.cpp",
             "",
         )
 
@@ -1708,7 +1708,7 @@ class TestResolveInstallAttempts:
         requested_tag, resolved_tag, attempts, approved = resolve_install_attempts(
             "latest",
             host,
-            "unslothai/llama.cpp",
+            "tunelabsai/llama.cpp",
             "",
         )
 
@@ -1754,7 +1754,7 @@ class TestResolveInstallAttempts:
         )
 
         with pytest.raises(PrebuiltFallback, match = "no compatible Linux prebuilt asset was found"):
-            resolve_install_attempts("latest", host, "unslothai/llama.cpp", "")
+            resolve_install_attempts("latest", host, "tunelabsai/llama.cpp", "")
 
     def test_linux_cuda_does_not_fall_back_to_upstream_cpu(self, monkeypatch):
         host = make_host(system = "Linux", machine = "x86_64", compute_caps = ["86"])
@@ -1780,7 +1780,7 @@ class TestResolveInstallAttempts:
         mock_linux_runtime(monkeypatch, ["cuda12"])
 
         with pytest.raises(PrebuiltFallback, match = "no compatible Linux prebuilt asset was found"):
-            resolve_install_attempts("latest", host, "unslothai/llama.cpp", "")
+            resolve_install_attempts("latest", host, "tunelabsai/llama.cpp", "")
 
     def test_windows_cpu_prefers_published_asset(self, monkeypatch):
         host = make_host(
@@ -1837,7 +1837,7 @@ class TestResolveInstallAttempts:
         _requested_tag, resolved_tag, attempts, _approved = resolve_install_attempts(
             "latest",
             host,
-            "unslothai/llama.cpp",
+            "tunelabsai/llama.cpp",
             "",
         )
 
@@ -1902,7 +1902,7 @@ class TestResolveInstallAttempts:
         _requested_tag, resolved_tag, attempts, _approved = resolve_install_attempts(
             "latest",
             host,
-            "unslothai/llama.cpp",
+            "tunelabsai/llama.cpp",
             "",
         )
 
@@ -1969,7 +1969,7 @@ class TestResolveInstallAttempts:
             resolve_install_attempts(
                 "latest",
                 host,
-                "unslothai/llama.cpp",
+                "tunelabsai/llama.cpp",
                 "",
             )
 
@@ -2014,7 +2014,7 @@ class TestResolveInstallReleasePlans:
         requested_tag, plans = _fork_manifest_release_plans(
             "latest",
             host,
-            "unslothai/llama.cpp",
+            "tunelabsai/llama.cpp",
             "",
             max_release_fallbacks = 2,
         )
@@ -2048,7 +2048,7 @@ class TestResolveInstallReleasePlans:
         _requested_tag, plans = _fork_manifest_release_plans(
             "latest",
             host,
-            "unslothai/llama.cpp",
+            "tunelabsai/llama.cpp",
             "",
             max_release_fallbacks = 2,
         )
@@ -2058,11 +2058,11 @@ class TestResolveInstallReleasePlans:
         assert plans[0].llama_tag == "b9001"
 
     def test_malformed_release_fallback_env_uses_default(self, monkeypatch):
-        monkeypatch.setenv("UNSLOTH_LLAMA_MAX_PREBUILT_RELEASE_FALLBACKS", "not-an-int")
-        assert env_int("UNSLOTH_LLAMA_MAX_PREBUILT_RELEASE_FALLBACKS", 3, minimum = 1) == 3
+        monkeypatch.setenv("TUNELABS_LLAMA_MAX_PREBUILT_RELEASE_FALLBACKS", "not-an-int")
+        assert env_int("TUNELABS_LLAMA_MAX_PREBUILT_RELEASE_FALLBACKS", 3, minimum = 1) == 3
 
     def test_import_with_malformed_release_fallback_env_does_not_crash(self, monkeypatch):
-        monkeypatch.setenv("UNSLOTH_LLAMA_MAX_PREBUILT_RELEASE_FALLBACKS", "bad-value")
+        monkeypatch.setenv("TUNELABS_LLAMA_MAX_PREBUILT_RELEASE_FALLBACKS", "bad-value")
         spec = importlib.util.spec_from_file_location(
             "studio_install_llama_prebuilt_env_reload",
             MODULE_PATH,
@@ -2475,7 +2475,7 @@ class TestBlackwellCuda124Exclusion:
         # Published cuda12 app bundles are toolkit-12.8 builds with sm_120; manifest SM
         # metadata must keep them on Blackwell.
         bundle = AssetChoice(
-            repo = "unslothai/llama.cpp",
+            repo = "tunelabsai/llama.cpp",
             tag = "b9585",
             name = "app-b9585-windows-x64-cuda12-portable.zip",
             url = "https://example.com/app",
@@ -2493,7 +2493,7 @@ class TestBlackwellCuda124Exclusion:
 
     def test_manifest_bundle_without_sm120_dropped(self):
         bundle = AssetChoice(
-            repo = "unslothai/llama.cpp",
+            repo = "tunelabsai/llama.cpp",
             tag = "b9585",
             name = "app-b9585-windows-x64-cuda12-older.zip",
             url = "https://example.com/app",
@@ -2580,7 +2580,7 @@ class TestDirectLinuxNvidiaCpuGate:
         host = make_host(driver_cuda_version = (13, 1), compute_caps = ["100"])
         with pytest.raises(PrebuiltFallback, match = "no compatible Linux prebuilt"):
             INSTALL_LLAMA_PREBUILT.direct_linux_release_plan(
-                {"tag_name": "b8508"}, host, "unslothai/llama.cpp", "latest"
+                {"tag_name": "b8508"}, host, "tunelabsai/llama.cpp", "latest"
             )
 
     def test_cpu_host_still_gets_cpu_bundle(self, monkeypatch):
@@ -2593,7 +2593,7 @@ class TestDirectLinuxNvidiaCpuGate:
             has_usable_nvidia = False,
         )
         plan = INSTALL_LLAMA_PREBUILT.direct_linux_release_plan(
-            {"tag_name": "b8508"}, host, "unslothai/llama.cpp", "latest"
+            {"tag_name": "b8508"}, host, "tunelabsai/llama.cpp", "latest"
         )
         assert [a.install_kind for a in plan.attempts] == ["linux-cpu"]
 
@@ -3066,7 +3066,7 @@ class TestApplyApprovedHashesRuntimePair:
 
     def _runtime_paired_attempt(self) -> AssetChoice:
         return AssetChoice(
-            repo = "unslothai/llama.cpp",
+            repo = "tunelabsai/llama.cpp",
             tag = self.TAG,
             name = f"llama-{self.TAG}-bin-win-cuda-13.1-x64.zip",
             url = f"https://x/llama-{self.TAG}-bin-win-cuda-13.1-x64.zip",
@@ -3080,20 +3080,20 @@ class TestApplyApprovedHashesRuntimePair:
     def test_runtime_hash_threaded_when_present(self):
         attempt = self._runtime_paired_attempt()
         checksums = ApprovedReleaseChecksums(
-            repo = "unslothai/llama.cpp",
+            repo = "tunelabsai/llama.cpp",
             release_tag = self.TAG,
             upstream_tag = self.TAG,
             artifacts = {
                 attempt.name: ApprovedArtifactHash(
                     asset_name = attempt.name,
                     sha256 = "0" * 64,
-                    repo = "unslothai/llama.cpp",
+                    repo = "tunelabsai/llama.cpp",
                     kind = "windows-cuda",
                 ),
                 "cudart-llama-bin-win-cuda-13.1-x64.zip": ApprovedArtifactHash(
                     asset_name = "cudart-llama-bin-win-cuda-13.1-x64.zip",
                     sha256 = "1" * 64,
-                    repo = "unslothai/llama.cpp",
+                    repo = "tunelabsai/llama.cpp",
                     kind = "windows-cuda",
                 ),
             },
@@ -3108,14 +3108,14 @@ class TestApplyApprovedHashesRuntimePair:
         # Drop the pair rather than install an unverified runtime.
         attempt = self._runtime_paired_attempt()
         checksums = ApprovedReleaseChecksums(
-            repo = "unslothai/llama.cpp",
+            repo = "tunelabsai/llama.cpp",
             release_tag = self.TAG,
             upstream_tag = self.TAG,
             artifacts = {
                 attempt.name: ApprovedArtifactHash(
                     asset_name = attempt.name,
                     sha256 = "0" * 64,
-                    repo = "unslothai/llama.cpp",
+                    repo = "tunelabsai/llama.cpp",
                     kind = "windows-cuda",
                 ),
             },
@@ -3426,8 +3426,8 @@ class TestLinuxArm64ForkFallsBackToSource:
 
         monkeypatch.setattr(INSTALL_LLAMA_PREBUILT, "_fork_manifest_release_plans", _full)
         host = make_host(system = "Linux", machine = "aarch64")
-        tag, plans = resolve_simple_install_release_plans("latest", host, "unslothai/llama.cpp", "")
-        assert called.get("args") == ("aarch64", "unslothai/llama.cpp")
+        tag, plans = resolve_simple_install_release_plans("latest", host, "tunelabsai/llama.cpp", "")
+        assert called.get("args") == ("aarch64", "tunelabsai/llama.cpp")
         assert plans == ["plan"]
 
     def test_x86_64_fork_delegates_to_manifest_resolver(self, monkeypatch):
@@ -3441,8 +3441,8 @@ class TestLinuxArm64ForkFallsBackToSource:
 
         monkeypatch.setattr(INSTALL_LLAMA_PREBUILT, "_fork_manifest_release_plans", _full)
         host = make_host(system = "Linux", machine = "x86_64")
-        tag, plans = resolve_simple_install_release_plans("latest", host, "unslothai/llama.cpp", "")
-        assert called.get("args") == ("x86_64", "unslothai/llama.cpp")
+        tag, plans = resolve_simple_install_release_plans("latest", host, "tunelabsai/llama.cpp", "")
+        assert called.get("args") == ("x86_64", "tunelabsai/llama.cpp")
         assert plans == ["plan"]
 
     def test_arm64_cpu_on_ggml_org_is_not_blocked(self, monkeypatch):
@@ -3690,7 +3690,7 @@ class TestCudaDriverToolkitMismatchMessage:
             env = {"PATH": f"{mock_bin}:{os.environ.get('PATH', '')}"},
         )
         assert "compatible:13.3" in output
-        assert "Unsloth supports CUDA Toolkit" not in output
+        assert "TuneLabs supports CUDA Toolkit" not in output
 
     def test_setup_sh_skips_check_without_nvidia_smi(self, tmp_path):
         empty_bin = tmp_path / "empty-bin"
@@ -3711,7 +3711,7 @@ class TestCudaDriverToolkitMismatchMessage:
         )
         output = self._run_bash(script, env = {"PATH": str(empty_bin)})
         assert "skipped" in output
-        assert "Unsloth supports CUDA Toolkit" not in output
+        assert "TuneLabs supports CUDA Toolkit" not in output
 
     def test_setup_sh_unparsable_nvidia_smi_output_falls_back(self, tmp_path):
         mock_bin = self._fake_nvidia_smi(
@@ -3737,7 +3737,7 @@ class TestCudaDriverToolkitMismatchMessage:
             env = {"PATH": f"{mock_bin}:{os.environ.get('PATH', '')}"},
         )
         assert "fallback:generic" in output
-        assert "Unsloth supports CUDA Toolkit" not in output
+        assert "TuneLabs supports CUDA Toolkit" not in output
 
     def test_setup_sh_cuda_version_gt_compares_numerically(self):
         # 13.9 vs 13.10 is where a lexical compare goes wrong (9 > 1).
@@ -3888,7 +3888,7 @@ class TestCudaDriverToolkitMismatchMessage:
             env = {"PATH": f"{mock_bin}:{os.environ.get('PATH', '')}"},
         )
         assert "skipped" in output
-        assert "Unsloth supports CUDA Toolkit" not in output
+        assert "TuneLabs supports CUDA Toolkit" not in output
 
     def test_setup_sh_nvcc_below_minimum_is_too_old(self, tmp_path):
         # CUDA toolkit < 12.4 short-circuits to the too_old branch (no mismatch).
@@ -4026,7 +4026,7 @@ class TestExactSourceAssetUrl:
             repo = repo,
             release_tag = release_tag,
             upstream_tag = "b9616",
-            source_repo = "unslothai/llama.cpp",
+            source_repo = "tunelabsai/llama.cpp",
             source_commit = self.COMMIT,
             artifacts = {},
         )
@@ -4038,41 +4038,41 @@ class TestExactSourceAssetUrl:
         )
 
     def test_uses_manifest_repo_and_tag_when_present(self):
-        checksums = self._checksums(repo = "unslothai/llama.cpp", release_tag = self.INSTALL_TAG)
+        checksums = self._checksums(repo = "tunelabsai/llama.cpp", release_tag = self.INSTALL_TAG)
         url = INSTALL_LLAMA_PREBUILT.exact_source_asset_url(
-            checksums, "unslothai/llama.cpp", self._artifact(repo = None), True, "ignored-tag"
+            checksums, "tunelabsai/llama.cpp", self._artifact(repo = None), True, "ignored-tag"
         )
-        assert url == self._expected("unslothai/llama.cpp", self.INSTALL_TAG)
+        assert url == self._expected("tunelabsai/llama.cpp", self.INSTALL_TAG)
 
     def test_falls_back_to_install_tag_when_manifest_tag_missing(self):
         # Regression: an empty manifest release_tag must not drop the asset URL.
         # Before the fix this returned None and hydration 404'd on the merge commit.
-        checksums = self._checksums(repo = "unslothai/llama.cpp", release_tag = "")
+        checksums = self._checksums(repo = "tunelabsai/llama.cpp", release_tag = "")
         url = INSTALL_LLAMA_PREBUILT.exact_source_asset_url(
-            checksums, "unslothai/llama.cpp", self._artifact(repo = None), True, self.INSTALL_TAG
+            checksums, "tunelabsai/llama.cpp", self._artifact(repo = None), True, self.INSTALL_TAG
         )
-        assert url == self._expected("unslothai/llama.cpp", self.INSTALL_TAG)
+        assert url == self._expected("tunelabsai/llama.cpp", self.INSTALL_TAG)
 
     def test_falls_back_to_source_repo_when_manifest_repo_missing(self):
         checksums = self._checksums(repo = "", release_tag = self.INSTALL_TAG)
         url = INSTALL_LLAMA_PREBUILT.exact_source_asset_url(
-            checksums, "unslothai/llama.cpp", self._artifact(repo = None), True, self.INSTALL_TAG
+            checksums, "tunelabsai/llama.cpp", self._artifact(repo = None), True, self.INSTALL_TAG
         )
-        assert url == self._expected("unslothai/llama.cpp", self.INSTALL_TAG)
+        assert url == self._expected("tunelabsai/llama.cpp", self.INSTALL_TAG)
 
     def test_prefers_artifact_repo_over_manifest_repo(self):
-        checksums = self._checksums(repo = "unslothai/checksums-only", release_tag = self.INSTALL_TAG)
+        checksums = self._checksums(repo = "tunelabsai/checksums-only", release_tag = self.INSTALL_TAG)
         url = INSTALL_LLAMA_PREBUILT.exact_source_asset_url(
             checksums,
-            "unslothai/llama.cpp",
-            self._artifact(repo = "unslothai/llama.cpp"),
+            "tunelabsai/llama.cpp",
+            self._artifact(repo = "tunelabsai/llama.cpp"),
             True,
             self.INSTALL_TAG,
         )
-        assert url == self._expected("unslothai/llama.cpp", self.INSTALL_TAG)
+        assert url == self._expected("tunelabsai/llama.cpp", self.INSTALL_TAG)
 
     def test_returns_none_for_non_exact_source(self):
-        checksums = self._checksums(repo = "unslothai/llama.cpp", release_tag = self.INSTALL_TAG)
+        checksums = self._checksums(repo = "tunelabsai/llama.cpp", release_tag = self.INSTALL_TAG)
         assert (
             INSTALL_LLAMA_PREBUILT.exact_source_asset_url(
                 checksums, UPSTREAM_REPO, None, False, self.INSTALL_TAG
@@ -4081,10 +4081,10 @@ class TestExactSourceAssetUrl:
         )
 
     def test_returns_none_without_source_archive(self):
-        checksums = self._checksums(repo = "unslothai/llama.cpp", release_tag = self.INSTALL_TAG)
+        checksums = self._checksums(repo = "tunelabsai/llama.cpp", release_tag = self.INSTALL_TAG)
         assert (
             INSTALL_LLAMA_PREBUILT.exact_source_asset_url(
-                checksums, "unslothai/llama.cpp", None, True, self.INSTALL_TAG
+                checksums, "tunelabsai/llama.cpp", None, True, self.INSTALL_TAG
             )
             is None
         )
@@ -4099,7 +4099,7 @@ class TestExactSourceAssetUrl:
             "component": "llama.cpp",
             "release_tag": self.INSTALL_TAG,
             "upstream_tag": "b9616",
-            "source_repo": "unslothai/llama.cpp",
+            "source_repo": "tunelabsai/llama.cpp",
             "source_commit": self.COMMIT,
             "artifacts": {
                 exact_source_archive_logical_name(self.COMMIT): {
@@ -4109,7 +4109,7 @@ class TestExactSourceAssetUrl:
             },
         }
         checksums = INSTALL_LLAMA_PREBUILT.parse_approved_release_checksums(
-            "unslothai/llama.cpp", self.INSTALL_TAG, payload
+            "tunelabsai/llama.cpp", self.INSTALL_TAG, payload
         )
         source_repo, _source_ref, source_archive, exact_source = (
             INSTALL_LLAMA_PREBUILT.preferred_source_archive(checksums, "b9616")
@@ -4119,4 +4119,4 @@ class TestExactSourceAssetUrl:
         url = INSTALL_LLAMA_PREBUILT.exact_source_asset_url(
             checksums, source_repo, source_archive, exact_source, self.INSTALL_TAG
         )
-        assert url == self._expected("unslothai/llama.cpp", self.INSTALL_TAG)
+        assert url == self._expected("tunelabsai/llama.cpp", self.INSTALL_TAG)

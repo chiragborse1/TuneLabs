@@ -1,4 +1,4 @@
-from unsloth import FastLanguageModel, FastModel
+from tunelabs import FastLanguageModel, FastModel
 from transformers import AutoModelForCausalLM, WhisperForConditionalGeneration
 from peft import PeftModel
 from pathlib import Path
@@ -16,7 +16,7 @@ print("🔍 PHASE 1: Loading Base Model")
 print(f"{'='*80}")
 
 model, tokenizer = FastModel.from_pretrained(
-    model_name = "unsloth/whisper-large-v3",
+    model_name = "tunelabs/whisper-large-v3",
     dtype = None,  # Leave as None for auto detection
     load_in_4bit = False,  # Set to True to do 4bit quantization which reduces memory
     auto_model = WhisperForConditionalGeneration,
@@ -59,4 +59,4 @@ except Exception as e:
     assert False, f"Phase 3 failed: {e}"
 
 safe_remove_directory("./test_output")
-safe_remove_directory("./unsloth_compiled_cache")
+safe_remove_directory("./tunelabs_compiled_cache")

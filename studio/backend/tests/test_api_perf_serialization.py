@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """_model_json_response produces the same body as JSONResponse(model.model_dump())."""
 
@@ -30,7 +30,7 @@ class _Resp(BaseModel):
     id: str = "chatcmpl-abc"
     object: str = "chat.completion"
     created: int = 1700000000
-    model: str = "unsloth/SmolLM2-135M-Instruct-GGUF"
+    model: str = "tunelabs/SmolLM2-135M-Instruct-GGUF"
     choices: list[_Choice] = [_Choice()]
     usage: _Usage = _Usage()
     system_fingerprint: Optional[str] = None

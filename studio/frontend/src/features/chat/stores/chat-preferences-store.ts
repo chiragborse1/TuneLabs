@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -25,7 +25,7 @@ export const useChatPreferencesStore = create<ChatPreferencesState>()(
         set({ showModelDisclaimer }),
     }),
     {
-      name: "unsloth_chat_preferences",
+      name: "tunelabs_chat_preferences",
       merge: (persisted, current) => {
         const saved = persisted as Partial<ChatPreferencesState> | undefined;
         return {

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { authFetch } from "@/features/auth";
 import { readFastApiError } from "@/lib/format-fastapi-error";
 
-const HELPER_PRECACHE_EVENT = "unsloth-helper-precache-change";
+const HELPER_PRECACHE_EVENT = "tunelabs-helper-precache-change";
 
 export type HelperPrecacheSettings = {
   enabled: boolean;

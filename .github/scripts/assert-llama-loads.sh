@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 #
 # Assert Studio installed a llama.cpp that loads and runs on THIS macOS. Tests
 # the contract that matters (binaries load and their minimum-OS is <= this host)
@@ -8,8 +8,8 @@
 # source build with a correct deployment target is a valid outcome.
 set -uo pipefail
 
-UNSLOTH_HOME="${STUDIO_HOME:-$HOME/.unsloth}"
-LLAMA_DIR="${LLAMA_CPP_DIR:-$UNSLOTH_HOME/llama.cpp}"
+TUNELABS_HOME="${STUDIO_HOME:-$HOME/.tunelabs}"
+LLAMA_DIR="${LLAMA_CPP_DIR:-$TUNELABS_HOME/llama.cpp}"
 BIN_DIR="$LLAMA_DIR/build/bin"
 
 fail() {

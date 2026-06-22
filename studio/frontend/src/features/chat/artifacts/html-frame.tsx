@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 "use client";
 
@@ -63,7 +63,7 @@ export function ArtifactHtmlFrame({
     // Sandboxed frame has an opaque origin ("null"), so a wildcard target is
     // required; the payload only reaches this iframe's contentWindow.
     iframeRef.current?.contentWindow?.postMessage(
-      { type: "unsloth:artifact-html", html: artifactHtml },
+      { type: "tunelabs:artifact-html", html: artifactHtml },
       "*",
     );
   }, [artifactHtml]);

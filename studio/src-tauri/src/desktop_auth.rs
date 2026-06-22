@@ -55,7 +55,7 @@ impl AuthError {
 }
 
 fn auth_secret_path(home: &Path, filename: &str) -> PathBuf {
-    home.join(".unsloth")
+    home.join(".tunelabs")
         .join("studio")
         .join("auth")
         .join(filename)
@@ -237,9 +237,9 @@ async fn provision_desktop_auth() -> Result<(), String> {
         cmd.env_remove("PYTHONPATH");
     }
 
-    // Tauri uses the legacy root regardless of UNSLOTH_STUDIO_HOME / STUDIO_HOME.
+    // Tauri uses the legacy root regardless of TUNELABS_STUDIO_HOME / STUDIO_HOME.
     // Scrub so provisioning writes match what the Rust auth code reads.
-    cmd.env_remove("UNSLOTH_STUDIO_HOME");
+    cmd.env_remove("TUNELABS_STUDIO_HOME");
     cmd.env_remove("STUDIO_HOME");
     #[cfg(windows)]
     {
@@ -432,7 +432,7 @@ mod tests {
     #[test]
     fn read_secret_handles_missing_trimmed_and_invalid_files() {
         let base =
-            std::env::temp_dir().join(format!("unsloth-desktop-secret-{}", std::process::id()));
+            std::env::temp_dir().join(format!("tunelabs-desktop-secret-{}", std::process::id()));
         let missing = base.with_extension("missing");
         let trimmed = base.with_extension("trimmed");
         let invalid = base.with_extension("invalid");

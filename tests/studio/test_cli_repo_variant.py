@@ -1,6 +1,6 @@
-"""Tests for the ``repo:variant`` shorthand parser used by ``unsloth studio run``.
+"""Tests for the ``repo:variant`` shorthand parser used by ``tunelabs studio run``.
 
-Loads studio.py via importlib with a minimal typer stub to avoid importing the unsloth training stack.
+Loads studio.py via importlib with a minimal typer stub to avoid importing the tunelabs training stack.
 """
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ def _load_split_repo_variant():
         typer_stub.echo = lambda *args, **kwargs: None
         sys.modules["typer"] = typer_stub
 
-    studio_py = Path(__file__).resolve().parents[2] / "unsloth_cli" / "commands" / "studio.py"
+    studio_py = Path(__file__).resolve().parents[2] / "tunelabs_cli" / "commands" / "studio.py"
     spec = importlib.util.spec_from_file_location("_studio_for_repo_variant_test", studio_py)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -52,11 +52,11 @@ _split = _load_split_repo_variant()
     "model_arg, expected",
     [
         (
-            "unsloth/gpt-oss-20b-GGUF:UD-Q4_K_XL",
-            ("unsloth/gpt-oss-20b-GGUF", "UD-Q4_K_XL"),
+            "tunelabs/gpt-oss-20b-GGUF:UD-Q4_K_XL",
+            ("tunelabs/gpt-oss-20b-GGUF", "UD-Q4_K_XL"),
         ),
-        ("unsloth/gpt-oss-120b-GGUF:Q4_K_XL", ("unsloth/gpt-oss-120b-GGUF", "Q4_K_XL")),
-        ("unsloth/Qwen3-0.6B-GGUF:Q4_K_M", ("unsloth/Qwen3-0.6B-GGUF", "Q4_K_M")),
+        ("tunelabs/gpt-oss-120b-GGUF:Q4_K_XL", ("tunelabs/gpt-oss-120b-GGUF", "Q4_K_XL")),
+        ("tunelabs/Qwen3-0.6B-GGUF:Q4_K_M", ("tunelabs/Qwen3-0.6B-GGUF", "Q4_K_M")),
         # Variants commonly contain dashes, dots, and underscores.
         ("org/repo:UD-Q5_K_M", ("org/repo", "UD-Q5_K_M")),
         ("org/repo:F16", ("org/repo", "F16")),
@@ -72,8 +72,8 @@ def test_repo_variant_split(model_arg, expected):
 @pytest.mark.parametrize(
     "model_arg",
     [
-        "unsloth/gpt-oss-20b-GGUF",
-        "unsloth/Qwen3-0.6B-GGUF",
+        "tunelabs/gpt-oss-20b-GGUF",
+        "tunelabs/Qwen3-0.6B-GGUF",
         "shorthand-no-org-no-colon",
     ],
 )

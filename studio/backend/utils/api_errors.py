@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Error-envelope helpers for the OpenAI/Anthropic-compatible ``/v1/*`` API surface.
 
 FastAPI's defaults emit ``{"detail": ...}`` bodies (status 422 for validation,
 ``exc.status_code`` for ``HTTPException``). Real OpenAI/Anthropic clients expect
-provider-specific error envelopes instead, so this module re-wraps Unsloth's own
+provider-specific error envelopes instead, so this module re-wraps TuneLabs's own
 client-error responses on the ``/v1/*`` surface:
 
 - OpenAI surface (``/v1/chat/completions``, ``/v1/completions``, ``/v1/models``,

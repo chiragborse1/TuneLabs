@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 from __future__ import annotations
 
@@ -98,7 +98,7 @@ def preferred_mmproj_sibling(siblings: Sequence) -> Optional[object]:
 
 def preferred_mtp_sibling(siblings: Sequence) -> Optional[object]:
     """The separate MTP drafter to fetch with every variant: the repo-root
-    ``mtp-*.gguf`` copy unsloth ships for llama.cpp ``-hf`` auto-discovery
+    ``mtp-*.gguf`` copy tunelabs ships for llama.cpp ``-hf`` auto-discovery
     (Gemma 4). Same pick as the loader's drafter resolution (``mtp-`` basename
     prefix, first in sort order) so download and load resolve the same file;
     the higher-precision ``MTP/`` subdir copies are for explicit selection and

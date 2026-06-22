@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Tests for is_vision_model() caching behaviour.
 
@@ -103,12 +103,12 @@ class TestVisionCacheSubprocessPath:
         """When the raw-config reader is inconclusive (None), the transformers
         5.x subprocess fires only on the first call; the second is cached."""
         # First call: raw None -> subprocess
-        assert is_vision_model("unsloth/Qwen3.5-2B") is True
+        assert is_vision_model("tunelabs/Qwen3.5-2B") is True
         # Second call: cache hit, no subprocess
-        assert is_vision_model("unsloth/Qwen3.5-2B") is True
+        assert is_vision_model("tunelabs/Qwen3.5-2B") is True
 
         mock_subprocess.assert_called_once()
-        assert _vision_detection_cache[("unsloth/Qwen3.5-2B", None)] is True
+        assert _vision_detection_cache[("tunelabs/Qwen3.5-2B", None)] is True
 
     @patch("utils.models.model_config._raw_config_has_vision_config", return_value = True)
     @patch("utils.models.model_config._is_vision_model_subprocess", return_value = None)
@@ -118,10 +118,10 @@ class TestVisionCacheSubprocessPath:
     ):
         # The raw config.json read is the primary path; a definitive answer there never
         # reaches the transformers-5.x subprocess or needs_transformers_5 routing.
-        assert is_vision_model("unsloth/gemma-4-E4B-it") is True
-        assert is_vision_model("unsloth/gemma-4-E4B-it") is True
+        assert is_vision_model("tunelabs/gemma-4-E4B-it") is True
+        assert is_vision_model("tunelabs/gemma-4-E4B-it") is True
 
-        mock_raw_config.assert_called_once_with("unsloth/gemma-4-E4B-it", hf_token = None)
+        mock_raw_config.assert_called_once_with("tunelabs/gemma-4-E4B-it", hf_token = None)
         mock_subprocess.assert_not_called()
 
 

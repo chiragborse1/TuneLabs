@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Regression test: setup.sh installs the isolated Node under <UNSLOTH_STUDIO_HOME>
+# Regression test: setup.sh installs the isolated Node under <TUNELABS_STUDIO_HOME>
 # (or the STUDIO_HOME alias), matching node_runtime.managed_node_dir(). Extracts
 # the real STUDIO_HOME + NODE_DIR logic from setup.sh by content anchors (not line
 # numbers) and runs it against a hermetic fake HOME for each override case.
@@ -31,28 +31,28 @@ SNIP="$blockA"$'\n'"$blockB"$'\n''echo "$NODE_DIR"'
 case "$blockA" in *"_STUDIO_HOME_IS_CUSTOM=true"*) : ;; *) echo "FAIL: blockA extraction broke"; exit 1 ;; esac
 case "$blockB" in *'NODE_DIR="$_NODE_PARENT/node"'*) : ;; *) echo "FAIL: blockB extraction broke"; exit 1 ;; esac
 
-node_dir_for() { # HOME UNSLOTH_STUDIO_HOME STUDIO_HOME
-    env -i HOME="$1" UNSLOTH_STUDIO_HOME="$2" STUDIO_HOME="$3" PATH="$PATH" \
+node_dir_for() { # HOME TUNELABS_STUDIO_HOME STUDIO_HOME
+    env -i HOME="$1" TUNELABS_STUDIO_HOME="$2" STUDIO_HOME="$3" PATH="$PATH" \
         bash -c "$SNIP" 2>/dev/null | tail -1
 }
 
 T="$(mktemp -d)"
 trap 'rm -rf "$T"' EXIT
-mkdir -p "$T/custom" "$T/fakehome/.unsloth/studio"
+mkdir -p "$T/custom" "$T/fakehome/.tunelabs/studio"
 CUSTOM="$(CDPATH= cd -P -- "$T/custom" && pwd -P)"
 FAKEHOME="$(CDPATH= cd -P -- "$T/fakehome" && pwd -P)"
-LEGACY="$FAKEHOME/.unsloth/studio"
+LEGACY="$FAKEHOME/.tunelabs/studio"
 
-# 1. UNSLOTH_STUDIO_HOME = custom dir -> <custom>/node
-check "UNSLOTH_STUDIO_HOME=<custom> -> <custom>/node" "$CUSTOM/node" "$(node_dir_for "$FAKEHOME" "$CUSTOM" "")"
+# 1. TUNELABS_STUDIO_HOME = custom dir -> <custom>/node
+check "TUNELABS_STUDIO_HOME=<custom> -> <custom>/node" "$CUSTOM/node" "$(node_dir_for "$FAKEHOME" "$CUSTOM" "")"
 # 2. STUDIO_HOME alias = custom dir -> <custom>/node
 check "STUDIO_HOME alias -> <custom>/node" "$CUSTOM/node" "$(node_dir_for "$FAKEHOME" "" "$CUSTOM")"
-# 3. UNSLOTH_STUDIO_HOME wins over STUDIO_HOME
-check "UNSLOTH_STUDIO_HOME wins over STUDIO_HOME" "$CUSTOM/node" "$(node_dir_for "$FAKEHOME" "$CUSTOM" "$T/fakehome")"
-# 4. Override = legacy default -> sibling ~/.unsloth/node
-check "legacy-valued override -> ~/.unsloth/node sibling" "$FAKEHOME/.unsloth/node" "$(node_dir_for "$FAKEHOME" "$LEGACY" "")"
-# 5. No override -> ~/.unsloth/node
-check "no override -> ~/.unsloth/node" "$FAKEHOME/.unsloth/node" "$(node_dir_for "$FAKEHOME" "" "")"
+# 3. TUNELABS_STUDIO_HOME wins over STUDIO_HOME
+check "TUNELABS_STUDIO_HOME wins over STUDIO_HOME" "$CUSTOM/node" "$(node_dir_for "$FAKEHOME" "$CUSTOM" "$T/fakehome")"
+# 4. Override = legacy default -> sibling ~/.tunelabs/node
+check "legacy-valued override -> ~/.tunelabs/node sibling" "$FAKEHOME/.tunelabs/node" "$(node_dir_for "$FAKEHOME" "$LEGACY" "")"
+# 5. No override -> ~/.tunelabs/node
+check "no override -> ~/.tunelabs/node" "$FAKEHOME/.tunelabs/node" "$(node_dir_for "$FAKEHOME" "" "")"
 
 if [ "$fails" -ne 0 ]; then echo "$fails check(s) failed"; exit 1; fi
 echo "All checks passed"

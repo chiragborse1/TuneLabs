@@ -18,7 +18,7 @@ import pytest
 
 # Repo discovery
 def _find_repo_root() -> Path | None:
-    env = os.environ.get("UNSLOTH_REPO_ROOT")
+    env = os.environ.get("TUNELABS_REPO_ROOT")
     if env:
         p = Path(env).resolve()
         if (p / "studio" / "backend").is_dir():
@@ -27,16 +27,16 @@ def _find_repo_root() -> Path | None:
     for parent in (here, *here.parents):
         if (parent / "studio" / "backend").is_dir():
             return parent
-        if (parent / "unsloth" / "studio" / "backend").is_dir():
-            return parent / "unsloth"
+        if (parent / "tunelabs" / "studio" / "backend").is_dir():
+            return parent / "tunelabs"
     return None
 
 
 _REPO_ROOT = _find_repo_root()
 if _REPO_ROOT is None:
     pytest.skip(
-        "Could not locate studio/backend. Set UNSLOTH_REPO_ROOT or clone "
-        "unslothai/unsloth into a parent directory.",
+        "Could not locate studio/backend. Set TUNELABS_REPO_ROOT or clone "
+        "tunelabsai/tunelabs into a parent directory.",
         allow_module_level = True,
     )
 

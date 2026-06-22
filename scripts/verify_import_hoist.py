@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 """Deterministic, scope-aware verifier for import-hoisting / alias-rename refactors.
 
 The risk when moving `from a import b as _b` (or `import b as _b`) to module top

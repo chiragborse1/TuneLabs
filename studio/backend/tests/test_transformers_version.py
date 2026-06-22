@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Tests for transformers version detection with local checkpoint fallbacks."""
 
@@ -400,13 +400,13 @@ class TestGetTransformersTier:
         assert get_transformers_tier("google/gemma-4-E2B-it") == "550"
 
     def test_gemma4_12b_substring_returns_510(self):
-        assert get_transformers_tier("unsloth/gemma-4-12b-it") == "510"
+        assert get_transformers_tier("tunelabs/gemma-4-12b-it") == "510"
 
     def test_gemma4_assistant_substring_returns_510(self):
         assert get_transformers_tier("google/gemma-4-E2B-it-assistant") == "510"
 
     def test_gemma4_alt_substring_returns_550(self):
-        assert get_transformers_tier("unsloth/gemma4-E4B-it") == "550"
+        assert get_transformers_tier("tunelabs/gemma4-E4B-it") == "550"
 
     def test_gemma4_config_json_returns_550(self, tmp_path: Path):
         """Local checkpoint with Gemma4 architecture → 550."""
@@ -578,7 +578,7 @@ class TestGetTransformersTier:
 
     def test_needs_transformers_5_compat(self):
         """needs_transformers_5 should return True for 510, 530, and 550 models."""
-        assert needs_transformers_5("unsloth/gemma-4-12b-it") is True
+        assert needs_transformers_5("tunelabs/gemma-4-12b-it") is True
         assert needs_transformers_5("google/gemma-4-E2B-it") is True
         with (
             patch(

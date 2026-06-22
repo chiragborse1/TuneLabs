@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 # Three end-to-end smoke jobs that boot a freshly-installed Studio and
 # exercise the surfaces real users hit through the OpenAI / Anthropic
@@ -33,8 +33,8 @@ on:
   pull_request:
     paths:
       - 'studio/**'
-      - 'unsloth/**'
-      - 'unsloth_cli/**'
+      - 'tunelabs/**'
+      - 'tunelabs_cli/**'
       - 'install.sh'
       - 'pyproject.toml'
       - '.github/workflows/studio-inference-smoke.yml'
@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      GGUF_REPO: unsloth/gemma-3-270m-it-GGUF
+      GGUF_REPO: tunelabs/gemma-3-270m-it-GGUF
       GGUF_VARIANT: UD-Q4_K_XL
       GGUF_FILE: gemma-3-270m-it-UD-Q4_K_XL.gguf
       STUDIO_PORT: '18888'
@@ -125,9 +125,9 @@ jobs:
 
       - name: Reset auth + boot Studio (API-only)
         run: |
-          unsloth studio reset-password
+          tunelabs studio reset-password
           mkdir -p logs
-          UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p "$STUDIO_PORT" \
+          TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p "$STUDIO_PORT" \
             > logs/studio.log 2>&1 &
           echo "STUDIO_PID=$!" >> "$GITHUB_ENV"
 
@@ -146,14 +146,14 @@ jobs:
 
       - name: Password rotation (old must fail, new must work)
         run: |
-          OLD=$(cat ~/.unsloth/studio/auth/.bootstrap_password)
+          OLD=$(cat ~/.tunelabs/studio/auth/.bootstrap_password)
           NEW="CIRotated-$(python -c 'import secrets; print(secrets.token_urlsafe(12))')"
           echo "::add-mask::$OLD"
           echo "::add-mask::$NEW"
           # 1. Login with the bootstrap password.
           OLD_TOKEN=$(curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/login" \
             -H 'content-type: application/json' \
-            -d "{\"username\":\"unsloth\",\"password\":\"$OLD\"}" | jq -r .access_token)
+            -d "{\"username\":\"tunelabs\",\"password\":\"$OLD\"}" | jq -r .access_token)
           [ -n "$OLD_TOKEN" ] && [ "$OLD_TOKEN" != "null" ] || { echo "bootstrap login failed"; exit 1; }
           # 2. Rotate to a fresh random password.
           curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/change-password" \
@@ -163,7 +163,7 @@ jobs:
           OLD_STATUS=$(curl -s -o /dev/null -w '%{http_code}' \
             -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/login" \
             -H 'content-type: application/json' \
-            -d "{\"username\":\"unsloth\",\"password\":\"$OLD\"}")
+            -d "{\"username\":\"tunelabs\",\"password\":\"$OLD\"}")
           if [ "$OLD_STATUS" != "401" ]; then
             echo "::error::Login with old password returned $OLD_STATUS, expected 401"
             exit 1
@@ -171,7 +171,7 @@ jobs:
           # 4. New password must succeed; capture the JWT for downstream steps.
           NEW_TOKEN=$(curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/login" \
             -H 'content-type: application/json' \
-            -d "{\"username\":\"unsloth\",\"password\":\"$NEW\"}" | jq -r .access_token)
+            -d "{\"username\":\"tunelabs\",\"password\":\"$NEW\"}" | jq -r .access_token)
           [ -n "$NEW_TOKEN" ] && [ "$NEW_TOKEN" != "null" ] || { echo "new login failed"; exit 1; }
           echo "TOKEN=$NEW_TOKEN" >> "$GITHUB_ENV"
           echo "password rotation OK (old=401, new=200)"
@@ -329,7 +329,7 @@ jobs:
       # Q4_K_XL, not IQ3_XXS: at IQ3_XXS this model emits malformed
       # tool calls that llama-server's peg-native parser rejects with a
       # 500. Mac/Windows already use Q4_K_XL for the same reason.
-      GGUF_REPO: unsloth/Qwen3.5-2B-GGUF
+      GGUF_REPO: tunelabs/Qwen3.5-2B-GGUF
       GGUF_FILE: Qwen3.5-2B-UD-Q4_K_XL.gguf
       STUDIO_PORT: '18889'
     steps:
@@ -388,7 +388,7 @@ jobs:
 
       - name: Reset auth + boot Studio (API-only, default tool policy)
         # We deliberately use the API-only mode rather than
-        # `unsloth studio run` because the latter calls
+        # `tunelabs studio run` because the latter calls
         # `set_tool_policy(...)` with a resolved bool: on loopback the
         # default resolves to True, which forces every request through
         # the server-side agentic loop and breaks the standard
@@ -396,9 +396,9 @@ jobs:
         # tool_policy=None so each request's `enable_tools` field is
         # honoured.
         run: |
-          unsloth studio reset-password
+          tunelabs studio reset-password
           mkdir -p logs
-          UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p "$STUDIO_PORT" \
+          TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p "$STUDIO_PORT" \
             > logs/studio.log 2>&1 &
           echo "STUDIO_PID=$!" >> "$GITHUB_ENV"
 
@@ -411,19 +411,19 @@ jobs:
             sleep 1
           done
           jq -e '.status == "healthy"' /tmp/health.json
-          OLD=$(cat ~/.unsloth/studio/auth/.bootstrap_password)
+          OLD=$(cat ~/.tunelabs/studio/auth/.bootstrap_password)
           NEW="CITool-$(python -c 'import secrets; print(secrets.token_urlsafe(12))')"
           echo "::add-mask::$OLD"
           echo "::add-mask::$NEW"
           OLD_TOKEN=$(curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/login" \
             -H 'content-type: application/json' \
-            -d "{\"username\":\"unsloth\",\"password\":\"$OLD\"}" | jq -r .access_token)
+            -d "{\"username\":\"tunelabs\",\"password\":\"$OLD\"}" | jq -r .access_token)
           curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/change-password" \
             -H "Authorization: Bearer $OLD_TOKEN" -H 'content-type: application/json' \
             -d "{\"current_password\":\"$OLD\",\"new_password\":\"$NEW\"}" > /dev/null
           TOKEN=$(curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/login" \
             -H 'content-type: application/json' \
-            -d "{\"username\":\"unsloth\",\"password\":\"$NEW\"}" | jq -r .access_token)
+            -d "{\"username\":\"tunelabs\",\"password\":\"$NEW\"}" | jq -r .access_token)
           echo "API_KEY=$TOKEN" >> "$GITHUB_ENV"
           GGUF_PATH="$GITHUB_WORKSPACE/gguf-cache/${GGUF_FILE}"
           ls -lh "$GGUF_PATH"
@@ -719,7 +719,7 @@ jobs:
           # red-herring failures from infra rather than from Studio.
           try:
               content, events = post_sse("/v1/chat/completions", {
-                  "messages":      [{"role": "user", "content": "Search the web for 'unsloth ai github' and summarise."}],
+                  "messages":      [{"role": "user", "content": "Search the web for 'tunelabs ai github' and summarise."}],
                   "enable_tools":  True,
                   "enabled_tools": ["web_search"],
                   "session_id":    "ci-tool-calling-web",
@@ -777,7 +777,7 @@ jobs:
           ss -tln | grep ":${STUDIO_PORT}" || true
           # Capture backend + llama-server logs so a 500 has a server-side traceback.
           mkdir -p logs/server-logs
-          cp -r ~/.unsloth/studio/logs/. logs/server-logs/ 2>/dev/null || true
+          cp -r ~/.tunelabs/studio/logs/. logs/server-logs/ 2>/dev/null || true
 
       - name: Upload logs
         # Always upload so green runs are still reviewable.
@@ -801,7 +801,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      GGUF_REPO: unsloth/Qwen3-VL-2B-Instruct-GGUF
+      GGUF_REPO: tunelabs/Qwen3-VL-2B-Instruct-GGUF
       # UD-Q4_K_XL, not UD-IQ2_XXS: at 2-bit the temp-0 answer to the JSON
       # step's capital-of-France probe flips with the host's SIMD kernels
       # (GitHub runners deterministically answered France while other CPUs
@@ -877,9 +877,9 @@ jobs:
         # response_format requests aren't routed through the agentic
         # tool loop.
         run: |
-          unsloth studio reset-password
+          tunelabs studio reset-password
           mkdir -p logs
-          UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p "$STUDIO_PORT" \
+          TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p "$STUDIO_PORT" \
             > logs/studio.log 2>&1 &
           echo "STUDIO_PID=$!" >> "$GITHUB_ENV"
 
@@ -892,19 +892,19 @@ jobs:
             sleep 1
           done
           jq -e '.status == "healthy"' /tmp/health.json
-          OLD=$(cat ~/.unsloth/studio/auth/.bootstrap_password)
+          OLD=$(cat ~/.tunelabs/studio/auth/.bootstrap_password)
           NEW="CIJson-$(python -c 'import secrets; print(secrets.token_urlsafe(12))')"
           echo "::add-mask::$OLD"
           echo "::add-mask::$NEW"
           OLD_TOKEN=$(curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/login" \
             -H 'content-type: application/json' \
-            -d "{\"username\":\"unsloth\",\"password\":\"$OLD\"}" | jq -r .access_token)
+            -d "{\"username\":\"tunelabs\",\"password\":\"$OLD\"}" | jq -r .access_token)
           curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/change-password" \
             -H "Authorization: Bearer $OLD_TOKEN" -H 'content-type: application/json' \
             -d "{\"current_password\":\"$OLD\",\"new_password\":\"$NEW\"}" > /dev/null
           TOKEN=$(curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/login" \
             -H 'content-type: application/json' \
-            -d "{\"username\":\"unsloth\",\"password\":\"$NEW\"}" | jq -r .access_token)
+            -d "{\"username\":\"tunelabs\",\"password\":\"$NEW\"}" | jq -r .access_token)
           echo "API_KEY=$TOKEN" >> "$GITHUB_ENV"
           # Retry: llama-server startup can race process teardown after a
           # failed attempt. Keep curl out of a pipe so HTTP failures are not

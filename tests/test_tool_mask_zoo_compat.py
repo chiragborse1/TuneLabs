@@ -1,4 +1,4 @@
-"""Compatibility checks for env/tool mask support with older unsloth_zoo."""
+"""Compatibility checks for env/tool mask support with older tunelabs_zoo."""
 
 from __future__ import annotations
 
@@ -10,8 +10,8 @@ import pytest
 import torch
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
-RL_SOURCE_PATH = os.path.join(REPO_ROOT, "unsloth", "models", "rl.py")
-RL_REPLACEMENTS_SOURCE_PATH = os.path.join(REPO_ROOT, "unsloth", "models", "rl_replacements.py")
+RL_SOURCE_PATH = os.path.join(REPO_ROOT, "tunelabs", "models", "rl.py")
+RL_REPLACEMENTS_SOURCE_PATH = os.path.join(REPO_ROOT, "tunelabs", "models", "rl_replacements.py")
 
 
 def _read(path: str) -> str:
@@ -73,7 +73,7 @@ def test_local_tool_mask_fallback_is_only_old_zoo_compat_shim():
     assert calls == []
 
     same_shape_tool_mask = torch.tensor([[1, 0, 1], [0, 1, 1]], dtype = torch.bool)
-    with pytest.raises(RuntimeError, match = "Please upgrade unsloth_zoo"):
+    with pytest.raises(RuntimeError, match = "Please upgrade tunelabs_zoo"):
         align_completion_tool_mask(same_shape_tool_mask, completion_mask)
 
 

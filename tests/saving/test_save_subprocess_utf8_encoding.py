@@ -1,5 +1,5 @@
-# Unsloth - 2x faster, 60% less VRAM LLM training and finetuning
-# Copyright 2023-present Daniel Han-Chen, Michael Han-Chen & the Unsloth team. All rights reserved.
+# TuneLabs - 2x faster, 60% less VRAM LLM training and finetuning
+# Copyright 2023-present Daniel Han-Chen, Michael Han-Chen & the TuneLabs team. All rights reserved.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -11,7 +11,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
 
-"""Regression tests for unslothai/unsloth#2660.
+"""Regression tests for tunelabsai/tunelabs#2660.
 
 On Windows, text-mode subprocess calls without explicit encoding decode child
 output as cp1252, raising UnicodeDecodeError on UTF-8 bytes undefined there
@@ -29,7 +29,7 @@ from pathlib import Path
 
 import pytest
 
-SAVE_PY = Path(__file__).resolve().parents[2] / "unsloth" / "save.py"
+SAVE_PY = Path(__file__).resolve().parents[2] / "tunelabs" / "save.py"
 
 
 def _is_subprocess_call(node: ast.Call) -> bool:
@@ -89,7 +89,7 @@ def test_save_subprocess_text_calls_declare_utf8_encoding():
             offenders.append(node.lineno)
 
     assert not offenders, (
-        "Text-mode subprocess call(s) in unsloth/save.py missing "
+        "Text-mode subprocess call(s) in tunelabs/save.py missing "
         'encoding="utf-8" (UnicodeDecodeError on Windows, #2660) at line(s): '
         + ", ".join(map(str, sorted(offenders)))
     )

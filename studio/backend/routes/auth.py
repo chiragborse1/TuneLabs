@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Authentication API routes."""
 
@@ -42,7 +42,7 @@ router = APIRouter()
 def _reset_password_command() -> str:
     """Shell command shown in the 'incorrect password' hint.
 
-    Prefer the absolute path to this install's ``unsloth`` launcher (sibling of
+    Prefer the absolute path to this install's ``tunelabs`` launcher (sibling of
     the running interpreter) so the hint works even when its dir isn't on PATH.
 
     POSIX paths are shell-quoted. On Windows we use the bare absolute path only
@@ -52,16 +52,16 @@ def _reset_password_command() -> str:
     try:
         bin_dir = os.path.dirname(os.path.abspath(sys.executable))
         if os.name == "nt":
-            exe = os.path.join(bin_dir, "unsloth.exe")
+            exe = os.path.join(bin_dir, "tunelabs.exe")
             if os.path.isfile(exe) and " " not in exe:
                 return f"{exe} studio reset-password"
         else:
-            exe = os.path.join(bin_dir, "unsloth")
+            exe = os.path.join(bin_dir, "tunelabs")
             if os.path.isfile(exe):
                 return f"{shlex.quote(exe)} studio reset-password"
     except Exception:
         pass
-    return "unsloth studio reset-password"
+    return "tunelabs studio reset-password"
 
 
 # Per-(ip, username) bucket + per-IP aggregate. Account bucket stops one user's
@@ -83,11 +83,11 @@ _UNKNOWN_LOGIN_USER = "\x00unknown-user"
 
 
 def _trust_forwarded_for() -> bool:
-    """Honour X-Forwarded-For only when UNSLOTH_STUDIO_TRUST_FORWARDED is set.
+    """Honour X-Forwarded-For only when TUNELABS_STUDIO_TRUST_FORWARDED is set.
 
     Off by default so a direct caller can't spoof the header.
     """
-    return os.environ.get("UNSLOTH_STUDIO_TRUST_FORWARDED", "").lower() in (
+    return os.environ.get("TUNELABS_STUDIO_TRUST_FORWARDED", "").lower() in (
         "1",
         "true",
         "yes",

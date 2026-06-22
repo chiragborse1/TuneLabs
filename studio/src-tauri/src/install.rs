@@ -150,9 +150,9 @@ fn spawn_script(
     install.intentional_stop = false;
     install.needed_packages.clear();
 
-    // Scripts create ~/.unsloth/studio/ themselves, but need a writable cwd.
+    // Scripts create ~/.tunelabs/studio/ themselves, but need a writable cwd.
     let home = dirs::home_dir().ok_or("Could not determine home directory")?;
-    let work_dir = home.join(".unsloth");
+    let work_dir = home.join(".tunelabs");
     if !work_dir.exists() {
         std::fs::create_dir_all(&work_dir)
             .map_err(|e| format!("Failed to create {}: {}", work_dir.display(), e))?;
@@ -198,7 +198,7 @@ fn spawn_script(
 
     // Tauri only does default-root installs; install.sh / install.ps1 reject
     // these under --tauri. Scrub so an inherited value can't trip the guard.
-    cmd.env_remove("UNSLOTH_STUDIO_HOME");
+    cmd.env_remove("TUNELABS_STUDIO_HOME");
     cmd.env_remove("STUDIO_HOME");
 
     // On Windows, launch the installer directly with CREATE_NO_WINDOW.

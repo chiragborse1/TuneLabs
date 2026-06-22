@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import asyncio
 import sys
@@ -1331,7 +1331,7 @@ def test_gguf_progress_unknown_hashes_no_backward_dip_when_variant_finalizes(mon
     # finalizes while the sibling still writes its .incomplete. The sibling's
     # bytes used to leak into this numerator, dipping the bar ~99% -> ~78% for
     # one poll. The unscoped .incomplete must be dropped so the reading stays 0.
-    entry = tmp_path / "models--unsloth--SmolLM2-360M-Instruct-GGUF"
+    entry = tmp_path / "models--tunelabs--SmolLM2-360M-Instruct-GGUF"
     blobs = entry / "blobs"
     snap = entry / "snapshots" / "rev0"
     blobs.mkdir(parents = True)
@@ -1376,7 +1376,7 @@ def test_gguf_progress_unknown_hashes_no_backward_dip_when_variant_finalizes(mon
 
     result = asyncio.run(
         downloads.get_gguf_download_progress_response(
-            "unsloth/SmolLM2-360M-Instruct-GGUF",
+            "tunelabs/SmolLM2-360M-Instruct-GGUF",
             variant = "Q2_K",
             expected_bytes = own_total,
         )

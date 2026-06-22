@@ -3,7 +3,7 @@ requires = ["setuptools==80.9.0", "setuptools-scm==9.2.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "unsloth"
+name = "tunelabs"
 dynamic = ["version"]
 description = "2-5X faster training, reinforcement learning & finetuning"
 readme = "README.md"
@@ -11,12 +11,12 @@ requires-python = ">=3.9,<3.15"
 license = "Apache-2.0"
 keywords = ["ai", "llm", "reinforcement learning", "machine learning", "artificial intelligence", "pytorch"]
 authors = [
-    {email = "info@unsloth.ai"},
-    {name = "Unsloth AI team"},
+    {email = "info@tunelabs.ai"},
+    {name = "TuneLabs AI team"},
 ]
 maintainers = [
-    {name = "Daniel Han", email = "daniel@unsloth.ai"},
-    {name = "Michael Han", email = "info@unsloth.ai"},
+    {name = "Daniel Han", email = "daniel@tunelabs.ai"},
+    {name = "Michael Han", email = "info@tunelabs.ai"},
 ]
 classifiers = [
     "Programming Language :: Python",
@@ -33,10 +33,10 @@ dependencies = [
 ]
 
 [project.scripts]
-unsloth = "unsloth_cli:app"
+tunelabs = "tunelabs_cli:app"
 
 [tool.setuptools.dynamic]
-version = {attr = "unsloth.models._utils.__version__"}
+version = {attr = "tunelabs.models._utils.__version__"}
 
 [tool.setuptools]
 include-package-data = true
@@ -61,7 +61,7 @@ studio = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["unsloth*", "unsloth_cli*", "studio", "studio.backend*"]
+include = ["tunelabs*", "tunelabs_cli*", "studio", "studio.backend*"]
 exclude = ["images*", "tests*", "*.node_modules", "*.node_modules.*"]
 
 [project.optional-dependencies]
@@ -71,7 +71,6 @@ triton = [
 ]
 
 huggingfacenotorch = [
-    "unsloth_zoo>=2026.6.6",
     "wheel>=0.42.0",
     "packaging",
     "numpy",
@@ -91,18 +90,17 @@ huggingfacenotorch = [
     "sentence-transformers",
 ]
 huggingface = [
-    "unsloth[huggingfacenotorch]",
-    "unsloth_zoo>=2026.6.6",
+    "tunelabs[huggingfacenotorch]",
     "torchvision",
-    "unsloth[triton]",
+    "tunelabs[triton]",
 ]
 windows = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0 ; (sys_platform == 'win32')",
     "xformers>=0.0.22.post7 ; (sys_platform == 'win32')",
 ]
 base = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
 ]
 cu118only = [
     "xformers @ https://download.pytorch.org/whl/cu118/xformers-0.0.22.post7%2Bcu118-cp39-cp39-manylinux2014_x86_64.whl ; python_version=='3.9' and ('linux' in sys_platform)",
@@ -341,248 +339,248 @@ cu130onlytorch2100 = [
     "xformers @ https://download.pytorch.org/whl/cu130/xformers-0.0.34-cp39-abi3-win_amd64.whl ; (sys_platform == 'win32')",
 ]
 cu118 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118only]",
+    "tunelabs[cu118only]",
 ]
 cu121 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu121only]",
+    "tunelabs[cu121only]",
 ]
 cu118-torch211 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes==0.45.5",
-    "unsloth[cu118onlytorch211]",
+    "tunelabs[cu118onlytorch211]",
 ]
 cu121-torch211 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes==0.45.5",
-    "unsloth[cu121onlytorch211]",
+    "tunelabs[cu121onlytorch211]",
 ]
 cu118-torch212 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes==0.45.5",
-    "unsloth[cu118onlytorch212]",
+    "tunelabs[cu118onlytorch212]",
 ]
 cu121-torch212 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes==0.45.5",
-    "unsloth[cu121onlytorch212]",
+    "tunelabs[cu121onlytorch212]",
 ]
 cu118-torch220 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118onlytorch220]",
+    "tunelabs[cu118onlytorch220]",
 ]
 cu121-torch220 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu121onlytorch220]",
+    "tunelabs[cu121onlytorch220]",
 ]
 cu118-torch230 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118onlytorch230]",
+    "tunelabs[cu118onlytorch230]",
 ]
 cu121-torch230 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu121onlytorch230]",
+    "tunelabs[cu121onlytorch230]",
 ]
 cu118-torch240 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118onlytorch240]",
+    "tunelabs[cu118onlytorch240]",
 ]
 cu121-torch240 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu121onlytorch240]",
+    "tunelabs[cu121onlytorch240]",
 ]
 cu124-torch240 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu124onlytorch240]",
+    "tunelabs[cu124onlytorch240]",
 ]
 cu118-torch250 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118onlytorch250]",
+    "tunelabs[cu118onlytorch250]",
 ]
 cu121-torch250 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu121onlytorch250]",
+    "tunelabs[cu121onlytorch250]",
 ]
 cu124-torch250 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu124onlytorch250]",
+    "tunelabs[cu124onlytorch250]",
 ]
 cu118-torch251 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118onlytorch251]",
+    "tunelabs[cu118onlytorch251]",
 ]
 cu121-torch251 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu121onlytorch251]",
+    "tunelabs[cu121onlytorch251]",
 ]
 cu124-torch251 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu124onlytorch251]",
+    "tunelabs[cu124onlytorch251]",
 ]
 cu118-torch260 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118onlytorch260]",
+    "tunelabs[cu118onlytorch260]",
 ]
 cu124-torch260 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu124onlytorch260]",
+    "tunelabs[cu124onlytorch260]",
 ]
 cu126-torch260 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu126onlytorch260]",
+    "tunelabs[cu126onlytorch260]",
 ]
 cu118-torch270 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118onlytorch270]",
+    "tunelabs[cu118onlytorch270]",
 ]
 cu126-torch270 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu126onlytorch270]",
+    "tunelabs[cu126onlytorch270]",
 ]
 cu128-torch270 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu128onlytorch270]",
+    "tunelabs[cu128onlytorch270]",
 ]
 cu118-torch271 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118onlytorch271]",
+    "tunelabs[cu118onlytorch271]",
 ]
 cu126-torch271 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu126onlytorch271]",
+    "tunelabs[cu126onlytorch271]",
 ]
 cu128-torch271 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu128onlytorch271]",
+    "tunelabs[cu128onlytorch271]",
 ]
 cu118-torch280 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118onlytorch280]",
+    "tunelabs[cu118onlytorch280]",
 ]
 cu126-torch280 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu126onlytorch280]",
+    "tunelabs[cu126onlytorch280]",
 ]
 cu128-torch280 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu128onlytorch280]",
+    "tunelabs[cu128onlytorch280]",
 ]
 cu130-torch280 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu130onlytorch280]",
+    "tunelabs[cu130onlytorch280]",
 ]
 cu126-torch290 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu126onlytorch290]",
+    "tunelabs[cu126onlytorch290]",
 ]
 cu128-torch290 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu128onlytorch290]",
+    "tunelabs[cu128onlytorch290]",
 ]
 cu130-torch290 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu130onlytorch290]",
+    "tunelabs[cu130onlytorch290]",
 ]
 cu126-torch291 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu126onlytorch291]",
+    "tunelabs[cu126onlytorch291]",
 ]
 cu128-torch291 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu128onlytorch291]",
+    "tunelabs[cu128onlytorch291]",
 ]
 cu130-torch291 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu130onlytorch291]",
+    "tunelabs[cu130onlytorch291]",
 ]
 cu126-torch2100 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu126onlytorch2100]",
+    "tunelabs[cu126onlytorch2100]",
 ]
 cu128-torch2100 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu128onlytorch2100]",
+    "tunelabs[cu128onlytorch2100]",
 ]
 cu130-torch2100 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu130onlytorch2100]",
+    "tunelabs[cu130onlytorch2100]",
 ]
 kaggle = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
 ]
 kaggle-new = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
 ]
 conda = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
 ]
 colab-torch211 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes==0.45.5",
-    "unsloth[cu121onlytorch211]",
+    "tunelabs[cu121onlytorch211]",
 ]
 colab-ampere-torch211 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes==0.45.5",
-    "unsloth[cu121onlytorch211]",
+    "tunelabs[cu121onlytorch211]",
     "packaging",
     "ninja",
     "flash-attn>=2.6.3 ; ('linux' in sys_platform)",
 ]
 colab-torch220 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu121onlytorch220]",
+    "tunelabs[cu121onlytorch220]",
 ]
 colab-ampere-torch220 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu121onlytorch220]",
+    "tunelabs[cu121onlytorch220]",
     "packaging",
     "ninja",
     "flash-attn>=2.6.3 ; ('linux' in sys_platform)",
 ]
 colab-new = [
-    "unsloth_zoo>=2026.6.6",
+    "tunelabs_zoo>=2026.6.6",
     "packaging",
     "tyro",
     "transformers>=4.51.3,!=4.52.0,!=4.52.1,!=4.52.2,!=4.52.3,!=4.53.0,!=4.54.0,!=4.55.0,!=4.55.1,!=4.57.0,!=4.57.4,!=4.57.5,!=5.0.0,!=5.1.0,<=5.5.0",
@@ -596,7 +594,7 @@ colab-new = [
     "huggingface_hub>=0.34.0",
     "hf_transfer",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[triton]",
+    "tunelabs[triton]",
     "sentence-transformers",
 ]
 colab-no-deps = [
@@ -608,7 +606,7 @@ colab-no-deps = [
     "protobuf",
 ]
 colab = [
-    "unsloth[cu121]",
+    "tunelabs[cu121]",
 ]
 flashattention = [
     "packaging ; ('linux' in sys_platform)",
@@ -616,233 +614,233 @@ flashattention = [
     "flash-attn>=2.6.3 ; ('linux' in sys_platform)",
 ]
 colab-ampere = [
-    "unsloth[colab-ampere-torch220]",
-    "unsloth[flashattention]",
+    "tunelabs[colab-ampere-torch220]",
+    "tunelabs[flashattention]",
 ]
 cu118-ampere = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118only]",
-    "unsloth[flashattention]",
+    "tunelabs[cu118only]",
+    "tunelabs[flashattention]",
 ]
 cu121-ampere = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu121only]",
-    "unsloth[flashattention]",
+    "tunelabs[cu121only]",
+    "tunelabs[flashattention]",
 ]
 cu118-ampere-torch211 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes==0.45.5",
-    "unsloth[cu118onlytorch211]",
-    "unsloth[flashattention]",
+    "tunelabs[cu118onlytorch211]",
+    "tunelabs[flashattention]",
 ]
 cu121-ampere-torch211 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes==0.45.5",
-    "unsloth[cu121onlytorch211]",
-    "unsloth[flashattention]",
+    "tunelabs[cu121onlytorch211]",
+    "tunelabs[flashattention]",
 ]
 cu118-ampere-torch220 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118onlytorch220]",
-    "unsloth[flashattention]",
+    "tunelabs[cu118onlytorch220]",
+    "tunelabs[flashattention]",
 ]
 cu121-ampere-torch220 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu121onlytorch220]",
-    "unsloth[flashattention]",
+    "tunelabs[cu121onlytorch220]",
+    "tunelabs[flashattention]",
 ]
 cu118-ampere-torch230 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118onlytorch230]",
-    "unsloth[flashattention]",
+    "tunelabs[cu118onlytorch230]",
+    "tunelabs[flashattention]",
 ]
 cu121-ampere-torch230 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu121onlytorch230]",
-    "unsloth[flashattention]",
+    "tunelabs[cu121onlytorch230]",
+    "tunelabs[flashattention]",
 ]
 cu118-ampere-torch240 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118onlytorch240]",
-    "unsloth[flashattention]",
+    "tunelabs[cu118onlytorch240]",
+    "tunelabs[flashattention]",
 ]
 cu121-ampere-torch240 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu121onlytorch240]",
-    "unsloth[flashattention]",
+    "tunelabs[cu121onlytorch240]",
+    "tunelabs[flashattention]",
 ]
 cu124-ampere-torch240 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu124onlytorch240]",
-    "unsloth[flashattention]",
+    "tunelabs[cu124onlytorch240]",
+    "tunelabs[flashattention]",
 ]
 cu118-ampere-torch250 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118onlytorch250]",
-    "unsloth[flashattention]",
+    "tunelabs[cu118onlytorch250]",
+    "tunelabs[flashattention]",
 ]
 cu121-ampere-torch250 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu121onlytorch250]",
-    "unsloth[flashattention]",
+    "tunelabs[cu121onlytorch250]",
+    "tunelabs[flashattention]",
 ]
 cu124-ampere-torch250 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu124onlytorch250]",
-    "unsloth[flashattention]",
+    "tunelabs[cu124onlytorch250]",
+    "tunelabs[flashattention]",
 ]
 cu118-ampere-torch251 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118onlytorch251]",
-    "unsloth[flashattention]",
+    "tunelabs[cu118onlytorch251]",
+    "tunelabs[flashattention]",
 ]
 cu121-ampere-torch251 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu121onlytorch251]",
-    "unsloth[flashattention]",
+    "tunelabs[cu121onlytorch251]",
+    "tunelabs[flashattention]",
 ]
 cu124-ampere-torch251 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu124onlytorch251]",
-    "unsloth[flashattention]",
+    "tunelabs[cu124onlytorch251]",
+    "tunelabs[flashattention]",
 ]
 cu118-ampere-torch260 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118onlytorch260]",
-    "unsloth[flashattention]",
+    "tunelabs[cu118onlytorch260]",
+    "tunelabs[flashattention]",
 ]
 cu124-ampere-torch260 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu124onlytorch260]",
-    "unsloth[flashattention]",
+    "tunelabs[cu124onlytorch260]",
+    "tunelabs[flashattention]",
 ]
 cu126-ampere-torch260 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu126onlytorch260]",
-    "unsloth[flashattention]",
+    "tunelabs[cu126onlytorch260]",
+    "tunelabs[flashattention]",
 ]
 cu118-ampere-torch270 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118onlytorch270]",
-    "unsloth[flashattention]",
+    "tunelabs[cu118onlytorch270]",
+    "tunelabs[flashattention]",
 ]
 cu126-ampere-torch270 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu126onlytorch270]",
-    "unsloth[flashattention]",
+    "tunelabs[cu126onlytorch270]",
+    "tunelabs[flashattention]",
 ]
 cu128-ampere-torch270 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu128onlytorch270]",
-    "unsloth[flashattention]",
+    "tunelabs[cu128onlytorch270]",
+    "tunelabs[flashattention]",
 ]
 cu118-ampere-torch271 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118onlytorch271]",
-    "unsloth[flashattention]",
+    "tunelabs[cu118onlytorch271]",
+    "tunelabs[flashattention]",
 ]
 cu126-ampere-torch271 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu126onlytorch271]",
-    "unsloth[flashattention]",
+    "tunelabs[cu126onlytorch271]",
+    "tunelabs[flashattention]",
 ]
 cu128-ampere-torch271 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu128onlytorch271]",
-    "unsloth[flashattention]",
+    "tunelabs[cu128onlytorch271]",
+    "tunelabs[flashattention]",
 ]
 cu118-ampere-torch280 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu118onlytorch280]",
-    "unsloth[flashattention]",
+    "tunelabs[cu118onlytorch280]",
+    "tunelabs[flashattention]",
 ]
 cu126-ampere-torch280 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu126onlytorch280]",
-    "unsloth[flashattention]",
+    "tunelabs[cu126onlytorch280]",
+    "tunelabs[flashattention]",
 ]
 cu128-ampere-torch280 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu128onlytorch280]",
-    "unsloth[flashattention]",
+    "tunelabs[cu128onlytorch280]",
+    "tunelabs[flashattention]",
 ]
 cu130-ampere-torch280 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu130onlytorch280]",
-    "unsloth[flashattention]",
+    "tunelabs[cu130onlytorch280]",
+    "tunelabs[flashattention]",
 ]
 cu126-ampere-torch290 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu126onlytorch290]",
+    "tunelabs[cu126onlytorch290]",
 ]
 cu128-ampere-torch290 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu128onlytorch290]",
+    "tunelabs[cu128onlytorch290]",
 ]
 cu130-ampere-torch290 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu130onlytorch290]",
+    "tunelabs[cu130onlytorch290]",
 ]
 cu126-ampere-torch291 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu126onlytorch291]",
+    "tunelabs[cu126onlytorch291]",
 ]
 cu128-ampere-torch291 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu128onlytorch291]",
+    "tunelabs[cu128onlytorch291]",
 ]
 cu130-ampere-torch291 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu130onlytorch291]",
+    "tunelabs[cu130onlytorch291]",
 ]
 cu126-ampere-torch2100 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu126onlytorch2100]",
+    "tunelabs[cu126onlytorch2100]",
 ]
 cu128-ampere-torch2100 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu128onlytorch2100]",
+    "tunelabs[cu128onlytorch2100]",
 ]
 cu130-ampere-torch2100 = [
-    "unsloth[huggingface]",
+    "tunelabs[huggingface]",
     "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
-    "unsloth[cu130onlytorch2100]",
+    "tunelabs[cu130onlytorch2100]",
 ]
 flashattentiontorch260abiFALSEcu12x = [
     "flash-attn @ https://github.com/Dao-AILab/flash-attention/releases/download/v2.7.4.post1/flash_attn-2.7.4.post1+cu12torch2.6cxx11abiFALSE-cp39-cp39-linux_x86_64.whl ; ('linux' in sys_platform) and python_version == '3.9'",
@@ -887,8 +885,8 @@ flashattentiontorch240abiTRUEcu12x = [
     "flash-attn @ https://github.com/Dao-AILab/flash-attention/releases/download/v2.7.4.post1/flash_attn-2.7.4.post1+cu12torch2.4cxx11abiTRUE-cp313-cp313-linux_x86_64.whl ; ('linux' in sys_platform) and python_version == '3.13'",
 ]
 intelgputorch260 = [
-    "unsloth_zoo[intelgpu]",
-    "unsloth[huggingfacenotorch]",
+    "tunelabs_zoo[intelgpu]",
+    "tunelabs[huggingfacenotorch]",
 
     "pytorch_triton_xpu @ https://download.pytorch.org/whl/pytorch_triton_xpu-3.2.0-cp39-cp39-linux_x86_64.whl#sha256=147607f190a7d7aa24ba454def5977fbbfec792fdae18e4ed278cfec29b69271 ; ('linux' in sys_platform) and python_version == '3.9' and (platform_machine == 'AMD64' or platform_machine == 'x86_64')",
     "pytorch_triton_xpu @ https://download.pytorch.org/whl/pytorch_triton_xpu-3.2.0-cp310-cp310-linux_x86_64.whl#sha256=23aa423fa1542afc34f67eb3ba8ef20060f6d1b3a4697eaeab22b11c92b30f2b ; ('linux' in sys_platform) and python_version == '3.10' and (platform_machine == 'AMD64' or platform_machine == 'x86_64')",
@@ -906,11 +904,11 @@ intelgputorch260 = [
     "torch @ https://download.pytorch.org/whl/xpu/torch-2.6.0%2Bxpu-cp313-cp313-linux_x86_64.whl#sha256=e6864f7a60a5ecc43d5d38f59a16e5dd132384f73dfd3a697f74944026038f7b ; ('linux' in sys_platform) and python_version == '3.13' and (platform_machine == 'AMD64' or platform_machine == 'x86_64')",
 ]
 intel-gpu-torch260 = [
-    "unsloth[intelgputorch260]"
+    "tunelabs[intelgputorch260]"
 ]
 intelgputorch270 = [
-    "unsloth_zoo[intelgpu]",
-    "unsloth[huggingfacenotorch]",
+    "tunelabs_zoo[intelgpu]",
+    "tunelabs[huggingfacenotorch]",
 
     "pytorch_triton_xpu @ https://download.pytorch.org/whl/pytorch_triton_xpu-3.3.0-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=749a7098492c6a27b356c97149a4a62973b953eae60bc1b6259260974f344913 ; ('linux' in sys_platform) and python_version == '3.9' and (platform_machine == 'AMD64' or platform_machine == 'x86_64')",
     "pytorch_triton_xpu @ https://download.pytorch.org/whl/pytorch_triton_xpu-3.3.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=44362e80abd752471a08341093321955b066daa2cfb4810e73b8e3b240850f93 ; ('linux' in sys_platform) and python_version == '3.10' and (platform_machine == 'AMD64' or platform_machine == 'x86_64')",
@@ -938,11 +936,11 @@ intelgputorch270 = [
     "torch @ https://download.pytorch.org/whl/xpu/torch-2.7.0%2Bxpu-cp313-cp313-win_amd64.whl#sha256=31df3cb674918e89bc8c532baa331dc84f4430e1f9c0ec379232db44cba78355 ; sys_platform == 'win32' and python_version == '3.13' and (platform_machine == 'AMD64' or platform_machine == 'x86_64')",
 ]
 intel-gpu-torch270 = [
-    "unsloth[intelgputorch270]"
+    "tunelabs[intelgputorch270]"
 ]
 intelgputorch280 = [
-    "unsloth_zoo[intelgpu]",
-    "unsloth[huggingfacenotorch]",
+    "tunelabs_zoo[intelgpu]",
+    "tunelabs[huggingfacenotorch]",
 
     "pytorch_triton_xpu @ https://download.pytorch.org/whl/pytorch_triton_xpu-3.4.0-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=ac4d8e33986b1c3c5e48151640539272b2187e83016985853111b46fb82c3c94 ; 'linux' in sys_platform and python_version == '3.9' and (platform_machine == 'AMD64' or platform_machine == 'x86_64')",
     "pytorch_triton_xpu @ https://download.pytorch.org/whl/pytorch_triton_xpu-3.4.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=999fef4c1f711092b9d3086525920545df490de476ecebe899ffc777019ae17f ; 'linux' in sys_platform and python_version == '3.10' and (platform_machine == 'AMD64' or platform_machine == 'x86_64')",
@@ -981,11 +979,11 @@ intelgputorch280 = [
     "torchvision @ https://download.pytorch.org/whl/xpu/torchvision-0.23.0%2Bxpu-cp313-cp313-win_amd64.whl#sha256=71dc4a6421742ed1e7f585b04a100ad53615c341fbccfbc255aefb38ea9091da ; sys_platform == 'win32' and python_version == '3.13' and (platform_machine == 'AMD64' or platform_machine == 'x86_64')",
 ]
 intel-gpu-torch280 = [
-    "unsloth[intelgputorch280]"
+    "tunelabs[intelgputorch280]"
 ]
 intelgputorch290 = [
-    "unsloth_zoo[intelgpu]",
-    "unsloth[huggingfacenotorch]",
+    "tunelabs_zoo[intelgpu]",
+    "tunelabs[huggingfacenotorch]",
 
     "pytorch_triton_xpu @ https://download.pytorch.org/whl/pytorch_triton_xpu-3.5.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=c169a1de14c19673b17c751290d467fa282fc90fa5da4314b2e5cdab1f553146 ; platform_system == 'Linux' and python_version == '3.10' and platform_machine == 'x86_64'",
     "pytorch_triton_xpu @ https://download.pytorch.org/whl/pytorch_triton_xpu-3.5.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=013d9dd5d6479bd22983161f462e61c8dbe1d82e6730624a7a8d5945507eaa61 ; platform_system == 'Linux' and python_version == '3.11' and platform_machine == 'x86_64'",
@@ -1018,11 +1016,11 @@ intelgputorch290 = [
     "torchvision @ https://download.pytorch.org/whl/xpu/torchvision-0.24.0%2Bxpu-cp313-cp313-win_amd64.whl#sha256=da47a3ce2bb7f0301a31124668b5908f9b9e92d6241443de15a310ef9632fd83 ; sys_platform == 'win32' and python_version == '3.13' and (platform_machine == 'AMD64' or platform_machine == 'x86_64')",
 ]
 intel-gpu-torch290 = [
-    "unsloth[intelgputorch290]"
+    "tunelabs[intelgputorch290]"
 ]
 intelgputorch271 = [
-    "unsloth_zoo[intelgpu]",
-    "unsloth[huggingfacenotorch]",
+    "tunelabs_zoo[intelgpu]",
+    "tunelabs[huggingfacenotorch]",
 
     "pytorch_triton_xpu @ https://download.pytorch.org/whl/pytorch_triton_xpu-3.3.1-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=663ce21364096b268c6687f26f22862cb1001cae0c4ec9f98a0998415f99e2b0 ; platform_system == 'Linux' and python_version == '3.10' and platform_machine == 'x86_64'",
     "pytorch_triton_xpu @ https://download.pytorch.org/whl/pytorch_triton_xpu-3.3.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=dd92cc17000bad19f213b6a877d7f10cd71341b703cd188513ce9fff8d42e3dd ; platform_system == 'Linux' and python_version == '3.11' and platform_machine == 'x86_64'",
@@ -1055,11 +1053,11 @@ intelgputorch271 = [
     "torchvision @ https://download.pytorch.org/whl/xpu/torchvision-0.22.1%2Bxpu-cp313-cp313-win_amd64.whl#sha256=fa87b3677cd1af67ce423004283c1bde80e3571f391182a3e89b485e18e3c70f ; sys_platform == 'win32' and python_version == '3.13' and (platform_machine == 'AMD64' or platform_machine == 'x86_64')",
 ]
 intel-gpu-torch271 = [
-    "unsloth[intelgputorch271]"
+    "tunelabs[intelgputorch271]"
 ]
 intelgputorch291 = [
-    "unsloth_zoo[intelgpu]",
-    "unsloth[huggingfacenotorch]",
+    "tunelabs_zoo[intelgpu]",
+    "tunelabs[huggingfacenotorch]",
 
     "pytorch_triton_xpu @ https://download.pytorch.org/whl/pytorch_triton_xpu-3.5.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=c169a1de14c19673b17c751290d467fa282fc90fa5da4314b2e5cdab1f553146 ; platform_system == 'Linux' and python_version == '3.10' and platform_machine == 'x86_64'",
     "pytorch_triton_xpu @ https://download.pytorch.org/whl/pytorch_triton_xpu-3.5.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=013d9dd5d6479bd22983161f462e61c8dbe1d82e6730624a7a8d5945507eaa61 ; platform_system == 'Linux' and python_version == '3.11' and platform_machine == 'x86_64'",
@@ -1092,11 +1090,11 @@ intelgputorch291 = [
     "torchvision @ https://download.pytorch.org/whl/xpu/torchvision-0.24.1%2Bxpu-cp313-cp313-win_amd64.whl#sha256=47059e290fc2a41ba78666ffcde102c436abf7ff8a34d200268b48c4fa0f9c45 ; sys_platform == 'win32' and python_version == '3.13' and (platform_machine == 'AMD64' or platform_machine == 'x86_64')",
 ]
 intel-gpu-torch291 = [
-    "unsloth[intelgputorch291]"
+    "tunelabs[intelgputorch291]"
 ]
 intelgputorch210 = [
-    "unsloth_zoo[intelgpu]",
-    "unsloth[huggingfacenotorch]",
+    "tunelabs_zoo[intelgpu]",
+    "tunelabs[huggingfacenotorch]",
 
     "triton-xpu @ https://download.pytorch.org/whl/triton_xpu-3.6.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl ; platform_system == 'Linux' and python_version == '3.10' and platform_machine == 'x86_64'",
     "triton-xpu @ https://download.pytorch.org/whl/triton_xpu-3.6.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl ; platform_system == 'Linux' and python_version == '3.11' and platform_machine == 'x86_64'",
@@ -1129,11 +1127,11 @@ intelgputorch210 = [
     "torchvision @ https://download.pytorch.org/whl/xpu/torchvision-0.25.0%2Bxpu-cp313-cp313-win_amd64.whl#sha256=1c4b44b36a557f7381e3076fb8843366742238648441d607c8d049c6da0f8886 ; sys_platform == 'win32' and python_version == '3.13' and (platform_machine == 'AMD64' or platform_machine == 'x86_64')",
 ]
 intel-gpu-torch210 = [
-    "unsloth[intelgputorch210]"
+    "tunelabs[intelgputorch210]"
 ]
 intelgputorch2110 = [
-    "unsloth_zoo[intelgpu]",
-    "unsloth[huggingfacenotorch]",
+    "tunelabs_zoo[intelgpu]",
+    "tunelabs[huggingfacenotorch]",
 
     "triton-xpu @ https://download.pytorch.org/whl/triton_xpu-3.7.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=2a1841138750f708ec017becbf8d357526f3fa350deee6553be5735ad66160a3 ; platform_system == 'Linux' and python_version == '3.10' and platform_machine == 'x86_64'",
     "triton-xpu @ https://download.pytorch.org/whl/triton_xpu-3.7.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=e85378f1fc1ea002271de2a35475b75008fa554b86ef9d3bc55be9c513a63b51 ; platform_system == 'Linux' and python_version == '3.11' and platform_machine == 'x86_64'",
@@ -1166,11 +1164,11 @@ intelgputorch2110 = [
     "torchvision @ https://download.pytorch.org/whl/xpu/torchvision-0.26.0%2Bxpu-cp313-cp313-win_amd64.whl#sha256=cb1da1d378ce440f7d1e0ed8cf21bd280d904ab25a55c9453f8377825818df74 ; sys_platform == 'win32' and python_version == '3.13' and (platform_machine == 'AMD64' or platform_machine == 'x86_64')",
 ]
 intel-gpu-torch2110 = [
-    "unsloth[intelgputorch2110]"
+    "tunelabs[intelgputorch2110]"
 ]
 intelgputorch2120 = [
-    "unsloth_zoo[intelgpu]",
-    "unsloth[huggingfacenotorch]",
+    "tunelabs_zoo[intelgpu]",
+    "tunelabs[huggingfacenotorch]",
 
     "triton-xpu @ https://download.pytorch.org/whl/triton_xpu-3.7.1-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=844d981cb1b3948085e8cfa62c74de9f100259f6131959aa70be49123b88ae81 ; platform_system == 'Linux' and python_version == '3.10' and platform_machine == 'x86_64'",
     "triton-xpu @ https://download.pytorch.org/whl/triton_xpu-3.7.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=a16b1d00e94ad87d62af3512e390348b8656419598004100c56028bf494f086b ; platform_system == 'Linux' and python_version == '3.11' and platform_machine == 'x86_64'",
@@ -1203,18 +1201,18 @@ intelgputorch2120 = [
     "torchvision @ https://download.pytorch.org/whl/xpu/torchvision-0.27.0%2Bxpu-cp313-cp313-win_amd64.whl#sha256=c70850842068c43a0d50eaf139c25b6f6cc9b17a0dae70218c7e69edbee0bc80 ; sys_platform == 'win32' and python_version == '3.13' and (platform_machine == 'AMD64' or platform_machine == 'x86_64')",
 ]
 intel-gpu-torch2120 = [
-    "unsloth[intelgputorch2120]"
+    "tunelabs[intelgputorch2120]"
 ]
 intel = [
-    "unsloth[intelgputorch280]",
+    "tunelabs[intelgputorch280]",
 ]
 amd = [
-    "unsloth[huggingfacenotorch]",
+    "tunelabs[huggingfacenotorch]",
     "bitsandbytes>=0.49.1 ; ('linux' in sys_platform) and (platform_machine == 'AMD64' or platform_machine == 'x86_64' or platform_machine == 'aarch64')",
     "bitsandbytes>=0.49.1 ; (sys_platform == 'win32') and (platform_machine == 'AMD64' or platform_machine == 'x86_64')",
 ]
 rocm702-torch280 = [
-    "unsloth[amd]",
+    "tunelabs[amd]",
 
     "triton @ https://repo.radeon.com/rocm/manylinux/rocm-rel-7.0.2/triton-3.4.0%2Brocm7.0.2.gitf9e5bf54-cp311-cp311-linux_x86_64.whl ; platform_system == 'Linux' and python_version == '3.11' and platform_machine == 'x86_64'",
     "triton @ https://repo.radeon.com/rocm/manylinux/rocm-rel-7.0.2/triton-3.4.0%2Brocm7.0.2.gitf9e5bf54-cp312-cp312-linux_x86_64.whl ; platform_system == 'Linux' and python_version == '3.12' and platform_machine == 'x86_64'",
@@ -1229,7 +1227,7 @@ rocm702-torch280 = [
     "torchvision @ https://repo.radeon.com/rocm/manylinux/rocm-rel-7.0.2/torchvision-0.23.0%2Brocm7.0.2.git824e8c87-cp313-cp313-linux_x86_64.whl ; platform_system == 'Linux' and python_version == '3.13' and platform_machine == 'x86_64'",
 ]
 rocm72-torch291 = [
-    "unsloth[amd]",
+    "tunelabs[amd]",
 
     "triton @ https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/triton-3.5.1%2Brocm7.2.0.gita272dfa8-cp310-cp310-linux_x86_64.whl ; platform_system == 'Linux' and python_version == '3.10' and platform_machine == 'x86_64'",
     "triton @ https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/triton-3.5.1%2Brocm7.2.0.gita272dfa8-cp311-cp311-linux_x86_64.whl ; platform_system == 'Linux' and python_version == '3.11' and platform_machine == 'x86_64'",
@@ -1249,7 +1247,7 @@ rocm72-torch291 = [
     "torchvision @ https://repo.radeon.com/rocm/windows/rocm-rel-7.2/torchvision-0.24.1%2Brocmsdk20260116-cp312-cp312-win_amd64.whl ; sys_platform == 'win32' and python_version == '3.12'",
 ]
 rocm711-torch291 = [
-    "unsloth[amd]",
+    "tunelabs[amd]",
 
     "triton @ https://repo.radeon.com/rocm/manylinux/rocm-rel-7.1.1/triton-3.5.1%2Brocm7.1.1.gita272dfa8-cp310-cp310-linux_x86_64.whl ; platform_system == 'Linux' and python_version == '3.10' and platform_machine == 'x86_64'",
     "triton @ https://repo.radeon.com/rocm/manylinux/rocm-rel-7.1.1/triton-3.5.1%2Brocm7.1.1.gita272dfa8-cp311-cp311-linux_x86_64.whl ; platform_system == 'Linux' and python_version == '3.11' and platform_machine == 'x86_64'",
@@ -1267,7 +1265,7 @@ rocm711-torch291 = [
     "torchvision @ https://repo.radeon.com/rocm/manylinux/rocm-rel-7.1.1/torchvision-0.24.0%2Brocm7.1.1.gitb919bd0c-cp313-cp313-linux_x86_64.whl ; platform_system == 'Linux' and python_version == '3.13' and platform_machine == 'x86_64'",
 ]
 rocm72-torch2100 = [
-    "unsloth[amd]",
+    "tunelabs[amd]",
 
     "triton @ https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/triton-3.6.0%2Brocm7.2.0.gitba5c1517-cp310-cp310-linux_x86_64.whl ; platform_system == 'Linux' and python_version == '3.10' and platform_machine == 'x86_64'",
     "triton @ https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/triton-3.6.0%2Brocm7.2.0.gitba5c1517-cp311-cp311-linux_x86_64.whl ; platform_system == 'Linux' and python_version == '3.11' and platform_machine == 'x86_64'",
@@ -1285,7 +1283,7 @@ rocm72-torch2100 = [
     "torchvision @ https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchvision-0.25.0%2Brocm7.2.0.git82df5f59-cp313-cp313-linux_x86_64.whl ; platform_system == 'Linux' and python_version == '3.13' and platform_machine == 'x86_64'",
 ]
 rocm711-torch2100 = [
-    "unsloth[amd]",
+    "tunelabs[amd]",
 
     "triton @ https://repo.radeon.com/rocm/manylinux/rocm-rel-7.1.1/triton-3.6.0%2Brocm7.1.1.gitba5c1517-cp310-cp310-linux_x86_64.whl ; platform_system == 'Linux' and python_version == '3.10' and platform_machine == 'x86_64'",
     "triton @ https://repo.radeon.com/rocm/manylinux/rocm-rel-7.1.1/triton-3.6.0%2Brocm7.1.1.gitba5c1517-cp311-cp311-linux_x86_64.whl ; platform_system == 'Linux' and python_version == '3.11' and platform_machine == 'x86_64'",
@@ -1304,9 +1302,9 @@ rocm711-torch2100 = [
 ]
 
 [project.urls]
-homepage = "https://unsloth.ai"
-documentation = "https://unsloth.ai/docs"
-repository = "https://github.com/unslothai/unsloth"
+homepage = "https://tunelabs.ai"
+documentation = "https://tunelabs.ai/docs"
+repository = "https://github.com/tunelabsai/tunelabs"
 
 [tool.ruff]
 target-version = "py311"

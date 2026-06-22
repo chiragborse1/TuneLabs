@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -29,7 +29,7 @@ import {
   teardownRuntime,
 } from "./runtime-registry";
 
-const PERSIST_KEY = "unsloth.studio.downloads";
+const PERSIST_KEY = "tunelabs.studio.downloads";
 const PERSIST_VERSION = 1;
 const PERSIST_THROTTLE_MS = 1_000;
 

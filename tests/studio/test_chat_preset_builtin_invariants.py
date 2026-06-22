@@ -14,7 +14,7 @@ def _source_path(relative_path: str) -> Path:
     direct = WORKDIR / relative_path
     if direct.exists():
         return direct
-    return WORKDIR / "unsloth_repo" / relative_path
+    return WORKDIR / "tunelabs_repo" / relative_path
 
 
 PRESET_POLICY = _source_path("studio/frontend/src/features/chat/presets/preset-policy.ts")

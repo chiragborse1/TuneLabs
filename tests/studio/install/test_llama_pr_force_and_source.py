@@ -111,7 +111,7 @@ def _bash_resolution_fragment(
         _DEFAULT_LLAMA_SOURCE={shlex.quote(default_source)}
 
         _LLAMA_PR_FORCE={shlex.quote(llama_pr_force) if llama_pr_force else '"$_DEFAULT_LLAMA_PR_FORCE"'}
-        export UNSLOTH_LLAMA_SOURCE={shlex.quote(llama_source) if llama_source else '""'}
+        export TUNELABS_LLAMA_SOURCE={shlex.quote(llama_source) if llama_source else '""'}
         _LLAMA_SOURCE="$_DEFAULT_LLAMA_SOURCE"
         _LLAMA_SOURCE="${{_LLAMA_SOURCE%.git}}"
 
@@ -154,7 +154,7 @@ class TestBashPrForcePromotion:
         assert "LLAMA_PR=999" in r.stdout
 
     def test_user_pr_overrides_pr_force(self):
-        """UNSLOTH_LLAMA_PR takes priority over PR_FORCE."""
+        """TUNELABS_LLAMA_PR takes priority over PR_FORCE."""
         script = _bash_resolution_fragment(
             llama_pr = "100",
             llama_pr_force = "200",
@@ -221,7 +221,7 @@ class TestBashFixedMainlineSource:
 
     def test_env_source_override_is_ignored(self):
         script = _bash_resolution_fragment(
-            llama_source = "https://github.com/unslothai/llama.cpp.git",
+            llama_source = "https://github.com/tunelabsai/llama.cpp.git",
         )
         r = run_bash(script)
         assert r.returncode == 0
@@ -279,12 +279,12 @@ class TestBashCloneUrlParameterized:
             mock_bin,
             build_tmp,
             llama_pr = "123",
-            llama_source = "https://github.com/unslothai/llama.cpp",
+            llama_source = "https://github.com/tunelabsai/llama.cpp",
         )
         r = run_bash(script)
         assert r.returncode == 0
         log = log_file.read_text()
-        assert "unslothai/llama.cpp.git" in log
+        assert "tunelabsai/llama.cpp.git" in log
         assert "ggml-org" not in log
 
     def test_non_pr_path_uses_custom_source(self, tmp_path: Path):
@@ -293,12 +293,12 @@ class TestBashCloneUrlParameterized:
         script = self._clone_script(
             mock_bin,
             build_tmp,
-            llama_source = "https://github.com/unslothai/llama.cpp",
+            llama_source = "https://github.com/tunelabsai/llama.cpp",
         )
         r = run_bash(script)
         assert r.returncode == 0
         log = log_file.read_text()
-        assert "unslothai/llama.cpp.git" in log
+        assert "tunelabsai/llama.cpp.git" in log
         assert "ggml-org" not in log
 
     def test_default_source_unchanged(self, tmp_path: Path):
@@ -355,14 +355,14 @@ class TestSourcePatternsSh:
         assert '_DEFAULT_LLAMA_SOURCE="https://github.com/ggml-org/llama.cpp"' in self.content
 
     def test_has_pr_force_env_read(self):
-        assert "UNSLOTH_LLAMA_PR_FORCE" in self.content
+        assert "TUNELABS_LLAMA_PR_FORCE" in self.content
 
     def test_source_env_override_removed(self):
-        assert "UNSLOTH_LLAMA_SOURCE:-${_DEFAULT_LLAMA_SOURCE}" not in self.content
+        assert "TUNELABS_LLAMA_SOURCE:-${_DEFAULT_LLAMA_SOURCE}" not in self.content
         assert '_LLAMA_SOURCE="${_DEFAULT_LLAMA_SOURCE}"' in self.content
 
     def test_release_repo_override_removed(self):
-        assert "UNSLOTH_LLAMA_RELEASE_REPO:-unslothai/llama.cpp" not in self.content
+        assert "TUNELABS_LLAMA_RELEASE_REPO:-tunelabsai/llama.cpp" not in self.content
         assert '_HELPER_RELEASE_REPO="ggml-org/llama.cpp"' in self.content
 
     def test_force_compile_skips_prebuilt_resolution_early(self):
@@ -418,26 +418,26 @@ class TestSourcePatternsPs1:
         assert '$DefaultLlamaSource = "https://github.com/ggml-org/llama.cpp"' in self.content
 
     def test_has_pr_force_env_read(self):
-        assert "$env:UNSLOTH_LLAMA_PR_FORCE" in self.content
+        assert "$env:TUNELABS_LLAMA_PR_FORCE" in self.content
 
     def test_source_env_override_removed(self):
-        assert "$LlamaSource = if ($env:UNSLOTH_LLAMA_SOURCE)" not in self.content
+        assert "$LlamaSource = if ($env:TUNELABS_LLAMA_SOURCE)" not in self.content
         assert "$LlamaSource = $DefaultLlamaSource" in self.content
 
     def test_release_repo_override_removed(self):
         # Repo chosen by GPU detection (GPU -> fork, CPU -> ggml-org), no env override.
-        assert "$HelperReleaseRepo = if ($env:UNSLOTH_LLAMA_RELEASE_REPO)" not in self.content
+        assert "$HelperReleaseRepo = if ($env:TUNELABS_LLAMA_RELEASE_REPO)" not in self.content
         assert (
             "$HelperReleaseRepo = if ($HasNvidiaSmi -or $HasROCm -or $script:ROCmGfxArch) "
-            '{ "unslothai/llama.cpp" } else { "ggml-org/llama.cpp" }' in self.content
+            '{ "tunelabsai/llama.cpp" } else { "ggml-org/llama.cpp" }' in self.content
         )
 
     def test_force_compile_skips_prebuilt_resolution_early(self):
-        assert 'if ($env:UNSLOTH_LLAMA_FORCE_COMPILE -eq "1") {' in self.content
+        assert 'if ($env:TUNELABS_LLAMA_FORCE_COMPILE -eq "1") {' in self.content
         assert "$SkipPrebuiltInstall = $true" in self.content
 
     def test_force_compile_uses_requested_tag_without_helper(self):
-        assert 'if ($env:UNSLOTH_LLAMA_FORCE_COMPILE -eq "1") {' in self.content
+        assert 'if ($env:TUNELABS_LLAMA_FORCE_COMPILE -eq "1") {' in self.content
         assert "$ResolvedLlamaTag = $RequestedLlamaTag" in self.content
 
     def test_pr_force_promotion_block(self):
@@ -479,8 +479,8 @@ class TestPwshPrForcePromotion:
         $DefaultLlamaPrForce = "%%DEFAULT_PR_FORCE%%"
         $DefaultLlamaSource = "%%DEFAULT_SOURCE%%"
 
-        $LlamaPr = if ($env:UNSLOTH_LLAMA_PR) { $env:UNSLOTH_LLAMA_PR.Trim() } else { "" }
-        $LlamaPrForce = if ($env:UNSLOTH_LLAMA_PR_FORCE) { $env:UNSLOTH_LLAMA_PR_FORCE.Trim() } else { $DefaultLlamaPrForce }
+        $LlamaPr = if ($env:TUNELABS_LLAMA_PR) { $env:TUNELABS_LLAMA_PR.Trim() } else { "" }
+        $LlamaPrForce = if ($env:TUNELABS_LLAMA_PR_FORCE) { $env:TUNELABS_LLAMA_PR_FORCE.Trim() } else { $DefaultLlamaPrForce }
         $LlamaSource = $DefaultLlamaSource
         if ($LlamaSource.EndsWith('.git')) { $LlamaSource = $LlamaSource.Substring(0, $LlamaSource.Length - 4) }
 
@@ -519,8 +519,8 @@ class TestPwshPrForcePromotion:
         )
         run_env = {}
         # Unset env vars by default.
-        run_env["UNSLOTH_LLAMA_PR"] = ""
-        run_env["UNSLOTH_LLAMA_PR_FORCE"] = ""
+        run_env["TUNELABS_LLAMA_PR"] = ""
+        run_env["TUNELABS_LLAMA_PR_FORCE"] = ""
         if env:
             run_env.update(env)
         return run_pwsh(script, env = run_env)
@@ -532,15 +532,15 @@ class TestPwshPrForcePromotion:
         assert "baked-in PR_FORCE=12345" in r.stdout
 
     def test_env_pr_force_promotes(self):
-        r = self._run(env = {"UNSLOTH_LLAMA_PR_FORCE": "999"})
+        r = self._run(env = {"TUNELABS_LLAMA_PR_FORCE": "999"})
         assert r.returncode == 0
         assert "LLAMA_PR=999" in r.stdout
 
     def test_user_pr_overrides_pr_force(self):
         r = self._run(
             env = {
-                "UNSLOTH_LLAMA_PR": "100",
-                "UNSLOTH_LLAMA_PR_FORCE": "200",
+                "TUNELABS_LLAMA_PR": "100",
+                "TUNELABS_LLAMA_PR_FORCE": "200",
             }
         )
         assert r.returncode == 0
@@ -548,20 +548,20 @@ class TestPwshPrForcePromotion:
         assert "baked-in PR_FORCE" not in r.stdout
 
     def test_pr_force_zero_ignored(self):
-        r = self._run(env = {"UNSLOTH_LLAMA_PR_FORCE": "0"})
+        r = self._run(env = {"TUNELABS_LLAMA_PR_FORCE": "0"})
         assert r.returncode == 0
         assert "LLAMA_PR=" in r.stdout
         assert "baked-in PR_FORCE" not in r.stdout
 
     def test_pr_force_alpha_ignored(self):
-        r = self._run(env = {"UNSLOTH_LLAMA_PR_FORCE": "abc"})
+        r = self._run(env = {"TUNELABS_LLAMA_PR_FORCE": "abc"})
         assert r.returncode == 0
         assert "baked-in PR_FORCE" not in r.stdout
 
     def test_env_source_override_is_ignored(self):
         r = self._run(
             env = {
-                "UNSLOTH_LLAMA_SOURCE": "https://github.com/unslothai/llama.cpp",
+                "TUNELABS_LLAMA_SOURCE": "https://github.com/tunelabsai/llama.cpp",
             }
         )
         assert r.returncode == 0
@@ -578,7 +578,7 @@ class TestPwshPrForcePromotion:
     def test_trailing_git_override_is_ignored(self):
         r = self._run(
             env = {
-                "UNSLOTH_LLAMA_SOURCE": "https://github.com/unslothai/llama.cpp.git",
+                "TUNELABS_LLAMA_SOURCE": "https://github.com/tunelabsai/llama.cpp.git",
             }
         )
         assert r.returncode == 0

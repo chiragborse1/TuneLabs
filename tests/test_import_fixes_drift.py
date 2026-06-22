@@ -1,5 +1,5 @@
-# Unsloth - 2x faster, 60% less VRAM LLM training and finetuning
-# Copyright 2023-present Daniel Han-Chen, Michael Han-Chen & the Unsloth team. All rights reserved.
+# TuneLabs - 2x faster, 60% less VRAM LLM training and finetuning
+# Copyright 2023-present Daniel Han-Chen, Michael Han-Chen & the TuneLabs team. All rights reserved.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -11,7 +11,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
 
-"""Drift detectors for the upstream pathologies ``unsloth/import_fixes.py``
+"""Drift detectors for the upstream pathologies ``tunelabs/import_fixes.py``
 works around; one test per ``fix_*`` / ``patch_*``, each fails (never skips)
 when the pathology is active. Runs under the GPU-free ``tests/conftest.py``."""
 
@@ -453,7 +453,7 @@ def test_torch_nn_init_trunc_normal_exists():
 
 def test_xformers_is_post_num_splits_key_fix_or_not_installed():
     """``fix_xformers_performance_issue``: xformers <0.0.29 has the
-    ``num_splits_key=-1`` perf bug Unsloth rewrites at install time."""
+    ``num_splits_key=-1`` perf bug TuneLabs rewrites at install time."""
     if importlib.util.find_spec("xformers") is None:
         pytest.skip("xformers not installed -- nothing to drift-check.")
     x_v = _safe_version(importlib_version("xformers"))
@@ -484,7 +484,7 @@ def test_transformers_pretrained_model_has_get_input_embeddings():
 # accelerate -- ``is_X_available`` API stability used across the fixes
 
 
-# Regression for https://github.com/unslothai/unsloth/issues/4188:
+# Regression for https://github.com/tunelabsai/tunelabs/issues/4188:
 # Qwen3_5ForConditionalGeneration uses loss_type='ForConditionalGeneration', a
 # separate LOSS_MAPPING key left unpatched, falling back to stock ForCausalLMLoss
 # whose logits.float() OOMs on <=24 GB GPUs.
@@ -497,22 +497,22 @@ def _reset_loss_mapping(mapping, saved):
 
 def test_patch_loss_functions_covers_conditional_generation():
     """patch_loss_functions() must repoint every ForCausalLMLoss alias to the
-    Unsloth kernel, not just LOSS_MAPPING['ForCausalLM']."""
+    TuneLabs kernel, not just LOSS_MAPPING['ForCausalLM']."""
     lu = pytest.importorskip("transformers.loss.loss_utils")
-    cel = pytest.importorskip("unsloth.kernels.cross_entropy_loss")
+    cel = pytest.importorskip("tunelabs.kernels.cross_entropy_loss")
 
     saved = dict(lu.LOSS_MAPPING)
     try:
         cel.patch_loss_functions(torch_compile = False)
 
-        unsloth_loss = lu.LOSS_MAPPING.get("ForCausalLM")
-        assert unsloth_loss is not None
-        assert "Unsloth" in str(
-            unsloth_loss
-        ), f"LOSS_MAPPING['ForCausalLM'] was not replaced: {unsloth_loss}"
+        tunelabs_loss = lu.LOSS_MAPPING.get("ForCausalLM")
+        assert tunelabs_loss is not None
+        assert "TuneLabs" in str(
+            tunelabs_loss
+        ), f"LOSS_MAPPING['ForCausalLM'] was not replaced: {tunelabs_loss}"
 
         cg_loss = lu.LOSS_MAPPING.get("ForConditionalGeneration")
-        assert cg_loss is unsloth_loss, (
+        assert cg_loss is tunelabs_loss, (
             f"LOSS_MAPPING['ForConditionalGeneration'] not patched: {cg_loss}. "
             f"Qwen3_5ForConditionalGeneration will silently use the stock "
             f"ForCausalLMLoss and OOM at large sequence lengths."
@@ -524,7 +524,7 @@ def test_patch_loss_functions_covers_conditional_generation():
 def test_patch_loss_functions_does_not_touch_other_loss_types():
     """patch_loss_functions() must not overwrite unrelated loss types with the causal-LM kernel."""
     lu = pytest.importorskip("transformers.loss.loss_utils")
-    cel = pytest.importorskip("unsloth.kernels.cross_entropy_loss")
+    cel = pytest.importorskip("tunelabs.kernels.cross_entropy_loss")
 
     non_causal_keys = {
         k for k, v in lu.LOSS_MAPPING.items() if getattr(v, "__name__", "") != "ForCausalLMLoss"
@@ -534,11 +534,11 @@ def test_patch_loss_functions_does_not_touch_other_loss_types():
     try:
         cel.patch_loss_functions(torch_compile = False)
 
-        unsloth_loss = lu.LOSS_MAPPING.get("ForCausalLM")
+        tunelabs_loss = lu.LOSS_MAPPING.get("ForCausalLM")
         for key in non_causal_keys:
-            assert lu.LOSS_MAPPING.get(key) is not unsloth_loss, (
+            assert lu.LOSS_MAPPING.get(key) is not tunelabs_loss, (
                 f"patch_loss_functions() incorrectly overwrote "
-                f"LOSS_MAPPING['{key}'] with the Unsloth ForCausalLM kernel."
+                f"LOSS_MAPPING['{key}'] with the TuneLabs ForCausalLM kernel."
             )
     finally:
         _reset_loss_mapping(lu.LOSS_MAPPING, saved)
@@ -561,7 +561,7 @@ def test_accelerate_recursively_apply_empty_logits_patch():
     pytest.importorskip("accelerate")
 
     import accelerate.utils.operations as acc_ops
-    from unsloth.import_fixes import patch_accelerate_recursively_apply
+    from tunelabs.import_fixes import patch_accelerate_recursively_apply
 
     class EmptyLogits:
         pass
@@ -578,7 +578,7 @@ def test_accelerate_gather_empty_logits_debug_mode_patch():
     pytest.importorskip("accelerate")
     from accelerate.state import PartialState, DistributedType
     import accelerate.utils.operations as acc_ops
-    from unsloth.import_fixes import patch_accelerate_recursively_apply
+    from tunelabs.import_fixes import patch_accelerate_recursively_apply
     import unittest.mock as mock
     import torch
 
@@ -662,7 +662,7 @@ def test_accelerate_patch_is_idempotent():
     """Calling patch_accelerate_recursively_apply twice must not stack wrappers."""
     pytest.importorskip("accelerate")
     import accelerate.utils.operations as acc_ops
-    from unsloth.import_fixes import patch_accelerate_recursively_apply
+    from tunelabs.import_fixes import patch_accelerate_recursively_apply
 
     patch_accelerate_recursively_apply()
     recursively_apply = acc_ops.recursively_apply
@@ -680,7 +680,7 @@ def test_accelerate_find_device_skips_empty_logits():
     import torch
     import accelerate.utils.operations as acc_ops
     from accelerate.state import PartialState
-    from unsloth.import_fixes import patch_accelerate_recursively_apply
+    from tunelabs.import_fixes import patch_accelerate_recursively_apply
 
     class EmptyLogits:
         pass
@@ -699,7 +699,7 @@ def test_accelerate_find_device_skips_empty_logits():
 def test_accelerate_patch_wired_into_gpu_init():
     """The patch must be installed at startup, not only importable."""
     import pathlib
-    import unsloth.import_fixes as import_fixes
+    import tunelabs.import_fixes as import_fixes
 
     source = pathlib.Path(import_fixes.__file__).with_name("_gpu_init.py").read_text()
     assert "patch_accelerate_recursively_apply()" in source, (

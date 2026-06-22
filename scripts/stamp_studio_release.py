@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Stamp and verify display-only Studio release metadata for builds."""
 
@@ -48,7 +48,7 @@ VERSION_RE = re.compile(r"^v\d+\.\d+\.\d+(?:-[0-9A-Za-z.][0-9A-Za-z.-]*)?$")
 GIT_DESCRIBE_SUFFIX_RE = re.compile(r"-\d+-g[0-9A-Fa-f]+(?:-dirty)?$")
 MAX_VERSION_LENGTH = 64
 PLACEHOLDER = """# SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 \"\"\"Build-stamped Studio release metadata.
 
@@ -125,9 +125,9 @@ def _github_tag() -> str | None:
 
 
 def resolve_version() -> tuple[str | None, str]:
-    env_version = os.environ.get("UNSLOTH_STUDIO_RELEASE_VERSION", "").strip()
+    env_version = os.environ.get("TUNELABS_STUDIO_RELEASE_VERSION", "").strip()
     if env_version:
-        return (env_version, "UNSLOTH_STUDIO_RELEASE_VERSION")
+        return (env_version, "TUNELABS_STUDIO_RELEASE_VERSION")
 
     github_ref = _github_tag()
     if github_ref:
@@ -143,7 +143,7 @@ def resolve_version() -> tuple[str | None, str]:
 def build_info_source(version: str | None) -> str:
     literal = repr(version) if version is not None else "None"
     return f'''# SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Build-stamped Studio release metadata."""
 
@@ -173,12 +173,12 @@ def stamp(require_release: bool) -> int:
         )
         return 2
 
-    if version is not None and source == "UNSLOTH_STUDIO_RELEASE_VERSION":
+    if version is not None and source == "TUNELABS_STUDIO_RELEASE_VERSION":
         conflicts = _env_version_conflicts(version)
         if conflicts:
             details = ", ".join(f"{name}={value!r}" for name, value in conflicts)
             print(
-                "UNSLOTH_STUDIO_RELEASE_VERSION does not match available "
+                "TUNELABS_STUDIO_RELEASE_VERSION does not match available "
                 f"release tag metadata: {details}",
                 file = sys.stderr,
             )
@@ -187,7 +187,7 @@ def stamp(require_release: bool) -> int:
     if require_release and source == "exact git tag" and _git_worktree_is_dirty():
         print(
             "Refusing to publish from a dirty exact-tag checkout. Set "
-            "UNSLOTH_STUDIO_RELEASE_VERSION explicitly from release automation "
+            "TUNELABS_STUDIO_RELEASE_VERSION explicitly from release automation "
             "or publish from a clean tag checkout.",
             file = sys.stderr,
         )
@@ -197,7 +197,7 @@ def stamp(require_release: bool) -> int:
         if require_release:
             print(
                 "No Studio release version available. Set "
-                "UNSLOTH_STUDIO_RELEASE_VERSION, build from a GitHub tag, "
+                "TUNELABS_STUDIO_RELEASE_VERSION, build from a GitHub tag, "
                 "or run from an exact local Studio release tag.",
                 file = sys.stderr,
             )

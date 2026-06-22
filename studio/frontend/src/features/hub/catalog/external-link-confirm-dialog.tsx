@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import {
   AlertDialog,
@@ -48,7 +48,7 @@ export function ExternalLinkConfirmDialog() {
           </AlertDialogMedia>
           <AlertDialogTitle>Open external link</AlertDialogTitle>
           <AlertDialogDescription>
-            You are about to leave Unsloth and open this page in your browser.
+            You are about to leave TuneLabs and open this page in your browser.
             Only continue if you trust the destination.
           </AlertDialogDescription>
         </AlertDialogHeader>

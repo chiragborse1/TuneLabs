@@ -11,7 +11,7 @@ tauri_exit_line=$(awk -v start="$tauri_marker_line" 'NR > start && /exit 0/ { pr
 tauri_done_line=$(awk -v start="$tauri_marker_line" 'NR > start && /tauri_log "DONE" ""/ { print NR; exit }' "$INSTALL_SH")
 first_setup_check_line=$(grep -n 'if \[ "$_SETUP_EXIT" -ne 0 \]; then' "$INSTALL_SH" | head -n1 | cut -d: -f1)
 setup_exit_line=$(awk -v start="$first_setup_check_line" 'NR > start && /exit "\$_SETUP_EXIT"/ { print NR; exit }' "$INSTALL_SH")
-shortcut_line=$(grep -n 'create_studio_shortcuts "$VENV_ABS_BIN/unsloth" "$OS"' "$INSTALL_SH" | head -n1 | cut -d: -f1)
+shortcut_line=$(grep -n 'create_studio_shortcuts "$VENV_ABS_BIN/tunelabs" "$OS"' "$INSTALL_SH" | head -n1 | cut -d: -f1)
 shortcut_guard_line=$(
     awk -v stop="$first_setup_check_line" '
         NR >= stop { exit }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -41,7 +41,7 @@ export function MethodPicker({ value, onChange, disabledMethods = [], disabledRe
           <TooltipContent>
             How your model is packaged for deployment.{" "}
             <a
-              href="https://unsloth.ai/docs/basics/inference-and-deployment"
+              href="https://tunelabs.ai/docs/basics/inference-and-deployment"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary underline"
@@ -108,8 +108,8 @@ export function MethodPicker({ value, onChange, disabledMethods = [], disabledRe
                       <a
                         href={
                           m.value === "gguf"
-                            ? "https://unsloth.ai/docs/basics/inference-and-deployment/saving-to-gguf"
-                            : "https://unsloth.ai/docs/basics/inference-and-deployment"
+                            ? "https://tunelabs.ai/docs/basics/inference-and-deployment/saving-to-gguf"
+                            : "https://tunelabs.ai/docs/basics/inference-and-deployment"
                         }
                         target="_blank"
                         rel="noopener noreferrer"

@@ -27,7 +27,7 @@ def _load(name: str, path: Path):
 
 def test_infer_studio_home_swallows_permission_error(tmp_path, monkeypatch):
     candidate = tmp_path / "fake_root"
-    venv = candidate / "unsloth_studio"
+    venv = candidate / "tunelabs_studio"
     venv.mkdir(parents = True)
     monkeypatch.setattr(sys, "prefix", str(venv))
     sys.modules.pop("sr_perm", None)
@@ -40,16 +40,16 @@ def test_infer_studio_home_swallows_permission_error(tmp_path, monkeypatch):
 def test_studio_root_does_not_crash_on_permission_error(tmp_path, monkeypatch):
     """studio_root() falls through to the legacy default on a restricted filesystem."""
     candidate = tmp_path / "fake_root"
-    venv = candidate / "unsloth_studio"
+    venv = candidate / "tunelabs_studio"
     venv.mkdir(parents = True)
     monkeypatch.setattr(sys, "prefix", str(venv))
-    monkeypatch.delenv("UNSLOTH_STUDIO_HOME", raising = False)
+    monkeypatch.delenv("TUNELABS_STUDIO_HOME", raising = False)
     monkeypatch.delenv("STUDIO_HOME", raising = False)
     sys.modules.pop("sr_studio_perm", None)
     mod = _load("sr_studio_perm", STORAGE_ROOTS)
     with mock.patch.object(Path, "is_file", side_effect = OSError("ebusy")):
         result = mod.studio_root()
-    assert result == Path.home() / ".unsloth" / "studio"
+    assert result == Path.home() / ".tunelabs" / "studio"
 
 
 def _method_body(src: str, name: str) -> str:
@@ -98,8 +98,8 @@ def _exec_search_roots_block(
     helper_end = min(sibling) if sibling else len(src)
     helper = textwrap.dedent(src[helper_start:helper_end])
     # search_roots derivation inside _find_llama_server_binary (delegates to the classifier).
-    block_start = src.index('legacy_llama = Path.home() / ".unsloth" / "llama.cpp"')
-    block_end = src.index("for unsloth_home in search_roots:", block_start)
+    block_start = src.index('legacy_llama = Path.home() / ".tunelabs" / "llama.cpp"')
+    block_end = src.index("for tunelabs_home in search_roots:", block_start)
     block = textwrap.dedent(" " * 8 + src[block_start:block_end])
     fake_module = type(sys)("fake_storage_roots")
     fake_module.studio_root = lambda: studio_root_value
@@ -144,15 +144,15 @@ def test_search_roots_keeps_custom_when_resolve_fails(tmp_path):
     assert custom / "llama.cpp" in roots, f"custom root dropped on resolve() failure: {roots}"
     # custom-mode discovery excludes the legacy tree to match _kill_orphaned_servers.
     assert (
-        home / ".unsloth" / "llama.cpp"
+        home / ".tunelabs" / "llama.cpp"
     ) not in roots, f"legacy llama path must not appear in custom-mode search_roots: {roots}"
 
 
 def test_search_roots_default_mode_uses_legacy_only(tmp_path):
     home = tmp_path / "home"
     home.mkdir()
-    legacy = home / ".unsloth" / "studio"
+    legacy = home / ".tunelabs" / "studio"
     legacy.mkdir(parents = True)
     roots = _exec_search_roots_block(home = home, studio_root_value = legacy, resolve_raises = False)
     # Default mode: only legacy_llama.
-    assert roots == [home / ".unsloth" / "llama.cpp"]
+    assert roots == [home / ".tunelabs" / "llama.cpp"]

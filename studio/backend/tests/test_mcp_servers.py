@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import pytest
 from fastapi import HTTPException
@@ -8,7 +8,7 @@ from storage import mcp_servers_db
 
 
 def _reset_db(tmp_path, monkeypatch):
-    monkeypatch.setenv("UNSLOTH_STUDIO_HOME", str(tmp_path))
+    monkeypatch.setenv("TUNELABS_STUDIO_HOME", str(tmp_path))
     monkeypatch.setattr(mcp_servers_db, "_schema_ready", False)
 
 
@@ -222,7 +222,7 @@ def test_clear_oauth_tokens_async_no_op_safe(tmp_path, monkeypatch):
     the delete + update handlers call it best-effort regardless of state."""
     import asyncio
 
-    monkeypatch.setenv("UNSLOTH_STUDIO_HOME", str(tmp_path))
+    monkeypatch.setenv("TUNELABS_STUDIO_HOME", str(tmp_path))
     from core.inference import mcp_client
 
     monkeypatch.setattr(mcp_client, "_oauth_token_store", None)
@@ -508,7 +508,7 @@ def test_clear_oauth_tokens_swallows_constructor_errors(tmp_path, monkeypatch):
     import asyncio
     from core.inference import mcp_client
 
-    monkeypatch.setenv("UNSLOTH_STUDIO_HOME", str(tmp_path))
+    monkeypatch.setenv("TUNELABS_STUDIO_HOME", str(tmp_path))
     monkeypatch.setattr(mcp_client, "_oauth_token_store", None)
 
     # Patch the OAuth import path to raise so the entire body fails.

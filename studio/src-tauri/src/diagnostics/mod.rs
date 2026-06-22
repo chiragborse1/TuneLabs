@@ -52,7 +52,7 @@ pub(crate) fn new_id(prefix: &str) -> String {
 pub fn studio_dir() -> PathBuf {
     dirs::home_dir()
         .unwrap_or_else(|| PathBuf::from("."))
-        .join(".unsloth")
+        .join(".tunelabs")
         .join("studio")
 }
 

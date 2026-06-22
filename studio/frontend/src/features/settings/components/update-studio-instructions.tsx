@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { copyToClipboard } from "@/lib/copy-to-clipboard";
 import { useT } from "@/i18n";
@@ -15,18 +15,18 @@ import type { ReactElement } from "react";
 import { useEffect, useRef, useState } from "react";
 
 const STUDIO_INSTALL_UNIX_CMD =
-  "curl -fsSL https://unsloth.ai/install.sh | sh";
-const STUDIO_INSTALL_WINDOWS_CMD = "irm https://unsloth.ai/install.ps1 | iex";
+  "curl -fsSL https://tunelabs.ai/install.sh | sh";
+const STUDIO_INSTALL_WINDOWS_CMD = "irm https://tunelabs.ai/install.ps1 | iex";
 const STUDIO_LOCAL_PULL_CMD = "git pull --ff-only";
 const STUDIO_LOCAL_INSTALL_UNIX_CMD = "./install.sh --local";
 const STUDIO_LOCAL_INSTALL_WINDOWS_CMD = ".\\install.ps1 --local";
 
-const DOCS_INSTALL_URL = "https://unsloth.ai/docs/get-started/install";
+const DOCS_INSTALL_URL = "https://tunelabs.ai/docs/get-started/install";
 const DOCS_UPDATING_URL =
-  "https://unsloth.ai/docs/get-started/install/updating";
-const DOCS_MAC_URL = "https://unsloth.ai/docs/get-started/install/mac";
+  "https://tunelabs.ai/docs/get-started/install/updating";
+const DOCS_MAC_URL = "https://tunelabs.ai/docs/get-started/install/mac";
 const DOCS_WINDOWS_URL =
-  "https://unsloth.ai/docs/get-started/install/windows-installation";
+  "https://tunelabs.ai/docs/get-started/install/windows-installation";
 
 export type UpdateShell = "windows" | "unix";
 export type UpdateInstallSource =

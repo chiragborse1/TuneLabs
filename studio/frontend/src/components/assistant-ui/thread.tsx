@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import {
   ComposerAttachments,
@@ -1330,7 +1330,7 @@ const ThreadWelcome: FC<{
               src={currentEmojiSrc}
               className="size-[44px] -translate-y-[2px]"
             />
-            <h1 className="aui-thread-welcome-message-inner unsloth-welcome-title fade-in slide-in-from-bottom-1 animate-in text-3xl tracking-[-0.02em] duration-200">
+            <h1 className="aui-thread-welcome-message-inner tunelabs-welcome-title fade-in slide-in-from-bottom-1 animate-in text-3xl tracking-[-0.02em] duration-200">
               {incognito ? "Temporary chat" : welcome.text}
             </h1>
           </div>
@@ -1838,11 +1838,11 @@ const Composer: FC<{
       />
       <ToolStatusDisplay />
       <div
-        className="unsloth-composer-line"
+        className="tunelabs-composer-line"
         data-expanded={composerExpanded ? "true" : "false"}
       >
         <div
-          className="unsloth-composer-left"
+          className="tunelabs-composer-left"
           data-pill-compact={pillsCompact ? "true" : undefined}
         >
           <ComposerToolsMenu side={effectiveMenuSide} />
@@ -1867,7 +1867,7 @@ const Composer: FC<{
             overlay ? "Type your edits for your image" : "Ask anything"
           }
           ref={inputRef}
-          className="aui-composer-input unsloth-composer-input"
+          className="aui-composer-input tunelabs-composer-input"
           minRows={1}
           maxRows={12}
           autoFocus={!disabled}
@@ -1917,11 +1917,11 @@ const Composer: FC<{
       {isTauri ? (
         // Phase 1 native model owns Tauri local-path drops. Restore browser
         // attachment drops in Tauri once Phase 1d adds token bridging.
-        <div className="aui-composer-attachment-dropzone unsloth-composer-surface relative z-10">
+        <div className="aui-composer-attachment-dropzone tunelabs-composer-surface relative z-10">
           {composerContent}
         </div>
       ) : (
-        <ComposerPrimitive.AttachmentDropzone className="group/dropzone aui-composer-attachment-dropzone unsloth-composer-surface relative z-10">
+        <ComposerPrimitive.AttachmentDropzone className="group/dropzone aui-composer-attachment-dropzone tunelabs-composer-surface relative z-10">
           {composerContent}
           {/* Gemini-style drop affordance, shown while a file is dragged over
               the composer. Absolute + pointer-events-none so the outline adds
@@ -2267,7 +2267,7 @@ const ReasoningToggle: FC<{ side?: "top" | "bottom" }> = ({
           <button
             type="button"
             disabled={disabled}
-            className="unsloth-thinking-pill"
+            className="tunelabs-thinking-pill"
             data-active={activeLook ? "true" : "false"}
             aria-label={thinkEffortAriaLabel({
               modelLoaded,
@@ -2286,7 +2286,7 @@ const ReasoningToggle: FC<{ side?: "top" | "bottom" }> = ({
           side={side}
           align="end"
           avoidCollisions={true}
-          className="unsloth-plus-menu unsloth-thinking-menu min-w-0 w-[176px]"
+          className="tunelabs-plus-menu tunelabs-thinking-menu min-w-0 w-[176px]"
         >
           {isEffort ? (
             <>
@@ -2303,7 +2303,7 @@ const ReasoningToggle: FC<{ side?: "top" | "bottom" }> = ({
                     icon={Tick02Icon}
                     strokeWidth={2}
                     className={cn(
-                      "unsloth-tick size-4",
+                      "tunelabs-tick size-4",
                       effectiveReasoningVisualEnabled && "opacity-0",
                     )}
                   />
@@ -2330,7 +2330,7 @@ const ReasoningToggle: FC<{ side?: "top" | "bottom" }> = ({
                     icon={Tick02Icon}
                     strokeWidth={2}
                       className={cn(
-                        "unsloth-tick size-4",
+                        "tunelabs-tick size-4",
                         !(
                           effectiveReasoningVisualEnabled &&
                           reasoningEffort === level
@@ -2360,7 +2360,7 @@ const ReasoningToggle: FC<{ side?: "top" | "bottom" }> = ({
                     icon={Tick02Icon}
                     strokeWidth={2}
                   className={cn(
-                    "unsloth-tick size-4",
+                    "tunelabs-tick size-4",
                     !effectiveReasoningEnabled && "opacity-0",
                   )}
                 />
@@ -2386,7 +2386,7 @@ const ReasoningToggle: FC<{ side?: "top" | "bottom" }> = ({
                     icon={Tick02Icon}
                     strokeWidth={2}
                 className={cn(
-                  "unsloth-tick size-4",
+                  "tunelabs-tick size-4",
                   !preserveThinking && "opacity-0",
                 )}
               />
@@ -2418,7 +2418,7 @@ const ReasoningToggle: FC<{ side?: "top" | "bottom" }> = ({
           setToolsEnabled(false, { persist: false });
         }
       }}
-      className="unsloth-thinking-pill"
+      className="tunelabs-thinking-pill"
       data-active={activeLook ? "true" : "false"}
       aria-label={thinkToggleAriaLabel({
         reasoningLockedOn,
@@ -2907,7 +2907,7 @@ const ComposerToolsMenu: FC<{ side?: "top" | "bottom" }> = ({
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent
           collisionPadding={16}
-          className="unsloth-plus-menu w-[208px]"
+          className="tunelabs-plus-menu w-[208px]"
         >
           {recentPrompts.map((p) => (
             <DropdownMenuItem
@@ -2938,7 +2938,7 @@ const ComposerToolsMenu: FC<{ side?: "top" | "bottom" }> = ({
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent
           collisionPadding={16}
-          className="unsloth-plus-menu w-[208px]"
+          className="tunelabs-plus-menu w-[208px]"
         >
           <DropdownMenuItem
             onSelect={() => {
@@ -2992,7 +2992,7 @@ const ComposerToolsMenu: FC<{ side?: "top" | "bottom" }> = ({
           <HugeiconsIcon icon={Folder01Icon} strokeWidth={2} />
           Projects
         </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent className="unsloth-plus-menu w-[232px]">
+        <DropdownMenuSubContent className="tunelabs-plus-menu w-[232px]">
           <DropdownMenuItem onSelect={() => setNewProjectOpen(true)}>
             <HugeiconsIcon icon={FolderAddIcon} strokeWidth={2} />
             New project
@@ -3042,7 +3042,7 @@ const ComposerToolsMenu: FC<{ side?: "top" | "bottom" }> = ({
         <button
           type="button"
           aria-label="Tools and attachments"
-          className="unsloth-composer-plus"
+          className="tunelabs-composer-plus"
         >
           <PlusIcon className="size-[22px] stroke-[1.75px]" />
         </button>
@@ -3052,7 +3052,7 @@ const ComposerToolsMenu: FC<{ side?: "top" | "bottom" }> = ({
         align="start"
         sideOffset={0}
         avoidCollisions={true}
-        className="unsloth-plus-menu w-[244px]"
+        className="tunelabs-plus-menu w-[244px]"
         // Don't refocus the + on close; restored focus showed a stray ring.
         onCloseAutoFocus={(event) => event.preventDefault()}
       >
@@ -3145,7 +3145,7 @@ const ComposerToolsMenu: FC<{ side?: "top" | "bottom" }> = ({
               <MoreHorizontalIcon className="size-4" />
               More
             </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="unsloth-plus-menu w-[248px]">
+            <DropdownMenuSubContent className="tunelabs-plus-menu w-[248px]">
               {overflowPlusItems.map((id) => (
                 <Fragment key={id}>{plusMenuNodes[id]}</Fragment>
               ))}

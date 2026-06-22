@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """
-End-to-end tests for Unsloth Studio's HTTP API surface.
+End-to-end tests for TuneLabs Studio's HTTP API surface.
 
 Covers the OpenAI- and Anthropic-compatible endpoints exposed by the
-server that ``unsloth studio run`` boots, plus API key authentication and
+server that ``tunelabs studio run`` boots, plus API key authentication and
 the CLI's ``--help`` output:
 
     1. curl -- basic chat completions (non-streaming)
@@ -27,22 +27,22 @@ see the unit suites elsewhere under ``studio/backend/tests/`` for those.
 
 Usage:
 
-    # Script mode — launches its own server via ``unsloth studio run``.
+    # Script mode — launches its own server via ``tunelabs studio run``.
     python tests/test_studio_api.py
-    python tests/test_studio_api.py --model unsloth/... --gguf-variant ...
+    python tests/test_studio_api.py --model tunelabs/... --gguf-variant ...
 
     # Pytest mode, external server — start a Studio server yourself,
     # then point pytest at it. Fastest iteration loop.
-    unsloth studio run --model unsloth/Qwen3-1.7B-GGUF --gguf-variant UD-Q4_K_XL &
-    export UNSLOTH_E2E_BASE_URL=http://127.0.0.1:8080
-    export UNSLOTH_E2E_API_KEY=sk-unsloth-...   # from the server banner
+    tunelabs studio run --model tunelabs/Qwen3-1.7B-GGUF --gguf-variant UD-Q4_K_XL &
+    export TUNELABS_E2E_BASE_URL=http://127.0.0.1:8080
+    export TUNELABS_E2E_API_KEY=sk-tunelabs-...   # from the server banner
     pytest tests/test_studio_api.py -v
 
     # Pytest mode, fixture-managed server — pytest launches and tears down
     # the server itself. One-shot verification, CI-friendly.
     pytest tests/test_studio_api.py -v \\
-        --unsloth-model unsloth/Qwen3-1.7B-GGUF \\
-        --unsloth-gguf-variant UD-Q4_K_XL
+        --tunelabs-model tunelabs/Qwen3-1.7B-GGUF \\
+        --tunelabs-gguf-variant UD-Q4_K_XL
 
 The ``base_url`` / ``api_key`` parameters on the test functions resolve via
 the ``studio_server`` session fixture in ``conftest.py``.
@@ -67,7 +67,7 @@ from pathlib import Path
 
 # Configuration
 
-DEFAULT_MODEL = "unsloth/Qwen3-1.7B-GGUF"
+DEFAULT_MODEL = "tunelabs/Qwen3-1.7B-GGUF"
 DEFAULT_VARIANT = "UD-Q4_K_XL"
 PORT = 18222  # high port unlikely to collide
 HOST = "127.0.0.1"
@@ -129,9 +129,9 @@ def _stream_http(
 
 
 def test_help_output():
-    """``unsloth studio run --help`` should show all documented options."""
+    """``tunelabs studio run --help`` should show all documented options."""
     result = subprocess.run(
-        ["unsloth", "studio", "run", "--help"],
+        ["tunelabs", "studio", "run", "--help"],
         capture_output = True,
         text = True,
         timeout = 15,
@@ -268,11 +268,11 @@ def test_curl_with_tools(base_url: str, api_key: str):
 
 # Standard OpenAI function-calling pass-through tests.
 #
-# Regression coverage for unslothai/unsloth#4999: /v1/chat/completions used
+# Regression coverage for tunelabsai/tunelabs#4999: /v1/chat/completions used
 # to strip standard OpenAI `tools`/`tool_choice`, so clients never got
 # structured tool_calls back. These exercise the pass-through that forwards
 # those fields to llama-server verbatim. Require a tool-capable GGUF
-# (supports_tools=True); the default unsloth/Qwen3-1.7B-GGUF qualifies.
+# (supports_tools=True); the default tunelabs/Qwen3-1.7B-GGUF qualifies.
 
 _WEATHER_TOOL = {
     "type": "function",
@@ -507,7 +507,7 @@ def test_invalid_key_rejected(base_url: str):
             "messages": [{"role": "user", "content": "Hello"}],
             "stream": False,
         },
-        headers = {"Authorization": "Bearer sk-unsloth-boguskey123"},
+        headers = {"Authorization": "Bearer sk-tunelabs-boguskey123"},
     )
     assert status == 401, f"Expected 401 for invalid key, got {status}"
     print("  PASS  invalid API key rejected (401)")
@@ -762,12 +762,12 @@ def test_anthropic_tool_choice_any(base_url: str, api_key: str):
 
 
 def _start_server(model: str, variant: str | None) -> tuple[subprocess.Popen, str]:
-    """Launch ``unsloth studio run`` and parse the API key from its banner.
+    """Launch ``tunelabs studio run`` and parse the API key from its banner.
 
     Returns (process, api_key).
     """
     cmd = [
-        "unsloth",
+        "tunelabs",
         "studio",
         "run",
         "--model",
@@ -801,7 +801,7 @@ def _start_server(model: str, variant: str | None) -> tuple[subprocess.Popen, st
             log_text = LOG_FILE.read_text()
             raise RuntimeError(f"Server exited early (code {proc.returncode}):\n{log_text[-2000:]}")
         log_text = LOG_FILE.read_text()
-        m = re.search(r"API Key:\s+(sk-unsloth-[a-f0-9]+)", log_text)
+        m = re.search(r"API Key:\s+(sk-tunelabs-[a-f0-9]+)", log_text)
         if m:
             api_key = m.group(1)
             break
@@ -836,7 +836,7 @@ def _kill_server(proc: subprocess.Popen):
 
 
 def main():
-    parser = argparse.ArgumentParser(description = "End-to-end tests for unsloth studio run")
+    parser = argparse.ArgumentParser(description = "End-to-end tests for tunelabs studio run")
     parser.add_argument(
         "--model",
         default = DEFAULT_MODEL,

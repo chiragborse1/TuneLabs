@@ -1,4 +1,4 @@
-"""Studio GGUF export pins convert_hf_to_gguf.py via UNSLOTH_LLAMA_CPP_SCRIPTS_DIR, with a once-per-process warning fallback when unsloth_zoo lacks the local-script resolver."""
+"""Studio GGUF export pins convert_hf_to_gguf.py via TUNELABS_LLAMA_CPP_SCRIPTS_DIR, with a once-per-process warning fallback when tunelabs_zoo lacks the local-script resolver."""
 
 from __future__ import annotations
 
@@ -31,7 +31,7 @@ def _find_pin_try(tree: ast.AST):
         for stmt in node.body:
             if (
                 isinstance(stmt, ast.ImportFrom)
-                and stmt.module == "unsloth_zoo.llama_cpp"
+                and stmt.module == "tunelabs_zoo.llama_cpp"
                 and any(alias.name == "_resolve_local_convert_script" for alias in stmt.names)
             ):
                 return node
@@ -54,7 +54,7 @@ def test_constant_and_resolver_imported_in_same_try():
     assert try_node is not None
     imported = []
     for stmt in try_node.body:
-        if isinstance(stmt, ast.ImportFrom) and stmt.module == "unsloth_zoo.llama_cpp":
+        if isinstance(stmt, ast.ImportFrom) and stmt.module == "tunelabs_zoo.llama_cpp":
             imported.extend(alias.name for alias in stmt.names)
     assert "LLAMA_CPP_DEFAULT_DIR" in imported
     assert "_resolve_local_convert_script" in imported
@@ -74,7 +74,7 @@ def test_setdefault_inside_try_block():
                 and node.func.value.attr == "environ"
                 and node.args
                 and isinstance(node.args[0], ast.Constant)
-                and node.args[0].value == "UNSLOTH_LLAMA_CPP_SCRIPTS_DIR"
+                and node.args[0].value == "TUNELABS_LLAMA_CPP_SCRIPTS_DIR"
             ):
                 setdefault_calls.append(node)
     assert setdefault_calls
@@ -109,46 +109,46 @@ def test_warning_handler_gated_on_module_flag():
     assert flag_writes
     assert warning_calls
     msg = ast.dump(warning_calls[0])
-    assert "UNSLOTH_LLAMA_CPP_SCRIPTS_DIR" in msg
-    assert "unsloth_zoo" in msg
+    assert "TUNELABS_LLAMA_CPP_SCRIPTS_DIR" in msg
+    assert "tunelabs_zoo" in msg
 
 
 def test_default_dir_is_string_for_setdefault_compat():
-    from unsloth_zoo.llama_cpp import LLAMA_CPP_DEFAULT_DIR
+    from tunelabs_zoo.llama_cpp import LLAMA_CPP_DEFAULT_DIR
     assert isinstance(LLAMA_CPP_DEFAULT_DIR, str)
 
 
 def test_setdefault_preserves_explicit_user_override(monkeypatch):
-    monkeypatch.setenv("UNSLOTH_LLAMA_CPP_SCRIPTS_DIR", "/explicit/override")
-    from unsloth_zoo.llama_cpp import LLAMA_CPP_DEFAULT_DIR
+    monkeypatch.setenv("TUNELABS_LLAMA_CPP_SCRIPTS_DIR", "/explicit/override")
+    from tunelabs_zoo.llama_cpp import LLAMA_CPP_DEFAULT_DIR
 
-    os.environ.setdefault("UNSLOTH_LLAMA_CPP_SCRIPTS_DIR", LLAMA_CPP_DEFAULT_DIR)
-    assert os.environ["UNSLOTH_LLAMA_CPP_SCRIPTS_DIR"] == "/explicit/override"
+    os.environ.setdefault("TUNELABS_LLAMA_CPP_SCRIPTS_DIR", LLAMA_CPP_DEFAULT_DIR)
+    assert os.environ["TUNELABS_LLAMA_CPP_SCRIPTS_DIR"] == "/explicit/override"
 
 
 def test_setdefault_assigns_default_when_unset(monkeypatch):
-    monkeypatch.delenv("UNSLOTH_LLAMA_CPP_SCRIPTS_DIR", raising = False)
-    from unsloth_zoo.llama_cpp import LLAMA_CPP_DEFAULT_DIR
+    monkeypatch.delenv("TUNELABS_LLAMA_CPP_SCRIPTS_DIR", raising = False)
+    from tunelabs_zoo.llama_cpp import LLAMA_CPP_DEFAULT_DIR
 
-    os.environ.setdefault("UNSLOTH_LLAMA_CPP_SCRIPTS_DIR", LLAMA_CPP_DEFAULT_DIR)
-    assert os.environ["UNSLOTH_LLAMA_CPP_SCRIPTS_DIR"] == LLAMA_CPP_DEFAULT_DIR
+    os.environ.setdefault("TUNELABS_LLAMA_CPP_SCRIPTS_DIR", LLAMA_CPP_DEFAULT_DIR)
+    assert os.environ["TUNELABS_LLAMA_CPP_SCRIPTS_DIR"] == LLAMA_CPP_DEFAULT_DIR
 
 
 def _simulate_pin_block(emit_records, set_value):
-    fake = types.ModuleType("unsloth_zoo.llama_cpp")
+    fake = types.ModuleType("tunelabs_zoo.llama_cpp")
     if set_value is not None:
         fake.LLAMA_CPP_DEFAULT_DIR = set_value
-    sys.modules["unsloth_zoo.llama_cpp"] = fake
+    sys.modules["tunelabs_zoo.llama_cpp"] = fake
 
     state = {"emitted": False}
 
     def run_once():
         try:
-            from unsloth_zoo.llama_cpp import (
+            from tunelabs_zoo.llama_cpp import (
                 LLAMA_CPP_DEFAULT_DIR,
                 _resolve_local_convert_script,  # noqa: F401
             )
-            os.environ.setdefault("UNSLOTH_LLAMA_CPP_SCRIPTS_DIR", LLAMA_CPP_DEFAULT_DIR)
+            os.environ.setdefault("TUNELABS_LLAMA_CPP_SCRIPTS_DIR", LLAMA_CPP_DEFAULT_DIR)
         except ImportError:
             if not state["emitted"]:
                 emit_records.append("warned")
@@ -158,7 +158,7 @@ def _simulate_pin_block(emit_records, set_value):
 
 
 def test_warning_fires_at_most_once_across_calls(monkeypatch):
-    monkeypatch.delenv("UNSLOTH_LLAMA_CPP_SCRIPTS_DIR", raising = False)
+    monkeypatch.delenv("TUNELABS_LLAMA_CPP_SCRIPTS_DIR", raising = False)
     emits = []
     runner = _simulate_pin_block(emits, set_value = "/fake/default")
     runner()
@@ -168,33 +168,33 @@ def test_warning_fires_at_most_once_across_calls(monkeypatch):
 
 
 def test_missing_default_dir_degrades_to_warning(monkeypatch):
-    monkeypatch.delenv("UNSLOTH_LLAMA_CPP_SCRIPTS_DIR", raising = False)
+    monkeypatch.delenv("TUNELABS_LLAMA_CPP_SCRIPTS_DIR", raising = False)
     emits = []
     runner = _simulate_pin_block(emits, set_value = None)
     runner()
     assert emits == ["warned"]
-    assert "UNSLOTH_LLAMA_CPP_SCRIPTS_DIR" not in os.environ
+    assert "TUNELABS_LLAMA_CPP_SCRIPTS_DIR" not in os.environ
 
 
 def test_no_warning_when_both_symbols_present(monkeypatch):
-    monkeypatch.delenv("UNSLOTH_LLAMA_CPP_SCRIPTS_DIR", raising = False)
-    fake = types.ModuleType("unsloth_zoo.llama_cpp")
+    monkeypatch.delenv("TUNELABS_LLAMA_CPP_SCRIPTS_DIR", raising = False)
+    fake = types.ModuleType("tunelabs_zoo.llama_cpp")
     fake.LLAMA_CPP_DEFAULT_DIR = "/fake/dir"
     fake._resolve_local_convert_script = lambda: None
-    monkeypatch.setitem(sys.modules, "unsloth_zoo.llama_cpp", fake)
+    monkeypatch.setitem(sys.modules, "tunelabs_zoo.llama_cpp", fake)
 
     emits = []
     state = {"emitted": False}
     try:
-        from unsloth_zoo.llama_cpp import (
+        from tunelabs_zoo.llama_cpp import (
             LLAMA_CPP_DEFAULT_DIR,
             _resolve_local_convert_script,  # noqa: F401
         )
-        os.environ.setdefault("UNSLOTH_LLAMA_CPP_SCRIPTS_DIR", LLAMA_CPP_DEFAULT_DIR)
+        os.environ.setdefault("TUNELABS_LLAMA_CPP_SCRIPTS_DIR", LLAMA_CPP_DEFAULT_DIR)
     except ImportError:
         if not state["emitted"]:
             emits.append("warned")
             state["emitted"] = True
 
     assert emits == []
-    assert os.environ.get("UNSLOTH_LLAMA_CPP_SCRIPTS_DIR") == "/fake/dir"
+    assert os.environ.get("TUNELABS_LLAMA_CPP_SCRIPTS_DIR") == "/fake/dir"

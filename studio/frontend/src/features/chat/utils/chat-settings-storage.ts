@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import {
   getChatSettings,
@@ -19,22 +19,22 @@ import {
 } from "../presets/preset-policy";
 import type { ReasoningEffort } from "../stores/chat-runtime-store";
 
-const AUTO_TITLE_KEY = "unsloth_chat_auto_title";
-const AUTO_HEAL_TOOL_CALLS_KEY = "unsloth_auto_heal_tool_calls";
-const MAX_TOOL_CALLS_KEY = "unsloth_max_tool_calls_per_message";
-const TOOL_CALL_TIMEOUT_KEY = "unsloth_tool_call_timeout";
-const INFERENCE_PARAMS_KEY = "unsloth_chat_inference_params";
-const CHAT_ACTIVE_PRESET_KEY = "unsloth_chat_active_preset";
-const CHAT_ACTIVE_PRESET_SOURCE_KEY = "unsloth_chat_active_preset_source";
-const REASONING_EFFORT_KEY = "unsloth_reasoning_effort";
-const PRESERVE_THINKING_KEY = "unsloth_preserve_thinking";
-const COLLAPSE_HTML_ARTIFACTS_KEY = "unsloth_chat_collapse_html_artifacts";
+const AUTO_TITLE_KEY = "tunelabs_chat_auto_title";
+const AUTO_HEAL_TOOL_CALLS_KEY = "tunelabs_auto_heal_tool_calls";
+const MAX_TOOL_CALLS_KEY = "tunelabs_max_tool_calls_per_message";
+const TOOL_CALL_TIMEOUT_KEY = "tunelabs_tool_call_timeout";
+const INFERENCE_PARAMS_KEY = "tunelabs_chat_inference_params";
+const CHAT_ACTIVE_PRESET_KEY = "tunelabs_chat_active_preset";
+const CHAT_ACTIVE_PRESET_SOURCE_KEY = "tunelabs_chat_active_preset_source";
+const REASONING_EFFORT_KEY = "tunelabs_reasoning_effort";
+const PRESERVE_THINKING_KEY = "tunelabs_preserve_thinking";
+const COLLAPSE_HTML_ARTIFACTS_KEY = "tunelabs_chat_collapse_html_artifacts";
 const ALLOW_ARTIFACT_NETWORK_ACCESS_KEY =
-  "unsloth_chat_allow_artifact_network_access";
-const CHAT_PRESETS_KEY = "unsloth_chat_custom_presets";
-const LEGACY_CHAT_SYSTEM_PROMPTS_KEY = "unsloth_chat_system_prompts";
+  "tunelabs_chat_allow_artifact_network_access";
+const CHAT_PRESETS_KEY = "tunelabs_chat_custom_presets";
+const LEGACY_CHAT_SYSTEM_PROMPTS_KEY = "tunelabs_chat_system_prompts";
 const LEGACY_CHAT_SETTINGS_IMPORT_KEY =
-  "unsloth_chat_settings_imported_to_studio_db";
+  "tunelabs_chat_settings_imported_to_studio_db";
 
 const NUMERIC_INFERENCE_FIELDS = [
   "temperature",

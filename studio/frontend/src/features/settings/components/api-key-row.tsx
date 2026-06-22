@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { Button } from "@/components/ui/button";
 import {
@@ -57,7 +57,7 @@ export function ApiKeyRow({
   onRevoke: (key: ApiKey) => void;
 }) {
   const t = useT();
-  const prefix = `sk-unsloth-${apiKey.key_prefix}…`;
+  const prefix = `sk-tunelabs-${apiKey.key_prefix}…`;
   return (
     <div className="group flex items-center gap-3 border-b border-border/60 px-1 py-3 last:border-b-0 transition-colors hover:bg-accent/40">
       <span

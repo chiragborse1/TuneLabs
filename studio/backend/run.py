@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-"""Run script for Unsloth UI Backend.
+"""Run script for TuneLabs UI Backend.
 
 Self-contained; can be moved to any directory.
 """
@@ -25,8 +25,8 @@ from utils.cpu_threads import configure_cpu_threads
 try:
     configure_cpu_threads()
 except ValueError as exc:
-    configured = os.environ.get("UNSLOTH_CPU_THREADS")
-    raise SystemExit(f"Error: Invalid UNSLOTH_CPU_THREADS value {configured!r}: {exc}") from None
+    configured = os.environ.get("TUNELABS_CPU_THREADS")
+    raise SystemExit(f"Error: Invalid TUNELABS_CPU_THREADS value {configured!r}: {exc}") from None
 
 # Anaconda/conda-forge Python: seed platform._sys_version_cache before imports
 # that trigger attrs -> rich -> structlog -> platform crash.
@@ -86,7 +86,7 @@ def _resolve_external_ip() -> str:
 def _install_uvicorn_startup_log_rewrite(bind_host: str, display_host: str) -> None:
     """Rewrite Uvicorn's startup log line: swap wildcard bind for the
     externally-reachable address, use our Mac-aware stop hint, and rename the
-    prefix to "Unsloth Studio running on"."""
+    prefix to "TuneLabs Studio running on"."""
     import logging
     import re
 
@@ -96,7 +96,7 @@ def _install_uvicorn_startup_log_rewrite(bind_host: str, display_host: str) -> N
     new_suffix = "(To stop: press Ctrl+C -- on macOS, Control+C not Command+C)"
     old_suffix_re = re.compile(r"\(Press CTRL\+C to quit\)")
     old_prefix = "Uvicorn running on "
-    new_prefix = "Unsloth Studio running on "
+    new_prefix = "TuneLabs Studio running on "
 
     def _rewrite(text: str) -> str:
         if text.startswith(old_prefix):
@@ -220,7 +220,7 @@ def _print_localhost_ipv6_mismatch_warning(local_url: str, port: int) -> None:
     reset = "\033[0m" if use_color else ""
 
     print(
-        f"{warn_c}  Warning: localhost resolves to IPv6 (::1), but Unsloth "
+        f"{warn_c}  Warning: localhost resolves to IPv6 (::1), but TuneLabs "
         f"Studio is listening on 127.0.0.1 only. Open {local_url} instead of "
         f"http://localhost:{port}.{reset}",
         flush = True,
@@ -276,7 +276,7 @@ def _verify_global_reachability(display_host: str, port: int) -> None:
             f"https://check-host.net/check-tcp?{qs}",
             headers = {
                 "Accept": "application/json",
-                "User-Agent": "unsloth-studio-reachability/1",
+                "User-Agent": "tunelabs-studio-reachability/1",
             },
         )
         with urllib.request.urlopen(req, timeout = 5) as resp:
@@ -291,7 +291,7 @@ def _verify_global_reachability(display_host: str, port: int) -> None:
             f"https://check-host.net/check-result/{req_id}",
             headers = {
                 "Accept": "application/json",
-                "User-Agent": "unsloth-studio-reachability/1",
+                "User-Agent": "tunelabs-studio-reachability/1",
             },
         )
         while time.monotonic() < deadline:
@@ -378,7 +378,7 @@ def _verify_global_reachability(display_host: str, port: int) -> None:
             local_url = _working_local_url(port)
             if local_url:
                 print(
-                    f"{local_url_c}  You can access Unsloth Studio locally "
+                    f"{local_url_c}  You can access TuneLabs Studio locally "
                     f"in the meantime: {local_url}{reset}",
                     flush = True,
                 )
@@ -429,7 +429,7 @@ def _emit_tool_policy_notice(host: str, secure: bool, enable_tools: "Optional[bo
 def _emit_secure_startup_output(port: int, enable_tools: "Optional[bool]" = None) -> None:
     """Secure-mode banner: only the Cloudflare link (loopback has no public raw URL)."""
     print("")
-    print("🦥 Unsloth Studio is running (secure)")
+    print("🦥 TuneLabs Studio is running (secure)")
     print("─" * 52)
     _print_cloudflare_line()
     print(f"  On this machine only: http://127.0.0.1:{port}/")
@@ -572,27 +572,27 @@ from utils.paths.storage_roots import studio_root as _studio_root
 _PID_FILE = _studio_root() / "studio.pid"
 
 # Direct backend launches bypass the CLI's env re-export; do it here for
-# real custom roots so unsloth-zoo's import-time LLAMA_CPP_DEFAULT_DIR
+# real custom roots so tunelabs-zoo's import-time LLAMA_CPP_DEFAULT_DIR
 # picks up the custom build. Skip legacy-default to avoid flipping
 # default-mode installs into env-override.
 try:
-    _LEGACY_STUDIO_ROOT = (Path.home() / ".unsloth" / "studio").resolve()
+    _LEGACY_STUDIO_ROOT = (Path.home() / ".tunelabs" / "studio").resolve()
 except (OSError, ValueError):
-    _LEGACY_STUDIO_ROOT = Path.home() / ".unsloth" / "studio"
+    _LEGACY_STUDIO_ROOT = Path.home() / ".tunelabs" / "studio"
 try:
     _STUDIO_ROOT_RESOLVED = _studio_root().resolve()
 except (OSError, ValueError):
     _STUDIO_ROOT_RESOLVED = _studio_root()
 if _STUDIO_ROOT_RESOLVED != _LEGACY_STUDIO_ROOT:
-    if not os.environ.get("UNSLOTH_STUDIO_HOME"):
-        os.environ["UNSLOTH_STUDIO_HOME"] = str(_STUDIO_ROOT_RESOLVED)
-    if not os.environ.get("UNSLOTH_LLAMA_CPP_PATH"):
-        os.environ["UNSLOTH_LLAMA_CPP_PATH"] = str(_STUDIO_ROOT_RESOLVED / "llama.cpp")
+    if not os.environ.get("TUNELABS_STUDIO_HOME"):
+        os.environ["TUNELABS_STUDIO_HOME"] = str(_STUDIO_ROOT_RESOLVED)
+    if not os.environ.get("TUNELABS_LLAMA_CPP_PATH"):
+        os.environ["TUNELABS_LLAMA_CPP_PATH"] = str(_STUDIO_ROOT_RESOLVED / "llama.cpp")
 
-# The studio bundles unsloth_zoo; declare unsloth present (as `import unsloth`
+# The studio bundles tunelabs_zoo; declare tunelabs present (as `import tunelabs`
 # does) so its lazy submodule imports (export, hardware, mlx) and the
 # DiffusionGemma runner never trip the install guard on a clean install.
-os.environ.setdefault("UNSLOTH_IS_PRESENT", "1")
+os.environ.setdefault("TUNELABS_IS_PRESENT", "1")
 
 
 def _write_pid_file():
@@ -702,18 +702,18 @@ def _iter_frontend_fallback_candidates() -> "list[Path]":
     """Yield `studio/frontend/dist` paths to try when the default is missing.
 
     Covers PATH-shadowed binaries whose __file__ resolves into a site-packages
-    tree with no vite build (e.g. plain `pip install unsloth`).
+    tree with no vite build (e.g. plain `pip install tunelabs`).
     """
     import ast
     import re
 
     out: list[Path] = []
     home_str = (
-        os.environ.get("UNSLOTH_STUDIO_HOME")
+        os.environ.get("TUNELABS_STUDIO_HOME")
         or os.environ.get("STUDIO_HOME")
-        or str(Path.home() / ".unsloth" / "studio")
+        or str(Path.home() / ".tunelabs" / "studio")
     )
-    venv_dir = Path(home_str).expanduser() / "unsloth_studio"
+    venv_dir = Path(home_str).expanduser() / "tunelabs_studio"
     # Installer venv site-packages.
     for pattern in (
         "lib/python*/site-packages/studio/frontend/dist",
@@ -808,25 +808,25 @@ class _TeeStream:
 
 
 def _setup_server_disk_logging():
-    """Tee stdout/stderr to ~/.unsloth/studio/logs/server/ and aim
+    """Tee stdout/stderr to ~/.tunelabs/studio/logs/server/ and aim
     faulthandler at the same file so hard crashes (access violations /
     SIGSEGV in the GPU runtime) leave a stack trace on disk.
 
     Also exports PYTHONFAULTHANDLER=1 so child Python processes (training
     workers) dump native-crash stacks to their captured stderr. Keeps the
-    newest 20 session logs. Opt out with UNSLOTH_STUDIO_NO_FILE_LOG=1.
+    newest 20 session logs. Opt out with TUNELABS_STUDIO_NO_FILE_LOG=1.
     Returns the log path, or None when disabled/unavailable.
     """
-    if os.environ.get("UNSLOTH_STUDIO_NO_FILE_LOG") == "1":
+    if os.environ.get("TUNELABS_STUDIO_NO_FILE_LOG") == "1":
         return None
     try:
         from utils.paths import studio_root
         log_dir = Path(studio_root()) / "logs" / "server"
     except Exception:
         home = (
-            os.environ.get("UNSLOTH_STUDIO_HOME")
+            os.environ.get("TUNELABS_STUDIO_HOME")
             or os.environ.get("STUDIO_HOME")
-            or os.path.join(os.path.expanduser("~"), ".unsloth", "studio")
+            or os.path.join(os.path.expanduser("~"), ".tunelabs", "studio")
         )
         log_dir = Path(home) / "logs" / "server"
     try:
@@ -926,7 +926,7 @@ def run_server(
     if secure:
         host = "127.0.0.1"
 
-    # `unsloth studio run` installs its own resolved policy and passes None here.
+    # `tunelabs studio run` installs its own resolved policy and passes None here.
     _apply_cli_tool_policy(enable_tools)
 
     # Windows cp1252 can't encode emoji; reconfigure stdout to UTF-8.
@@ -948,7 +948,7 @@ def run_server(
 
     # Set env var BEFORE importing main so CORS middleware picks it up.
     if api_only:
-        os.environ["UNSLOTH_API_ONLY"] = "1"
+        os.environ["TUNELABS_API_ONLY"] = "1"
 
     import nest_asyncio
 
@@ -984,7 +984,7 @@ def run_server(
                 print(f"Port {original_port} is already in use by " f"{name} (PID {pid}).")
             else:
                 print(f"Port {original_port} is already in use.")
-            print(f"Unsloth Studio will use port {port} instead.")
+            print(f"TuneLabs Studio will use port {port} instead.")
             print(f"Open http://localhost:{port} in your browser.")
             print("=" * 50)
             print("")
@@ -1003,23 +1003,23 @@ def run_server(
                 print(f"[OK] Frontend loaded from {display}")
         else:
             home_str = (
-                os.environ.get("UNSLOTH_STUDIO_HOME")
+                os.environ.get("TUNELABS_STUDIO_HOME")
                 or os.environ.get("STUDIO_HOME")
-                or str(Path.home() / ".unsloth" / "studio")
+                or str(Path.home() / ".tunelabs" / "studio")
             )
-            # Windows shim: $STUDIO_HOME/bin/unsloth.exe; Linux/macOS venv binary:
-            # $STUDIO_HOME/unsloth_studio/bin/unsloth.
+            # Windows shim: $STUDIO_HOME/bin/tunelabs.exe; Linux/macOS venv binary:
+            # $STUDIO_HOME/tunelabs_studio/bin/tunelabs.
             home = Path(home_str).expanduser()
             if sys.platform == "win32":
-                installer_bin = home / "bin" / "unsloth.exe"
+                installer_bin = home / "bin" / "tunelabs.exe"
             else:
-                installer_bin = home / "unsloth_studio" / "bin" / "unsloth"
+                installer_bin = home / "tunelabs_studio" / "bin" / "tunelabs"
             tried_lines = "\n".join(f"  - {p}" for p in attempted) or "  (none)"
             raise SystemExit(
                 "[ERROR] Studio frontend build not found.\n"
                 f"Tried:\n{tried_lines}\n"
                 "\n"
-                "Likely cause: another 'unsloth' on PATH is shadowing the "
+                "Likely cause: another 'tunelabs' on PATH is shadowing the "
                 "installer's binary and points at a site-packages tree with "
                 "no built dist.\n"
                 "\n"
@@ -1027,7 +1027,7 @@ def run_server(
                 f"  - run the installer's binary directly: {installer_bin} studio\n"
                 "  - pass --frontend <path/to/studio/frontend/dist>\n"
                 "  - pass --api-only to skip serving the web UI\n"
-                "  - reinstall: curl -fsSL https://unsloth.ai/install.sh | sh"
+                "  - reinstall: curl -fsSL https://tunelabs.ai/install.sh | sh"
             )
 
     # Resolve once; shared by the log rewrite and banner.
@@ -1187,7 +1187,7 @@ if __name__ == "__main__":
         except Exception:
             pass
 
-    parser = argparse.ArgumentParser(description = "Run Unsloth UI Backend server")
+    parser = argparse.ArgumentParser(description = "Run TuneLabs UI Backend server")
     parser.add_argument(
         "--host",
         default = "127.0.0.1",
@@ -1238,8 +1238,8 @@ if __name__ == "__main__":
         default = None,
         help = "Force server-side tools off for every request.",
     )
-    # Mirror unsloth_cli/commands/studio.py's _PARALLEL_*. Default 1 is for direct
-    # backend launches; `unsloth studio run` always passes its own value (4).
+    # Mirror tunelabs_cli/commands/studio.py's _PARALLEL_*. Default 1 is for direct
+    # backend launches; `tunelabs studio run` always passes its own value (4).
     _PARALLEL_MIN = 1
     _PARALLEL_MAX = 64
     _PARALLEL_DEFAULT_PLAIN = 1
@@ -1250,7 +1250,7 @@ if __name__ == "__main__":
         default = _PARALLEL_DEFAULT_PLAIN,
         help = (
             f"llama-server parallel decode slots ({_PARALLEL_MIN}..{_PARALLEL_MAX}). "
-            f"Default {_PARALLEL_DEFAULT_PLAIN}; `unsloth studio run` uses 4."
+            f"Default {_PARALLEL_DEFAULT_PLAIN}; `tunelabs studio run` uses 4."
         ),
     )
 
@@ -1280,11 +1280,11 @@ if __name__ == "__main__":
     except Exception:
         sys.stderr.write("\n")
         sys.stderr.write("=" * 60 + "\n")
-        sys.stderr.write("ERROR: Unsloth Studio failed to start.\n")
+        sys.stderr.write("ERROR: TuneLabs Studio failed to start.\n")
         sys.stderr.write("=" * 60 + "\n")
         traceback.print_exc(file = sys.stderr)
         sys.stderr.write("\n")
-        sys.stderr.write("If a package is missing, try re-running: unsloth studio setup\n")
+        sys.stderr.write("If a package is missing, try re-running: tunelabs studio setup\n")
         sys.stderr.flush()
         sys.exit(1)
 

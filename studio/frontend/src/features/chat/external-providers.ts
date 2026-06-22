@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 
 export interface ExternalProviderConfig {
@@ -258,9 +258,9 @@ export function toExternalBackendProviderType(
     : providerType;
 }
 
-const EXTERNAL_PROVIDERS_KEY = "unsloth_chat_external_providers";
-const EXTERNAL_PROVIDER_KEYS_KEY = "unsloth_chat_external_provider_keys";
-const CONNECTIONS_ENABLED_KEY = "unsloth_chat_connections_enabled";
+const EXTERNAL_PROVIDERS_KEY = "tunelabs_chat_external_providers";
+const EXTERNAL_PROVIDER_KEYS_KEY = "tunelabs_chat_external_provider_keys";
+const CONNECTIONS_ENABLED_KEY = "tunelabs_chat_connections_enabled";
 const EXTERNAL_MODEL_PREFIX = "external::";
 
 function canUseStorage(): boolean {

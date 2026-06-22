@@ -1,5 +1,5 @@
 #!/bin/sh
-# Post-removal script for the Unsloth Studio Debian package
+# Post-removal script for the TuneLabs Studio Debian package
 # Runs non-interactively; never deletes user data or touches other users' homes.
 
 case "${1:-}" in

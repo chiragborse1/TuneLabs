@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """
 Static registry of supported external LLM providers.
@@ -326,8 +326,8 @@ PROVIDER_REGISTRY: dict[str, dict[str, Any]] = {
         "auth_header": "Authorization",
         "auth_prefix": "Bearer ",
         "extra_headers": {
-            "HTTP-Referer": "https://unsloth.ai",
-            "X-Title": "Unsloth Studio",
+            "HTTP-Referer": "https://tunelabs.ai",
+            "X-Title": "TuneLabs Studio",
         },
         "notes": "Unified gateway to 300+ models across all major providers. HTTP-Referer and X-Title headers sent for attribution.",
         "model_list_mode": "curated",

@@ -1,4 +1,4 @@
-"""Unit tests for the tied-weights-keys coercion used by unsloth.save.
+"""Unit tests for the tied-weights-keys coercion used by tunelabs.save.
 
 Regression for the NemotronH save / GGUF-export crash: transformers >= 5
 ``save_pretrained`` reads ``_tied_weights_keys.keys()`` and raises on the legacy list
@@ -8,7 +8,7 @@ form. Exercised on tiny module trees, no model download.
 import pytest
 import torch
 
-from unsloth.save import (
+from tunelabs.save import (
     _coerce_tied_weights_keys_to_dict,
     _normalize_tied_weights_keys_for_save,
     _restore_tied_weights_keys,
@@ -100,7 +100,7 @@ def test_decorator_restores_on_exception():
 
 
 def test_decorator_finds_model_in_kwargs_and_positional():
-    # unsloth_save_model / unsloth_generic_save pass model= as a keyword; the gguf path
+    # tunelabs_save_model / tunelabs_generic_save pass model= as a keyword; the gguf path
     # binds it as the first positional (method ``self``). Both must be coerced.
     for call in (lambda f, r: f(model = r), lambda f, r: f(r)):
         root, mixer = _build_tree()

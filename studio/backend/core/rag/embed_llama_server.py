@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """GGUF embedder over the bundled llama.cpp, served via HTTP (no torch).
 
@@ -82,7 +82,7 @@ class LlamaServerBackend:
             raise RuntimeError(
                 "llama-server binary not found; cannot use RAG_EMBED_BACKEND="
                 "llama-server. Install llama.cpp or set LLAMA_SERVER_PATH / "
-                "UNSLOTH_LLAMA_CPP_PATH."
+                "TUNELABS_LLAMA_CPP_PATH."
             )
         self._assert_embedding_support(binary)
         self._binary = binary

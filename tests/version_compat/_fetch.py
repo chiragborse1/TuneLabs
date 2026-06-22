@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team.
+# Copyright 2026-present the TuneLabs AI Inc. team.
 """Shared helpers for version-compat suites: GitHub raw fetch + regex symbol grep."""
 
 from __future__ import annotations

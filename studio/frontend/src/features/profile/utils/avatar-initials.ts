@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 export function initialsFromName(name: string): string {
   const trimmed = name.trim();
@@ -8,7 +8,7 @@ export function initialsFromName(name: string): string {
 }
 
 /**
- * Default Unsloth-brand background for the avatar fallback (readable white text).
+ * Default TuneLabs-brand background for the avatar fallback (readable white text).
  *
  * Uses the shared `--primary` design token instead of a one-off hardcoded
  * shade, so the avatar always matches the app's general brand green (send

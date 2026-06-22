@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { ModelDeleteAction } from "@/components/assistant-ui/model-selector/model-delete-action";
 import {
@@ -15,7 +15,7 @@ import {
   listGgufVariants,
   useGgufVariantsCacheVersion,
 } from "@/features/hub/inventory";
-import { classifyUnslothSupport } from "@/features/hub/hooks/use-hub-model-search";
+import { classifyTuneLabsSupport } from "@/features/hub/hooks/use-hub-model-search";
 import { formatBytes, formatRelativeShort } from "@/features/hub/lib/format";
 import { ggufVariantDisplayLabel } from "@/features/hub/lib/gguf-variant-sort";
 import { modelIdsMatch } from "@/features/hub/lib/model-identity";
@@ -430,7 +430,7 @@ export const DiscoverModelRow = memo(function DiscoverModelRow({
     () =>
       isDataset
         ? null
-        : classifyUnslothSupport({
+        : classifyTuneLabsSupport({
             modelId: row.id,
             pipelineTag: row.result.pipelineTag,
             tags: row.result.tags,
@@ -512,9 +512,9 @@ export const DiscoverModelRow = memo(function DiscoverModelRow({
           <div className="flex h-[16px] min-w-0 items-center justify-between gap-2 text-[11.5px] leading-[16px] text-muted-foreground/85">
             <span className="flex min-w-0 items-center gap-1">
               <span className="truncate">{row.owner}</span>
-              {row.owner.toLowerCase() === "unsloth" && (
+              {row.owner.toLowerCase() === "tunelabs" && (
                 <span
-                  aria-label="Verified Unsloth"
+                  aria-label="Verified TuneLabs"
                   className="hub-verified-badge size-3.5 shrink-0 text-primary"
                 />
               )}
@@ -585,7 +585,7 @@ export const InventoryRow = memo(function InventoryRow({
   const unsupported = useMemo(() => {
     if (isDataset) return false;
     return (
-      classifyUnslothSupport({
+      classifyTuneLabsSupport({
         modelId: rowModelId,
         pipelineTag: row.pipelineTag,
         tags: rowTagsSignature ? rowTagsSignature.split("\u0001") : undefined,
@@ -709,9 +709,9 @@ export const InventoryRow = memo(function InventoryRow({
   const ownerLine = (
     <span className="mt-0.5 flex min-w-0 items-center gap-1 text-[11.5px] leading-[15px] text-muted-foreground/80">
       <span className="truncate">{subLabel}</span>
-      {subLabel.toLowerCase() === "unsloth" && (
+      {subLabel.toLowerCase() === "tunelabs" && (
         <span
-          aria-label="Verified Unsloth"
+          aria-label="Verified TuneLabs"
           className="hub-verified-badge size-3.5 shrink-0 text-primary"
         />
       )}
@@ -786,9 +786,9 @@ export const InventoryRow = memo(function InventoryRow({
             <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[10.5px] leading-[14px] text-muted-foreground/75">
               <span className="flex min-w-0 items-center gap-1">
                 <span className="truncate">{subLabel}</span>
-                {subLabel.toLowerCase() === "unsloth" && (
+                {subLabel.toLowerCase() === "tunelabs" && (
                   <span
-                    aria-label="Verified Unsloth"
+                    aria-label="Verified TuneLabs"
                     className="hub-verified-badge size-3 shrink-0 text-primary"
                   />
                 )}

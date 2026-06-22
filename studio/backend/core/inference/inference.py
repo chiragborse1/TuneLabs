@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Core inference backend."""
 
-from unsloth import FastLanguageModel, FastVisionModel
-from unsloth.chat_templates import get_chat_template
+from tunelabs import FastLanguageModel, FastVisionModel
+from tunelabs.chat_templates import get_chat_template
 from transformers import TextStreamer
 from peft import PeftModel, PeftModelForCausalLM
 
@@ -220,7 +220,7 @@ class InferenceBackend:
         gpu_ids: Optional[list[int]] = None,
     ) -> bool:
         """Load any model: base, LoRA adapter, text, or vision."""
-        # GGUF uses max_seq_length=0 as "model default"; Unsloth crashes on it.
+        # GGUF uses max_seq_length=0 as "model default"; TuneLabs crashes on it.
         if max_seq_length <= 0:
             max_seq_length = 2048
 
@@ -264,7 +264,7 @@ class InferenceBackend:
                 log_gpu_memory(f"Before loading {model_name}")
 
                 if audio_type == "csm":
-                    from unsloth import FastModel
+                    from tunelabs import FastModel
                     from transformers import CsmForConditionalGeneration
 
                     model, processor = FastModel.from_pretrained(
@@ -281,7 +281,7 @@ class InferenceBackend:
                     self.models[model_name]["processor"] = processor
                 elif audio_type == "bicodec":
                     import os
-                    from unsloth import FastModel
+                    from tunelabs import FastModel
 
                     if config.is_lora and config.base_model:
                         # LoRA adapter: base_model is .../Spark-TTS-0.5B/LLM;
@@ -336,7 +336,7 @@ class InferenceBackend:
                     self.models[model_name]["model_repo_path"] = abs_repo_path
                 elif audio_type == "dac":
                     # OuteTTS uses FastModel (not FastLanguageModel)
-                    from unsloth import FastModel
+                    from tunelabs import FastModel
 
                     model, tokenizer = FastModel.from_pretrained(
                         config.path,
@@ -351,7 +351,7 @@ class InferenceBackend:
                     self.models[model_name]["tokenizer"] = tokenizer
                 elif audio_type == "whisper":
                     # Whisper ASR — uses FastModel with WhisperForConditionalGeneration
-                    from unsloth import FastModel
+                    from tunelabs import FastModel
                     from transformers import WhisperForConditionalGeneration
 
                     model, tokenizer = FastModel.from_pretrained(
@@ -535,10 +535,10 @@ class InferenceBackend:
                 # Drop stale compiled cache for the next model. On spawn platforms,
                 # preserve trainer files so concurrent dataset.map() workers can import them.
                 import sys as _sys
-                from utils.cache_cleanup import clear_unsloth_compiled_cache
+                from utils.cache_cleanup import clear_tunelabs_compiled_cache
 
-                _preserve = ["Unsloth*Trainer.py"] if _sys.platform in ("win32", "darwin") else None
-                clear_unsloth_compiled_cache(preserve_patterns = _preserve)
+                _preserve = ["TuneLabs*Trainer.py"] if _sys.platform in ("win32", "darwin") else None
+                clear_tunelabs_compiled_cache(preserve_patterns = _preserve)
 
                 logger.info(f"Model '{model_name}' successfully unloaded.")
                 return True
@@ -947,7 +947,7 @@ class InferenceBackend:
                 )
             else:
                 logger.info(
-                    f"No registered Unsloth template for {self.active_model_name}, using tokenizer default"
+                    f"No registered TuneLabs template for {self.active_model_name}, using tokenizer default"
                 )
         except Exception as e:
             logger.warning(f"Could not apply get_chat_template: {e}")
@@ -1672,7 +1672,7 @@ class InferenceBackend:
     ) -> str:
         """Render the chat prompt, peeling kwargs the template doesn't
         understand. Delegates to the dependency-light helper module so the
-        fallback chain is unit-testable without pulling unsloth / torch into
+        fallback chain is unit-testable without pulling tunelabs / torch into
         the test sandbox.
         """
         from core.inference.chat_template_helpers import (
@@ -1902,7 +1902,7 @@ class InferenceBackend:
             return
 
         try:
-            # Common pattern for Unsloth/Hugging Face models
+            # Common pattern for TuneLabs/Hugging Face models
             if hasattr(model, "past_key_values"):
                 model.past_key_values = None
             if hasattr(model, "generation_config"):
@@ -2070,7 +2070,7 @@ class InferenceBackend:
         path and builds the ModelConfig internally.
 
         Args:
-            model_path: Model name or path (e.g., "unsloth/llama-3-8b")
+            model_path: Model name or path (e.g., "tunelabs/llama-3-8b")
             hf_token: HuggingFace token for gated models
             max_seq_length: Maximum sequence length
             load_in_4bit: Whether to use 4-bit quantization

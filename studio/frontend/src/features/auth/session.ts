@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { usePlatformStore } from "@/config/env";
 import { isTauri } from "@/lib/api-base";
 
-export const AUTH_TOKEN_KEY = "unsloth_auth_token";
-export const AUTH_REFRESH_TOKEN_KEY = "unsloth_auth_refresh_token";
-export const ONBOARDING_DONE_KEY = "unsloth_onboarding_done";
-export const AUTH_MUST_CHANGE_PASSWORD_KEY = "unsloth_auth_must_change_password";
+export const AUTH_TOKEN_KEY = "tunelabs_auth_token";
+export const AUTH_REFRESH_TOKEN_KEY = "tunelabs_auth_refresh_token";
+export const ONBOARDING_DONE_KEY = "tunelabs_onboarding_done";
+export const AUTH_MUST_CHANGE_PASSWORD_KEY = "tunelabs_auth_must_change_password";
 
 type PostAuthRoute = "/change-password" | "/chat";
 

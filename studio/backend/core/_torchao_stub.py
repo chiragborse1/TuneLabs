@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Shared torchao Windows-ROCm import stub.
 
@@ -8,7 +8,7 @@ unconditionally, which crashes on Windows ROCm because the RCCL backend
 (torch._C._distributed_c10d) is absent. Stubbing torchao short-circuits its
 import chain; _StubSubpackageFinder handles any depth of torchao.xxx.yyy.
 Worker subprocesses call install_torchao_windows_rocm_stub() before importing
-transformers / unsloth_zoo.
+transformers / tunelabs_zoo.
 """
 
 from __future__ import annotations
@@ -51,7 +51,7 @@ def _make_mod_stub(mod_name):
     m = types.ModuleType(mod_name)
     m.__path__ = []
     m.__package__ = mod_name
-    m._unsloth_stub = _STUB_SENTINEL
+    m._tunelabs_stub = _STUB_SENTINEL
     m.__spec__ = importlib.machinery.ModuleSpec(mod_name, loader = None, is_package = True)
 
     def _ga(
@@ -93,7 +93,7 @@ class _StubSubpackageFinder(importlib.abc.MetaPathFinder):
         parent = sys.modules.get(fullname.rsplit(".", 1)[0])
         if parent is None:
             return None
-        if getattr(parent, "_unsloth_stub", None) is not _STUB_SENTINEL:
+        if getattr(parent, "_tunelabs_stub", None) is not _STUB_SENTINEL:
             return None
         return importlib.machinery.ModuleSpec(
             fullname, _StubSubpackageLoader(fullname), is_package = True
@@ -104,7 +104,7 @@ def install_torchao_windows_rocm_stub() -> None:
     """Pre-stub torchao on Windows ROCm so transformers/peft imports don't crash.
 
     No-op elsewhere (incl. Windows CUDA, where torchao is real). Must run before
-    importing transformers / unsloth_zoo. Safe to call once per worker.
+    importing transformers / tunelabs_zoo. Safe to call once per worker.
     """
     # Gate on the active torch runtime, not env-var presence -- HIP_PATH/ROCM_PATH
     # persist after reverting to a CUDA wheel. Some ROCm wheels lack

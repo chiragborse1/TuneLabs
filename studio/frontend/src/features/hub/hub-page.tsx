@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { useHubInventory } from "@/features/hub/inventory";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
@@ -69,7 +69,7 @@ import { inventoryRowMatches, tokenizeQuery } from "./lib/inventory-search";
 import {
   buildDiscoverRows,
   detectResultFormat,
-  isUnslothFinetunable,
+  isTuneLabsFinetunable,
   matchesCapability,
   matchesFormat,
 } from "./lib/view-models";
@@ -84,23 +84,23 @@ import type {
   SelectedModelView,
 } from "./types";
 
-const MODELS_TAB_STORAGE_KEY = "unsloth.hub.modelsTab";
-const ALL_MODELS_VIEW_STORAGE_KEY = "unsloth.hub.allModelsView";
-const INVENTORY_SORT_STORAGE_KEY = "unsloth.hub.inventorySort";
-const OWNER_SCOPE_STORAGE_KEY = "unsloth.hub.ownerScope";
+const MODELS_TAB_STORAGE_KEY = "tunelabs.hub.modelsTab";
+const ALL_MODELS_VIEW_STORAGE_KEY = "tunelabs.hub.allModelsView";
+const INVENTORY_SORT_STORAGE_KEY = "tunelabs.hub.inventorySort";
+const OWNER_SCOPE_STORAGE_KEY = "tunelabs.hub.ownerScope";
 
-/** Discover browsing scope: only the unsloth org (default) or the whole Hub. */
-export type OwnerScope = "unsloth" | "all";
+/** Discover browsing scope: only the tunelabs org (default) or the whole Hub. */
+export type OwnerScope = "tunelabs" | "all";
 
 function readOwnerScopePreference(): OwnerScope {
   if (typeof window === "undefined") {
-    return "unsloth";
+    return "tunelabs";
   }
   try {
     const value = window.localStorage.getItem(OWNER_SCOPE_STORAGE_KEY);
-    return value === "all" ? "all" : "unsloth";
+    return value === "all" ? "all" : "tunelabs";
   } catch {
-    return "unsloth";
+    return "tunelabs";
   }
 }
 
@@ -115,8 +115,8 @@ function writeOwnerScopePreference(scope: OwnerScope): void {
   }
 }
 
-const DEFAULT_DISCOVER_CHANNEL: ChannelId = "unsloth-trending";
-const FEED_LIST_CHANNEL_ID: ChannelId = "unsloth-latest";
+const DEFAULT_DISCOVER_CHANNEL: ChannelId = "tunelabs-trending";
+const FEED_LIST_CHANNEL_ID: ChannelId = "tunelabs-latest";
 
 type DiscoverMode = "feed" | "channel-list" | "search";
 
@@ -685,7 +685,7 @@ export function ModelsPage() {
       (row) =>
         matchesFormat(detectResultFormat(row.result), effectiveDiscoverFormat) &&
         matchesCapability(row.capabilities, deferredCapabilityFilter) &&
-        (!activeChannel?.finetunableOnly || isUnslothFinetunable(row.result)),
+        (!activeChannel?.finetunableOnly || isTuneLabsFinetunable(row.result)),
     );
   }, [
     discoverRows,

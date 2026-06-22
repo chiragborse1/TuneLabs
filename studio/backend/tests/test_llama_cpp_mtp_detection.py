@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Tests for the MTP auto-detection path (llama.cpp #22673).
 
@@ -114,11 +114,11 @@ def _write_minimal_gguf(
 @pytest.mark.parametrize(
     "identifier",
     [
-        "unsloth/Qwen3.6-27B-MTP-GGUF",
-        "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
-        "unsloth/qwen3.6-27b-mtp-gguf",
-        "unsloth/Qwen3.6-27B-Mtp-GGUF",
-        "unsloth/Qwen3.6-27B-MTP-GGUF:UD-Q4_K_XL",
+        "tunelabs/Qwen3.6-27B-MTP-GGUF",
+        "tunelabs/Qwen3.6-35B-A3B-MTP-GGUF",
+        "tunelabs/qwen3.6-27b-mtp-gguf",
+        "tunelabs/Qwen3.6-27B-Mtp-GGUF",
+        "tunelabs/Qwen3.6-27B-MTP-GGUF:UD-Q4_K_XL",
     ],
 )
 def test_is_mtp_model_name_detects_marker_in_identifier(identifier):
@@ -128,8 +128,8 @@ def test_is_mtp_model_name_detects_marker_in_identifier(identifier):
 @pytest.mark.parametrize(
     "identifier",
     [
-        "unsloth/Qwen3-27B-GGUF",
-        "unsloth/Llama-3.1-8B-Instruct-GGUF",
+        "tunelabs/Qwen3-27B-GGUF",
+        "tunelabs/Llama-3.1-8B-Instruct-GGUF",
         "google/gemma-3-4b-it",
         # mtp inside an org name should not match.
         "mtp-research/foo",
@@ -188,7 +188,7 @@ def _mtp_backend(**overrides):
     backend = LlamaCppBackend()
     backend._process = _FakeProcess()
     backend._healthy = True
-    backend._model_identifier = "unsloth/Qwen3.6-27B-MTP-GGUF"
+    backend._model_identifier = "tunelabs/Qwen3.6-27B-MTP-GGUF"
     backend._hf_variant = "Q4_K_M"
     backend._requested_n_ctx = 8192
     backend._cache_type_kv = None
@@ -213,7 +213,7 @@ def test_already_in_target_state_matches_when_request_omits_spec_for_mtp_model()
     assert (
         backend._already_in_target_state(
             gguf_path = None,
-            model_identifier = "unsloth/Qwen3.6-27B-MTP-GGUF",
+            model_identifier = "tunelabs/Qwen3.6-27B-MTP-GGUF",
             hf_variant = "Q4_K_M",
             n_ctx = 8192,
             cache_type_kv = None,
@@ -231,7 +231,7 @@ def test_already_in_target_state_matches_when_request_uses_default_for_mtp_model
     assert (
         backend._already_in_target_state(
             gguf_path = None,
-            model_identifier = "unsloth/Qwen3.6-27B-MTP-GGUF",
+            model_identifier = "tunelabs/Qwen3.6-27B-MTP-GGUF",
             hf_variant = "Q4_K_M",
             n_ctx = 8192,
             cache_type_kv = None,
@@ -250,13 +250,13 @@ def test_already_in_target_state_auto_request_matches_auto_backend_for_non_mtp_m
     # handled by the load path and reflected in _speculative_type; the
     # short-circuit only cares whether the *intent* changed.
     backend = _mtp_backend(
-        _model_identifier = "unsloth/Qwen3.6-27B-GGUF",
+        _model_identifier = "tunelabs/Qwen3.6-27B-GGUF",
         _speculative_type = "default",
     )
     assert (
         backend._already_in_target_state(
             gguf_path = None,
-            model_identifier = "unsloth/Qwen3.6-27B-GGUF",
+            model_identifier = "tunelabs/Qwen3.6-27B-GGUF",
             hf_variant = "Q4_K_M",
             n_ctx = 8192,
             cache_type_kv = None,
@@ -274,7 +274,7 @@ def test_already_in_target_state_explicit_off_still_mismatches_mtp_backend():
     assert (
         backend._already_in_target_state(
             gguf_path = None,
-            model_identifier = "unsloth/Qwen3.6-27B-MTP-GGUF",
+            model_identifier = "tunelabs/Qwen3.6-27B-MTP-GGUF",
             hf_variant = "Q4_K_M",
             n_ctx = 8192,
             cache_type_kv = None,
@@ -287,7 +287,7 @@ def test_already_in_target_state_explicit_off_still_mismatches_mtp_backend():
     )
 
 
-# User override via extra_args (unsloth run / unsloth studio run).
+# User override via extra_args (tunelabs run / tunelabs studio run).
 
 
 @pytest.mark.parametrize(
@@ -371,7 +371,7 @@ def test_already_in_target_state_user_spec_type_override_matches_clean_backend()
     assert (
         backend._already_in_target_state(
             gguf_path = None,
-            model_identifier = "unsloth/Qwen3.6-27B-MTP-GGUF",
+            model_identifier = "tunelabs/Qwen3.6-27B-MTP-GGUF",
             hf_variant = "Q4_K_M",
             n_ctx = 8192,
             cache_type_kv = None,
@@ -416,7 +416,7 @@ def test_already_in_target_state_vision_mtp_match():
     assert (
         backend._already_in_target_state(
             gguf_path = None,
-            model_identifier = "unsloth/Qwen3.6-27B-MTP-GGUF",
+            model_identifier = "tunelabs/Qwen3.6-27B-MTP-GGUF",
             hf_variant = "Q4_K_M",
             n_ctx = 8192,
             cache_type_kv = None,
@@ -434,7 +434,7 @@ def test_already_in_target_state_vision_mtp_default_matches():
     assert (
         backend._already_in_target_state(
             gguf_path = None,
-            model_identifier = "unsloth/Qwen3.6-27B-MTP-GGUF",
+            model_identifier = "tunelabs/Qwen3.6-27B-MTP-GGUF",
             hf_variant = "Q4_K_M",
             n_ctx = 8192,
             cache_type_kv = None,
@@ -452,7 +452,7 @@ def test_already_in_target_state_vision_off_matches_vision_backend():
     # _already_in_target_state compares canonical requested modes; a vision
     # backend with _requested_spec_mode="off" matches req "off" or None+vision.
     backend = _mtp_backend(
-        _model_identifier = "unsloth/Qwen3-VL-4B-Instruct-GGUF",
+        _model_identifier = "tunelabs/Qwen3-VL-4B-Instruct-GGUF",
         _is_vision = True,
         _speculative_type = None,
         _requested_spec_mode = "off",
@@ -460,7 +460,7 @@ def test_already_in_target_state_vision_off_matches_vision_backend():
     assert (
         backend._already_in_target_state(
             gguf_path = None,
-            model_identifier = "unsloth/Qwen3-VL-4B-Instruct-GGUF",
+            model_identifier = "tunelabs/Qwen3-VL-4B-Instruct-GGUF",
             hf_variant = "Q4_K_M",
             n_ctx = 8192,
             cache_type_kv = None,
@@ -479,7 +479,7 @@ def test_already_in_target_state_vision_off_matches_vision_backend():
 @pytest.mark.parametrize(
     "arch, nextn",
     [
-        # Verified against real Unsloth MTP GGUFs (qwen35 / qwen35moe).
+        # Verified against real TuneLabs MTP GGUFs (qwen35 / qwen35moe).
         ("qwen35", 1),
         ("qwen35moe", 1),
         # Future-proofing: any arch + n>0 should match.
@@ -810,7 +810,7 @@ def test_already_in_target_state_matches_when_draft_n_max_unset():
     assert (
         backend._already_in_target_state(
             gguf_path = None,
-            model_identifier = "unsloth/Qwen3.6-27B-MTP-GGUF",
+            model_identifier = "tunelabs/Qwen3.6-27B-MTP-GGUF",
             hf_variant = "Q4_K_M",
             n_ctx = 8192,
             cache_type_kv = None,
@@ -829,7 +829,7 @@ def test_already_in_target_state_matches_when_draft_n_max_equals_backend():
     assert (
         backend._already_in_target_state(
             gguf_path = None,
-            model_identifier = "unsloth/Qwen3.6-27B-MTP-GGUF",
+            model_identifier = "tunelabs/Qwen3.6-27B-MTP-GGUF",
             hf_variant = "Q4_K_M",
             n_ctx = 8192,
             cache_type_kv = None,
@@ -848,7 +848,7 @@ def test_already_in_target_state_mismatches_when_draft_n_max_differs():
     assert (
         backend._already_in_target_state(
             gguf_path = None,
-            model_identifier = "unsloth/Qwen3.6-27B-MTP-GGUF",
+            model_identifier = "tunelabs/Qwen3.6-27B-MTP-GGUF",
             hf_variant = "Q4_K_M",
             n_ctx = 8192,
             cache_type_kv = None,
@@ -873,7 +873,7 @@ def test_already_in_target_state_draft_n_max_ignored_when_not_mtp():
     assert (
         backend._already_in_target_state(
             gguf_path = None,
-            model_identifier = "unsloth/Qwen3.6-27B-MTP-GGUF",
+            model_identifier = "tunelabs/Qwen3.6-27B-MTP-GGUF",
             hf_variant = "Q4_K_M",
             n_ctx = 8192,
             cache_type_kv = None,
@@ -921,14 +921,14 @@ def test_already_in_target_state_sub_3b_falls_back_to_ngram_mod_when_supported(m
     # head); reload check must match a ngram-mod backend.
     _patch_probe(monkeypatch, ngram_supported = True)
     backend = _mtp_backend(
-        _model_identifier = "unsloth/Qwen3.5-0.8B-MTP-GGUF",
+        _model_identifier = "tunelabs/Qwen3.5-0.8B-MTP-GGUF",
         _speculative_type = "ngram-mod",
         _spec_draft_n_max = None,
     )
     assert (
         backend._already_in_target_state(
             gguf_path = None,
-            model_identifier = "unsloth/Qwen3.5-0.8B-MTP-GGUF",
+            model_identifier = "tunelabs/Qwen3.5-0.8B-MTP-GGUF",
             hf_variant = "Q4_K_M",
             n_ctx = 8192,
             cache_type_kv = None,
@@ -945,14 +945,14 @@ def test_already_in_target_state_sub_3b_falls_back_to_off_when_no_ngram(monkeypa
     # 0.8B + binary lacks ngram-mod -> fall back to off.
     _patch_probe(monkeypatch, ngram_supported = False)
     backend = _mtp_backend(
-        _model_identifier = "unsloth/Qwen3.5-0.8B-MTP-GGUF",
+        _model_identifier = "tunelabs/Qwen3.5-0.8B-MTP-GGUF",
         _speculative_type = None,
         _spec_draft_n_max = None,
     )
     assert (
         backend._already_in_target_state(
             gguf_path = None,
-            model_identifier = "unsloth/Qwen3.5-0.8B-MTP-GGUF",
+            model_identifier = "tunelabs/Qwen3.5-0.8B-MTP-GGUF",
             hf_variant = "Q4_K_M",
             n_ctx = 8192,
             cache_type_kv = None,
@@ -969,14 +969,14 @@ def test_already_in_target_state_4b_mtp_request_promotes_as_before(monkeypatch):
     # 4B is above the 3B threshold -> auto-promote still applies.
     _patch_probe(monkeypatch, ngram_supported = True)
     backend = _mtp_backend(
-        _model_identifier = "unsloth/Qwen3.5-4B-MTP-GGUF",
+        _model_identifier = "tunelabs/Qwen3.5-4B-MTP-GGUF",
         _speculative_type = "draft-mtp",
         _spec_draft_n_max = None,
     )
     assert (
         backend._already_in_target_state(
             gguf_path = None,
-            model_identifier = "unsloth/Qwen3.5-4B-MTP-GGUF",
+            model_identifier = "tunelabs/Qwen3.5-4B-MTP-GGUF",
             hf_variant = "Q4_K_M",
             n_ctx = 8192,
             cache_type_kv = None,
@@ -994,14 +994,14 @@ def test_already_in_target_state_2b_falls_back_to_ngram_below_threshold(monkeypa
     # Clean-bench shows 2B regresses with draft-mtp.
     _patch_probe(monkeypatch, ngram_supported = True)
     backend = _mtp_backend(
-        _model_identifier = "unsloth/Qwen3.5-2B-MTP-GGUF",
+        _model_identifier = "tunelabs/Qwen3.5-2B-MTP-GGUF",
         _speculative_type = "ngram-mod",
         _spec_draft_n_max = None,
     )
     assert (
         backend._already_in_target_state(
             gguf_path = None,
-            model_identifier = "unsloth/Qwen3.5-2B-MTP-GGUF",
+            model_identifier = "tunelabs/Qwen3.5-2B-MTP-GGUF",
             hf_variant = "Q4_K_M",
             n_ctx = 8192,
             cache_type_kv = None,
@@ -1141,9 +1141,9 @@ def _flags_dict(flags):
     return out
 
 
-_MTP_MODEL = "unsloth/Qwen3.6-27B-MTP-GGUF"
-_NON_MTP_MODEL = "unsloth/Qwen3-7B-Instruct-GGUF"
-_SUB_3B_MTP_MODEL = "unsloth/Qwen3.5-0.8B-MTP-GGUF"
+_MTP_MODEL = "tunelabs/Qwen3.6-27B-MTP-GGUF"
+_NON_MTP_MODEL = "tunelabs/Qwen3-7B-Instruct-GGUF"
+_SUB_3B_MTP_MODEL = "tunelabs/Qwen3.5-0.8B-MTP-GGUF"
 
 
 @pytest.mark.parametrize(
@@ -1336,11 +1336,11 @@ def test_forced_mtp_ngram_on_non_mtp_model_keeps_ngram(monkeypatch):
 # bench), so Auto downgrades it to ngram-mod (or spec-off). The clean
 # metadata separator from non-MLA MTP (Qwen, kept on draft-mtp) is
 # self._kv_lora_rank. Forced mtp / mtp+ngram and separate drafters (Gemma)
-# stay on draft-mtp; UNSLOTH_MLA_MTP_ENABLED=1 re-enables Auto promotion.
+# stay on draft-mtp; TUNELABS_MLA_MTP_ENABLED=1 re-enables Auto promotion.
 
 # GLM-5.2's repo name has no "MTP" marker, so its MTP signal is metadata-only
 # (nextn_predict_layers) -- exactly the embedded-MLA case we gate.
-_GLM_MLA_MODEL = "unsloth/GLM-5.2-GGUF"
+_GLM_MLA_MODEL = "tunelabs/GLM-5.2-GGUF"
 
 
 def _mla_resolver_backend(
@@ -1449,7 +1449,7 @@ def test_auto_non_mtp_mla_model_unaffected(monkeypatch):
         speculative_type = "auto",
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "unsloth/GLM-4.7-Flash-GGUF",
+        model_identifier = "tunelabs/GLM-4.7-Flash-GGUF",
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -1489,9 +1489,9 @@ def test_forced_mtp_on_mla_still_engages(monkeypatch, mode, expect_spec_type, ex
 
 
 def test_env_flag_reenables_auto_mla_mtp(monkeypatch):
-    # UNSLOTH_MLA_MTP_ENABLED=1 -> Auto promotes MLA embedded MTP to draft-mtp
+    # TUNELABS_MLA_MTP_ENABLED=1 -> Auto promotes MLA embedded MTP to draft-mtp
     # again (the forward hook for when llama.cpp optimizes the path).
-    monkeypatch.setenv("UNSLOTH_MLA_MTP_ENABLED", "1")
+    monkeypatch.setenv("TUNELABS_MLA_MTP_ENABLED", "1")
     backend = _mla_resolver_backend(monkeypatch)
     flags = backend._build_speculative_flags(
         speculative_type = "auto",
@@ -1510,18 +1510,18 @@ def test_env_flag_reenables_auto_mla_mtp(monkeypatch):
 
 @pytest.mark.parametrize("value", ["1", "true", "yes", "on", "TRUE", "On"])
 def test_mla_mtp_auto_enabled_truthy_values(monkeypatch, value):
-    monkeypatch.setenv("UNSLOTH_MLA_MTP_ENABLED", value)
+    monkeypatch.setenv("TUNELABS_MLA_MTP_ENABLED", value)
     assert _mla_mtp_auto_enabled() is True
 
 
 @pytest.mark.parametrize("value", ["0", "false", "no", "off", "", "  ", "bogus"])
 def test_mla_mtp_auto_disabled_default_and_falsy(monkeypatch, value):
-    monkeypatch.setenv("UNSLOTH_MLA_MTP_ENABLED", value)
+    monkeypatch.setenv("TUNELABS_MLA_MTP_ENABLED", value)
     assert _mla_mtp_auto_enabled() is False
 
 
 def test_mla_mtp_auto_disabled_when_unset(monkeypatch):
-    monkeypatch.delenv("UNSLOTH_MLA_MTP_ENABLED", raising = False)
+    monkeypatch.delenv("TUNELABS_MLA_MTP_ENABLED", raising = False)
     assert _mla_mtp_auto_enabled() is False
 
 
@@ -1625,29 +1625,29 @@ _GEMMA_DRAFTER = "/snap/mtp-gemma-4-it.gguf"  # stand-in separate drafter
 
 _REAL_REPO_MATRIX = [
     # repo, drafter, auto_spec, auto_ngram_knobs
-    ("unsloth/Qwen3.5-0.8B-MTP-GGUF", None, "ngram-mod", True),
-    ("unsloth/Qwen3.5-2B-MTP-GGUF", None, "ngram-mod", True),
-    ("unsloth/Qwen3.5-4B-MTP-GGUF", None, "draft-mtp", False),
-    ("unsloth/Qwen3.5-9B-MTP-GGUF", None, "draft-mtp", False),
-    ("unsloth/Qwen3.5-27B-MTP-GGUF", None, "draft-mtp", False),
-    ("unsloth/Qwen3.5-35B-A3B-MTP-GGUF", None, "draft-mtp", False),
-    ("unsloth/Qwen3.5-122B-A10B-MTP-GGUF", None, "draft-mtp", False),
-    ("unsloth/Qwen3.5-397B-A17B-MTP-GGUF", None, "draft-mtp", False),
-    ("unsloth/Qwen3.5-0.8B-GGUF", None, None, False),
-    ("unsloth/Qwen3.5-2B-GGUF", None, None, False),
-    ("unsloth/Qwen3.5-4B-GGUF", None, None, False),
-    ("unsloth/Qwen3.5-9B-GGUF", None, None, False),
+    ("tunelabs/Qwen3.5-0.8B-MTP-GGUF", None, "ngram-mod", True),
+    ("tunelabs/Qwen3.5-2B-MTP-GGUF", None, "ngram-mod", True),
+    ("tunelabs/Qwen3.5-4B-MTP-GGUF", None, "draft-mtp", False),
+    ("tunelabs/Qwen3.5-9B-MTP-GGUF", None, "draft-mtp", False),
+    ("tunelabs/Qwen3.5-27B-MTP-GGUF", None, "draft-mtp", False),
+    ("tunelabs/Qwen3.5-35B-A3B-MTP-GGUF", None, "draft-mtp", False),
+    ("tunelabs/Qwen3.5-122B-A10B-MTP-GGUF", None, "draft-mtp", False),
+    ("tunelabs/Qwen3.5-397B-A17B-MTP-GGUF", None, "draft-mtp", False),
+    ("tunelabs/Qwen3.5-0.8B-GGUF", None, None, False),
+    ("tunelabs/Qwen3.5-2B-GGUF", None, None, False),
+    ("tunelabs/Qwen3.5-4B-GGUF", None, None, False),
+    ("tunelabs/Qwen3.5-9B-GGUF", None, None, False),
     # E2B is 2B but ships a separate drafter -> exempt from the sub-3B drop.
-    ("unsloth/gemma-4-E2B-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
-    ("unsloth/gemma-4-E4B-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
-    ("unsloth/gemma-4-12b-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
-    ("unsloth/gemma-4-26B-A4B-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
-    ("unsloth/gemma-4-31B-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
-    ("unsloth/gemma-4-E2B-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
-    ("unsloth/gemma-4-E4B-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
-    ("unsloth/gemma-4-12b-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
-    ("unsloth/gemma-4-26B-A4B-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
-    ("unsloth/gemma-4-31B-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("tunelabs/gemma-4-E2B-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("tunelabs/gemma-4-E4B-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("tunelabs/gemma-4-12b-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("tunelabs/gemma-4-26B-A4B-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("tunelabs/gemma-4-31B-it-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("tunelabs/gemma-4-E2B-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("tunelabs/gemma-4-E4B-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("tunelabs/gemma-4-12b-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("tunelabs/gemma-4-26B-A4B-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
+    ("tunelabs/gemma-4-31B-it-qat-GGUF", _GEMMA_DRAFTER, "draft-mtp", False),
 ]
 
 
@@ -1748,7 +1748,7 @@ def test_sub3b_gemma_separate_drafter_engages_mtp(monkeypatch):
         speculative_type = "auto",
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "unsloth/gemma-4-E2B-it-GGUF",  # 2B
+        model_identifier = "tunelabs/gemma-4-E2B-it-GGUF",  # 2B
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -1767,7 +1767,7 @@ def test_sub3b_qwen_embedded_head_still_drops_to_ngram(monkeypatch):
         speculative_type = "auto",
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "unsloth/Qwen3.5-2B-MTP-GGUF",  # 2B, embedded head
+        model_identifier = "tunelabs/Qwen3.5-2B-MTP-GGUF",  # 2B, embedded head
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -1850,12 +1850,12 @@ def test_spec_fallback_reason_reset_on_off(monkeypatch):
 def test_is_gemma_mtp_family():
     from core.inference.llama_cpp import _is_gemma_mtp_family
 
-    assert _is_gemma_mtp_family("unsloth/gemma-4-E4B-it-GGUF") is True
-    assert _is_gemma_mtp_family("unsloth/gemma-4-12b-it-GGUF") is True
+    assert _is_gemma_mtp_family("tunelabs/gemma-4-E4B-it-GGUF") is True
+    assert _is_gemma_mtp_family("tunelabs/gemma-4-12b-it-GGUF") is True
     # gemma-3n ships no separate drafter, so it is not a drafter family.
-    assert _is_gemma_mtp_family("unsloth/gemma-3n-E2B-it-GGUF") is False
-    assert _is_gemma_mtp_family("unsloth/Qwen3.5-35B-A3B-MTP-GGUF") is False
-    assert _is_gemma_mtp_family("unsloth/llama-3-8b") is False
+    assert _is_gemma_mtp_family("tunelabs/gemma-3n-E2B-it-GGUF") is False
+    assert _is_gemma_mtp_family("tunelabs/Qwen3.5-35B-A3B-MTP-GGUF") is False
+    assert _is_gemma_mtp_family("tunelabs/llama-3-8b") is False
 
 
 def test_gemma_3n_without_drafter_is_not_mtp(monkeypatch):
@@ -1866,7 +1866,7 @@ def test_gemma_3n_without_drafter_is_not_mtp(monkeypatch):
         speculative_type = "auto",
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "unsloth/gemma-3n-E4B-it-GGUF",
+        model_identifier = "tunelabs/gemma-3n-E4B-it-GGUF",
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -1882,7 +1882,7 @@ def test_spec_fallback_reason_drafter_not_found(monkeypatch):
         speculative_type = "auto",
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "unsloth/gemma-4-E4B-it-GGUF",
+        model_identifier = "tunelabs/gemma-4-E4B-it-GGUF",
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -1900,7 +1900,7 @@ def test_is_gemma_mtp_name_none_safe():
 
     assert _is_gemma_mtp_family(None) is False
     assert _is_gemma_mtp_name(None, "/models/gemma-4-E4B-it-Q4_K_M.gguf") is True
-    assert _is_gemma_mtp_name("unsloth/Qwen3.5-4B-MTP-GGUF", None) is False
+    assert _is_gemma_mtp_name("tunelabs/Qwen3.5-4B-MTP-GGUF", None) is False
 
 
 @pytest.mark.parametrize("mode", ["mtp", "mtp+ngram"])
@@ -1911,7 +1911,7 @@ def test_forced_mtp_gemma_without_drafter_falls_back(monkeypatch, mode):
         speculative_type = mode,
         spec_draft_n_max = None,
         extra_args = None,
-        model_identifier = "unsloth/gemma-4-E4B-it-GGUF",
+        model_identifier = "tunelabs/gemma-4-E4B-it-GGUF",
         model_path = None,
         gpus = True,
         binary = "/fake/llama-server",
@@ -1943,7 +1943,7 @@ def test_local_gemma_gguf_without_identifier_falls_back(monkeypatch):
 
 def _drafter_not_found_kwargs():
     return dict(
-        model_identifier = "unsloth/gemma-4-E4B-it-GGUF",
+        model_identifier = "tunelabs/gemma-4-E4B-it-GGUF",
         hf_variant = "Q4_K_M",
         n_ctx = 8192,
         cache_type_kv = None,
@@ -1958,7 +1958,7 @@ def _drafter_not_found_kwargs():
 def test_already_in_target_state_retries_after_hf_drafter_not_found():
     # Recoverable drafter_not_found must not dedupe; reload re-attempts download.
     backend = _mtp_backend(
-        _model_identifier = "unsloth/gemma-4-E4B-it-GGUF",
+        _model_identifier = "tunelabs/gemma-4-E4B-it-GGUF",
         _speculative_type = "ngram-mod",
         _spec_fallback_reason = "drafter_not_found",
         _mtp_draft_path = None,
@@ -1966,5 +1966,5 @@ def test_already_in_target_state_retries_after_hf_drafter_not_found():
     )
     assert backend._already_in_target_state(**_drafter_not_found_kwargs()) is False
     # Sanity: with no fallback reason the same request still dedupes (matches).
-    ok = _mtp_backend(_model_identifier = "unsloth/gemma-4-E4B-it-GGUF", _gguf_path = None)
+    ok = _mtp_backend(_model_identifier = "tunelabs/gemma-4-E4B-it-GGUF", _gguf_path = None)
     assert ok._already_in_target_state(**_drafter_not_found_kwargs()) is True

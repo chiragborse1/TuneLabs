@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Separate-file MTP drafter (Gemma 4) contracts.
 
@@ -65,13 +65,13 @@ def test_drafter_predicate_and_mirrors_agree(path, expected):
 @pytest.mark.parametrize(
     "model_id,size_b",
     [
-        ("unsloth/gemma-4-E2B-it-GGUF", 2.0),
-        ("unsloth/gemma-4-E4B-it", 4.0),
-        ("unsloth/gemma-3n-E4B-it", 4.0),
+        ("tunelabs/gemma-4-E2B-it-GGUF", 2.0),
+        ("tunelabs/gemma-4-E4B-it", 4.0),
+        ("tunelabs/gemma-3n-E4B-it", 4.0),
         # MoE active params beat effective and total notation.
-        ("unsloth/Qwen3.5-35B-A3B", 3.0),
-        ("unsloth/gemma-4-12b-it-GGUF", 12.0),
-        ("unsloth/Qwen3.5-9B-MTP-GGUF", 9.0),
+        ("tunelabs/Qwen3.5-35B-A3B", 3.0),
+        ("tunelabs/gemma-4-12b-it-GGUF", 12.0),
+        ("tunelabs/Qwen3.5-9B-MTP-GGUF", 9.0),
         ("no-size-here", None),
     ],
 )
@@ -187,7 +187,7 @@ def test_detect_mtp_file_skips_foreign_drafter(tmp_path):
 
 
 def test_detect_mtp_file_qat_prefix_layout(tmp_path):
-    # unsloth's qat repo: drafter stem omits the -qat suffix but prefixes
+    # tunelabs's qat repo: drafter stem omits the -qat suffix but prefixes
     # the weight name (mtp-gemma-4-12B-it.gguf / gemma-4-12B-it-qat-Q4_0.gguf).
     (tmp_path / "gemma-4-12B-it-qat-Q4_0.gguf").write_bytes(b"x")
     (tmp_path / "mtp-gemma-4-12B-it.gguf").write_bytes(b"x")

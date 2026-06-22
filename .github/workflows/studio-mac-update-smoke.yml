@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 # Mac counterpart to studio-update-smoke.yml. Verifies that on a real
 # Apple Silicon (macos-14, M1) runner:
@@ -7,9 +7,9 @@
 #   1. install.sh --local --no-torch installs Studio AND auto-fetches
 #      the prebuilt llama.cpp Mac binary (llama-bNNNN-bin-macos-arm64
 #      from ggml-org/llama.cpp). Hitting the source-build fallback is
-#      treated as an Unsloth bug -- Studio must always pick the
+#      treated as an TuneLabs bug -- Studio must always pick the
 #      prebuilt on Mac.
-#   2. unsloth studio update --local is idempotent. Two consecutive
+#   2. tunelabs studio update --local is idempotent. Two consecutive
 #      runs both report "prebuilt up to date and validated", no
 #      source-build fallback.
 #   3. The installed Studio still boots and /api/health returns
@@ -26,7 +26,7 @@ on:
       - 'studio/install_python_stack.py'
       - 'studio/install_llama_prebuilt.py'
       - 'studio/backend/requirements/**'
-      - 'unsloth_cli/commands/studio.py'
+      - 'tunelabs_cli/commands/studio.py'
       - 'pyproject.toml'
       - '.github/workflows/studio-mac-update-smoke.yml'
   push:
@@ -77,7 +77,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           set -o pipefail
-          unsloth studio update --local 2>&1 | tee logs/update.log
+          tunelabs studio update --local 2>&1 | tee logs/update.log
           if grep -q "falling back to source build" logs/update.log; then
             echo "::error::studio update fell back to source-build llama.cpp on Mac."
             grep -E "llama-prebuilt|llama.cpp" logs/update.log | tail -60
@@ -96,7 +96,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           set -o pipefail
-          unsloth studio update --local 2>&1 | tee logs/update2.log
+          tunelabs studio update --local 2>&1 | tee logs/update2.log
           grep -q "falling back to source build" logs/update2.log && {
               echo "::error::second update fell back to source build on Mac"
               tail -60 logs/update2.log; exit 1; } || true
@@ -106,7 +106,7 @@ jobs:
       - name: Boot Studio briefly to confirm the install is still usable
         run: |
           mkdir -p logs
-          UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p 18891 \
+          TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p 18891 \
             > logs/studio.log 2>&1 &
           PID=$!
           HEALTHY=""
@@ -131,7 +131,7 @@ jobs:
       - name: Uninstall and verify clean
         # Round-trip through scripts/uninstall.sh on real macOS. As a side
         # effect this exercises the macOS-only .app bundle + Launch Services
-        # removal path (~/Applications/Unsloth Studio.app, lsregister -u)
+        # removal path (~/Applications/TuneLabs Studio.app, lsregister -u)
         # which is not testable from a Linux runner. Skips gracefully if
         # scripts/uninstall.sh has not landed yet (lets this workflow merge
         # before #5497).
@@ -145,11 +145,11 @@ jobs:
           sh scripts/uninstall.sh 2>&1 | tee logs/uninstall.log
           leak=0
           for p in \
-            "$HOME/.unsloth/studio" \
-            "$HOME/.local/share/unsloth" \
-            "$HOME/Applications/Unsloth Studio.app" \
-            "$HOME/Desktop/Unsloth Studio.app" \
-            "$HOME/.local/bin/unsloth"; do
+            "$HOME/.tunelabs/studio" \
+            "$HOME/.local/share/tunelabs" \
+            "$HOME/Applications/TuneLabs Studio.app" \
+            "$HOME/Desktop/TuneLabs Studio.app" \
+            "$HOME/.local/bin/tunelabs"; do
             if [ -e "$p" ] || [ -L "$p" ]; then
               echo "::error::leak: $p"
               leak=$((leak + 1))

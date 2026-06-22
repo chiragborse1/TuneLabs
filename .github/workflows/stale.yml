@@ -20,7 +20,7 @@ jobs:
           stale-issue-message: >
             Is this issue still important to you?
             Apologies in advance we might have missed this issue as well.
-            For faster response times, please post on our Reddit server - https://www.reddit.com/r/unsloth or our Discord - https://discord.com/invite/unsloth 
+            For faster response times, please post on our Reddit server - https://www.reddit.com/r/tunelabs or our Discord - https://discord.com/invite/tunelabs 
 
           # The number of days of inactivity before an issue is considered stale.
           days-before-issue-stale: 9999

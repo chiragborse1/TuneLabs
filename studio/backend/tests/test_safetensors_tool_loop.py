@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Tests for the safetensors agentic tool loop.
 
@@ -1215,7 +1215,7 @@ class TestGuardrails:
 
 class TestGptOssNameDetection:
     def test_substring_match(self):
-        assert is_gpt_oss_model_name("unsloth/gpt-oss-20b") is True
+        assert is_gpt_oss_model_name("tunelabs/gpt-oss-20b") is True
 
     def test_negative_known_non_oss_model(self):
         assert is_gpt_oss_model_name("meta-llama/Llama-3.1-8B-Instruct") is False

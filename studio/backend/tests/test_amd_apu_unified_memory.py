@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """GGML_CUDA_ENABLE_UNIFIED_MEMORY must be set only for AMD unified-memory APUs
 (gfx1150/gfx1151), never for discrete AMD, NVIDIA, CPU or macOS."""

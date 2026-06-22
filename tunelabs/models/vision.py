@@ -1,0 +1,1966 @@
+# Copyright 2023-present Daniel Han-Chen & the TuneLabs team. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import torch
+from transformers import (
+    BitsAndBytesConfig,
+    AutoProcessor,
+    AutoTokenizer,
+    AutoModelForCausalLM,
+)
+
+try:
+    from transformers import AutoModelForImageTextToText
+    AutoModelForVision2Seq = AutoModelForImageTextToText
+except:
+    from transformers import AutoModelForVision2Seq
+from ..kernels import (
+    post_patch_loss_function,
+)
+from ._utils import (
+    __version__,
+    importlib_version,
+    _prepare_model_for_qat,
+    resolve_model_class,
+    resolve_attention_implementation,
+    _get_text_only_config,
+    _is_family_text_decoder,
+    _apply_text_only_key_mapping,
+    set_task_config_attr,
+)
+from ._utils import *
+from .loader_utils import _get_fp8_mode_and_check_settings
+from ..save import patch_saving_functions
+from ..models.loader_utils import is_distributed
+from tunelabs_zoo.gradient_checkpointing import (
+    unpatch_tunelabs_gradient_checkpointing,
+    unpatch_tunelabs_smart_gradient_checkpointing,
+)
+import torch.utils.checkpoint as torch_checkpoint
+import transformers.modeling_utils as hf_modeling_utils
+from peft import LoraConfig, TaskType, get_peft_model as _get_peft_model
+from peft import PeftModelForCausalLM
+from transformers import set_seed as transformers_set_seed
+from tunelabs_zoo.peft_utils import (
+    get_peft_regex,
+    SKIP_QUANTIZATION_MODULES,
+    requires_grad_for_gradient_checkpointing,
+)
+from transformers.models.llama.modeling_llama import logger
+from transformers import __version__ as transformers_version
+from triton import __version__ as triton_version
+from tunelabs_zoo.utils import _get_dtype
+from tunelabs_zoo.hf_utils import (
+    dtype_from_config,
+    add_dtype_kwargs,
+    fix_lora_auto_mapping,
+    get_auto_processor,
+)
+from tunelabs_zoo.patching_utils import patch_model_and_tokenizer
+from tunelabs_zoo.training_utils import prepare_model_for_training
+
+from tunelabs_zoo.utils import Version
+from transformers import __version__ as transformers_version
+
+import types
+import functools
+import os
+import gc
+import math
+import warnings
+from typing import Optional, Tuple, List, Union
+import re, inspect, sys
+import contextlib
+
+try:
+    from huggingface_hub.utils import get_token
+except:
+    # Old HF Hub versions <= 0.0.25
+    from huggingface_hub.utils._token import get_token
+from ..device_type import (
+    is_hip,
+    get_device_type,
+    DEVICE_TYPE,
+    DEVICE_TYPE_TORCH,
+    DEVICE_COUNT,
+    ALLOW_PREQUANTIZED_MODELS,
+)
+
+__all__ = [
+    "FastBaseModel",
+]
+
+
+def _infer_device_map_from_loaded_model(model):
+    """Build a compact device_map by inspecting actual parameter placements."""
+    device_map = {}
+
+    def _assign(module, prefix):
+        params = list(module.named_parameters(remove_duplicate = False))
+        if not params:
+            bufs = list(module.named_buffers())
+            if bufs:
+                device_map[prefix] = bufs[0][1].device
+            return
+        devices = {p.device for _, p in params}
+        if len(devices) == 1:
+            device_map[prefix] = next(iter(devices))
+        else:
+            for child_name, child in module.named_children():
+                child_prefix = f"{prefix}.{child_name}" if prefix else child_name
+                _assign(child, child_prefix)
+            for pname, param in module.named_parameters(remove_duplicate = False):
+                if "." not in pname:
+                    full = f"{prefix}.{pname}" if prefix else pname
+                    if not any(full == k or full.startswith(k + ".") for k in device_map):
+                        device_map[full] = param.device
+
+    _assign(model, "")
+    if "" in device_map and len(device_map) > 1:
+        device_map.pop("")
+    return device_map
+
+
+def _attach_bnb_multidevice_hooks(
+    model, load_in_4bit, load_in_8bit, offload_embedding, fast_inference
+):
+    """
+    Attach accelerate AlignDevicesHook on a bnb model loaded across multiple
+    devices (or a non-default device).  No-op for single-GPU cuda:0, non-bnb,
+    vLLM, or already-dispatched models.
+    """
+    if fast_inference:
+        return
+    is_bnb = (
+        load_in_4bit
+        or load_in_8bit
+        or getattr(model, "is_loaded_in_4bit", False)
+        or getattr(model, "is_loaded_in_8bit", False)
+        or getattr(model, "quantization_method", None) == "bitsandbytes"
+    )
+    if not is_bnb:
+        return
+    if offload_embedding:
+        return
+    if getattr(model, "hf_device_map", None) is not None:
+        return  # already dispatched
+
+    try:
+        all_devs = {p.device for p in model.parameters()}
+    except Exception as exc:
+        warnings.warn(
+            "TuneLabs: Failed to determine device placement from model parameters, "
+            f"so multi-GPU hooks cannot be attached. ({type(exc).__name__}: {exc})",
+            RuntimeWarning,
+            stacklevel = 2,
+        )
+        return
+
+    cuda_devs = {d for d in all_devs if d.type == "cuda"}
+    if not cuda_devs:
+        return
+
+    default_cuda = torch.device("cuda", 0)
+    if all_devs == {default_cuda}:
+        return
+
+    try:
+        from accelerate import dispatch_model
+    except ImportError:
+        return  # accelerate not available
+
+    try:
+        inferred_map = _infer_device_map_from_loaded_model(model)
+        if not inferred_map:
+            return
+
+        # bnb constructors reject _is_hf_initialized; strip before dispatch.
+        _extra_keys = ("_is_hf_initialized",)
+        _stripped = []
+        for _, param in model.named_parameters():
+            for key in _extra_keys:
+                if key in param.__dict__:
+                    _stripped.append((param, key, param.__dict__.pop(key)))
+
+        try:
+            # CUDA -> int index, non-CUDA -> type string ("cpu", "meta").
+            device_map_int = {
+                k: (v.index if v.type == "cuda" else v.type) if isinstance(v, torch.device) else v
+                for k, v in inferred_map.items()
+            }
+
+            # force_hooks=True: install hooks even for single-device maps.
+            main_device = device_map_int.get("")
+            if main_device in (None, "cpu", "disk"):
+                main_device = next(
+                    (d for d in device_map_int.values() if d not in ("cpu", "disk")),
+                    None,
+                )
+            dispatch_model(
+                model,
+                device_map = device_map_int,
+                main_device = main_device,
+                skip_keys = getattr(model, "_skip_keys_device_placement", None),
+                force_hooks = True,
+            )
+            desc = f"{len(inferred_map)} block(s) across {len(cuda_devs)} device(s)"
+        finally:
+            # Restore stripped keys.
+            for param, key, val in _stripped:
+                param.__dict__[key] = val
+
+        logger.info(
+            f"TuneLabs: Attached accelerate AlignDevicesHook ({desc}) "
+            f"for bnb multi-GPU inference."
+        )
+    except Exception as exc:
+        warnings.warn(
+            f"TuneLabs: Could not attach multi-device dispatch hooks automatically "
+            f"({type(exc).__name__}: {exc}). "
+            "Cross-device inference may fail. Consider using a single GPU or "
+            "calling accelerate.dispatch_model() manually.",
+            RuntimeWarning,
+            stacklevel = 2,
+        )
+
+
+global NUM_LOGITS_TO_KEEP
+NUM_LOGITS_TO_KEEP = dict()
+
+VLLM_SUPPORTED_VLM = [
+    "qwen2_5_vl",
+    "gemma3",
+    "mistral3",
+    "qwen3_vl",
+    "qwen3_vl_moe",
+]
+VLLM_NON_LORA_VLM = [
+    "mllama",
+]
+PRE_COMPILE_INFERENCE = [
+    "gpt_oss",
+]
+
+from transformers import GenerationConfig, CompileConfig, AutoConfig
+
+try:
+    from transformers import PreTrainedConfig
+    PretrainedConfig = PreTrainedConfig
+except:
+    from transformers import PretrainedConfig
+
+HAS_TORCH_DTYPE = "torch_dtype" in PretrainedConfig.__doc__
+
+_compile_config = CompileConfig(
+    fullgraph = False,
+    dynamic = None,
+    mode = "reduce-overhead",
+)
+_compile_config.disable = True  # Must set manually
+
+try:
+    torch_compiler_set_stance = torch.compiler.set_stance
+except:
+    torch_compiler_set_stance = None
+
+
+def tunelabs_base_fast_generate(self, *args, **kwargs):
+    if len(args) != 0:
+        input_ids = args[0]
+    elif "input_ids" in kwargs:
+        input_ids = kwargs["input_ids"]
+    elif "input" in kwargs:
+        input_ids = kwargs["input"]
+    elif "input_features" in kwargs:
+        input_ids = kwargs["input_features"]
+    elif "inputs_embeds" in kwargs:
+        # canonical HF name for embedding inputs (e.g. multimodal generate)
+        input_ids = kwargs["inputs_embeds"]
+    elif "input_embeds" in kwargs:
+        input_ids = kwargs["input_embeds"]
+    elif "inputs" in kwargs:
+        input_ids = kwargs["inputs"]
+    else:
+        key = next(iter(kwargs.keys()))
+        if type(kwargs[key]) is not torch.Tensor:
+            raise TypeError("TuneLabs: You need to pass in input_ids to .generate!")
+        input_ids = kwargs[key]
+    assert type(input_ids) is torch.Tensor
+    bsz = input_ids.shape[0]
+
+    FastBaseModel.for_inference(self)
+    dtype = _get_dtype(dtype_from_config(self.config))
+    # Handle full float32 cases as config.dtype == torch.float32!
+    do_bfloat16_mixed_precision = os.environ.get("TUNELABS_BFLOAT16_MIXED_PRECISION", "0") == "1"
+    if do_bfloat16_mixed_precision:
+        dtype = torch.bfloat16
+
+    is_vlm = any(
+        x.endswith(("ForConditionalGeneration", "ForVisionText2Text"))
+        for x in self.config.architectures
+    )
+    is_vlm = is_vlm or hasattr(self.config, "vision_config")
+    arch = self.config.architectures[0]
+
+    # Remove token_type_ids - WRONG for Gemma 3 since bidirectional attention
+    if hasattr(self, "generate") and hasattr(self, "forward"):
+        # did not combine with below since self might not have model
+        keys = inspect.signature(self.forward).parameters.keys()
+        if "token_type_ids" not in keys:
+            kwargs.pop("token_type_ids", None)
+    # kwargs.pop("token_type_ids", None)
+
+    # VLMs do not allow logits_to_keep
+    global NUM_LOGITS_TO_KEEP
+    if arch not in NUM_LOGITS_TO_KEEP:
+        m = self
+        # Find which is used: num_logits_to_keep or logits_to_keep
+        while hasattr(m, "model"):
+            if hasattr(m, "forward"):
+                keys = inspect.signature(m.forward).parameters.keys()
+                if "num_logits_to_keep" in keys:
+                    NUM_LOGITS_TO_KEEP[arch] = "num_logits_to_keep"
+                    break
+                elif "logits_to_keep" in keys:
+                    NUM_LOGITS_TO_KEEP[arch] = "logits_to_keep"
+                    break
+            m = m.model
+        if arch not in NUM_LOGITS_TO_KEEP:
+            NUM_LOGITS_TO_KEEP[arch] = None
+    key = NUM_LOGITS_TO_KEEP[arch]
+    if key is not None and key not in kwargs:
+        kwargs[key] = 1
+
+    model_eos_token_id = getattr(self.config, "eos_token_id", None)
+    if model_eos_token_id is not None and hasattr(model_eos_token_id, "__iter__"):
+        model_eos_token_id = model_eos_token_id[0]
+
+    kwargs["pad_token_id"] = kwargs.pop("pad_token_id", model_eos_token_id)
+
+    # Get pixel values for VLMs
+    try:
+        kwargs["pixel_values"] = kwargs["pixel_values"].to(dtype)
+    except:
+        pass
+    try:
+        kwargs["pixel_values_videos"] = kwargs["pixel_values_videos"].to(dtype)
+    except:
+        pass
+
+    # Mixed precision autocast
+    if os.environ.get("TUNELABS_FORCE_FLOAT32", "0") == "1":
+        autocaster = torch.autocast(device_type = DEVICE_TYPE_TORCH, dtype = torch.float16)
+        dtype = torch.float16
+    else:
+        autocaster = torch.autocast(device_type = DEVICE_TYPE_TORCH, dtype = dtype)
+    # Prepare LoRA
+    # state_dict = convert_lora_modules(self, dtype = dtype)
+
+    # Set compile dynamic shapes
+    torch._dynamo.mark_static(input_ids, 0)
+    torch._dynamo.mark_dynamic(input_ids, 1)
+    if "attention_mask" in kwargs:
+        torch._dynamo.mark_static(kwargs["attention_mask"], 0)
+        torch._dynamo.mark_dynamic(kwargs["attention_mask"], 1)
+    if "token_type_ids" in kwargs:
+        torch._dynamo.mark_static(kwargs["token_type_ids"], 0)
+        torch._dynamo.mark_dynamic(kwargs["token_type_ids"], 1)
+
+    # Fix generation_config
+    # Use hybrid if sliding window seen, otherwise try static
+    cache_implementation = getattr(self.config, "cache_implementation", None)
+    if getattr(self, "_supports_static_cache", getattr(self, "_can_compile_fullgraph", True)):
+        if os.environ.get("TUNELABS_DISABLE_STATIC_GENERATION", "0") == "0":
+            cache_implementation = "static"
+        elif Version(transformers_version) < Version("4.56.0.dev0"):
+            cache_implementation = None
+        else:
+            # Should work in latest transformers!
+            cache_implementation = "static"
+    else:
+        cache_implementation = None
+    if cache_implementation is not None:
+        swa = getattr(getattr(self.config, "text_config", self.config), "sliding_window", None)
+        if (swa == 0 or type(swa) is not int) and (
+            getattr(self, "_can_compile_fullgraph", True) is True
+        ):
+            cache_implementation = "static"
+        else:
+            if Version(transformers_version) < Version("4.56.0.dev0"):
+                cache_implementation = "hybrid"
+            else:
+                cache_implementation = "static"
+    # [TODO] Unsure why static fails
+    if do_bfloat16_mixed_precision:
+        cache_implementation = None
+
+    if "generation_config" in kwargs:
+        kwargs["generation_config"].cache_implementation = cache_implementation
+        if cache_implementation is not None:
+            kwargs["generation_config"].compile_config = _compile_config
+    else:
+        kwargs["cache_implementation"] = cache_implementation
+        if cache_implementation is not None:
+            kwargs["compile_config"] = _compile_config
+
+    # Delete cached Flex Attention masks to reset inference
+    for name, module in self.named_modules():
+        if hasattr(module, "_flex_attention_cache"):
+            try:
+                del module._flex_attention_cache
+            except:
+                pass
+        # Solves AttributeError: 'SlidingWindowLayer' object has no attribute 'max_batch_size'
+        if hasattr(module, "_cache") and "cache_utils" in str(module._cache.__class__):
+            try:
+                del module._cache
+            except:
+                pass
+
+    with torch.inference_mode(), autocaster:
+        output = self._old_generate(*args, **kwargs)
+
+    # Delete cached Flex Attention masks to reset inference
+    for name, module in self.named_modules():
+        if hasattr(module, "_flex_attention_cache"):
+            try:
+                del module._flex_attention_cache
+            except:
+                pass
+        # Solves AttributeError: 'SlidingWindowLayer' object has no attribute 'max_batch_size'
+        if hasattr(module, "_cache") and "cache_utils" in str(module._cache.__class__):
+            try:
+                del module._cache
+            except:
+                pass
+
+    # FastBaseModel.for_training(self)
+    return output
+
+
+def _construct_vlm_processor_fallback(tokenizer_name, model_type, token, trust_remote_code):
+    """Construct a VLM processor manually when AutoProcessor.from_pretrained fails.
+
+    Some VLMs (e.g., LFM2.5-VL) have tokenizer_class entries that AutoTokenizer
+    cannot resolve. This function loads the image processor and tokenizer separately,
+    sets required special token attributes, and constructs the processor.
+    """
+    try:
+        from transformers import AutoImageProcessor, PreTrainedTokenizerFast, AutoConfig
+        from transformers.models.auto.processing_auto import PROCESSOR_MAPPING_NAMES
+        import json
+
+        # Load image processor
+        image_processor = AutoImageProcessor.from_pretrained(
+            tokenizer_name,
+            token = token,
+            trust_remote_code = trust_remote_code,
+        )
+        # Load tokenizer via PreTrainedTokenizerFast (bypasses tokenizer_class check)
+        tok = PreTrainedTokenizerFast.from_pretrained(
+            tokenizer_name,
+            padding_side = "left",
+            token = token,
+            trust_remote_code = trust_remote_code,
+        )
+        # Read tokenizer_config.json for model-specific special tokens
+        try:
+            from huggingface_hub import hf_hub_download
+
+            config_path = hf_hub_download(tokenizer_name, "tokenizer_config.json", token = token)
+            with open(config_path, "r", encoding = "utf-8") as f:
+                tok_config = json.load(f)
+            # Set model-specific special tokens and their IDs
+            for key in (
+                "image_token",
+                "image_start_token",
+                "image_end_token",
+                "image_thumbnail",
+                "video_token",
+            ):
+                if key in tok_config and not hasattr(tok, key):
+                    setattr(tok, key, tok_config[key])
+                    id_key = key + "_id" if not key.endswith("_id") else key
+                    token_id = tok.convert_tokens_to_ids(tok_config[key])
+                    if not hasattr(tok, id_key):
+                        setattr(tok, id_key, token_id)
+        except Exception:
+            pass
+
+        # Find the processor class - try model_type first, then top-level config model_type
+        proc_class_name = PROCESSOR_MAPPING_NAMES.get(model_type)
+        if proc_class_name is None:
+            # model_type might be a sub-model type (e.g. "lfm2" instead of "lfm2_vl").
+            # Try the top-level config.model_type which often has the processor mapping.
+            try:
+                config = AutoConfig.from_pretrained(
+                    tokenizer_name,
+                    token = token,
+                    trust_remote_code = trust_remote_code,
+                )
+                proc_class_name = PROCESSOR_MAPPING_NAMES.get(config.model_type)
+            except Exception:
+                pass
+
+        if proc_class_name is not None:
+            import transformers
+            proc_class = getattr(transformers, proc_class_name, None)
+            if proc_class is not None:
+                processor = proc_class(image_processor = image_processor, tokenizer = tok)
+                # Copy chat_template from tokenizer to processor if needed
+                if not getattr(processor, "chat_template", None) and getattr(
+                    tok, "chat_template", None
+                ):
+                    processor.chat_template = tok.chat_template
+                return processor
+    except Exception:
+        pass
+    return None
+
+
+def _get_total_transformer_layers(model):
+    """Best-effort total transformer block count across HF model shapes.
+    Returns None if not determinable; caller should skip the conversion."""
+    cfg = getattr(model, "config", None)
+    if cfg is None:
+        return None
+    for name in (
+        "num_hidden_layers",
+        "n_layer",
+        "n_layers",
+        "num_layers",
+    ):
+        v = getattr(cfg, name, None)
+        if isinstance(v, int) and v > 0:
+            return v
+    text_cfg = getattr(cfg, "text_config", None)
+    if text_cfg is not None:
+        for name in (
+            "num_hidden_layers",
+            "n_layer",
+            "n_layers",
+            "num_layers",
+        ):
+            v = getattr(text_cfg, name, None)
+            if isinstance(v, int) and v > 0:
+                return v
+    return None
+
+
+class FastBaseModel:
+    @staticmethod
+    def from_pretrained(
+        model_name = "tunelabs/Llama-3.2-1B-Instruct",
+        max_seq_length = 2048,
+        dtype = None,
+        load_in_4bit = True,
+        load_in_8bit = False,
+        load_in_16bit = False,
+        full_finetuning = False,
+        token = None,
+        device_map = "sequential",
+        trust_remote_code = False,
+        model_types = None,
+        tokenizer_name = None,
+        auto_model = AutoModelForVision2Seq,
+        use_gradient_checkpointing = "tunelabs",
+        supports_sdpa = True,
+        whisper_language = None,
+        whisper_task = None,
+        auto_config = None,
+        offload_embedding = False,
+        float32_mixed_precision = None,  # Forces float32 mixed precision
+        # vLLM parameters
+        fast_inference = False,
+        gpu_memory_utilization = 0.5,
+        float8_kv_cache = False,
+        random_state = 3407,
+        max_lora_rank = 64,
+        disable_log_stats = False,
+        tunelabs_vllm_standby = False,
+        load_in_fp8 = False,  # fp8 LoRA (True, False, 'block')
+        text_only = False,
+        **kwargs,
+    ):
+        user_config = kwargs.pop("config", None)
+        if auto_config is None and user_config is not None:
+            auto_config = user_config
+
+        if tunelabs_vllm_standby and os.environ.get("TUNELABS_VLLM_STANDBY", "0") != "1":
+            raise RuntimeError(
+                "TuneLabs: TUNELABS_VLLM_STANDBY is True, but TUNELABS_VLLM_STANDBY is not set to 1!"
+            )
+
+        if model_types is None:
+            raise RuntimeError(
+                "TuneLabs: Please use FastModel or FastVisionModel and not use FastBaseModel directly!"
+            )
+        if os.environ.get("TUNELABS_MODEL_NAME", "") == "":
+            os.environ["TUNELABS_MODEL_NAME"] = model_name.lower()
+
+        # Resolve text-only before the is_vlm / vLLM checks so is_vlm stays consistent;
+        # skip the vision tower only for families with their own text decoder (Gemma 3). #5816
+        if text_only and auto_config is None:
+            auto_config = AutoConfig.from_pretrained(
+                model_name,
+                token = token,
+                trust_remote_code = trust_remote_code,
+            )
+        if text_only and hasattr(auto_config, "vision_config"):
+            parent_config = auto_config
+            text_config = _get_text_only_config(parent_config, model_name)
+            text_class = resolve_model_class(AutoModelForCausalLM, text_config)
+            if text_class is not None and _is_family_text_decoder(
+                getattr(parent_config, "model_type", ""),
+                getattr(text_config, "model_type", ""),
+            ):
+                auto_config = text_config
+                auto_model = AutoModelForCausalLM
+                _apply_text_only_key_mapping(kwargs, parent_config, text_config)
+        elif text_only and auto_model in [
+            AutoModelForVision2Seq,
+            AutoModelForImageTextToText,
+        ]:
+            # Pure text model requested text-only with a VLM auto class.
+            auto_model = AutoModelForCausalLM
+        is_vlm = auto_model in [AutoModelForVision2Seq, AutoModelForImageTextToText]
+        # A repo-code VLM may register only AutoModel / AutoModelForCausalLM (e.g.
+        # DeepSeek-OCR, Nemotron-VL), so auto_model is not a VLM class even though the
+        # config is a vision model. Keep is_vlm (auto-class derived) for processor
+        # selection below -- these repos ship no AutoProcessor -- but treat the model as a
+        # VLM on the vLLM path so a vision_config model is never silently loaded/converted
+        # as text-only. text_only resolves the tower away first, so honour that here.
+        is_vlm_config = is_vlm or (not text_only and hasattr(auto_config, "vision_config"))
+        is_whisper = whisper_language is not None and whisper_task is not None
+        auto_processor = AutoProcessor if (is_vlm or is_whisper) else AutoTokenizer
+
+        model_type_arch = model_types[0]
+        if model_type_arch == "siglip":
+            for model_type_arch in model_types:
+                if model_type_arch != "siglip":
+                    break
+
+        vllm_enable_lora = True
+
+        if is_vlm_config and fast_inference:
+            if not any(arch in VLLM_SUPPORTED_VLM for arch in model_types):
+                raise RuntimeError(
+                    f"TuneLabs: Fast inference is only supported for Language models and Qwen2.5-VL, Gemma3 among vision models. "
+                    f"Found architectures: {', '.join(model_types)}!"
+                )
+
+        if any(arch in VLLM_NON_LORA_VLM for arch in model_types):
+            # mllama is still only in vllm v0 https://arc.net/l/quote/llwkfgmu
+            # https://docs.vllm.ai/en/stable/models/supported_models.html#text-generation_1
+            # vLLM V0 does not support LoRA on multi modal models.
+            # TODO: Update this once vLLM V1 supports Llama 3.2 aka mllama
+            vllm_enable_lora = False
+
+        os.environ["TUNELABS_USE_NEW_MODEL"] = "1"
+        if trust_remote_code:
+            print(
+                "TuneLabs: WARNING `trust_remote_code` is True.\n"
+                "Are you certain you want to do remote code execution?"
+            )
+        token = hf_login(token)
+        SUPPORTS_BFLOAT16 = is_bfloat16_supported()
+
+        if DEVICE_TYPE == "cuda":
+            gpu_stats = torch.cuda.get_device_properties(0)
+            gpu_stats_name = (
+                gpu_stats.name + ". " if gpu_stats.name != "" else "NVIDIA GPU Device. "
+            )
+            gpu_version = torch.version.cuda
+            gpu_stats_snippet = (
+                f"CUDA: {gpu_stats.major}.{gpu_stats.minor}. CUDA Toolkit: {gpu_version}."
+            )
+            try:
+                vllm_version = f" vLLM: {importlib_version('vllm')}."
+            except:
+                vllm_version = ""
+        elif DEVICE_TYPE == "hip":
+            gpu_stats = torch.cuda.get_device_properties(0)
+            gpu_stats_name = resolve_hip_gpu_stats_name(gpu_stats)
+            gpu_version = torch.version.hip
+            gpu_stats_snippet = f"ROCm Toolkit: {gpu_version}."
+            try:
+                vllm_version = f" vLLM: {importlib_version('vllm')}."
+            except:
+                vllm_version = ""
+        elif DEVICE_TYPE == "xpu":
+            gpu_stats = torch.xpu.get_device_properties(0)
+            gpu_stats_name = gpu_stats.name + ". " if gpu_stats.name != "" else "Intel XPU Device. "
+            gpu_version = torch.version.xpu
+            gpu_stats_snippet = f"Intel Toolkit: {gpu_version}."
+            # [TODO] After adding vLLM support for XPU, change this
+            vllm_version = ""
+        else:
+            raise ValueError(f"TuneLabs: Unsupported device type: {DEVICE_TYPE}")
+
+        max_memory = round(gpu_stats.total_memory / 1024 / 1024 / 1024, 3)
+
+        arch_name = model_type_arch.title()
+        arch_name = arch_name.replace("_Vl_", "_VL_").replace("_Moe", "_MoE")
+        statistics = (
+            f"==((====))==  TuneLabs {__version__}: Fast {arch_name} patching. Transformers: {transformers_version}.{vllm_version}\n"
+            f"   {chr(92)}{chr(92)}   /|    {gpu_stats_name}Num GPUs = {DEVICE_COUNT}. Max memory: {max_memory} GB. Platform: {platform_system}.\n"
+            f"O^O/ {chr(92)}_/ {chr(92)}    Torch: {torch.__version__}. {gpu_stats_snippet} Triton: {triton_version}\n"
+            f"{chr(92)}        /    Bfloat16 = {str(SUPPORTS_BFLOAT16).upper()}. FA [Xformers = {xformers_version}. FA2 = {HAS_FLASH_ATTENTION}]\n"
+            f' "-____-"     Free license: http://github.com/tunelabsai/tunelabs'
+        )
+
+        print(statistics)
+
+        # Warn about fast transfers
+        if "HF_HUB_ENABLE_HF_TRANSFER" in os.environ:
+            old_hf_transfer = os.environ["HF_HUB_ENABLE_HF_TRANSFER"]
+            if old_hf_transfer in ("False", "false"):
+                old_hf_transfer = "0"
+            if old_hf_transfer in ("True", "true"):
+                old_hf_transfer = "1"
+        else:
+            old_hf_transfer = "0"
+        if old_hf_transfer == "1":
+            print(
+                "TuneLabs: Fast downloading is enabled - ignore downloading bars which are red colored!"
+            )
+        if old_hf_transfer != "0":
+            os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "1"
+
+        # For debugging - we use a download counter to see if environments are not breaking or if HF is down
+        get_statistics(kwargs.get("local_files_only", False))
+
+        if dtype is None:
+            dtype = torch.float16 if not SUPPORTS_BFLOAT16 else torch.bfloat16
+        elif os.environ.get("TUNELABS_FORCE_FLOAT32", "0") == "1":
+            if dtype == torch.float16:
+                dtype = torch.bfloat16
+        elif dtype == torch.bfloat16 and not SUPPORTS_BFLOAT16:
+            logger.warning_once("Device does not support bfloat16. Will change to float16.")
+            dtype = torch.float16
+        assert dtype in (torch.float16, torch.bfloat16, torch.float32)
+
+        bnb_compute_dtype = dtype
+        do_forced_float32 = False
+        if os.environ.get("TUNELABS_FORCE_FLOAT32", "0") == "1":
+            print(
+                f"TuneLabs: Using float16 precision for {model_type_arch} won't work! Using float32."
+            )
+            bnb_compute_dtype = torch.float16
+            do_forced_float32 = True
+
+        # Check for custom data-types
+        custom_datatype = None
+        correct_dtype = None
+        if os.environ.get("TUNELABS_FORCE_CUSTOM_DTYPE", "") != "":
+            custom_datatype = os.environ["TUNELABS_FORCE_CUSTOM_DTYPE"]
+            assert custom_datatype.count(";") >= 4
+            checker, _dtype, _bnb_compute_dtype, _custom_datatype, execute_code = (
+                custom_datatype.split(";", 4)
+            )
+            # Allow custom dtypes on all runs
+            allow_all_runs = checker == "all"
+            # Allow only on float16 datatypes
+            allow_float16_runs = (checker == "float16" or checker == "torch.float16") and (
+                dtype == torch.float16 or os.environ.get("TUNELABS_FORCE_FLOAT32", "0") == "1"
+            )
+            if allow_all_runs or allow_float16_runs:
+                if eval(_dtype) is not None:
+                    dtype = eval(_dtype)
+                if eval(_bnb_compute_dtype) is not None:
+                    bnb_compute_dtype = eval(_bnb_compute_dtype)
+                correct_dtype = bnb_compute_dtype
+                custom_datatype = _custom_datatype
+                # Execute code as well
+                if len(execute_code.strip()) != 0:
+                    exec(execute_code)
+            else:
+                custom_datatype = None
+                correct_dtype = None
+
+        if auto_config is None:
+            auto_config = AutoConfig.from_pretrained(
+                model_name,
+                token = token,
+                trust_remote_code = trust_remote_code,
+            )
+        model_class = resolve_model_class(auto_model, auto_config)
+        attn_impl = resolve_attention_implementation(
+            model_class,
+            auto_config,
+            requested_attn_implementation = kwargs.get("attn_implementation", None),
+            supports_sdpa = supports_sdpa,
+        )
+
+        # Handle FP8 models: get_model_name has already redirected this to BF16 sibling if the model ships with
+        # FP8 weights. We just need to update it here for sanity.
+        auto_config.model_name = model_name
+        kwargs["attn_implementation"] = attn_impl
+
+        bnb_config = None
+        user_quantization_config = kwargs.get("quantization_config", None)
+
+        # Check if model already has a non-bitsandbytes quantization config (e.g. compressed-tensors/NVFP4)
+        from .loader_utils import (
+            check_and_disable_bitsandbytes_loading,
+            sync_tunelabs_model_name_bnb_flags,
+        )
+
+        load_in_4bit, load_in_8bit, _ = check_and_disable_bitsandbytes_loading(
+            auto_config, load_in_4bit = load_in_4bit, load_in_8bit = load_in_8bit
+        )
+        # Correct TUNELABS_MODEL_NAME's bnb tokens now that the effective bnb state is known
+        # (the per-load env was built before remap/disable). gpt-oss only; no-op otherwise.
+        sync_tunelabs_model_name_bnb_flags(load_in_4bit, load_in_8bit)
+
+        if full_finetuning and (load_in_4bit or load_in_8bit):
+            print(
+                "TuneLabs: You selected full finetuning support, but 4bit / 8bit is enabled - disabling LoRA / QLoRA."
+            )
+            load_in_4bit = False
+            load_in_8bit = False
+            load_in_16bit = False
+
+        if int(load_in_4bit) + int(load_in_8bit) + int(load_in_16bit) >= 2:
+            raise RuntimeError(
+                "TuneLabs: Can only load in 4bit or 8bit or 16bit, not a combination!"
+            )
+        _skip_modules = SKIP_QUANTIZATION_MODULES.copy()
+        # Nemotron-H uses 'mixer' (not 'mamba') for Mamba layers.
+        # Mamba fused kernels pass out_proj.weight directly to F.linear,
+        # which fails with quantized Params4bit. Skip out_proj from quantization.
+        if any(mt == "nemotron_h" for mt in (model_types or [])):
+            _skip_modules.append("out_proj")
+
+        if load_in_4bit:
+            bnb_config = BitsAndBytesConfig(
+                load_in_4bit = True,
+                bnb_4bit_use_double_quant = True,
+                bnb_4bit_quant_type = "nf4",
+                bnb_4bit_compute_dtype = bnb_compute_dtype,
+                llm_int8_skip_modules = _skip_modules,
+            )
+        elif load_in_8bit:
+            bnb_config = BitsAndBytesConfig(
+                load_in_8bit = True,
+                llm_int8_skip_modules = _skip_modules,
+            )
+        elif load_in_16bit:
+            bnb_config = None
+        elif not load_in_4bit and not load_in_8bit and not full_finetuning:
+            print("TuneLabs: QLoRA and full finetuning all not selected. Switching to 16bit LoRA.")
+
+        if full_finetuning:
+            os.environ["TUNELABS_ENABLE_FULL_FINETUNING"] = "1"
+            if dtype == torch.bfloat16:
+                if float32_mixed_precision != True:
+                    print(
+                        f"TuneLabs: Using bfloat16 full finetuning which cuts memory usage by 50%.\n"
+                        f"To enable float32 training, use `float32_mixed_precision = True` during FastLanguageModel.from_pretrained"
+                    )
+                else:
+                    print(
+                        f"TuneLabs: Using full float32 full finetuning. "
+                        f"To enable bfloat16 training to reduce VRAM usage by 50% albeit with a slightly higher loss, do:\n"
+                        "use `float32_mixed_precision = False` during FastLanguageModel.from_pretrained"
+                    )
+                    os.environ["TUNELABS_BFLOAT16_MIXED_PRECISION"] = "1"
+            else:
+                print(
+                    "TuneLabs: Float16 full finetuning uses more memory since we upcast weights to float32."
+                )
+        else:
+            os.environ["TUNELABS_ENABLE_FULL_FINETUNING"] = "0"
+
+        # Fix AttributeError: 'BitsAndBytesConfig' object has no attribute 'get_loading_attributes'
+        if bnb_config is not None and not hasattr(bnb_config, "get_loading_attributes"):
+            bnb_config.get_loading_attributes = lambda *args, **kwargs: {}
+
+        # Cannot be None, since HF now checks for the config
+        if load_in_4bit or load_in_8bit:
+            # Ignore load_in_4bit / load_in_8bit for MXFP4 - best to get config file
+            if "gpt-oss-20b" in model_name.lower() or "gpt-oss-120b" in model_name.lower():
+                pass
+            else:
+                if user_quantization_config is None:
+                    kwargs["quantization_config"] = bnb_config
+        else:
+            if auto_config is None:
+                auto_config = AutoConfig.from_pretrained(
+                    model_name,
+                    token = token,
+                    trust_remote_code = trust_remote_code,
+                )
+            if hasattr(auto_config, "quantization_config"):
+                from transformers.quantizers.auto import (
+                    AUTO_QUANTIZATION_CONFIG_MAPPING,
+                )
+
+                quantization_config = auto_config.quantization_config
+                quant_method = quantization_config["quant_method"]
+                # Sometimes bitsandbytes_4bit + bitsandbytes_8bit is provided
+                if (
+                    quant_method == "bitsandbytes"
+                    and "bitsandbytes" not in AUTO_QUANTIZATION_CONFIG_MAPPING
+                ):
+                    if "bitsandbytes_4bit" not in AUTO_QUANTIZATION_CONFIG_MAPPING:
+                        raise KeyError(
+                            "TuneLabs: AUTO_QUANTIZATION_CONFIG_MAPPING does not have `bitsandbytes_4bit`"
+                        )
+                    quantizer = AUTO_QUANTIZATION_CONFIG_MAPPING["bitsandbytes_4bit"]
+                else:
+                    quantizer = AUTO_QUANTIZATION_CONFIG_MAPPING[quant_method]
+                quantizer_kwargs = {}
+                if quant_method == "compressed-tensors":
+                    # Ignore these
+                    pass
+                else:
+                    # We cannot dequantize since gpt-oss-20b MXFP4 will now be gpt-oss-20b-BF16
+                    if load_in_16bit and "dequantize" in inspect.signature(quantizer).parameters:
+                        quantizer_kwargs["dequantize"] = True
+                    try:
+                        # Sometimes this fails so we wrap it in a try except
+                        quantization_config = quantizer.from_dict(
+                            quantization_config, **quantizer_kwargs
+                        )
+                    except:
+                        pass
+                    if user_quantization_config is None:
+                        kwargs["quantization_config"] = quantization_config
+
+        # Check if using forced float32 - we load it in bfloat16, then cast to float16!
+        torch_dtype = dtype
+        if do_forced_float32:
+            torch_dtype = torch.bfloat16
+
+        kwargs = add_dtype_kwargs(torch_dtype, kwargs)
+
+        config_attn_impl = kwargs.get("attn_implementation", None)
+        if config_attn_impl is None:
+            config_attn_impl = "sdpa" if supports_sdpa else "eager"
+        if auto_config is None:
+            auto_config = AutoConfig.from_pretrained(
+                model_name,
+                token = token,
+                trust_remote_code = trust_remote_code,
+            )
+        _set_attn_impl(auto_config, config_attn_impl)
+        model_config = auto_config
+
+        verify_fp8_support_if_applicable(model_config)
+
+        raise_handler = RaiseUninitialized()
+        if not fast_inference:
+            # Prevent load_in_fp8 from being forwarded into HF internal model loading
+            load_in_fp8 = kwargs.pop("load_in_fp8", None)
+            # Transformers 5.x @strict config classes reject unexpected kwargs.
+            # Move config-level attributes onto the config object directly.
+            _num_labels = kwargs.pop("num_labels", None)
+            if _num_labels is not None:
+                set_task_config_attr(model_config, "num_labels", _num_labels)
+            for _cfg_key in ("id2label", "label2id", "problem_type"):
+                _cfg_val = kwargs.pop(_cfg_key, None)
+                if _cfg_val is not None:
+                    set_task_config_attr(model_config, _cfg_key, _cfg_val)
+            _cfg_val = kwargs.pop("max_position_embeddings", None)
+            if _cfg_val is not None:
+                setattr(model_config, "max_position_embeddings", _cfg_val)
+            model = auto_model.from_pretrained(
+                model_name,
+                config = model_config,
+                device_map = device_map,
+                # torch_dtype           = torch_dtype, # Transformers removed torch_dtype
+                # quantization_config   = bnb_config,
+                token = token,
+                trust_remote_code = trust_remote_code,
+                # attn_implementation   = attn_implementation,
+                **kwargs,
+            )
+            # Attach dispatch hooks for bnb multi-device loads.
+            _attach_bnb_multidevice_hooks(
+                model,
+                load_in_4bit = load_in_4bit,
+                load_in_8bit = load_in_8bit,
+                offload_embedding = offload_embedding,
+                fast_inference = fast_inference,
+            )
+            if hasattr(model, "generate"):
+                model.fast_generate = make_fast_generate_wrapper(model.generate)
+                model.fast_generate_batches = error_out_no_vllm
+            if offload_embedding:
+                if bool(os.environ.get("WSL_DISTRO_NAME") or os.environ.get("WSL_INTEROP")):
+                    # WSL doesn't work with offloaded embeddings
+                    pass
+                elif os.name == "nt":
+                    # Windows doesn't work with offloaded embeddings
+                    pass
+                else:
+                    embed_tokens = model.get_input_embeddings()
+                    nbytes = embed_tokens.weight.numel() * embed_tokens.weight.itemsize
+                    ngb = round(nbytes / 1024 / 1024 / 1024, 2)
+                    print(f"TuneLabs: Offloading embeddings to RAM to save {ngb} GB.")
+                    embed_tokens.to("cpu")
+
+                    # Add hooks to move inputs to CPU and back to CUDA
+                    # [TODO] Doesn't seem to work!
+                    # def pre_hook(module, args):
+                    #     args[0]._old_device = args[0].device
+                    #     return (args[0].to("cpu", non_blocking = True))
+                    # def post_hook(module, args, output):
+                    #     old_device = getattr(args[0], "_old_device", "cuda")
+                    #     return output.to(old_device, non_blocking = True)
+                    # embed_tokens.register_forward_pre_hook(pre_hook,  prepend = True)
+                    # embed_tokens.register_forward_hook    (post_hook, prepend = True)
+                    # Must free GPU memory otherwise will not free!
+                    torch.cuda.empty_cache()
+                    gc.collect()
+        else:
+            from tunelabs_zoo.vllm_utils import (
+                load_vllm,
+                get_vllm_state_dict,
+                convert_vllm_to_huggingface,
+                generate_batches,
+                get_lora_supported_ranks,
+            )
+
+            if full_finetuning:
+                max_lora_rank = max(get_lora_supported_ranks())
+                raise NotImplementedError(
+                    "TuneLabs: `fast_inference=True` cannot be used together with `full_finetuning=True`.\n"
+                    "Reason: fast_inference is optimized for inference-only workflows and "
+                    "does not currently support full fine-tuning.\n"
+                    "Workaround: disable fast_inference, or use parameter-efficient fine-tuning "
+                    f"(e.g. LoRA with rank r={max_lora_rank})."
+                )
+
+            model_config.model_name = model_name
+
+            if fast_inference:
+                fast_inference, model_name = fast_inference_setup(model_name, model_config)
+
+            fp8_mode = None
+            if load_in_fp8 != False:
+                fp8_mode = _get_fp8_mode_and_check_settings(
+                    load_in_fp8,
+                    fast_inference,
+                    full_finetuning,
+                    load_in_4bit,
+                    load_in_8bit,
+                    load_in_16bit,
+                )
+
+            allowed_args = inspect.getfullargspec(load_vllm).args
+            load_vllm_kwargs = dict(
+                model_name = model_name,
+                config = model_config,
+                gpu_memory_utilization = gpu_memory_utilization,
+                max_seq_length = max_seq_length,
+                dtype = dtype,
+                float8_kv_cache = float8_kv_cache,
+                enable_lora = vllm_enable_lora,
+                max_lora_rank = max_lora_rank,
+                disable_log_stats = disable_log_stats,
+                use_bitsandbytes = load_in_4bit,
+                tunelabs_vllm_standby = tunelabs_vllm_standby,
+                is_vision_model = is_vlm_config,
+                fp8_mode = fp8_mode,
+            )
+            for allowed_arg in allowed_args:
+                if allowed_arg not in load_vllm_kwargs and allowed_arg in kwargs:
+                    load_vllm_kwargs[allowed_arg] = kwargs[allowed_arg]
+
+            # Load vLLM first
+            llm = load_vllm(**load_vllm_kwargs)
+
+            # Convert to HF format
+            _, quant_state_dict = get_vllm_state_dict(
+                llm,
+                config = model_config,
+                is_vision_model = is_vlm_config,
+                load_in_fp8 = load_in_fp8,
+            )
+            model = convert_vllm_to_huggingface(
+                quant_state_dict,
+                model_config,
+                dtype,
+                bnb_config,
+                is_vision_model = is_vlm_config,
+            )
+            model.vllm_engine = llm
+            llm.shared_weights = True
+            model.fast_generate = model.vllm_engine.generate
+            model.fast_generate_batches = functools.partial(generate_batches, model.vllm_engine)
+
+        raise_handler.remove()
+
+        # Return old flag
+        os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = old_hf_transfer
+
+        # Check float32 norm weights
+        if os.environ.get("TUNELABS_HIGH_PRECISION_LAYERNORM", "0") == "1":
+            for jj, (name, module) in enumerate(model.named_modules()):
+                if (
+                    name.endswith(("norm", "norm1", "norm2", "norm3", "norm4"))
+                    or "layernorm" in name
+                    or "layer_norm" in name
+                ) and hasattr(module, "weight"):
+                    module._pre_set_compute_dtype = torch.float32
+        # Edit data-types
+        if custom_datatype is not None:
+            with torch.no_grad():
+                for jj, (name, module) in enumerate(model.named_modules()):
+                    exec(custom_datatype)
+        # Clear deleted GPU items
+        for _ in range(3):
+            gc.collect()
+            if DEVICE_TYPE in ("cuda", "hip"):
+                torch.cuda.empty_cache()
+            elif DEVICE_TYPE == "xpu":
+                torch.xpu.empty_cache()
+
+        # Counteract saved tokenizers
+        tokenizer_name = model_name if tokenizer_name is None else tokenizer_name
+
+        # Fix _TuneLabs_Patched_ prefix in local config files from old saves (issue #4085)
+        if os.path.isdir(tokenizer_name):
+            import json as _json
+            for _cfg_name in (
+                "processor_config.json",
+                "preprocessor_config.json",
+                "tokenizer_config.json",
+            ):
+                _cfg_path = os.path.join(tokenizer_name, _cfg_name)
+                if os.path.exists(_cfg_path):
+                    try:
+                        with open(_cfg_path, "r", encoding = "utf-8") as _f:
+                            _cfg = _json.load(_f)
+                        if _cfg.get("processor_class", "").startswith("_TuneLabs_Patched_"):
+                            _cfg["processor_class"] = _cfg["processor_class"][
+                                len("_TuneLabs_Patched_") :
+                            ]
+                            with open(_cfg_path, "w", encoding = "utf-8") as _f:
+                                _json.dump(_cfg, _f, indent = 2, ensure_ascii = False)
+                    except Exception:
+                        pass
+
+        if (whisper_language and whisper_task) or auto_model.__name__.endswith(
+            "ForConditionalGeneration"
+        ):
+            try:
+                tokenizer = auto_processor.from_pretrained(
+                    tokenizer_name,
+                    padding_side = "left",
+                    token = token,
+                    language = whisper_language,
+                    task = whisper_task,
+                    trust_remote_code = trust_remote_code,
+                )
+            except Exception:
+                tokenizer = None
+        else:
+            try:
+                tokenizer = auto_processor.from_pretrained(
+                    tokenizer_name,
+                    padding_side = "left",
+                    token = token,
+                    trust_remote_code = trust_remote_code,
+                )
+            except:
+                tokenizer = get_auto_processor(
+                    tokenizer_name,
+                    padding_side = "left",
+                    token = token,
+                    trust_remote_code = trust_remote_code,
+                )
+
+        # If processor loading failed (e.g., tokenizer class not found),
+        # or if AutoProcessor silently degraded to a text-only tokenizer
+        # instead of returning a full VLM processor (issue #4085),
+        # try constructing the processor manually from separate components.
+        _processor_is_degraded = (
+            is_vlm and tokenizer is not None and not hasattr(tokenizer, "image_processor")
+        )
+        if (tokenizer is None or _processor_is_degraded) and is_vlm:
+            _fallback = _construct_vlm_processor_fallback(
+                tokenizer_name,
+                model_type_arch,
+                token,
+                trust_remote_code,
+            )
+            if _fallback is not None:
+                tokenizer = _fallback
+            if tokenizer is None:
+                import sys
+                print(
+                    f"TuneLabs: Warning - VLM processor fallback returned None for model_type={model_type_arch}",
+                    file = sys.stderr,
+                )
+        # Backwards compat: if processor has no chat_template (e.g. old saves without
+        # chat_template.jinja) but the inner tokenizer does, copy it to the processor.
+        if (
+            hasattr(tokenizer, "tokenizer")
+            and getattr(tokenizer, "chat_template", None) is None
+            and getattr(tokenizer.tokenizer, "chat_template", None) is not None
+        ):
+            tokenizer.chat_template = tokenizer.tokenizer.chat_template
+
+        if hasattr(tokenizer, "tokenizer"):
+            __tokenizer = tokenizer.tokenizer
+            # Add padding side as well
+            __tokenizer.padding_side = "left"
+            # Check bos, eos, pad tokens
+            if hasattr(__tokenizer, "bos_token"):
+                tokenizer.bos_token = __tokenizer.bos_token
+                tokenizer.bos_token_id = __tokenizer.bos_token_id
+            if hasattr(__tokenizer, "eos_token"):
+                tokenizer.eos_token = __tokenizer.eos_token
+                tokenizer.eos_token_id = __tokenizer.eos_token_id
+            if hasattr(__tokenizer, "pad_token"):
+                tokenizer.pad_token = __tokenizer.pad_token
+                tokenizer.pad_token_id = __tokenizer.pad_token_id
+        # Fix other stuff like BnB compute data types
+        model, tokenizer = patch_model_and_tokenizer(
+            model,
+            tokenizer,
+            downcast_rope = False,
+            fix_embeddings = False,
+            do_forced_float32 = do_forced_float32,
+            correct_dtype = correct_dtype,
+        )
+
+        try:
+            model, tokenizer = patch_tokenizer(model, tokenizer)
+        except Exception as _patch_err:
+            # Some VLM processors (e.g., ERNIE VL) may fail during tokenizer patching.
+            # Try loading tokenizer separately via AutoTokenizer as fallback.
+            try:
+                from transformers import AutoTokenizer as _AutoTokenizer
+
+                _fallback_tok = _AutoTokenizer.from_pretrained(
+                    tokenizer_name,
+                    padding_side = "left",
+                    token = token,
+                    trust_remote_code = trust_remote_code,
+                )
+                model, _fallback_tok = patch_tokenizer(model, _fallback_tok)
+                # Re-attach as processor wrapper if original was a processor
+                if hasattr(tokenizer, "image_processor"):
+                    tokenizer.tokenizer = _fallback_tok
+                else:
+                    tokenizer = _fallback_tok
+            except Exception:
+                # If fallback also fails, raise the original error
+                raise _patch_err
+        model = post_patch_loss_function(model)
+
+        # Log TuneLabs version for future fastpaths for inference
+        if hasattr(model, "config"):
+            model.config.update({"tunelabs_version": __version__})
+        patch_saving_functions(model, vision = True)
+        if tokenizer is None:
+            # Last resort: try loading tokenizer via AutoTokenizer, then PreTrainedTokenizerFast
+            try:
+                from transformers import AutoTokenizer as _AutoTokenizer
+                tokenizer = _AutoTokenizer.from_pretrained(
+                    tokenizer_name,
+                    padding_side = "left",
+                    token = token,
+                    trust_remote_code = trust_remote_code,
+                )
+            except Exception:
+                try:
+                    from transformers import PreTrainedTokenizerFast
+                    tokenizer = PreTrainedTokenizerFast.from_pretrained(
+                        tokenizer_name,
+                        padding_side = "left",
+                        token = token,
+                        trust_remote_code = trust_remote_code,
+                    )
+                except Exception:
+                    del model
+                    raise RuntimeError(
+                        "TuneLabs: The tokenizer is weirdly not loaded? Please check if there is one."
+                    )
+        patch_saving_functions(tokenizer, vision = True)
+
+        # Fix gradient accumulation. See issue #4982.
+        from transformers.trainer import Trainer
+
+        apply_accepts_loss_kwargs_fix(model)
+        patch_gradient_accumulation_fix(Trainer)
+
+        # Save tokenizer for inference purposes
+        tokenizer.padding_side = "left"  # Force inference
+        if hasattr(tokenizer, "tokenizer"):
+            tokenizer.tokenizer.padding_side = "left"  # Force inference
+        # Audio feature extractors must stay right padded: left (a text setting,
+        # forwarded by from_pretrained) shifts Whisper mels and desyncs Gemma 4
+        # audio token counts (crash on transformers < 5.10).
+        feature_extractor = getattr(tokenizer, "feature_extractor", None)
+        if (
+            feature_extractor is not None
+            and getattr(feature_extractor, "padding_side", None) == "left"
+        ):
+            feature_extractor.padding_side = "right"
+        m = model
+        while hasattr(m, "model"):
+            m.max_seq_length = max_seq_length
+            m._saved_temp_tokenizer = tokenizer
+            # Also set is_loaded_in_8bit to disable incorrect DDP
+            m.is_loaded_in_8bit = True if not full_finetuning else False
+            m = m.model
+        m.max_seq_length = max_seq_length
+        # Save to modules as well
+        for module in model.modules():
+            module.max_seq_length = max_seq_length
+        m._saved_temp_tokenizer = tokenizer
+        # Also set is_loaded_in_8bit to disable incorrect DDP
+        m.is_loaded_in_8bit = True if not full_finetuning else False
+
+        # Patch generate
+        if os.environ.get("TUNELABS_DISABLE_FAST_GENERATION", "0") == "0" and hasattr(
+            model, "generate"
+        ):
+            if model.generate.__name__ != "tunelabs_base_fast_generate":
+                model._old_generate = model.generate
+                tunelabs_base_fast_generate.__doc__ = model._old_generate.__doc__
+                model.generate = types.MethodType(tunelabs_base_fast_generate, model)
+        model._tunelabs_trust_remote_code = trust_remote_code
+        # Post patches
+        model = FastBaseModel.post_patch_model(
+            model,
+            use_gradient_checkpointing = use_gradient_checkpointing,
+            trust_remote_code = trust_remote_code,
+            model_type = model_type_arch,
+            tokenizer = tokenizer,
+            float32_mixed_precision = float32_mixed_precision,
+        )
+        # Clear deleted GPU items
+        for _ in range(3):
+            gc.collect()
+            if DEVICE_TYPE in ("cuda", "hip"):
+                torch.cuda.empty_cache()
+            elif DEVICE_TYPE == "xpu":
+                torch.xpu.empty_cache()
+        return model, tokenizer
+
+    @staticmethod
+    def get_peft_model(
+        model,
+        r = 16,
+        target_modules = None,
+        lora_alpha = 16,
+        lora_dropout = 0.0,
+        bias = "none",
+        finetune_vision_layers = True,
+        finetune_language_layers = True,
+        finetune_attention_modules = True,
+        finetune_mlp_modules = True,
+        finetune_last_n_layers = None,
+        layers_to_transform = None,
+        layers_pattern = None,
+        use_gradient_checkpointing = "tunelabs",
+        random_state = 3407,
+        max_seq_length = 2048,  # not used anymore
+        use_rslora = False,
+        modules_to_save = None,
+        init_lora_weights = True,
+        loftq_config = {},
+        task_type = TaskType.CAUSAL_LM,
+        temporary_location = "_tunelabs_temporary_saved_buffers",
+        qat_scheme = None,
+        target_parameters = None,  # For MoE expert layers (nn.Parameter)
+        ensure_weight_tying = False,  # [TODO] Add `ensure_weight_tying` for `modules_to_save` for vision models
+        **kwargs,
+    ):
+        if os.environ.get("TUNELABS_ENABLE_FULL_FINETUNING", "0") == "1":
+            print("TuneLabs: Full finetuning is enabled, so .get_peft_model has no effect")
+            return model
+        transformers_set_seed(random_state)
+
+        if type(r) is not int:
+            raise TypeError(f"TuneLabs: Rank of {str(r)} must be an integer.")
+        if r <= 0:
+            raise TypeError(f"TuneLabs: Rank of {str(r)} must be larger than 0.")
+
+        if isinstance(model, PeftModelForCausalLM):
+            raise RuntimeError("TuneLabs: You already added LoRA adapters to your model!")
+
+        if target_modules == "all-linear":
+            finetune_vision_layers = True
+            finetune_language_layers = True
+            finetune_attention_modules = True
+            finetune_mlp_modules = True
+        if target_modules is None or target_modules == "all-linear":
+            target_modules = get_peft_regex(
+                model,
+                finetune_vision_layers = finetune_vision_layers,
+                finetune_language_layers = finetune_language_layers,
+                finetune_attention_modules = finetune_attention_modules,
+                finetune_mlp_modules = finetune_mlp_modules,
+            )
+        else:
+            assert type(target_modules) in (list, tuple, str)
+            if type(target_modules) in (list, tuple) and (
+                not finetune_vision_layers
+                or not finetune_language_layers
+                or not finetune_attention_modules
+                or not finetune_mlp_modules
+            ):
+                print(
+                    "TuneLabs: Explicit target_modules are constrained by the "
+                    "finetune_(vision|language|attention|mlp) filters; adapters "
+                    "attach only where both select."
+                )
+                target_modules = get_peft_regex(
+                    model,
+                    finetune_vision_layers = finetune_vision_layers,
+                    finetune_language_layers = finetune_language_layers,
+                    finetune_attention_modules = finetune_attention_modules,
+                    finetune_mlp_modules = finetune_mlp_modules,
+                    target_modules = list(target_modules),
+                )
+
+        if hasattr(model, "vllm_engine"):
+            if (
+                hasattr(model.vllm_engine, "llm_engine")
+                and hasattr(model.vllm_engine.llm_engine, "vllm_config")
+                and getattr(model.vllm_engine.llm_engine.vllm_config, "lora_config", None) is None
+            ):
+                # If vLLM is being used but lora is not enabled, throw an error
+                # Ref https://github.com/vllm-project/vllm/blob/51ba839555a5d122eadd91e9c16463ac288f5fa1/vllm/v1/engine/processor.py#L148-L151
+                raise RuntimeError("TuneLabs: LoRA is not enabled for this model!")
+            if finetune_vision_layers:
+                # vLLM does not support LoRA on vision layers
+                # https://github.com/vllm-project/vllm/blob/main/vllm/lora/models.py#L471-L477
+                # TODO: Update this once vLLM V1 supports LoRA on vision layers (possibly not happening)
+                raise RuntimeError(
+                    "TuneLabs: Finetuning vision layers is not supported for fast_inference. Only text layers are supported!"
+                )
+            if model.config.model_type in VLLM_NON_LORA_VLM:
+                # mllama is still only in vllm v0 https://arc.net/l/quote/llwkfgmu
+                # https://docs.vllm.ai/en/stable/models/supported_models.html#text-generation_1
+                # vLLM V0 does not support LoRA on multi modal models.
+                # TODO: Update this once vLLM V1 supports Llama 3.2 aka mllama
+                raise RuntimeError(
+                    "TuneLabs: LoRA finetuning for Llama 3.2 aka mllama models is not supported with fast_inference!"
+                )
+
+        # Clear deleted GPU items
+        for _ in range(3):
+            gc.collect()
+            if DEVICE_TYPE in ("cuda", "hip"):
+                torch.cuda.empty_cache()
+            elif DEVICE_TYPE == "xpu":
+                torch.xpu.empty_cache()
+        max_seq_length = model.max_seq_length
+        # If we pass loftq_config = None we will get an error
+        loftq_config = validate_loftq_config(
+            loftq_config, lora_dropout, bias, init_lora_weights, model
+        )
+
+        # Auto-detect MoE models and populate target_parameters for expert layers
+        if target_parameters is None:
+            target_parameters = get_moe_target_parameters(model, target_modules)
+
+        if finetune_last_n_layers is not None and layers_to_transform is None:
+            _total_layers = _get_total_transformer_layers(model)
+            if _total_layers is not None and _total_layers > 0:
+                n = max(1, min(int(finetune_last_n_layers), _total_layers))
+                layers_to_transform = list(range(_total_layers - n, _total_layers))
+
+        # Get only allowed parameters for LoraConfig
+        local_variables = {
+            **locals(),
+            **kwargs,
+        }
+        del local_variables["kwargs"]
+        allowed_parameters = inspect.signature(LoraConfig).parameters.keys()
+        lora_config = LoraConfig(
+            **{k: v for k, v in local_variables.items() if k in allowed_parameters},
+        )
+        model = prepare_model_for_kbit_training(
+            model,
+            use_gradient_checkpointing = use_gradient_checkpointing,
+        )
+        # Gemma4 ClippableLinear wraps nn.Linear -- PEFT can't inject LoRA on it directly.
+        # Monkey-patch PEFT to target the inner .linear child instead.
+        _clippable_linear_cls = None
+        try:
+            from transformers.models.gemma4.modeling_gemma4 import (
+                Gemma4ClippableLinear as _clippable_linear_cls,
+            )
+        except ImportError:
+            pass
+        if _clippable_linear_cls is not None:
+            from peft.tuners.lora.model import LoraModel as _LoraModel
+
+            _original_car = _LoraModel._create_and_replace
+
+            def _patched_car(
+                self,
+                peft_config,
+                adapter_name,
+                target,
+                target_name,
+                parent,
+                current_key = None,
+                **kwargs,
+            ):
+                if isinstance(target, _clippable_linear_cls):
+                    return _original_car(
+                        self,
+                        peft_config,
+                        adapter_name,
+                        target.linear,
+                        "linear",
+                        target,
+                        current_key = current_key,
+                        **kwargs,
+                    )
+                return _original_car(
+                    self,
+                    peft_config,
+                    adapter_name,
+                    target,
+                    target_name,
+                    parent,
+                    current_key = current_key,
+                    **kwargs,
+                )
+
+            _LoraModel._create_and_replace = _patched_car
+
+        model = _get_peft_model(model, lora_config)
+
+        # Restore original PEFT method
+        if _clippable_linear_cls is not None:
+            _LoraModel._create_and_replace = _original_car
+        # Apply QAT + LoRA if specified
+        if qat_scheme is not None:
+            print("TuneLabs: Applying QAT to mitigate quantization degradation")
+            model = _prepare_model_for_qat(model, qat_scheme)
+        # Fix LoraConfig.auto_mapping is None
+        fix_lora_auto_mapping(model)
+        # Enable gradients on modules which are trainable
+        requires_grad_for_gradient_checkpointing(model)
+        trust_remote_code = getattr(model, "_tunelabs_trust_remote_code", False)
+        model = FastBaseModel.post_patch_model(
+            model,
+            use_gradient_checkpointing = use_gradient_checkpointing,
+            trust_remote_code = trust_remote_code,
+        )
+        model.max_seq_length = max_seq_length
+        # Save to modules as well
+        for module in model.modules():
+            module.max_seq_length = max_seq_length
+        # Clear deleted GPU items
+        for _ in range(3):
+            gc.collect()
+            if DEVICE_TYPE in ("cuda", "hip"):
+                torch.cuda.empty_cache()
+            elif DEVICE_TYPE == "xpu":
+                torch.xpu.empty_cache()
+        patch_saving_functions(model, vision = True)
+        patch_peft_fast_inference(model)
+
+        # Add for_inference and for_training
+        model.for_training = functools.partial(FastBaseModel.for_training, model)
+        model.for_inference = functools.partial(FastBaseModel.for_inference, model)
+        m = model
+        while hasattr(m, "model"):
+            m.for_training = functools.partial(FastBaseModel.for_training, m)
+            m.for_inference = functools.partial(FastBaseModel.for_inference, m)
+            m = m.model
+        return model
+
+    @staticmethod
+    def post_patch_model(
+        model,
+        use_gradient_checkpointing = True,
+        trust_remote_code = False,
+        model_type = None,
+        tokenizer = None,
+        float32_mixed_precision = None,
+    ):
+        full_finetuning = os.environ.get("TUNELABS_ENABLE_FULL_FINETUNING", "0") == "1"
+
+        if type(float32_mixed_precision) is bool:
+            # Respect whatever it was set before
+            pass
+        else:
+            float32_mixed_precision = True
+            if _get_dtype(dtype_from_config(model.config)) == torch.bfloat16 and full_finetuning:
+                # Use bfloat16 precision for full finetuning
+                float32_mixed_precision = False
+
+        # VLMs can hit DDP "marked ready twice" with re-entrant checkpointing.
+        # See: https://github.com/tunelabsai/tunelabs/issues/3713.
+        use_reentrant = not is_distributed()
+        if not use_reentrant:
+            # Under DDP, avoid the offloaded/re-entrant checkpoint patch.
+            unpatch_tunelabs_gradient_checkpointing()
+            unpatch_tunelabs_smart_gradient_checkpointing()
+            # Force native checkpoint to default to non-reentrant for downstream calls.
+            _orig_checkpoint = torch_checkpoint.checkpoint
+
+            def _nonre_checkpoint(function, *args, **kwargs):
+                kwargs["use_reentrant"] = False
+                return _orig_checkpoint(function, *args, **kwargs)
+
+            torch_checkpoint.checkpoint = _nonre_checkpoint
+            hf_modeling_utils.checkpoint = _nonre_checkpoint
+
+        model = prepare_model_for_training(
+            model,
+            use_gradient_checkpointing = use_gradient_checkpointing,
+            use_reentrant = use_reentrant,
+            full_finetuning = full_finetuning,
+            train_layernorms = full_finetuning,
+            train_embedding = full_finetuning,
+            train_lm_head = full_finetuning,
+            float32_mixed_precision = float32_mixed_precision,
+            patch_modules_to_save = True,
+        )
+
+        # Gemma3N audio conformer processes variable-length audio tensors
+        # that cause stride mismatches in AOT autograd compiled backward
+        # when non-reentrant checkpointing is used. The notebook or TRL
+        # may override gradient_checkpointing_kwargs with use_reentrant=False
+        # after this point, so we intercept gradient_checkpointing_enable
+        # to always force use_reentrant=True for Gemma3N.
+        _model_type = getattr(getattr(model, "config", None), "model_type", "") or ""
+        if "gemma3n" in _model_type.lower() or "gemma4" in _model_type.lower():
+            _original_gc_enable = model.gradient_checkpointing_enable
+
+            def _gc_enable_reentrant(**kwargs):
+                gc_kwargs = kwargs.get("gradient_checkpointing_kwargs", {}) or {}
+                gc_kwargs["use_reentrant"] = True
+                kwargs["gradient_checkpointing_kwargs"] = gc_kwargs
+                return _original_gc_enable(**kwargs)
+
+            model.gradient_checkpointing_enable = _gc_enable_reentrant
+
+        from transformers.trainer import Trainer
+
+        if (
+            Trainer._inner_training_loop.__name__ != "_fast_inner_training_loop"
+            and trust_remote_code == False
+        ):
+            raise RuntimeError("TuneLabs: Unsuccessfully patched inner_training_loop")
+        patch_saving_functions(model, vision = True)
+
+        # Patch tokenizer to pad to the left
+        m = model
+        while hasattr(m, "model"):
+            if hasattr(m, "_saved_temp_tokenizer"):
+                if hasattr(m._saved_temp_tokenizer, "tokenizer"):
+                    m._saved_temp_tokenizer.tokenizer.padding_side = "left"
+            # Also set is_loaded_in_8bit to disable incorrect DDP
+            m.is_loaded_in_8bit = True if not full_finetuning else False
+            m = m.model
+        if hasattr(m, "_saved_temp_tokenizer"):
+            if hasattr(m._saved_temp_tokenizer, "tokenizer"):
+                m._saved_temp_tokenizer.tokenizer.padding_side = "left"
+        # Also set is_loaded_in_8bit to disable incorrect DDP
+        m.is_loaded_in_8bit = True if not full_finetuning else False
+
+        # Clear deleted GPU items
+        for _ in range(3):
+            gc.collect()
+            if DEVICE_TYPE in ("cuda", "hip"):
+                torch.cuda.empty_cache()
+            elif DEVICE_TYPE == "xpu":
+                torch.xpu.empty_cache()
+        # Add for_inference and for_training
+        model.for_training = functools.partial(FastBaseModel.for_training, model)
+        model.for_inference = functools.partial(FastBaseModel.for_inference, model)
+        m = model
+        while hasattr(m, "model"):
+            m.for_training = functools.partial(FastBaseModel.for_training, m)
+            m.for_inference = functools.partial(FastBaseModel.for_inference, m)
+            m = m.model
+        # Set weight[padding_idx] = 0 for embeddings that are NOT tied with the
+        # lm_head. When weights are tied, zeroing the padding row also zeros
+        # the corresponding lm_head row, forcing logit = 0 for the pad token.
+        # Only do this if tokenizer is defined since eos_token == pad_token sometimes!
+        pad_token_id = getattr(tokenizer, "pad_token_id", None)
+        lm_head = getattr(model, "lm_head", None)
+        lm_head_weight = getattr(lm_head, "weight", None) if lm_head is not None else None
+        if tokenizer is not None and getattr(tokenizer, "eos_token_id", None) != pad_token_id:
+            with torch.no_grad():
+                for name, module in model.named_modules():
+                    if type(module) is torch.nn.Embedding:
+                        if (
+                            getattr(module, "weight", None) is not None
+                            and getattr(module, "padding_idx", None) is not None
+                        ):
+                            if (
+                                module.padding_idx == pad_token_id
+                                and module.padding_idx < module.weight.shape[0]
+                            ):
+                                # Skip if tied to lm_head
+                                if (
+                                    lm_head_weight is not None
+                                    and module.weight.data_ptr() == lm_head_weight.data_ptr()
+                                ):
+                                    continue
+                                module.weight[module.padding_idx] = 0
+        return model
+
+    @staticmethod
+    def for_inference(model):
+        if not hasattr(model, "parameters"):
+            raise TypeError(
+                "TuneLabs: I think you're passing a tokenizer, not the model to for_inference!"
+            )
+
+        def _for_inference(m):
+            if hasattr(m, "gradient_checkpointing"):
+                m.gradient_checkpointing = False
+            if hasattr(m, "training"):
+                m.training = False
+            # Pad tokenizer to the left
+            if hasattr(m, "_saved_temp_tokenizer"):
+                m._saved_temp_tokenizer.padding_side = "left"
+            # Set a flag for generation!
+            m._flag_for_generation = True
+
+        m = model
+        while hasattr(m, "model"):
+            _for_inference(m)
+            m = m.model
+        _for_inference(m)
+        model.eval()  # to turn off training on modules deeper in
+
+        # Since transformers 4.53, must turn off explicitly
+        for module in model.modules():
+            if hasattr(module, "gradient_checkpointing"):
+                module.gradient_checkpointing = False
+
+        # Also disable training for embeddings for NEFTune
+        if hasattr(model, "get_input_embeddings"):
+            embeddings = model.get_input_embeddings()
+            if hasattr(embeddings, "training"):
+                embeddings.training = False
+        if hasattr(model, "get_output_embeddings"):
+            embeddings = model.get_output_embeddings()
+            if hasattr(embeddings, "training"):
+                embeddings.training = False
+        # Restore use_cache values that prepare_model_for_training disabled
+        # for gradient checkpointing (older tunelabs_zoo has no restore helper)
+        try:
+            from tunelabs_zoo.training_utils import restore_use_cache
+            restore_use_cache(model)
+        except ImportError:
+            pass
+
+        # Must disable returning hidden states in the case for GRPO
+        os.environ["TUNELABS_RETURN_HIDDEN_STATES"] = "0"
+        # Must enable returning logits
+        os.environ["TUNELABS_RETURN_LOGITS"] = "1"
+        # Turn off skip guards and set stance to default
+        if torch_compiler_set_stance is not None:
+            torch_compiler_set_stance(stance = "default", skip_guard_eval_unsafe = False)
+        return model
+
+    @staticmethod
+    def for_training(model, use_gradient_checkpointing = True):
+        if not hasattr(model, "parameters"):
+            raise TypeError(
+                "TuneLabs: I think you're passing a tokenizer, not the model to for_training!"
+            )
+
+        # Delete all fast inference loras
+        for param in model.parameters():
+            if hasattr(param, "_fast_lora"):
+                del param._fast_lora
+
+        def _for_training(m):
+            if hasattr(m, "gradient_checkpointing"):
+                m.gradient_checkpointing = use_gradient_checkpointing
+            if hasattr(m, "training"):
+                m.training = True
+            # Pad tokenizer to the left
+            if hasattr(m, "_saved_temp_tokenizer"):
+                m._saved_temp_tokenizer.padding_side = "right"
+            # Set a flag for generation!
+            if hasattr(m, "_flag_for_generation"):
+                try:
+                    # Weirdly sometimes cannot succeed so do a try except
+                    del m._flag_for_generation
+                except:
+                    pass
+
+        m = model
+        while hasattr(m, "model"):
+            _for_training(m)
+            m = m.model
+        _for_training(m)
+        model.train()  # to turn on training on modules deeper in
+
+        # Since transformers 4.53, must turn on explicitly
+        for module in model.modules():
+            if hasattr(module, "gradient_checkpointing"):
+                module.gradient_checkpointing = use_gradient_checkpointing
+
+        # Also re-enable training for embeddings for NEFTune
+        if hasattr(model, "get_input_embeddings"):
+            embeddings = model.get_input_embeddings()
+            if hasattr(embeddings, "training"):
+                embeddings.training = True
+        if hasattr(model, "get_output_embeddings"):
+            embeddings = model.get_output_embeddings()
+            if hasattr(embeddings, "training"):
+                embeddings.training = True
+        # Re-disable use_cache if prepare_model_for_training had disabled it
+        # and for_inference restored it (record only exists after a disable)
+        if (
+            use_gradient_checkpointing
+            and getattr(model, "_tunelabs_use_cache_originals", None) is not None
+        ):
+            try:
+                from tunelabs_zoo.training_utils import disable_use_cache
+                disable_use_cache(model)
+            except ImportError:
+                pass
+
+        # Can re-enable not returning logits
+        os.environ["TUNELABS_RETURN_LOGITS"] = "0"
+        # Turn off skip guards and set stance to default
+        if torch_compiler_set_stance is not None:
+            torch_compiler_set_stance(stance = "default", skip_guard_eval_unsafe = False)
+        return model
+
+
+def _looks_like_message_list(value):
+    return isinstance(value, list) and (len(value) == 0 or isinstance(value[0], dict))
+
+
+def _iter_message_lists(example, column):
+    if _looks_like_message_list(example):
+        yield example
+        return
+    if not isinstance(example, dict):
+        return
+    seen_keys = set()
+    for key in (column, "messages", "conversations", "prompt", "completion"):
+        if key in seen_keys:
+            continue
+        seen_keys.add(key)
+        value = example.get(key)
+        if _looks_like_message_list(value):
+            yield value
+
+
+def _local_path_from_video_value(video_path):
+    # data: URIs are inline payloads, not files, and contain no "://"
+    if video_path.startswith("data:"):
+        return None
+    if "://" not in video_path:
+        return video_path
+    if not video_path.startswith("file://"):
+        return None
+    from urllib.parse import urlparse
+    from urllib.request import url2pathname
+
+    parsed = urlparse(video_path)
+    # RFC 8089: only an empty authority or "localhost" is the local machine
+    if parsed.netloc and parsed.netloc != "localhost":
+        return None
+    path = url2pathname(parsed.path)
+    return path or None
+
+
+def check_dataset_for_missing_videos(
+    dataset,
+    column = "messages",
+    raise_error = True,
+    checked = None,
+):
+    """
+    Validate that local video paths referenced in a dataset exist, catching
+    missing files before training (torchvision otherwise returns an empty
+    tensor and the model silently receives no video signal).
+
+    Args:
+        dataset:     Map-style Dataset, list of dicts, or iterable of examples
+                     (not a streaming IterableDataset - iterating consumes it).
+        column:      Chat-messages column, default "messages"; "conversations",
+                     "prompt" and "completion" are also scanned.
+        raise_error: True (default) raises FileNotFoundError listing missing
+                     files; False warns and returns them.
+        checked:     Optional set of known-good paths for cross-call dedup.
+
+    Returns:
+        List[str]: Missing file paths (empty when all exist).
+    """
+    try:
+        from datasets import IterableDataset as _IterableDataset
+        if isinstance(dataset, _IterableDataset):
+            warnings.warn(
+                "TuneLabs: check_dataset_for_missing_videos received a streaming "
+                "IterableDataset; iterating would exhaust it and training would "
+                "see zero samples. Skipping validation - pass a map-style Dataset "
+                "or rely on the TuneLabsVisionDataCollator's per-batch check.",
+                stacklevel = 2,
+            )
+            return []
+    except ImportError:
+        pass
+
+    missing = []
+    # Report each missing path once; only confirmed-existing paths enter
+    # `checked`, so retries after an error re-check previously missing files.
+    seen_missing = set()
+    if checked is None:
+        checked = set()
+
+    for example in dataset:
+        for messages in _iter_message_lists(example, column):
+            for msg in messages:
+                if not isinstance(msg, dict):
+                    continue
+                content = msg.get("content", [])
+                if not isinstance(content, (list, tuple)):
+                    continue
+                for item in content:
+                    if not isinstance(item, dict) or item.get("type") != "video":
+                        continue
+                    video_path = item.get("video", "")
+                    if not isinstance(video_path, str) or not video_path:
+                        continue
+                    path = _local_path_from_video_value(video_path)
+                    if path is None or path in checked or path in seen_missing:
+                        continue
+                    if not os.path.isfile(path):
+                        seen_missing.add(path)
+                        missing.append(path)
+                    else:
+                        checked.add(path)
+
+    if missing:
+        missing_list = "\n".join(f"  - {p}" for p in missing)
+        error_msg = (
+            f"TuneLabs: {len(missing)} video file(s) referenced in your dataset could not be found.\n"
+            "Training would silently continue with empty video tensors - the model would receive\n"
+            "no actual video signal while loss still appears to decrease.\n\n"
+            f"Missing files:\n{missing_list}\n\n"
+            "Fix: verify the video file paths in your dataset before calling the trainer."
+        )
+        if raise_error:
+            raise FileNotFoundError(error_msg)
+        warnings.warn(error_msg, stacklevel = 2)
+
+    return missing

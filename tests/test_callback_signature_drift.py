@@ -1,6 +1,6 @@
 """Static-analysis regression test: callback signature drift.
 
-Catches a producer (e.g. unsloth_zoo's MLXTrainer) changing the arity it passes to a registered
+Catches a producer (e.g. tunelabs_zoo's MLXTrainer) changing the arity it passes to a registered
 callback while consumers still declare the old arity; the producer's try/except swallows the
 TypeError so the callback silently never fires. Pure AST so it runs on every CI OS/Python.
 
@@ -252,22 +252,22 @@ def check_registrations(
 
 
 def _zoo_roots() -> list[pathlib.Path]:
-    """unsloth_zoo source roots, in order: UNSLOTH_ZOO_SRC env, ../unsloth-zoo sibling, pip package.
+    """tunelabs_zoo source roots, in order: TUNELABS_ZOO_SRC env, ../tunelabs-zoo sibling, pip package.
 
     (The pip wheel may strip submodules like mlx/, missing MLX producers.) All existing roots scanned.
     """
     roots: list[pathlib.Path] = []
-    env_src = os.environ.get("UNSLOTH_ZOO_SRC")
+    env_src = os.environ.get("TUNELABS_ZOO_SRC")
     if env_src:
         p = pathlib.Path(env_src).expanduser().resolve()
         if p.exists():
             roots.append(p)
-    sibling = (REPO_ROOT.parent / "unsloth-zoo").resolve()
+    sibling = (REPO_ROOT.parent / "tunelabs-zoo").resolve()
     if sibling.exists():
         roots.append(sibling)
-    spec = importlib.util.find_spec("unsloth_zoo")
+    spec = importlib.util.find_spec("tunelabs_zoo")
     if spec is not None and spec.origin is not None:
-        # Use the unsloth_zoo dir itself (parent of __init__.py), not the site-packages root.
+        # Use the tunelabs_zoo dir itself (parent of __init__.py), not the site-packages root.
         roots.append(pathlib.Path(spec.origin).resolve().parent)
     return roots
 
@@ -279,7 +279,7 @@ def test_no_callback_signature_drift():
         import pytest
         pytest.skip(
             "no callback producer pattern (self._*_callbacks + cb(...)) found in "
-            "unsloth or unsloth_zoo. Set UNSLOTH_ZOO_SRC=<path-to-unsloth-zoo-git-checkout> "
+            "tunelabs or tunelabs_zoo. Set TUNELABS_ZOO_SRC=<path-to-tunelabs-zoo-git-checkout> "
             "(the pip wheel strips platform-specific submodules like mlx/) to enable "
             "the detector locally."
         )

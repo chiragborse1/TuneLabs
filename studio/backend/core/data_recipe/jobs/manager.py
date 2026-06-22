@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 from __future__ import annotations
 
@@ -132,7 +132,7 @@ class JobManager:
     ) -> str:
         """Spawn the job subprocess (one at a time, no cap).
 
-        ``internal_api_key_id`` is a workflow-scoped sk-unsloth-* key row id
+        ``internal_api_key_id`` is a workflow-scoped sk-tunelabs-* key row id
         minted by the route layer; revoked on terminal state so the key's
         live window is no longer than the run.
         """
@@ -537,7 +537,7 @@ class JobManager:
         self._emit(event)
 
     def _retire_workflow_key(self, job: Job) -> None:
-        """Revoke the workflow-scoped sk-unsloth-* key, if one was minted.
+        """Revoke the workflow-scoped sk-tunelabs-* key, if one was minted.
 
         Best-effort: failures are swallowed. The key expires after 24h, so a
         missed revoke is a latency, not correctness, concern.

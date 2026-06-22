@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: AGPL-3.0-only */
-/* Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0 */
+/* Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0 */
 
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -737,7 +737,7 @@
 		@apply hover:bg-white/[0.04] focus:bg-white/[0.06];
 	}
 
-	/* Switch — unsloth-green track when active, slider-gray thumb in
+	/* Switch — tunelabs-green track when active, slider-gray thumb in
 	   both states. Keeps the on-state recognizable as an "engaged"
 	   primary control while the moving thumb sits in the same neutral
 	   palette as the panel sliders, tying every control in the panel
@@ -896,13 +896,13 @@
 	}
 
 	/* Model selector: pointer cursor on every clickable element. */
-	.unsloth-model-selector-trigger,
-	.unsloth-model-selector-menu button {
+	.tunelabs-model-selector-trigger,
+	.tunelabs-model-selector-menu button {
 		cursor: pointer;
 	}
 
-	.unsloth-model-selector-trigger:disabled,
-	.unsloth-model-selector-menu button:disabled {
+	.tunelabs-model-selector-trigger:disabled,
+	.tunelabs-model-selector-menu button:disabled {
 		cursor: not-allowed;
 	}
 
@@ -951,13 +951,13 @@
 
 	/* Model selector: drop the inset edge ring, keep the soft drop shadow.
 	   Pin --radius to the light value so the corners match in both themes. */
-	.unsloth-model-selector-menu.menu-soft-surface {
+	.tunelabs-model-selector-menu.menu-soft-surface {
 		--radius: 1.1rem;
 		box-shadow: 0 var(--menu-soft-offset-y) var(--menu-soft-blur)
 			var(--menu-soft-spread) var(--menu-soft-shadow);
 	}
 
-	.dark .unsloth-model-selector-menu.menu-soft-surface {
+	.dark .tunelabs-model-selector-menu.menu-soft-surface {
 		box-shadow: none;
 	}
 
@@ -996,7 +996,7 @@
 
 	/* Model selector: shadow in the page-bg color so it lifts off the
 	   composer it overlaps (chatbox geometry). Account menu stays flat. */
-	.dark .unsloth-model-selector-menu {
+	.dark .tunelabs-model-selector-menu {
 		box-shadow: 0 2px 8px -2px var(--background) !important;
 	}
 	.dark .app-user-menu.menu-soft-surface-up {
@@ -1131,12 +1131,12 @@
 
 	/* Hovering an active pill swaps the icon for an X (click to turn off). */
 	.composer-pill-btn[data-active="true"]:hover .composer-pill-glyph > :not(.composer-pill-x),
-	.unsloth-thinking-pill[data-active="true"]:hover .composer-pill-glyph > :not(.composer-pill-x) {
+	.tunelabs-thinking-pill[data-active="true"]:hover .composer-pill-glyph > :not(.composer-pill-x) {
 		@apply opacity-0;
 	}
 
 	.composer-pill-btn[data-active="true"]:hover .composer-pill-x,
-	.unsloth-thinking-pill[data-active="true"]:hover .composer-pill-x {
+	.tunelabs-thinking-pill[data-active="true"]:hover .composer-pill-x {
 		@apply opacity-100;
 	}
 
@@ -1168,7 +1168,7 @@
 	}
 
 	/* Pill composer; own classes so compare-mode keeps its stacked layout. */
-	.unsloth-composer-surface {
+	.tunelabs-composer-surface {
 		@apply relative flex w-full flex-col rounded-[32px] bg-background dark:bg-card px-3 py-3 outline-none transition-shadow;
 		font-family: var(--font-sans);
 		background-clip: padding-box;
@@ -1178,11 +1178,11 @@
 		transition: box-shadow 0.1s;
 	}
 
-	.unsloth-composer-surface:focus-within {
+	.tunelabs-composer-surface:focus-within {
 		box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.16);
 	}
 
-	.dark .unsloth-composer-surface {
+	.dark .tunelabs-composer-surface {
 		background-color: var(--card);
 		box-shadow: none;
 	}
@@ -1190,37 +1190,37 @@
 	/* Keep the expand/collapse width swap instant. A transition on width (e.g.
 	   the reduced-motion blanket rule) makes getComputedStyle().width lag a
 	   frame, so autosize measures the stale width and leaves a stray blank row. */
-	.unsloth-composer-line,
-	.unsloth-composer-line .unsloth-composer-input,
-	.unsloth-composer-left {
+	.tunelabs-composer-line,
+	.tunelabs-composer-line .tunelabs-composer-input,
+	.tunelabs-composer-left {
 		transition-property: none !important;
 	}
 
 	/* Composer row: one centered line when empty; two rows (input over controls)
 	   when filled, so the textarea never remounts. */
-	.unsloth-composer-line {
+	.tunelabs-composer-line {
 		@apply flex w-full flex-wrap items-center gap-0.5 px-1;
 	}
 
-	.unsloth-composer-left {
+	.tunelabs-composer-left {
 		@apply flex shrink-0 items-center gap-0.5;
 		order: 1;
 		/* Pull the plus button closer to the composer edge. */
 		margin-left: -0.25rem;
 	}
 
-	.unsloth-composer-line .unsloth-composer-input {
+	.tunelabs-composer-line .tunelabs-composer-input {
 		order: 2;
 	}
 
-	.unsloth-composer-line .aui-composer-action-wrapper {
+	.tunelabs-composer-line .aui-composer-action-wrapper {
 		order: 3;
 		margin-left: auto;
 		/* Inset the send circle from the edge, Gemini-style. */
 		margin-right: -0.125rem;
 	}
 
-	.unsloth-composer-line[data-expanded="true"] .unsloth-composer-input {
+	.tunelabs-composer-line[data-expanded="true"] .tunelabs-composer-input {
 		order: 1;
 		flex-basis: 100%;
 		width: 100%;
@@ -1232,31 +1232,31 @@
 
 	/* Two-row gap between text and controls. On the line, not the input, so
 	   the placeholder max-height clamp never crops it like padding would. */
-	.unsloth-composer-line[data-expanded="true"] {
+	.tunelabs-composer-line[data-expanded="true"] {
 		row-gap: 0.75rem;
 	}
 
-	.unsloth-composer-line[data-expanded="true"] .unsloth-composer-left {
+	.tunelabs-composer-line[data-expanded="true"] .tunelabs-composer-left {
 		order: 2;
 	}
 
 	/* Empty (placeholder shown): clamp back to one row. max-height beats the
 	   autosize textarea's inline !important height, so a cleared message leaves
 	   no stale tall box or stray scrollbar. */
-	.unsloth-composer-input:placeholder-shown {
+	.tunelabs-composer-input:placeholder-shown {
 		max-height: 40px !important;
 		overflow-y: hidden !important;
 	}
 
-	.unsloth-composer-input {
+	.tunelabs-composer-input {
 		@apply min-h-[40px] min-w-0 flex-1 resize-none overflow-y-auto bg-transparent pl-0.5 pr-2 py-2 text-[15px] font-[450] leading-6 outline-none placeholder:text-muted-foreground focus-visible:ring-0;
 	}
 
-	.unsloth-composer-plus {
+	.tunelabs-composer-plus {
 		@apply flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-foreground transition-colors hover:bg-muted-foreground/15 disabled:cursor-not-allowed disabled:opacity-40;
 	}
 
-	.unsloth-composer-plus[data-state="open"] {
+	.tunelabs-composer-plus[data-state="open"] {
 		@apply bg-muted-foreground/15;
 		/* Radix's modal menu sets body pointer-events:none; re-enable on the open
 		   trigger so the cursor and click-to-close work. */
@@ -1266,20 +1266,20 @@
 
 	/* Open menu rotates the plus 45deg into an x. Ease-in-out for a smooth
 	   spin; keep it at 45deg so it never passes back through a "+". */
-	.unsloth-composer-plus svg {
+	.tunelabs-composer-plus svg {
 		transition: transform 250ms cubic-bezier(0.65, 0, 0.35, 1);
 		will-change: transform;
 	}
 
-	.unsloth-composer-plus[data-state="open"] svg {
+	.tunelabs-composer-plus[data-state="open"] svg {
 		transform: rotate(45deg);
 	}
 
 	/* Keyboard focus shows a subtle brand ring, not the browser's blue outline;
 	   mouse clicks (no :focus-visible) stay ring-free. */
 	.composer-pill-btn:focus-visible,
-	.unsloth-thinking-pill:focus-visible,
-	.unsloth-composer-plus:focus-visible {
+	.tunelabs-thinking-pill:focus-visible,
+	.tunelabs-composer-plus:focus-visible {
 		outline: none;
 		box-shadow: 0 0 0 2px color-mix(in oklab, var(--ring) 45%, transparent);
 	}
@@ -1304,39 +1304,39 @@
 	}
 
 	/* Set Hellix explicitly; .aui-thread-root resets --font-heading to sans. */
-	.unsloth-welcome-title {
+	.tunelabs-welcome-title {
 		font-family: "Hellix", "Space Grotesk Variable", var(--font-sans);
 		font-weight: 500;
 	}
 
 	/* Right-side Thinking pill (toggle or dropdown). pl-2 matches the left
 	   pills so the hover X is not pushed in too far. */
-	.unsloth-thinking-pill {
+	.tunelabs-thinking-pill {
 		@apply inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-full py-1.5 pl-2 pr-2.5 text-[14px] font-medium text-muted-foreground transition-colors hover:bg-primary/10 dark:hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-40;
 		/* Reserve a text line so the icon-only (inactive) pill matches the
 		   text pills' height instead of collapsing to the icon. */
 		min-height: calc(1lh + 0.75rem);
 	}
 
-	.unsloth-thinking-pill[data-active="true"] {
+	.tunelabs-thinking-pill[data-active="true"] {
 		color: var(--primary);
 	}
 
-	.unsloth-thinking-pill[data-state="open"] {
+	.tunelabs-thinking-pill[data-state="open"] {
 		@apply bg-muted-foreground/10;
-		/* See .unsloth-composer-plus: re-enable pointer-events on the open trigger. */
+		/* See .tunelabs-composer-plus: re-enable pointer-events on the open trigger. */
 		pointer-events: auto;
 		cursor: pointer;
 	}
 
 	/* Smaller tick for selected Thinking options. */
-	.unsloth-tick {
+	.tunelabs-tick {
 		width: 0.8rem !important;
 		height: 0.8rem !important;
 	}
 
 	/* Soft elevation; [data-slot] outranks the component ring-1, dropping the border. */
-	.unsloth-plus-menu[data-slot] {
+	.tunelabs-plus-menu[data-slot] {
 		/* Concentric with the item hover boxes: container radius =
 		   item radius (12px) + side gutter (9px), so the curves run parallel.
 		   !important beats the global 14px dropdown radius. */
@@ -1352,21 +1352,21 @@
 
 	/* Width does not change the concentric radius; the MCP menu uses the same
 	   item radius + gutter, so it keeps the same container radius. */
-	.unsloth-plus-menu.mcp-menu[data-slot] {
+	.tunelabs-plus-menu.mcp-menu[data-slot] {
 		border-radius: 22px !important;
 	}
 
 	/* One-line menus keep the standard menu shape (same radius as multi-line),
 	   so a lone row doesn't balloon into a fully rounded pill. */
 
-	.dark .unsloth-plus-menu[data-slot] {
+	.dark .tunelabs-plus-menu[data-slot] {
 		background-color: var(--card);
 		/* Shadow tinted to the page bg so it blends, not a dark halo. */
 		box-shadow: 0 4px 14px var(--background);
 	}
 
 	/* Compact items; also applied to portaled sub-content. */
-	.unsloth-plus-menu :is(
+	.tunelabs-plus-menu :is(
 			[data-slot="dropdown-menu-item"],
 			[data-slot="dropdown-menu-sub-trigger"]
 		) {
@@ -1377,18 +1377,18 @@
 		border-radius: 12px;
 	}
 
-	.unsloth-plus-menu [data-slot="dropdown-menu-label"] {
+	.tunelabs-plus-menu [data-slot="dropdown-menu-label"] {
 		@apply pl-3 pr-3 py-1.5 text-[12px];
 	}
 
 	/* Active (green) items keep their primary text and icon color on hover. */
-	.unsloth-plus-menu [data-slot="dropdown-menu-item"].text-primary:is(:hover, :focus, :focus-visible, [data-highlighted]),
-	.unsloth-plus-menu [data-slot="dropdown-menu-item"].text-primary:is(:hover, :focus, :focus-visible, [data-highlighted]) svg {
+	.tunelabs-plus-menu [data-slot="dropdown-menu-item"].text-primary:is(:hover, :focus, :focus-visible, [data-highlighted]),
+	.tunelabs-plus-menu [data-slot="dropdown-menu-item"].text-primary:is(:hover, :focus, :focus-visible, [data-highlighted]) svg {
 		color: var(--primary) !important;
 	}
 
 	/* Light hover: neutral grey, not the green accent. */
-	.unsloth-plus-menu :is(
+	.tunelabs-plus-menu :is(
 			[data-slot="dropdown-menu-item"],
 			[data-slot="dropdown-menu-sub-trigger"]
 		):is(:hover, :focus, :focus-visible, [data-highlighted], [data-state="open"]) {
@@ -1396,7 +1396,7 @@
 	}
 
 	/* Dark hover: the accent nearly matches the surface, so use a clear overlay. */
-	.dark .unsloth-plus-menu :is(
+	.dark .tunelabs-plus-menu :is(
 			[data-slot="dropdown-menu-item"],
 			[data-slot="dropdown-menu-sub-trigger"]
 		):is(:hover, :focus, :focus-visible, [data-highlighted], [data-state="open"]) {
@@ -1406,18 +1406,18 @@
 	/* Hover tints only the background; the item and every descendant (text, icons,
 	   labels) keep their resting color, overriding Radix's focus:**:text-accent-
 	   foreground. The active green rule above still wins via higher specificity. */
-	.unsloth-plus-menu :is(
+	.tunelabs-plus-menu :is(
 			[data-slot="dropdown-menu-item"],
 			[data-slot="dropdown-menu-sub-trigger"]
 		):is(:hover, :focus, :focus-visible, [data-highlighted], [data-state="open"]),
-	.unsloth-plus-menu :is(
+	.tunelabs-plus-menu :is(
 			[data-slot="dropdown-menu-item"],
 			[data-slot="dropdown-menu-sub-trigger"]
 		):is(:hover, :focus, :focus-visible, [data-highlighted], [data-state="open"]) * {
 		color: inherit !important;
 	}
 
-	.unsloth-plus-menu :is(
+	.tunelabs-plus-menu :is(
 			[data-slot="dropdown-menu-item"],
 			[data-slot="dropdown-menu-sub-trigger"]
 		)
@@ -1427,17 +1427,17 @@
 	}
 
 	/* Destructive items keep red text and a red-tinted hover, not the grey one. */
-	.unsloth-plus-menu [data-slot="dropdown-menu-item"][data-variant="destructive"],
-	.unsloth-plus-menu [data-slot="dropdown-menu-item"][data-variant="destructive"] * {
+	.tunelabs-plus-menu [data-slot="dropdown-menu-item"][data-variant="destructive"],
+	.tunelabs-plus-menu [data-slot="dropdown-menu-item"][data-variant="destructive"] * {
 		color: var(--destructive) !important;
 	}
-	.unsloth-plus-menu [data-slot="dropdown-menu-item"][data-variant="destructive"]:is(:hover, :focus, :focus-visible, [data-highlighted]) {
+	.tunelabs-plus-menu [data-slot="dropdown-menu-item"][data-variant="destructive"]:is(:hover, :focus, :focus-visible, [data-highlighted]) {
 		background-color: color-mix(in oklab, var(--destructive) 10%, transparent) !important;
 	}
 
 	/* Thinking menu: tighter gap; nowrap keeps "Preserve thinking" on one line
 	   so the menu sizes to its content. */
-	.unsloth-thinking-menu :is(
+	.tunelabs-thinking-menu :is(
 			[data-slot="dropdown-menu-item"],
 			[data-slot="dropdown-menu-sub-trigger"]
 		) {
@@ -1787,7 +1787,7 @@
 	}
 }
 
-/* No border line; same drop shadow as the composer (.unsloth-composer-surface).
+/* No border line; same drop shadow as the composer (.tunelabs-composer-surface).
    !important because Sonner injects its base rules at runtime. */
 [data-sonner-toast][data-styled='true'] {
 	padding: 12px 18px !important;
@@ -1925,36 +1925,36 @@
 /* Composer textarea: keep the scroll thumb faint until the user hovers or
    drags the thumb itself, so a tall draft never shows a heavy dark rail. */
 .composer-input,
-.unsloth-composer-input {
+.tunelabs-composer-input {
 	scrollbar-color: oklch(0.5 0 0 / 0.16) transparent;
 }
 
 .composer-input::-webkit-scrollbar-thumb,
-.unsloth-composer-input::-webkit-scrollbar-thumb {
+.tunelabs-composer-input::-webkit-scrollbar-thumb {
 	background: oklch(0.5 0 0 / 0.16);
 }
 
 .composer-input::-webkit-scrollbar-thumb:hover,
-.unsloth-composer-input::-webkit-scrollbar-thumb:hover,
+.tunelabs-composer-input::-webkit-scrollbar-thumb:hover,
 .composer-input::-webkit-scrollbar-thumb:active,
-.unsloth-composer-input::-webkit-scrollbar-thumb:active {
+.tunelabs-composer-input::-webkit-scrollbar-thumb:active {
 	background: oklch(0.5 0 0 / 0.45);
 }
 
 .dark .composer-input,
-.dark .unsloth-composer-input {
+.dark .tunelabs-composer-input {
 	scrollbar-color: oklch(0.72 0 0 / 0.18) transparent;
 }
 
 .dark .composer-input::-webkit-scrollbar-thumb,
-.dark .unsloth-composer-input::-webkit-scrollbar-thumb {
+.dark .tunelabs-composer-input::-webkit-scrollbar-thumb {
 	background: oklch(0.72 0 0 / 0.18);
 }
 
 .dark .composer-input::-webkit-scrollbar-thumb:hover,
-.dark .unsloth-composer-input::-webkit-scrollbar-thumb:hover,
+.dark .tunelabs-composer-input::-webkit-scrollbar-thumb:hover,
 .dark .composer-input::-webkit-scrollbar-thumb:active,
-.dark .unsloth-composer-input::-webkit-scrollbar-thumb:active {
+.dark .tunelabs-composer-input::-webkit-scrollbar-thumb:active {
 	background: oklch(0.72 0 0 / 0.5);
 }
 
@@ -2188,7 +2188,7 @@
 
 	/* Keep the plus/x morph animating under reduced motion (small rotation,
 	   like the spinners above). */
-	.unsloth-composer-plus svg {
+	.tunelabs-composer-plus svg {
 		transition-duration: 250ms !important;
 	}
 }

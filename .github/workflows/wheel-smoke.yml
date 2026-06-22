@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 # Builds the PyPI wheel from the PR branch, then verifies the built wheel
 # actually contains what we expect to ship and does NOT contain the broken
@@ -7,7 +7,7 @@
 # would have blocked the 2026.5.1 release before twine upload.
 #
 # Verified locally end-to-end against this branch:
-#   - python -m build produces unsloth-<version>-py3-none-any.whl in 13s
+#   - python -m build produces tunelabs-<version>-py3-none-any.whl in 13s
 #   - wheel content sanity passes:
 #       lockfile shipped, frontend dist shipped,
 #       no node_modules in wheel, no bun.lock in wheel,
@@ -22,8 +22,8 @@ on:
     paths:
       - 'pyproject.toml'
       - 'studio/**'
-      - 'unsloth/**'
-      - 'unsloth_cli/**'
+      - 'tunelabs/**'
+      - 'tunelabs_cli/**'
       - '.github/workflows/wheel-smoke.yml'
   push:
     branches: [main, pip]
@@ -78,7 +78,7 @@ jobs:
         run: |
           python - <<'PY'
           import zipfile, glob, sys
-          w = glob.glob("dist/unsloth-*.whl")
+          w = glob.glob("dist/tunelabs-*.whl")
           if not w:
               print("FAIL: no wheel produced"); sys.exit(2)
           w = w[0]
@@ -122,7 +122,7 @@ jobs:
             python-multipart aiofiles sqlalchemy cryptography \
             pyyaml jinja2 mammoth unpdf requests \
             'numpy<3'
-          /tmp/v/bin/pip install --no-deps dist/unsloth-*.whl
+          /tmp/v/bin/pip install --no-deps dist/tunelabs-*.whl
           # Run from /tmp so Python imports the installed package, not the source tree.
           cd /tmp
           /tmp/v/bin/python -c "from studio.backend.main import app; print('Studio backend OK:', app.title)"
@@ -131,6 +131,6 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
-          name: unsloth-wheel
+          name: tunelabs-wheel
           path: dist/
           retention-days: 7

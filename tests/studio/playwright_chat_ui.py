@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Comprehensive Studio chat UI test, run locally + in CI."""
 
@@ -35,7 +35,7 @@ BASE = os.environ["BASE_URL"]
 OLD = os.environ["STUDIO_OLD_PW"]
 NEW = os.environ["STUDIO_NEW_PW"]
 NEW2 = os.environ.get("STUDIO_NEW2_PW", NEW + "X9!")
-GGUF_REPO = os.environ.get("GGUF_REPO", "unsloth/gemma-3-270m-it-GGUF")
+GGUF_REPO = os.environ.get("GGUF_REPO", "tunelabs/gemma-3-270m-it-GGUF")
 GGUF_VARIANT = os.environ.get("GGUF_VARIANT", "UD-Q4_K_XL")
 ART_DIR = os.environ.get("PW_ART_DIR", "logs/playwright")
 ART = Path(ART_DIR)
@@ -119,7 +119,7 @@ def soft_fail(m):
 def login_via_api(pw):
     req = urllib.request.Request(
         f"{BASE}/api/auth/login",
-        data = json.dumps({"username": "unsloth", "password": pw}).encode(),
+        data = json.dumps({"username": "tunelabs", "password": pw}).encode(),
         method = "POST",
         headers = {"Content-Type": "application/json"},
     )
@@ -356,16 +356,16 @@ with sync_playwright() as p:
     shoot("03-chat-loaded")
 
     # /api/models/list and /api/inference/load need a bearer; the
-    # frontend stores it under "unsloth_auth_token" (auth/session.ts).
+    # frontend stores it under "tunelabs_auth_token" (auth/session.ts).
     token = robust_evaluate(
         page,
-        "() => localStorage.getItem('unsloth_auth_token')",
+        "() => localStorage.getItem('tunelabs_auth_token')",
     )
     if not token:
         # Fall back: exchange the refresh token via /api/auth/refresh.
         refresh_token = robust_evaluate(
             page,
-            "() => localStorage.getItem('unsloth_auth_refresh_token')",
+            "() => localStorage.getItem('tunelabs_auth_refresh_token')",
         )
         if refresh_token:
             refresh_resp = evaluate_fetch(
@@ -1128,7 +1128,7 @@ with sync_playwright() as p:
             "-H",
             "Content-Type: application/json",
             "-d",
-            json.dumps({"username": "unsloth", "password": NEW}),
+            json.dumps({"username": "tunelabs", "password": NEW}),
         ],
         capture_output = True,
         text = True,
@@ -1193,7 +1193,7 @@ with sync_playwright() as p:
 
     # ─────────────────────────────────────────────────────
     # 17. Shutdown via the account menu. The "Stop server" action
-    # POSTs /api/shutdown, swaps in the "Unsloth Studio has stopped"
+    # POSTs /api/shutdown, swaps in the "TuneLabs Studio has stopped"
     # placeholder, and /api/health goes unreachable shortly after.
     # ─────────────────────────────────────────────────────
     step("Shutdown via account menu")
@@ -1236,14 +1236,14 @@ with sync_playwright() as p:
     stop_btn.click()
 
     # Wait for the post-shutdown placeholder body (the component swaps in
-    # "Unsloth Studio has stopped." once /api/shutdown returns ok).
+    # "TuneLabs Studio has stopped." once /api/shutdown returns ok).
     try:
         page.wait_for_function(
-            """() => /Unsloth Studio has stopped/.test(document.body.innerText)""",
+            """() => /TuneLabs Studio has stopped/.test(document.body.innerText)""",
             timeout = 15_000,
         )
         shoot("20-shutdown-placeholder")
-        info("OK 'Unsloth Studio has stopped' placeholder rendered")
+        info("OK 'TuneLabs Studio has stopped' placeholder rendered")
     except Exception as exc:
         info(f"WARN shutdown placeholder didn't render: {exc!r}")
 

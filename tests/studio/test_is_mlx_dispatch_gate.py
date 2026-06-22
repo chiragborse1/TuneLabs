@@ -2,7 +2,7 @@
 
 """Regression tests for the CUDA-vs-MLX dispatch gates Studio relies on.
 
-Two gates: (1) ``unsloth._IS_MLX`` (import-time, delegates to the zoo MLX
+Two gates: (1) ``tunelabs._IS_MLX`` (import-time, delegates to the zoo MLX
 runtime gate behind a local precheck barrier); (2)
 ``utils.hardware.detect_hardware()`` (runtime, CUDA->XPU->MLX->CPU). These
 are the canaries against "MLX support accidentally hijacks CUDA/AMD/Intel
@@ -19,7 +19,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-UNSLOTH_INIT = REPO_ROOT / "unsloth" / "__init__.py"
+TUNELABS_INIT = REPO_ROOT / "tunelabs" / "__init__.py"
 
 
 # 1. Source-level structure check on _IS_MLX (no platform dependencies).
@@ -27,7 +27,7 @@ UNSLOTH_INIT = REPO_ROOT / "unsloth" / "__init__.py"
 
 def test_is_mlx_gate_uses_three_required_predicates():
     """_IS_MLX must AND Darwin+arm64+importable-mlx; dropping any breaks dispatch."""
-    tree = ast.parse(UNSLOTH_INIT.read_text())
+    tree = ast.parse(TUNELABS_INIT.read_text())
 
     target = None
     for node in ast.walk(tree):
@@ -39,7 +39,7 @@ def test_is_mlx_gate_uses_three_required_predicates():
         ):
             target = node.value
             break
-    assert target is not None, "_IS_MLX assignment not found in unsloth/__init__.py"
+    assert target is not None, "_IS_MLX assignment not found in tunelabs/__init__.py"
     assert isinstance(target, ast.Call), "_IS_MLX must call the shared MLX helper"
     expr_src = ast.unparse(target)
     assert expr_src == "_is_mlx_available()", "_IS_MLX must delegate to the shared MLX runtime gate"
@@ -59,26 +59,26 @@ def test_is_mlx_gate_uses_three_required_predicates():
         and "'arm64'" in helper_src
         and "find_spec" in helper_src
         and "'mlx'" in helper_src
-        and "from unsloth_zoo.mlx import is_mlx_available" in helper_src
+        and "from tunelabs_zoo.mlx import is_mlx_available" in helper_src
     ), "_IS_MLX helper must precheck local MLX predicates before importing zoo"
     assert (
-        "from unsloth_zoo.mlx import is_mlx_available" in helper_src
+        "from tunelabs_zoo.mlx import is_mlx_available" in helper_src
         and "return is_mlx_available()" in helper_src
     ), "_IS_MLX helper must delegate final detection to the shared zoo MLX runtime gate"
-    assert helper_src.index("UNSLOTH_FORCE_GPU_PATH") < helper_src.index(
-        "from unsloth_zoo.mlx import is_mlx_available"
+    assert helper_src.index("TUNELABS_FORCE_GPU_PATH") < helper_src.index(
+        "from tunelabs_zoo.mlx import is_mlx_available"
     ), "_IS_MLX helper must run the local MLX precheck before importing zoo"
 
 
 # 2. Runtime gate behavior with platform spoofed to Apple Silicon + fake mlx.
-#    Re-evaluates the expression rather than reloading unsloth (avoids a torch
+#    Re-evaluates the expression rather than reloading tunelabs (avoids a torch
 #    cascade-reload).
 
 
 def _evaluate_is_mlx_precheck(platform_module, importlib_util, os_module):
     """Re-evaluate the local _is_mlx_available precheck with injected deps."""
     return (
-        os_module.environ.get("UNSLOTH_FORCE_GPU_PATH", "0") != "1"
+        os_module.environ.get("TUNELABS_FORCE_GPU_PATH", "0") != "1"
         and platform_module.system() == "Darwin"
         and platform_module.machine() == "arm64"
         and importlib_util.find_spec("mlx") is not None

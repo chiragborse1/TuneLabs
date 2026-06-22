@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """The llama.cpp startup probes must run OFF the FastAPI lifespan critical path.
 
@@ -52,7 +52,7 @@ def _fast_capability_probe(monkeypatch):
         "probe_server_capabilities",
         staticmethod(lambda _b: {"found": False}),
     )
-    monkeypatch.delenv("UNSLOTH_DISABLE_UPDATE_CHECK", raising = False)
+    monkeypatch.delenv("TUNELABS_DISABLE_UPDATE_CHECK", raising = False)
 
 
 def test_probe_does_not_block_startup(monkeypatch):
@@ -80,7 +80,7 @@ def test_probe_does_not_block_startup(monkeypatch):
 
 
 def test_disable_env_skips_probe_entirely(monkeypatch):
-    """UNSLOTH_DISABLE_UPDATE_CHECK=1 starts no probe thread and makes no call."""
+    """TUNELABS_DISABLE_UPDATE_CHECK=1 starts no probe thread and makes no call."""
     calls: list[int] = []
 
     def _freshness(_bin, **_kw):
@@ -88,11 +88,11 @@ def test_disable_env_skips_probe_entirely(monkeypatch):
         return {"stale": False}
 
     monkeypatch.setattr(freshness, "check_prebuilt_freshness", _freshness)
-    monkeypatch.setenv("UNSLOTH_DISABLE_UPDATE_CHECK", "1")
+    monkeypatch.setenv("TUNELABS_DISABLE_UPDATE_CHECK", "1")
 
     app = _FakeApp()
     main._start_llama_cpp_probes_if_enabled(app)
     time.sleep(0.5)
 
-    assert calls == [], "freshness check ran despite UNSLOTH_DISABLE_UPDATE_CHECK=1"
+    assert calls == [], "freshness check ran despite TUNELABS_DISABLE_UPDATE_CHECK=1"
     assert app.state.llama_cpp_freshness is None

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import asyncio
 import sys
@@ -117,7 +117,7 @@ def test_is_hidden_model_hides_validation_probe_everywhere():
     assert models_route._is_hidden_model(
         None, "/hf/models--ggml-org--models/snapshots/abc/tinyllamas/stories260K.gguf"
     )
-    assert not models_route._is_hidden_model("unsloth/gemma-3-270m-it-GGUF")
+    assert not models_route._is_hidden_model("tunelabs/gemma-3-270m-it-GGUF")
     # The exact-filename needle must not hide a real repo that merely
     # references stories260K in its name.
     assert not models_route._is_hidden_model("user/stories260K-finetune-GGUF")
@@ -134,9 +134,9 @@ def test_list_cached_gguf_hides_llama_validation_probe(monkeypatch, tmp_path):
         tmp_path / "models--ggml-org--models",
     )
     real = _repo(
-        "unsloth/gemma-3-270m-it-GGUF",
+        "tunelabs/gemma-3-270m-it-GGUF",
         [_file("gemma-3-270m-it-UD-Q4_K_XL.gguf", 200_000)],
-        tmp_path / "models--unsloth--gemma-3-270m-it-GGUF",
+        tmp_path / "models--tunelabs--gemma-3-270m-it-GGUF",
     )
     monkeypatch.setattr(
         models_route, "_all_hf_cache_scans", lambda: [SimpleNamespace(repos = [probe, real])]
@@ -146,7 +146,7 @@ def test_list_cached_gguf_hides_llama_validation_probe(monkeypatch, tmp_path):
 
     repo_ids = [c["repo_id"] for c in result["cached"]]
     assert "ggml-org/models" not in repo_ids
-    assert "unsloth/gemma-3-270m-it-GGUF" in repo_ids
+    assert "tunelabs/gemma-3-270m-it-GGUF" in repo_ids
 
 
 def test_list_cached_gguf_skips_repos_without_positive_gguf_size(monkeypatch, tmp_path):

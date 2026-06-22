@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import importlib.machinery
 import importlib.util
@@ -223,29 +223,29 @@ def _install_pydantic_stub(monkeypatch):
 def _install_export_backend_stubs(monkeypatch):
     _install_lightweight_backend_stubs(monkeypatch)
 
-    unsloth = types.ModuleType("unsloth")
-    unsloth.FastLanguageModel = object
-    unsloth.FastVisionModel = object
-    unsloth._IS_MLX = True
-    unsloth.__spec__ = importlib.machinery.ModuleSpec("unsloth", loader = None)
-    monkeypatch.setitem(sys.modules, "unsloth", unsloth)
+    tunelabs = types.ModuleType("tunelabs")
+    tunelabs.FastLanguageModel = object
+    tunelabs.FastVisionModel = object
+    tunelabs._IS_MLX = True
+    tunelabs.__spec__ = importlib.machinery.ModuleSpec("tunelabs", loader = None)
+    monkeypatch.setitem(sys.modules, "tunelabs", tunelabs)
 
-    unsloth_zoo = types.ModuleType("unsloth_zoo")
-    unsloth_zoo.__path__ = []
-    unsloth_zoo.__spec__ = importlib.machinery.ModuleSpec(
-        "unsloth_zoo",
+    tunelabs_zoo = types.ModuleType("tunelabs_zoo")
+    tunelabs_zoo.__path__ = []
+    tunelabs_zoo.__spec__ = importlib.machinery.ModuleSpec(
+        "tunelabs_zoo",
         loader = None,
         is_package = True,
     )
-    llama_cpp = types.ModuleType("unsloth_zoo.llama_cpp")
+    llama_cpp = types.ModuleType("tunelabs_zoo.llama_cpp")
     llama_cpp.LLAMA_CPP_DEFAULT_DIR = str(Path("/tmp/llama.cpp"))
     llama_cpp._resolve_local_convert_script = lambda *args, **kwargs: None
     llama_cpp.__spec__ = importlib.machinery.ModuleSpec(
-        "unsloth_zoo.llama_cpp",
+        "tunelabs_zoo.llama_cpp",
         loader = None,
     )
-    monkeypatch.setitem(sys.modules, "unsloth_zoo", unsloth_zoo)
-    monkeypatch.setitem(sys.modules, "unsloth_zoo.llama_cpp", llama_cpp)
+    monkeypatch.setitem(sys.modules, "tunelabs_zoo", tunelabs_zoo)
+    monkeypatch.setitem(sys.modules, "tunelabs_zoo.llama_cpp", llama_cpp)
 
     huggingface_hub = types.ModuleType("huggingface_hub")
     huggingface_hub.HfApi = object

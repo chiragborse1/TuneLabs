@@ -11,7 +11,7 @@ import pytest
 
 # Locate source files relative to this test.
 _TESTS_DIR = pathlib.Path(__file__).resolve().parent.parent  # tests/
-_REPO_ROOT = _TESTS_DIR.parent  # unsloth/
+_REPO_ROOT = _TESTS_DIR.parent  # tunelabs/
 _INSTALL_SH = _REPO_ROOT / "install.sh"
 _INSTALL_PS1 = _REPO_ROOT / "install.ps1"
 _NO_TORCH_RT = _REPO_ROOT / "studio" / "backend" / "requirements" / "no-torch-runtime.txt"

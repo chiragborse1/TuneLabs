@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """
 S3 dataset loader.
@@ -25,7 +25,7 @@ from typing import Callable, Optional
 
 logger = logging.getLogger(__name__)
 
-# Extensions the local-file loader (UnslothTrainer._loader_for_files) understands.
+# Extensions the local-file loader (TuneLabsTrainer._loader_for_files) understands.
 SUPPORTED_EXTENSIONS = (".parquet", ".json", ".jsonl", ".csv")
 _JSON_EXTENSIONS = (".json", ".jsonl")
 _IGNORED_METADATA_FILENAMES = {
@@ -181,7 +181,7 @@ def prepare_s3_dataset_download(
     _validate_single_extension_family(keys)
 
     owns_temp_dir = dest_dir is None
-    target_dir = dest_dir or tempfile.mkdtemp(prefix = "unsloth_s3_dataset_")
+    target_dir = dest_dir or tempfile.mkdtemp(prefix = "tunelabs_s3_dataset_")
     try:
         os.makedirs(target_dir, exist_ok = True)
 

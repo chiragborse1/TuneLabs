@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import {
   Sidebar,
@@ -128,7 +128,7 @@ import { toast } from "@/lib/toast";
 import { ShutdownDialog } from "@/components/shutdown-dialog";
 import { translate, useT, type TranslationKey } from "@/i18n";
 
-const EMPHASIS_MARKER = "__UNSLOTH_I18N_EMPHASIS_MARKER__";
+const EMPHASIS_MARKER = "__TUNELABS_I18N_EMPHASIS_MARKER__";
 
 type AppT = ReturnType<typeof useT>;
 
@@ -274,11 +274,11 @@ export function AppSidebar() {
   const chatOnlyReason = usePlatformStore((s) => s.chatOnlyReason);
   // When Train/Export are greyed out (chat-only host), explain why on hover
   // instead of disabling them silently. mlx_unavailable is the common macOS case
-  // after a reinstall/update dropped MLX and is recoverable via `unsloth studio update`.
+  // after a reinstall/update dropped MLX and is recoverable via `tunelabs studio update`.
   const trainExportDisabledHint: string | undefined = !chatOnly
     ? undefined
     : chatOnlyReason === "mlx_unavailable"
-      ? "Training needs MLX. Run `unsloth studio update` to enable Train and Export."
+      ? "Training needs MLX. Run `tunelabs studio update` to enable Train and Export."
       : chatOnlyReason === "intel_mac"
         ? "Training needs Apple Silicon or a GPU. Intel Macs are chat-only."
         : chatOnlyReason === "no_gpu"
@@ -819,7 +819,7 @@ export function AppSidebar() {
             side="bottom"
             align="start"
             sideOffset={0}
-            className="unsloth-plus-menu menu-flat-destructive w-56"
+            className="tunelabs-plus-menu menu-flat-destructive w-56"
           >
             <DropdownMenuItem onSelect={() => openRenameChat(item)}>
               <HugeiconsIcon icon={Edit03Icon} strokeWidth={1.75} className="size-icon" />
@@ -837,7 +837,7 @@ export function AppSidebar() {
               <DropdownMenuSubContent
                 sideOffset={0}
                 alignOffset={-4}
-                className="unsloth-plus-menu w-52"
+                className="tunelabs-plus-menu w-52"
               >
                 <DropdownMenuItem
                   onSelect={() => {
@@ -872,7 +872,7 @@ export function AppSidebar() {
                 <HugeiconsIcon icon={Download01Icon} strokeWidth={1.75} className="size-icon" />
                 <span>Export</span>
               </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent sideOffset={8} alignOffset={-4} className="unsloth-plus-menu w-52">
+              <DropdownMenuSubContent sideOffset={8} alignOffset={-4} className="tunelabs-plus-menu w-52">
                 {[
                   { label: "Raw JSONL", fn: exportConversationRawJsonl },
                   { label: "CSV", fn: exportConversationCsv },
@@ -970,11 +970,11 @@ export function AppSidebar() {
           >
             <img
               src="/circle-logo-small.png"
-              alt="Unsloth"
+              alt="TuneLabs"
               className="h-[34px] w-[34px] rounded-full object-cover"
             />
             <span className="font-heading text-[21px] font-semibold tracking-[0em] dark:tracking-[0.02em] leading-none text-black dark:text-white">
-              unsloth
+              tunelabs
             </span>
             <span className="nav-badge ml-0.5 inline-flex items-center justify-center rounded-full border border-nav-beta-border px-[5px] pt-[3px] pb-[2px] text-[8px] font-medium leading-none tracking-[0.04em] text-nav-fg-muted antialiased subpixel-antialiased shadow-[0_1px_2px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
               {t("shell.beta")}
@@ -1378,7 +1378,7 @@ export function AppSidebar() {
                   </div>
                   <div className="flex flex-col gap-px leading-tight group-data-[collapsible=icon]:hidden">
                     <span className="truncate font-heading text-[13.5px] tracking-[0.025em] dark:tracking-[0.04em] font-semibold text-nav-fg">{displayTitle}</span>
-                    <span className="truncate text-[11.5px] tracking-nav text-muted-foreground">Unsloth</span>
+                    <span className="truncate text-[11.5px] tracking-nav text-muted-foreground">TuneLabs</span>
                   </div>
                   {/* settings cog (replaces the up/down chevron) */}
                   <HugeiconsIcon

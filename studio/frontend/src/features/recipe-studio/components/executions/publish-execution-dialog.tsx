@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { useEffect, useMemo, useState, type ReactElement } from "react";
 import { ArrowRight01Icon, CheckmarkCircle02Icon, Copy01Icon, Key01Icon } from "@hugeicons/core-free-icons";
@@ -59,7 +59,7 @@ function buildDefaultDescription(execution: RecipeExecutionRecord | null): strin
     typeof records === "number" && records > 0
       ? ` It contains ${records.toLocaleString()} generated records.`
       : "";
-  return `${runName} was generated with Unsloth Recipe Studio.${recordPart}`;
+  return `${runName} was generated with TuneLabs Recipe Studio.${recordPart}`;
 }
 
 export function PublishExecutionDialog({

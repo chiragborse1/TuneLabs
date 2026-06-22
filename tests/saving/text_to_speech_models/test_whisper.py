@@ -1,4 +1,4 @@
-from unsloth import FastLanguageModel, FastModel
+from tunelabs import FastLanguageModel, FastModel
 from transformers import WhisperForConditionalGeneration, WhisperProcessor
 import torch
 
@@ -28,7 +28,7 @@ print(f"{'='*80}")
 
 
 model, tokenizer = FastModel.from_pretrained(
-    model_name = "unsloth/whisper-large-v3",
+    model_name = "tunelabs/whisper-large-v3",
     dtype = None,  # Leave as None for auto detection
     load_in_4bit = False,  # Set to True to do 4bit quantization which reduces memory
     auto_model = WhisperForConditionalGeneration,
@@ -51,8 +51,8 @@ model = FastModel.get_peft_model(
     lora_alpha = 64,
     lora_dropout = 0,  # Supports any, but = 0 is optimized
     bias = "none",  # Supports any, but = "none" is optimized
-    # [NEW] "unsloth" uses 30% less VRAM, fits 2x larger batch sizes!
-    use_gradient_checkpointing = "unsloth",  # True or "unsloth" for very long context
+    # [NEW] "tunelabs" uses 30% less VRAM, fits 2x larger batch sizes!
+    use_gradient_checkpointing = "tunelabs",  # True or "tunelabs" for very long context
     random_state = 3407,
     use_rslora = False,  # We support rank stabilized LoRA
     loftq_config = None,  # And LoftQ
@@ -184,5 +184,5 @@ assert all_phrases_found, f"Expected phrases not found in transcription: {transc
 print("✅ Transcription contains all expected phrases!")
 
 
-safe_remove_directory("./unsloth_compiled_cache")
+safe_remove_directory("./tunelabs_compiled_cache")
 safe_remove_directory("./whisper")

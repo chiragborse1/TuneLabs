@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Shared Studio upload/request size limits."""
 
@@ -36,7 +36,7 @@ def _coerce_upload_limit_mb(value: Any) -> int | None:
 
 
 def default_upload_limit_mb() -> int:
-    env_value = _coerce_upload_limit_mb(os.environ.get("UNSLOTH_STUDIO_MAX_BODY_MB"))
+    env_value = _coerce_upload_limit_mb(os.environ.get("TUNELABS_STUDIO_MAX_BODY_MB"))
     return env_value or DEFAULT_UPLOAD_LIMIT_MB
 
 

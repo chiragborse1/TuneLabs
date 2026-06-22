@@ -1,6 +1,6 @@
 # data-designer-github-repo-seed
 
-A Data Designer seed-reader plugin for **Unsloth Studio** that scrapes real
+A Data Designer seed-reader plugin for **TuneLabs Studio** that scrapes real
 GitHub data (issues, pull requests, commits) from one or more repositories
 and hands it to the recipe pipeline as a seed dataset.
 
@@ -38,7 +38,7 @@ can treat it like any other seed table.
   "seed_config": {
     "source": {
       "seed_type": "github_repo",
-      "repos": ["unslothai/unsloth", "unslothai/unsloth-zoo"],
+      "repos": ["tunelabsai/tunelabs", "tunelabsai/tunelabs-zoo"],
       "token": "",
       "item_types": ["issues", "pulls"],
       "limit": 100,

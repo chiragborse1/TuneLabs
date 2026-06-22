@@ -1,5 +1,5 @@
 """Static + behavioral checks for multi-image GRPO chunking and the zoo
-compatibility guard in unsloth/models/rl_replacements.py."""
+compatibility guard in tunelabs/models/rl_replacements.py."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import os
 import re
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
-SOURCE_PATH = os.path.join(REPO_ROOT, "unsloth", "models", "rl_replacements.py")
+SOURCE_PATH = os.path.join(REPO_ROOT, "tunelabs", "models", "rl_replacements.py")
 
 
 def _read_source() -> str:
@@ -111,16 +111,16 @@ def test_simulate_pixel_attention_mask_axis_decision():
 
 def test_zoo_guard_branch_present():
     src = _read_source()
-    assert "_unsloth_grpo_zoo_checked" in src
+    assert "_tunelabs_grpo_zoo_checked" in src
     assert "raise RuntimeError" in src
-    assert "https://github.com/unslothai/unsloth-zoo/pull/613" in src
+    assert "https://github.com/tunelabsai/tunelabs-zoo/pull/613" in src
     assert "Multi-image GRPO" in src
 
 
 def test_guard_helper_skips_all_ones_num_images():
     src = _read_source()
     helper_match = re.search(
-        r"def _unsloth_requires_multi_image_zoo\(value\):.*?return any\(int\(n\) != 1 for n in counts\)",
+        r"def _tunelabs_requires_multi_image_zoo\(value\):.*?return any\(int\(n\) != 1 for n in counts\)",
         src,
         re.DOTALL,
     )
@@ -145,7 +145,7 @@ def test_guard_helper_skips_all_ones_num_images():
 
     namespace["torch"] = type("torch_stub", (), {"Tensor": _FakeTensor})()
     exec(helper_match.group(0), namespace)
-    helper = namespace["_unsloth_requires_multi_image_zoo"]
+    helper = namespace["_tunelabs_requires_multi_image_zoo"]
 
     assert helper(None) is False
     assert helper([1, 1, 1, 1]) is False
@@ -157,7 +157,7 @@ def test_guard_helper_skips_all_ones_num_images():
 
 def test_guard_prefers_inspect_signature_over_getsource():
     src = _read_source()
-    helper_idx = src.find("_unsloth_requires_multi_image_zoo")
+    helper_idx = src.find("_tunelabs_requires_multi_image_zoo")
     body = src[helper_idx:]
     sig_call = body.find("inspect.signature(grpo_accumulated_loss).parameters")
     src_call = body.find("inspect.getsource(grpo_accumulated_loss)")

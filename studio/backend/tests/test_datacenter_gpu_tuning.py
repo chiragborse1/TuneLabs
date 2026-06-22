@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Data-center llama.cpp env tuning: FP32 accum (+ P2P / launch queues for
 multi-GPU) must apply only to datacenter NVIDIA parts, never consumer GeForce,
-AMD/ROCm, CPU or macOS. User values win; UNSLOTH_DISABLE_DC_TUNING=1 disables.
+AMD/ROCm, CPU or macOS. User values win; TUNELABS_DISABLE_DC_TUNING=1 disables.
 """
 
 from __future__ import annotations
@@ -198,7 +198,7 @@ def test_effective_gpu_count_missing_torch_is_zero(monkeypatch):
 
 
 def test_apply_env_single_dc_gpu_sets_only_fp32(monkeypatch):
-    monkeypatch.delenv("UNSLOTH_DISABLE_DC_TUNING", raising = False)
+    monkeypatch.delenv("TUNELABS_DISABLE_DC_TUNING", raising = False)
     monkeypatch.setitem(sys.modules, "torch", _fake_torch(["NVIDIA B200"]))
     env: dict = {}
     assert LlamaCppBackend._apply_datacenter_env(env, [0]) is True
@@ -208,7 +208,7 @@ def test_apply_env_single_dc_gpu_sets_only_fp32(monkeypatch):
 
 
 def test_apply_env_multi_dc_gpu_sets_all(monkeypatch):
-    monkeypatch.delenv("UNSLOTH_DISABLE_DC_TUNING", raising = False)
+    monkeypatch.delenv("TUNELABS_DISABLE_DC_TUNING", raising = False)
     monkeypatch.setitem(sys.modules, "torch", _fake_torch(["NVIDIA B200"] * 4))
     env: dict = {}
     assert LlamaCppBackend._apply_datacenter_env(env, [0, 1]) is True
@@ -219,7 +219,7 @@ def test_apply_env_multi_dc_gpu_sets_all(monkeypatch):
 
 def test_apply_env_none_indices_uses_visible_count(monkeypatch):
     # None on a 2x DC box -> multi-GPU flags applied.
-    monkeypatch.delenv("UNSLOTH_DISABLE_DC_TUNING", raising = False)
+    monkeypatch.delenv("TUNELABS_DISABLE_DC_TUNING", raising = False)
     monkeypatch.setitem(sys.modules, "torch", _fake_torch(["NVIDIA H100", "NVIDIA H100"]))
     env: dict = {}
     assert LlamaCppBackend._apply_datacenter_env(env, None) is True
@@ -228,7 +228,7 @@ def test_apply_env_none_indices_uses_visible_count(monkeypatch):
 
 
 def test_apply_env_consumer_gpu_is_noop(monkeypatch):
-    monkeypatch.delenv("UNSLOTH_DISABLE_DC_TUNING", raising = False)
+    monkeypatch.delenv("TUNELABS_DISABLE_DC_TUNING", raising = False)
     monkeypatch.setitem(sys.modules, "torch", _fake_torch(["NVIDIA GeForce RTX 4090"] * 2))
     env: dict = {}
     assert LlamaCppBackend._apply_datacenter_env(env, [0, 1]) is False
@@ -236,7 +236,7 @@ def test_apply_env_consumer_gpu_is_noop(monkeypatch):
 
 
 def test_apply_env_user_value_wins(monkeypatch):
-    monkeypatch.delenv("UNSLOTH_DISABLE_DC_TUNING", raising = False)
+    monkeypatch.delenv("TUNELABS_DISABLE_DC_TUNING", raising = False)
     monkeypatch.setitem(sys.modules, "torch", _fake_torch(["NVIDIA B200"] * 2))
     env = {
         "GGML_CUDA_FORCE_CUBLAS_COMPUTE_32F": "0",  # user explicitly disabled
@@ -250,7 +250,7 @@ def test_apply_env_user_value_wins(monkeypatch):
 
 
 def test_apply_env_disable_flag_respected(monkeypatch):
-    monkeypatch.setenv("UNSLOTH_DISABLE_DC_TUNING", "1")
+    monkeypatch.setenv("TUNELABS_DISABLE_DC_TUNING", "1")
     monkeypatch.setitem(sys.modules, "torch", _fake_torch(["NVIDIA B200"] * 2))
     env: dict = {}
     assert LlamaCppBackend._apply_datacenter_env(env, [0, 1]) is False
@@ -258,7 +258,7 @@ def test_apply_env_disable_flag_respected(monkeypatch):
 
 
 def test_apply_env_fail_open_on_detection_error(monkeypatch):
-    monkeypatch.delenv("UNSLOTH_DISABLE_DC_TUNING", raising = False)
+    monkeypatch.delenv("TUNELABS_DISABLE_DC_TUNING", raising = False)
     monkeypatch.setitem(sys.modules, "torch", None)  # detection raises -> False
     env: dict = {}
     assert LlamaCppBackend._apply_datacenter_env(env, [0]) is False
@@ -268,7 +268,7 @@ def test_apply_env_fail_open_on_detection_error(monkeypatch):
 def test_apply_env_masked_host_multi_dc(monkeypatch):
     # End-to-end masked host (mask 4,5,6,7, physical selection [4,5]): pre-fix
     # applied no tuning; now all three multi-GPU flags must be set.
-    monkeypatch.delenv("UNSLOTH_DISABLE_DC_TUNING", raising = False)
+    monkeypatch.delenv("TUNELABS_DISABLE_DC_TUNING", raising = False)
     monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "4,5,6,7")
     monkeypatch.setitem(sys.modules, "torch", _fake_torch(["NVIDIA B200"] * 4))
     env: dict = {}

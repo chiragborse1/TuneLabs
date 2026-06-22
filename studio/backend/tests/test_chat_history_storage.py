@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import os
 import platform
@@ -18,9 +18,9 @@ def _reset_studio_db(
     monkeypatch,
     projects_home = None,
 ):
-    monkeypatch.setenv("UNSLOTH_STUDIO_HOME", str(tmp_path))
+    monkeypatch.setenv("TUNELABS_STUDIO_HOME", str(tmp_path))
     monkeypatch.setenv(
-        "UNSLOTH_STUDIO_PROJECTS_HOME",
+        "TUNELABS_STUDIO_PROJECTS_HOME",
         str(projects_home if projects_home is not None else tmp_path / "Projects"),
     )
     monkeypatch.setattr(studio_db, "_schema_ready", False)
@@ -38,12 +38,12 @@ def workspace_projects_home(tmp_path):
     check = os.path.normcase(resolved) if platform.system() == "Windows" else resolved
     denied = studio_db._denied_path_prefixes()
     if any(check == p or check.startswith(p + os.sep) for p in denied):
-        candidate = Path.home() / ".unsloth-studio-tests" / uuid.uuid4().hex
+        candidate = Path.home() / ".tunelabs-studio-tests" / uuid.uuid4().hex
     candidate.mkdir(parents = True, exist_ok = True)
     try:
         yield candidate
     finally:
-        if ".unsloth-studio-tests" in candidate.parts:
+        if ".tunelabs-studio-tests" in candidate.parts:
             shutil.rmtree(candidate, ignore_errors = True)
 
 

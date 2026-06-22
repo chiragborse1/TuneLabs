@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Tests for the llama-server mmproj text-only fallback.
 
@@ -123,7 +123,7 @@ class TestSignalCrashDetector:
 # A realistic vision launch argv (mirrors the live "Starting llama-server"
 # command), projector pair at the end.
 _VISION_CMD = [
-    "/home/u/.unsloth/llama.cpp/build/bin/llama-server",
+    "/home/u/.tunelabs/llama.cpp/build/bin/llama-server",
     "-m",
     "/cache/gemma-4-E2B-it-UD-Q4_K_XL.gguf",
     "--port",

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -285,7 +285,7 @@ export function GithubRepoSeedForm({
             }}
             placeholder={
               repos.length === 0
-                ? "unslothai/unsloth or GitHub URL"
+                ? "tunelabsai/tunelabs or GitHub URL"
                 : "Add repo…"
             }
             aria-invalid={hasRepoErrors}
@@ -334,8 +334,8 @@ export function GithubRepoSeedForm({
         />
         <p id={tokenHelpId} className="text-xs text-muted-foreground">
           {usingEnvToken
-            ? "Unsloth detected a server env token, so saved/shared recipes can leave this blank."
-            : "Blank is safest for saved/shared recipes because Unsloth will read the server environment at run time."}
+            ? "TuneLabs detected a server env token, so saved/shared recipes can leave this blank."
+            : "Blank is safest for saved/shared recipes because TuneLabs will read the server environment at run time."}
         </p>
         {hasToken && (
           <p className="rounded-md bg-amber-500/10 px-2 py-1.5 text-xs text-amber-700 dark:text-amber-300">
@@ -450,7 +450,7 @@ export function GithubRepoSeedForm({
       </fieldset>
 
       <p className="text-xs text-muted-foreground">
-        Backed by Unsloth's built-in <code>github_repo</code> seed reader. Large
+        Backed by TuneLabs's built-in <code>github_repo</code> seed reader. Large
         repos can take minutes, so start with small limits for previews.
       </p>
     </div>

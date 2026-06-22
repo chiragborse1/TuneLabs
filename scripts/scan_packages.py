@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 #
 # .github/workflows/security-audit.yml's pip-scan-packages job depends
 # on this file existing at scripts/scan_packages.py.
@@ -27,7 +27,7 @@ Examples:
     python scan_packages.py -d ./my-project/
 
     # Scan with full transitive dependency tree
-    python scan_packages.py --with-deps unsloth unsloth-zoo
+    python scan_packages.py --with-deps tunelabs tunelabs-zoo
 
     # Scan + auto-fix CRITICAL findings in requirements files
     python scan_packages.py --fix -r requirements.txt

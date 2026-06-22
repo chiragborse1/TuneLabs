@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { usePlatformStore } from "@/config/env";
 import { SectionCard } from "@/components/section-card";
@@ -255,7 +255,7 @@ export function ParamsSection(): ReactElement {
                         ? t("studio.params.epochsTooltip")
                         : t("studio.params.maxStepsTooltip")}{" "}
                       <a
-                        href="https://unsloth.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
+                        href="https://tunelabs.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary underline"
@@ -336,7 +336,7 @@ export function ParamsSection(): ReactElement {
                 <TooltipContent>
                   {t("studio.params.contextLengthTooltip")}{" "}
                   <a
-                    href="https://unsloth.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
+                    href="https://tunelabs.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-primary underline"
@@ -415,7 +415,7 @@ export function ParamsSection(): ReactElement {
                 <TooltipContent>
                   {t("studio.params.learningRateTooltip")}{" "}
                   <a
-                    href="https://unsloth.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
+                    href="https://tunelabs.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-primary underline"
@@ -501,7 +501,7 @@ export function ParamsSection(): ReactElement {
                     <>
                       {t("studio.params.rankTooltip")}{" "}
                       <a
-                        href="https://unsloth.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
+                        href="https://tunelabs.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary underline"
@@ -522,7 +522,7 @@ export function ParamsSection(): ReactElement {
                     <>
                       {t("studio.params.alphaTooltip")}{" "}
                       <a
-                        href="https://unsloth.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
+                        href="https://tunelabs.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary underline"
@@ -543,7 +543,7 @@ export function ParamsSection(): ReactElement {
                     <>
                       {t("studio.params.dropoutTooltip")}{" "}
                       <a
-                        href="https://unsloth.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
+                        href="https://tunelabs.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary underline"
@@ -723,7 +723,7 @@ export function ParamsSection(): ReactElement {
                       <>
                         {t("studio.params.optimizerTooltip")}{" "}
                         <a
-                          href="https://unsloth.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
+                          href="https://tunelabs.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-primary underline"
@@ -758,7 +758,7 @@ export function ParamsSection(): ReactElement {
                       <>
                         {t("studio.params.lrSchedulerTooltip")}{" "}
                         <a
-                          href="https://unsloth.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
+                          href="https://tunelabs.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-primary underline"
@@ -793,7 +793,7 @@ export function ParamsSection(): ReactElement {
                       <>
                         {t("studio.params.batchSizeTooltip")}{" "}
                         <a
-                          href="https://unsloth.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
+                          href="https://tunelabs.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-primary underline"
@@ -814,7 +814,7 @@ export function ParamsSection(): ReactElement {
                       <>
                         {t("studio.params.gradAccumTooltip")}{" "}
                         <a
-                          href="https://unsloth.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
+                          href="https://tunelabs.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-primary underline"
@@ -835,7 +835,7 @@ export function ParamsSection(): ReactElement {
                       <>
                         {t("studio.params.weightDecayTooltip")}{" "}
                         <a
-                          href="https://unsloth.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
+                          href="https://tunelabs.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-primary underline"
@@ -867,7 +867,7 @@ export function ParamsSection(): ReactElement {
                       <>
                         {t("studio.params.warmupStepsTooltip")}{" "}
                         <a
-                          href="https://unsloth.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
+                          href="https://tunelabs.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-primary underline"
@@ -889,7 +889,7 @@ export function ParamsSection(): ReactElement {
                         <>
                           {t("studio.params.scheduleEpochsTooltip")}{" "}
                           <a
-                            href="https://unsloth.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
+                            href="https://tunelabs.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary underline"
@@ -911,7 +911,7 @@ export function ParamsSection(): ReactElement {
                       <>
                         {t("studio.params.saveStepsTooltip")}{" "}
                         <a
-                          href="https://unsloth.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
+                          href="https://tunelabs.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-primary underline"
@@ -963,7 +963,7 @@ export function ParamsSection(): ReactElement {
                           Resize images by maximum side length. Default uses the
                           model image size. Larger images use up more context. Does not upscale or change aspect ratio.{" "}
                           <a
-                            href="https://unsloth.ai/docs/basics/vision-fine-tuning"
+                            href="https://tunelabs.ai/docs/basics/vision-fine-tuning"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary underline"
@@ -1017,7 +1017,7 @@ export function ParamsSection(): ReactElement {
                       <>
                         {t("studio.params.gradCheckpointTooltip")}{" "}
                         <a
-                          href="https://unsloth.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
+                          href="https://tunelabs.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-primary underline"
@@ -1042,7 +1042,7 @@ export function ParamsSection(): ReactElement {
                         {platformDeviceType === "mac" ? (
                           <SelectItem value="mlx">MLX</SelectItem>
                         ) : (
-                          <SelectItem value="unsloth">Unsloth</SelectItem>
+                          <SelectItem value="tunelabs">TuneLabs</SelectItem>
                         )}
                       </SelectContent>
                     </Select>

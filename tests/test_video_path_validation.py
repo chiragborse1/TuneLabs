@@ -1,7 +1,7 @@
 """Tests for check_dataset_for_missing_videos (issue #5085).
 
 Fixtures AST-extract the function from vision.py so logic tests run without
-the full unsloth import chain (triton/CUDA kernels).
+the full tunelabs import chain (triton/CUDA kernels).
 """
 
 import ast
@@ -50,12 +50,12 @@ def _extract_fn_via_ast(
 def check_dataset_for_missing_videos():
     """Direct import when possible, else AST extraction from vision.py."""
     try:
-        from unsloth.models.vision import check_dataset_for_missing_videos as fn
+        from tunelabs.models.vision import check_dataset_for_missing_videos as fn
         return fn
     except Exception:
         pass
 
-    vision_path = Path(__file__).parent.parent / "unsloth" / "models" / "vision.py"
+    vision_path = Path(__file__).parent.parent / "tunelabs" / "models" / "vision.py"
     fns = _extract_fns_via_ast(
         vision_path,
         [
@@ -175,7 +175,7 @@ def test_duplicate_paths_deduplicated(check_dataset_for_missing_videos):
     assert str(exc_info.value).count("/nonexistent/clip.mp4") == 1
 
 
-# ── Tests: UnslothVisionDataCollator auto-validation ─────────────────────────
+# ── Tests: TuneLabsVisionDataCollator auto-validation ─────────────────────────
 
 
 def test_collator_raises_on_first_batch_with_missing_video(make_auto_validating_collator):
@@ -473,21 +473,21 @@ def test_duplicate_missing_deduped_in_warn_mode(check_dataset_for_missing_videos
     assert missing == ["/nonexistent/dup.mp4"]
 
 
-# ── Tests: real unsloth_zoo collator integration ─────────────────────────────
+# ── Tests: real tunelabs_zoo collator integration ─────────────────────────────
 # Exercise the real trainer.py subclass against the real zoo base (the fakes
-# above don't cover super()/formatting_func); skip when unsloth can't import.
+# above don't cover super()/formatting_func); skip when tunelabs can't import.
 
 
 @pytest.fixture(scope = "session")
 def real_collator_classes():
     try:
-        from unsloth.trainer import UnslothVisionDataCollator
-        from unsloth_zoo.vision_utils import (
-            UnslothVisionDataCollator as ZooBase,
+        from tunelabs.trainer import TuneLabsVisionDataCollator
+        from tunelabs_zoo.vision_utils import (
+            TuneLabsVisionDataCollator as ZooBase,
         )
     except Exception as exc:  # noqa: BLE001 - skip on any import failure
-        pytest.skip(f"full unsloth import unavailable: {exc!r}")
-    return UnslothVisionDataCollator, ZooBase
+        pytest.skip(f"full tunelabs import unavailable: {exc!r}")
+    return TuneLabsVisionDataCollator, ZooBase
 
 
 def _make_real_collator(real_collator_classes, formatting_func = None):

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team.
+# Copyright 2026-present the TuneLabs AI Inc. team.
 """Pinned-symbol compat check across bitsandbytes minor versions via GitHub raw fetch + symbol grep."""
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ BNB_TAGS = [
 ]
 
 
-# bnb.functional dequantize_4bit / quantize_4bit: the public 4-bit surface unsloth kernels call into.
+# bnb.functional dequantize_4bit / quantize_4bit: the public 4-bit surface tunelabs kernels call into.
 
 
 @pytest.mark.parametrize("tag", BNB_TAGS)
@@ -36,11 +36,11 @@ def test_bnb_functional_4bit(tag: str):
     needed = ("dequantize_4bit", "quantize_4bit")
     missing = [n for n in needed if not has_def(src, n, "func") and n not in src]
     assert not missing, (
-        f"{tag}: bnb.functional missing {missing}; " f"unsloth-zoo dequant kernels rely on these"
+        f"{tag}: bnb.functional missing {missing}; " f"tunelabs-zoo dequant kernels rely on these"
     )
 
 
-# bnb.nn.Linear4bit / Params4bit: peft + unsloth isinstance-check these; renaming breaks 4-bit LoRA.
+# bnb.nn.Linear4bit / Params4bit: peft + tunelabs isinstance-check these; renaming breaks 4-bit LoRA.
 
 
 @pytest.mark.parametrize("tag", BNB_TAGS)
@@ -63,14 +63,14 @@ def test_bnb_nn_linear4bit_classes(tag: str):
             return
     pytest.fail(
         f"{tag}: Linear4bit={found_linear} Params4bit={found_params} "
-        f"in {candidates}; unsloth + peft 4-bit isinstance checks fail"
+        f"in {candidates}; tunelabs + peft 4-bit isinstance checks fail"
     )
 
 
-# Coverage extension (2026-05): every bnb symbol unsloth + unsloth-zoo touch.
+# Coverage extension (2026-05): every bnb symbol tunelabs + tunelabs-zoo touch.
 
 
-# Top-level export: unsloth/kernels/utils.py + zoo vllm_utils.py call bnb.matmul_4bit(...).
+# Top-level export: tunelabs/kernels/utils.py + zoo vllm_utils.py call bnb.matmul_4bit(...).
 
 
 @pytest.mark.parametrize("tag", BNB_TAGS)
@@ -80,7 +80,7 @@ def test_bnb_matmul_4bit_top_level(tag: str):
         pytest.skip(f"{tag}: bitsandbytes/__init__.py missing")
     assert "matmul_4bit" in src, (
         f"{tag}: bitsandbytes.matmul_4bit not exported at package root; "
-        f"unsloth/kernels/utils.py + zoo/temporary_patches/moe call paths break"
+        f"tunelabs/kernels/utils.py + zoo/temporary_patches/moe call paths break"
     )
 
 
@@ -104,13 +104,13 @@ def test_bnb_functional_4bit_kernel_path(tag: str):
     assert legacy_path or new_path, (
         f"{tag}: bnb.functional has NEITHER legacy `lib.cdequantize_*` "
         f"NOR new `torch.ops.bitsandbytes.*` kernel path; "
-        f"unsloth/kernels/utils.py module-top binding will AttributeError"
+        f"tunelabs/kernels/utils.py module-top binding will AttributeError"
     )
 
 
 @pytest.mark.parametrize("tag", BNB_TAGS)
 def test_bnb_functional_get_ptr(tag: str):
-    """unsloth/kernels/utils.py top-level: `get_ptr = bnb.functional.get_ptr`."""
+    """tunelabs/kernels/utils.py top-level: `get_ptr = bnb.functional.get_ptr`."""
     candidates = [
         "bitsandbytes/functional.py",
         "bitsandbytes/functional/__init__.py",
@@ -121,13 +121,13 @@ def test_bnb_functional_get_ptr(tag: str):
     _, src = hit
     assert has_def(src, "get_ptr", "func") or "get_ptr" in src, (
         f"{tag}: bnb.functional.get_ptr missing; "
-        f"unsloth/kernels/utils.py module-top ImportError"
+        f"tunelabs/kernels/utils.py module-top ImportError"
     )
 
 
 @pytest.mark.parametrize("tag", BNB_TAGS)
 def test_bnb_quantstate_from_dict(tag: str):
-    """unsloth-zoo rebinds QuantState.from_dict; both class and classmethod must be present."""
+    """tunelabs-zoo rebinds QuantState.from_dict; both class and classmethod must be present."""
     candidates = [
         "bitsandbytes/functional.py",
         "bitsandbytes/functional/__init__.py",
@@ -138,13 +138,13 @@ def test_bnb_quantstate_from_dict(tag: str):
     _, src = hit
     assert has_def(src, "QuantState", "class"), f"{tag}: bnb.functional.QuantState missing"
     assert "from_dict" in src, (
-        f"{tag}: QuantState.from_dict missing; " f"unsloth-zoo monkey-patch silently no-ops"
+        f"{tag}: QuantState.from_dict missing; " f"tunelabs-zoo monkey-patch silently no-ops"
     )
 
 
 @pytest.mark.parametrize("tag", BNB_TAGS)
 def test_bnb_nn_modules_fix_4bit_weight_optional(tag: str):
-    """fix_4bit_weight_quant_state_from_module is optional; unsloth getattr-fallbacks on older bnb."""
+    """fix_4bit_weight_quant_state_from_module is optional; tunelabs getattr-fallbacks on older bnb."""
     src = fetch_text("bitsandbytes-foundation/bitsandbytes", tag, "bitsandbytes/nn/modules.py")
     if src is None:
         pytest.skip(f"{tag}: bitsandbytes/nn/modules.py missing")
@@ -154,7 +154,7 @@ def test_bnb_nn_modules_fix_4bit_weight_optional(tag: str):
 
 @pytest.mark.parametrize("tag", BNB_TAGS)
 def test_bnb_nn_linear8bitlt(tag: str):
-    """unsloth/__init__ probes both Linear4bit AND Linear8bitLt."""
+    """tunelabs/__init__ probes both Linear4bit AND Linear8bitLt."""
     candidates = [
         "bitsandbytes/nn/modules.py",
         "bitsandbytes/nn/__init__.py",
@@ -195,7 +195,7 @@ def test_bnb_utils_pack_unpack(tag: str):
 
 @pytest.mark.parametrize("tag", BNB_TAGS)
 def test_bnb_cextension_rocm_warp_size_optional(tag: str):
-    """ROCM_WARP_SIZE_64 is optional (pre-ROCm bnb lacks it); unsloth probes via try/except."""
+    """ROCM_WARP_SIZE_64 is optional (pre-ROCm bnb lacks it); tunelabs probes via try/except."""
     src = fetch_text("bitsandbytes-foundation/bitsandbytes", tag, "bitsandbytes/cextension.py")
     if src is None:
         pytest.skip(f"{tag}: cextension.py missing")
@@ -205,7 +205,7 @@ def test_bnb_cextension_rocm_warp_size_optional(tag: str):
 
 @pytest.mark.parametrize("tag", BNB_TAGS)
 def test_bnb_autograd_functions_matmul_4bit(tag: str):
-    """bnb.autograd._functions.matmul_4bit must remain (unsloth-zoo has a dynamo-disable patch site)."""
+    """bnb.autograd._functions.matmul_4bit must remain (tunelabs-zoo has a dynamo-disable patch site)."""
     src = fetch_text(
         "bitsandbytes-foundation/bitsandbytes",
         tag,
@@ -218,7 +218,7 @@ def test_bnb_autograd_functions_matmul_4bit(tag: str):
 
 @pytest.mark.parametrize("tag", BNB_TAGS)
 def test_bnb_version_parseable(tag: str):
-    """bnb.__version__ must be exported via at least one mechanism (unsloth feature-gates on it)."""
+    """bnb.__version__ must be exported via at least one mechanism (tunelabs feature-gates on it)."""
     src = fetch_text("bitsandbytes-foundation/bitsandbytes", tag, "bitsandbytes/__init__.py")
     if src is None:
         pytest.skip(f"{tag}: bitsandbytes/__init__.py missing")

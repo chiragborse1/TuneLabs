@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Unit tests for the prompt-cache accounting chunk from the external-provider proxy.
 
@@ -271,7 +271,7 @@ def test_custom_provider_test_endpoint_probes_chat_completion(monkeypatch):
                 base_url = "http://custom.example/v1",
                 model_id = "Qwen/Qwen3-0.6B",
             ),
-            current_subject = "unsloth",
+            current_subject = "tunelabs",
         )
 
     result = _drive(run())
@@ -311,7 +311,7 @@ def test_custom_provider_test_endpoint_requires_model_id(monkeypatch):
                 provider_type = "custom",
                 base_url = "http://custom.example/v1",
             ),
-            current_subject = "unsloth",
+            current_subject = "tunelabs",
         )
 
     result = _drive(run())

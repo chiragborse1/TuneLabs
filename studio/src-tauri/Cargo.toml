@@ -1,8 +1,8 @@
 [package]
-name = "unsloth-studio"
+name = "tunelabs-studio"
 version = "2026.4.8"
-description = "Unsloth Studio Desktop App"
-authors = ["Unsloth AI"]
+description = "TuneLabs Studio Desktop App"
+authors = ["TuneLabs AI"]
 edition = "2021"
 
 [dependencies]

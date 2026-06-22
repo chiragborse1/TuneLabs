@@ -30,7 +30,7 @@ fn external_conflict_message(conflict: &crate::preflight::ExternalBackendConflic
         );
     }
     format!(
-        "A Studio server for this install is already running from a terminal on port {}. Stop that server, or run `unsloth studio update` from that terminal before using desktop repair/update.",
+        "A Studio server for this install is already running from a terminal on port {}. Stop that server, or run `tunelabs studio update` from that terminal before using desktop repair/update.",
         conflict.port
     )
 }
@@ -97,13 +97,13 @@ pub async fn desktop_preflight(
     Ok(result)
 }
 
-/// Check if unsloth is installed AND functional.
-/// Runs `unsloth -h` to verify the import chain works — a partial install
+/// Check if tunelabs is installed AND functional.
+/// Runs `tunelabs -h` to verify the import chain works — a partial install
 /// (binary exists but deps missing) will fail on import and return false,
 /// which sends the user to the install screen for a clean re-install.
 #[tauri::command]
 pub async fn check_install_status() -> bool {
-    let Some(bin) = process::find_unsloth_binary() else {
+    let Some(bin) = process::find_tunelabs_binary() else {
         return false;
     };
 
@@ -126,9 +126,9 @@ pub async fn check_install_status() -> bool {
         cmd.env_remove("PYTHONPATH");
     }
 
-    // Tauri uses the legacy root regardless of UNSLOTH_STUDIO_HOME / STUDIO_HOME;
+    // Tauri uses the legacy root regardless of TUNELABS_STUDIO_HOME / STUDIO_HOME;
     // probe subprocesses must follow the same isolation as process.rs.
-    cmd.env_remove("UNSLOTH_STUDIO_HOME");
+    cmd.env_remove("TUNELABS_STUDIO_HOME");
     cmd.env_remove("STUDIO_HOME");
 
     let mut child = match cmd.spawn() {
@@ -143,7 +143,7 @@ pub async fn check_install_status() -> bool {
         Ok(Ok(status)) => {
             let ok = status.success();
             if !ok {
-                warn!("Install check: `unsloth -h` exited with {}", status);
+                warn!("Install check: `tunelabs -h` exited with {}", status);
             }
             ok
         }
@@ -152,7 +152,7 @@ pub async fn check_install_status() -> bool {
             false
         }
         Err(_) => {
-            warn!("Install check: `unsloth -h` timed out after 10s");
+            warn!("Install check: `tunelabs -h` timed out after 10s");
             let _ = child.kill().await;
             false
         }
@@ -244,8 +244,8 @@ pub async fn stop_server(
     .map_err(|e| format!("stop backend task failed: {e}"))?
 }
 
-/// Check if a healthy Unsloth backend is running on the given port.
-/// Expects JSON response with status=="healthy" AND service=="Unsloth UI Backend".
+/// Check if a healthy TuneLabs backend is running on the given port.
+/// Expects JSON response with status=="healthy" AND service=="TuneLabs UI Backend".
 #[tauri::command]
 pub async fn check_health(port: u16) -> Result<bool, String> {
     match check_health_inner(port).await {
@@ -274,7 +274,7 @@ async fn check_health_inner(port: u16) -> Result<bool, reqwest::Error> {
     let correct_service = json
         .get("service")
         .and_then(|v| v.as_str())
-        .map(|s| s == "Unsloth UI Backend")
+        .map(|s| s == "TuneLabs UI Backend")
         .unwrap_or(false);
 
     Ok(healthy && correct_service)
@@ -330,12 +330,12 @@ fn open_existing_dir(dir: &std::path::Path) -> Result<(), String> {
     open::that(dir).map_err(|e| format!("Failed to open directory: {}", e))
 }
 
-/// Open the Unsloth Studio directory in the system file manager.
+/// Open the TuneLabs Studio directory in the system file manager.
 #[tauri::command]
 pub fn open_logs_dir(window: tauri::WebviewWindow) -> Result<(), String> {
     crate::native_intents::ensure_main_window(&window)?;
     let home = dirs::home_dir().ok_or("Could not determine home directory")?;
-    open_existing_dir(&home.join(".unsloth").join("studio"))
+    open_existing_dir(&home.join(".tunelabs").join("studio"))
 }
 
 /// Open a models directory (resolved by the backend, e.g. the HF cache) in the
@@ -409,7 +409,7 @@ pub fn install_system_packages(
     Err("Elevated package install is only supported on Linux".to_string())
 }
 
-/// Run backend update: stop server, run `unsloth studio update`, emit progress.
+/// Run backend update: stop server, run `tunelabs studio update`, emit progress.
 /// Does NOT restart the backend — the frontend handles shell update + relaunch after.
 #[tauri::command]
 pub async fn start_backend_update(
@@ -642,7 +642,7 @@ mod tests {
             String::new()
         };
         format!(
-            r#"{{"status":"healthy","service":"Unsloth UI Backend","version":"2026.5.3","desktop_protocol_version":1,"desktop_manageability_version":1,"supports_desktop_auth":true,"supports_desktop_backend_ownership":true,"studio_root_id":"{ROOT_ID}"{owner}}}"#
+            r#"{{"status":"healthy","service":"TuneLabs UI Backend","version":"2026.5.3","desktop_protocol_version":1,"desktop_manageability_version":1,"supports_desktop_auth":true,"supports_desktop_backend_ownership":true,"studio_root_id":"{ROOT_ID}"{owner}}}"#
         )
     }
 

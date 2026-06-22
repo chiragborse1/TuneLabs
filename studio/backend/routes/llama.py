@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """llama.cpp prebuilt update endpoints.
 
@@ -40,7 +40,7 @@ class LlamaUpdateJob(BaseModel):
 class LlamaUpdateStatusResponse(BaseModel):
     supported: bool = Field(
         False,
-        description = "True when the install came from an Unsloth prebuilt (has a marker).",
+        description = "True when the install came from an TuneLabs prebuilt (has a marker).",
     )
     update_available: bool = Field(
         False, description = "True when the latest release is genuinely newer than the install."

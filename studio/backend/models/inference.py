@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Pydantic schemas for the Inference API."""
 
@@ -402,7 +402,7 @@ class InferenceStatusResponse(BaseModel):
         True,
         description = (
             "Whether llama.cpp supports MTP (--spec-type mtp/draft-mtp). "
-            "False -> recommend `unsloth studio update`."
+            "False -> recommend `tunelabs studio update`."
         ),
     )
     spec_fallback_reason: Optional[str] = Field(
@@ -417,7 +417,7 @@ class InferenceStatusResponse(BaseModel):
             "an Auto-mode policy downgrade: the model is MLA (GLM-5.2 et al.) "
             "whose llama.cpp MTP path runs slower than no speculation, so Auto "
             "used ngram-mod or spec-off instead -- updating won't help; choose "
-            "MTP in Settings (or set UNSLOTH_MLA_MTP_ENABLED=1) to force it. "
+            "MTP in Settings (or set TUNELABS_MLA_MTP_ENABLED=1) to force it. "
             "None when MTP engaged or was not requested."
         ),
     )
@@ -425,7 +425,7 @@ class InferenceStatusResponse(BaseModel):
         False,
         description = (
             "Installed llama.cpp prebuilt is >=3 days behind the latest "
-            "release. True -> show `unsloth studio update` banner."
+            "release. True -> show `tunelabs studio update` banner."
         ),
     )
     llama_cpp_installed_tag: Optional[str] = Field(
@@ -635,7 +635,7 @@ class ThinkingConfig(BaseModel):
 class ChatCompletionRequest(BaseModel):
     """OpenAI-compatible chat completion request.
 
-    Non-OpenAI extension fields are marked with 'x-unsloth'.
+    Non-OpenAI extension fields are marked with 'x-tunelabs'.
     """
 
     # Accept unknown fields so future OpenAI fields aren't dropped before route
@@ -708,23 +708,23 @@ class ChatCompletionRequest(BaseModel):
         description = 'Streaming options, e.g. {"include_usage": true} to emit a final usage chunk.',
     )
 
-    # ── Unsloth extensions (ignored by standard OpenAI clients) ──
-    top_k: int = Field(20, ge = -1, le = 100, description = "[x-unsloth] Top-k sampling")
-    min_p: float = Field(0.01, ge = 0.0, le = 1.0, description = "[x-unsloth] Min-p sampling threshold")
+    # ── TuneLabs extensions (ignored by standard OpenAI clients) ──
+    top_k: int = Field(20, ge = -1, le = 100, description = "[x-tunelabs] Top-k sampling")
+    min_p: float = Field(0.01, ge = 0.0, le = 1.0, description = "[x-tunelabs] Min-p sampling threshold")
     repetition_penalty: float = Field(
-        1.0, ge = 1.0, le = 2.0, description = "[x-unsloth] Repetition penalty"
+        1.0, ge = 1.0, le = 2.0, description = "[x-tunelabs] Repetition penalty"
     )
     image_base64: Optional[str] = Field(
-        None, description = "[x-unsloth] Base64-encoded image for vision models"
+        None, description = "[x-tunelabs] Base64-encoded image for vision models"
     )
     audio_base64: Optional[str] = Field(
         None,
-        description = "[x-unsloth] Base64-encoded audio (wav/mp3/ogg/flac/m4a) for audio-input models",
+        description = "[x-tunelabs] Base64-encoded audio (wav/mp3/ogg/flac/m4a) for audio-input models",
     )
     use_adapter: Optional[Union[bool, str]] = Field(
         None,
         description = (
-            "[x-unsloth] Adapter control for compare mode. "
+            "[x-tunelabs] Adapter control for compare mode. "
             "null = no change (default), "
             "false = disable adapters (base model), "
             "true = enable the current adapter, "
@@ -733,17 +733,17 @@ class ChatCompletionRequest(BaseModel):
     )
     enable_thinking: Optional[bool] = Field(
         None,
-        description = "[x-unsloth] Enable/disable thinking/reasoning mode for supported models",
+        description = "[x-tunelabs] Enable/disable thinking/reasoning mode for supported models",
     )
     reasoning_effort: Optional[
         Literal["none", "minimal", "low", "medium", "high", "max", "xhigh"]
     ] = Field(
         None,
-        description = "[x-unsloth] Reasoning effort level ('none'|'minimal'|'low'|'medium'|'high'|'max'|'xhigh'). OpenAI `/v1/responses` accepts model-dependent subsets; Anthropic adaptive thinking uses `max` as the top tier on Claude 4.6 Opus/Sonnet (inbound `xhigh` is mapped to `max`) and `xhigh` on Claude 4.7 Opus; local Harmony/gpt-oss templates support low|medium|high.",
+        description = "[x-tunelabs] Reasoning effort level ('none'|'minimal'|'low'|'medium'|'high'|'max'|'xhigh'). OpenAI `/v1/responses` accepts model-dependent subsets; Anthropic adaptive thinking uses `max` as the top tier on Claude 4.6 Opus/Sonnet (inbound `xhigh` is mapped to `max`) and `xhigh` on Claude 4.7 Opus; local Harmony/gpt-oss templates support low|medium|high.",
     )
     preserve_thinking: Optional[bool] = Field(
         None,
-        description = "[x-unsloth] When true, keep historical <think> blocks from past assistant turns in the prompt (Qwen3.6 templates). Independent of enable_thinking / reasoning_effort.",
+        description = "[x-tunelabs] When true, keep historical <think> blocks from past assistant turns in the prompt (Qwen3.6 templates). Independent of enable_thinking / reasoning_effort.",
     )
     thinking: Optional[ThinkingConfig] = Field(
         None,
@@ -752,12 +752,12 @@ class ChatCompletionRequest(BaseModel):
     )
     enable_tools: Optional[bool] = Field(
         None,
-        description = "[x-unsloth] Enable tool calling for supported models",
+        description = "[x-tunelabs] Enable tool calling for supported models",
     )
     enabled_tools: Optional[list[str]] = Field(
         None,
         description = (
-            "[x-unsloth] List of enabled tool names. Local GGUF/safetensors models "
+            "[x-tunelabs] List of enabled tool names. Local GGUF/safetensors models "
             "accept ['web_search', 'python', 'terminal', 'render_html']. External "
             "providers accept ['web_search', 'web_fetch', 'code_execution'] for "
             "Anthropic and ['web_search', 'code_execution', 'image_generation'] for "
@@ -767,24 +767,24 @@ class ChatCompletionRequest(BaseModel):
     )
     mcp_enabled: Optional[bool] = Field(
         None,
-        description = "[x-unsloth] When true, append tools from every enabled MCP server to this request's tool list.",
+        description = "[x-tunelabs] When true, append tools from every enabled MCP server to this request's tool list.",
     )
     confirm_tool_calls: Optional[bool] = Field(
         None,
-        description = "[x-unsloth] When true, pause before each tool call and wait for the user to allow/deny it via POST /api/inference/tool-confirm.",
+        description = "[x-tunelabs] When true, pause before each tool call and wait for the user to allow/deny it via POST /api/inference/tool-confirm.",
     )
     bypass_permissions: Optional[bool] = Field(
         False,
-        description = "[x-unsloth] Bypass Permissions: when true, skip the tool-call confirmation gate AND disable the python/terminal execution sandbox (safety checks, command blocklist, resource limits). Secret env vars are still stripped. Takes precedence over confirm_tool_calls.",
+        description = "[x-tunelabs] Bypass Permissions: when true, skip the tool-call confirmation gate AND disable the python/terminal execution sandbox (safety checks, command blocklist, resource limits). Secret env vars are still stripped. Takes precedence over confirm_tool_calls.",
     )
     auto_heal_tool_calls: Optional[bool] = Field(
         True,
-        description = "[x-unsloth] Auto-detect and fix malformed tool calls from model output.",
+        description = "[x-tunelabs] Auto-detect and fix malformed tool calls from model output.",
     )
     context_overflow: Optional[Literal["error", "truncate_middle"]] = Field(
         None,
         description = (
-            "[x-unsloth] Passthrough behavior when the prompt exceeds the real "
+            "[x-tunelabs] Passthrough behavior when the prompt exceeds the real "
             "context window. 'error' (default) returns a 400 with "
             "code=context_length_exceeded. 'truncate_middle' drops middle "
             "turn-groups (system prompt, first turn, and recent turns kept; "
@@ -794,21 +794,21 @@ class ChatCompletionRequest(BaseModel):
     max_tool_calls_per_message: Optional[int] = Field(
         25,
         ge = 0,
-        description = "[x-unsloth] Maximum number of tool call iterations per message (0 = disabled, 9999 = unlimited).",
+        description = "[x-tunelabs] Maximum number of tool call iterations per message (0 = disabled, 9999 = unlimited).",
     )
     tool_call_timeout: Optional[int] = Field(
         300,
         ge = 1,
-        description = "[x-unsloth] Timeout in seconds for each tool call execution (9999 = no limit).",
+        description = "[x-tunelabs] Timeout in seconds for each tool call execution (9999 = no limit).",
     )
     session_id: Optional[str] = Field(
         None,
-        description = "[x-unsloth] Session/thread ID for scoping tool execution sandbox.",
+        description = "[x-tunelabs] Session/thread ID for scoping tool execution sandbox.",
     )
     rag_scope: Optional[dict] = Field(
         None,
         description = (
-            "[x-unsloth] Hidden RAG retrieval scope for the search_knowledge_base "
+            "[x-tunelabs] Hidden RAG retrieval scope for the search_knowledge_base "
             "tool: {kb_id?, thread_id?, default_top_k?, mode?, autoinject?, "
             "autoinject_min_score?}. Candidate pools and the RRF constant come from "
             "server config. The model never sees this; the server resolves which "
@@ -817,34 +817,34 @@ class ChatCompletionRequest(BaseModel):
     )
     cancel_id: Optional[str] = Field(
         None,
-        description = "[x-unsloth] Per-request cancellation token. Frontend sends a fresh UUID per run so /inference/cancel matches one specific generation.",
+        description = "[x-tunelabs] Per-request cancellation token. Frontend sends a fresh UUID per run so /inference/cancel matches one specific generation.",
     )
 
-    # ── External provider routing (x-unsloth extensions) ──────────
+    # ── External provider routing (x-tunelabs extensions) ──────────
     provider_id: Optional[str] = Field(
         None,
-        description = "[x-unsloth] Saved provider config ID. If set with encrypted_api_key, routes to external LLM.",
+        description = "[x-tunelabs] Saved provider config ID. If set with encrypted_api_key, routes to external LLM.",
     )
     provider_type: Optional[str] = Field(
         None,
-        description = "[x-unsloth] Provider type (e.g. 'openai', 'mistral'). Used if provider_id is not set.",
+        description = "[x-tunelabs] Provider type (e.g. 'openai', 'mistral'). Used if provider_id is not set.",
     )
     external_model: Optional[str] = Field(
         None,
-        description = "[x-unsloth] Model ID at the external provider.",
+        description = "[x-tunelabs] Model ID at the external provider.",
     )
     encrypted_api_key: Optional[str] = Field(
         None,
-        description = "[x-unsloth] RSA-encrypted, base64-encoded API key for the external provider.",
+        description = "[x-tunelabs] RSA-encrypted, base64-encoded API key for the external provider.",
     )
     provider_base_url: Optional[str] = Field(
         None,
-        description = "[x-unsloth] Override base URL for the external provider.",
+        description = "[x-tunelabs] Override base URL for the external provider.",
     )
     enable_prompt_caching: Optional[Union[bool, str]] = Field(
         None,
         description = (
-            "[x-unsloth] Opt in to provider-side prompt caching. On Anthropic, "
+            "[x-tunelabs] Opt in to provider-side prompt caching. On Anthropic, "
             "boolean true attaches cache_control={type:ephemeral} to the system "
             "block so the static prefix is reused across turns. On OpenAI cloud, "
             "caching is automatic for prompts >=1024 tokens and the boolean is "
@@ -875,7 +875,7 @@ class ChatCompletionRequest(BaseModel):
     prompt_cache_ttl: Optional[str] = Field(
         None,
         description = (
-            "[x-unsloth] Anthropic cache_control TTL. Defaults to the 5-minute "
+            "[x-tunelabs] Anthropic cache_control TTL. Defaults to the 5-minute "
             "ephemeral pool when omitted. Pass `1h` to write into the 1-hour "
             "pool instead -- 1h writes are billed at 2x base input vs 1.25x "
             "for 5m, but reads stay at 0.1x for both, so 1h pays off the "
@@ -890,7 +890,7 @@ class ChatCompletionRequest(BaseModel):
         ge = 1,
         le = 2_000_000,
         description = (
-            "[x-unsloth] Server-side context compaction trigger, in tokens. "
+            "[x-tunelabs] Server-side context compaction trigger, in tokens. "
             "Per-provider routing:\n"
             "  - Anthropic (Opus 4.6+, Sonnet 4.6, Mythos preview): attaches "
             "the `compact_20260112` edit and the `compact-2026-01-12` beta "
@@ -912,7 +912,7 @@ class ChatCompletionRequest(BaseModel):
     openai_code_exec_container_id: Optional[str] = Field(
         None,
         description = (
-            "[x-unsloth] OpenAI shell-tool container id from the prior response "
+            "[x-tunelabs] OpenAI shell-tool container id from the prior response "
             "in the same chat thread. When set and `code_execution` is in "
             "`enabled_tools`, the next /v1/responses call uses "
             "environment.type='container_reference' so filesystem state "
@@ -924,7 +924,7 @@ class ChatCompletionRequest(BaseModel):
     anthropic_code_exec_container_id: Optional[str] = Field(
         None,
         description = (
-            "[x-unsloth] Anthropic code_execution container id from the prior "
+            "[x-tunelabs] Anthropic code_execution container id from the prior "
             "response in the same chat thread. When set and `code_execution` "
             "is in `enabled_tools`, the next /v1/messages call carries a "
             "top-level `container` field so the model sees filesystem state "
@@ -938,7 +938,7 @@ class ChatCompletionRequest(BaseModel):
     fast_mode: Optional[bool] = Field(
         None,
         description = (
-            "[x-unsloth] Anthropic fast-mode toggle. On Claude Opus 4.6 / "
+            "[x-tunelabs] Anthropic fast-mode toggle. On Claude Opus 4.6 / "
             "4.7 adds the `fast-mode-2026-02-01` beta header and sends "
             "`speed: 'fast'` for higher OTPS at premium pricing. Silently "
             "ignored on every other model + provider. See "
@@ -1045,11 +1045,11 @@ class OpenAIContainerRequest(BaseModel):
 
     encrypted_api_key: str = Field(
         ...,
-        description = "[x-unsloth] RSA-encrypted, base64-encoded OpenAI API key.",
+        description = "[x-tunelabs] RSA-encrypted, base64-encoded OpenAI API key.",
     )
     provider_base_url: Optional[str] = Field(
         None,
-        description = "[x-unsloth] OpenAI base URL. Only api.openai.com is supported; non-cloud bases are rejected with 400.",
+        description = "[x-tunelabs] OpenAI base URL. Only api.openai.com is supported; non-cloud bases are rejected with 400.",
     )
 
 
@@ -1591,15 +1591,15 @@ class AnthropicMessagesRequest(BaseModel):
     top_k: Optional[int] = None
     stop_sequences: Optional[list[str]] = None
     metadata: Optional[dict] = None
-    # [x-unsloth] extensions mirroring the OpenAI endpoint convenience fields
+    # [x-tunelabs] extensions mirroring the OpenAI endpoint convenience fields
     min_p: Optional[float] = Field(
-        None, ge = 0.0, le = 1.0, description = "[x-unsloth] Min-p sampling threshold"
+        None, ge = 0.0, le = 1.0, description = "[x-tunelabs] Min-p sampling threshold"
     )
     repetition_penalty: Optional[float] = Field(
-        None, ge = 1.0, le = 2.0, description = "[x-unsloth] Repetition penalty"
+        None, ge = 1.0, le = 2.0, description = "[x-tunelabs] Repetition penalty"
     )
     presence_penalty: Optional[float] = Field(
-        None, ge = 0.0, le = 2.0, description = "[x-unsloth] Presence penalty"
+        None, ge = 0.0, le = 2.0, description = "[x-tunelabs] Presence penalty"
     )
     enable_tools: Optional[bool] = None
     enabled_tools: Optional[list[str]] = None
@@ -1607,7 +1607,7 @@ class AnthropicMessagesRequest(BaseModel):
     cancel_id: Optional[str] = None
     bypass_permissions: Optional[bool] = Field(
         False,
-        description = "[x-unsloth] Bypass Permissions: when true, disable the python/terminal execution sandbox (safety checks, command blocklist, resource limits) for server-side tool calls. Secret env vars are still stripped. Declared explicitly (not relied on via extra='allow') so omitted requests default to False instead of raising AttributeError.",
+        description = "[x-tunelabs] Bypass Permissions: when true, disable the python/terminal execution sandbox (safety checks, command blocklist, resource limits) for server-side tool calls. Secret env vars are still stripped. Declared explicitly (not relied on via extra='allow') so omitted requests default to False instead of raising AttributeError.",
     )
     model_config = {"extra": "allow"}
 

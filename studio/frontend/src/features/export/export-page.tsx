@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { SectionCard } from "@/components/section-card";
 import { RecentTrainingsSection } from "@/features/studio/recent-trainings-section";
@@ -785,7 +785,7 @@ export function ExportPage() {
                               Choose a saved checkpoint to export. Lower loss
                               generally means better quality.{" "}
                               <a
-                                href="https://unsloth.ai/docs/basics/inference-and-deployment"
+                                href="https://tunelabs.ai/docs/basics/inference-and-deployment"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-primary underline"

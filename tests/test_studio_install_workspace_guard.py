@@ -45,7 +45,7 @@ def _build_install_guard_script(
     return (
         _INSTALL_GUARD_STUBS
         + f'STUDIO_HOME="{studio_home}"\n'
-        + f'VENV_DIR="$STUDIO_HOME/unsloth_studio"\n'
+        + f'VENV_DIR="$STUDIO_HOME/tunelabs_studio"\n'
         + f'_STUDIO_HOME_REDIRECT="{redirect}"\n'
         + block
         + "echo RESULT=ok\n"
@@ -59,7 +59,7 @@ def _run_install_guard(
     create_bin_shim: bool = False,
     create_venv_marker: bool = False,
 ) -> subprocess.CompletedProcess:
-    venv_dir = studio_home / "unsloth_studio"
+    venv_dir = studio_home / "tunelabs_studio"
     (venv_dir / "bin").mkdir(parents = True, exist_ok = True)
     py = venv_dir / "bin" / "python"
     py.write_text("#!/bin/sh\nexit 0\n")
@@ -69,9 +69,9 @@ def _run_install_guard(
         (studio_home / "share" / "studio.conf").write_text("")
     if create_bin_shim:
         (studio_home / "bin").mkdir(parents = True, exist_ok = True)
-        (studio_home / "bin" / "unsloth").write_text("")
+        (studio_home / "bin" / "tunelabs").write_text("")
     if create_venv_marker:
-        (venv_dir / ".unsloth-studio-owned").write_text("")
+        (venv_dir / ".tunelabs-studio-owned").write_text("")
     script = _build_install_guard_script(studio_home, redirect)
     return subprocess.run(
         ["bash", "-c", script],
@@ -81,15 +81,15 @@ def _run_install_guard(
     )
 
 
-def test_env_mode_blocks_unsloth_studio_without_sentinels(tmp_path):
+def test_env_mode_blocks_tunelabs_studio_without_sentinels(tmp_path):
     studio_home = tmp_path / "ws"
     res = _run_install_guard(studio_home, redirect = "env")
     assert res.returncode != 0, (
         "env-mode without sentinels must refuse to rm -rf $VENV_DIR; "
         f"stdout={res.stdout!r} stderr={res.stderr!r}"
     )
-    assert "does not look like an Unsloth Studio install" in res.stderr
-    assert (studio_home / "unsloth_studio" / "bin" / "python").is_file()
+    assert "does not look like an TuneLabs Studio install" in res.stderr
+    assert (studio_home / "tunelabs_studio" / "bin" / "python").is_file()
 
 
 def test_env_mode_passes_when_share_studio_conf_present(tmp_path):
@@ -100,14 +100,14 @@ def test_env_mode_passes_when_share_studio_conf_present(tmp_path):
         f" stdout={res.stdout!r} stderr={res.stderr!r}"
     )
     assert "RESULT=ok" in res.stdout
-    assert not (studio_home / "unsloth_studio").exists()
+    assert not (studio_home / "tunelabs_studio").exists()
 
 
-def test_env_mode_passes_when_bin_unsloth_shim_present(tmp_path):
+def test_env_mode_passes_when_bin_tunelabs_shim_present(tmp_path):
     studio_home = tmp_path / "ws"
     res = _run_install_guard(studio_home, redirect = "env", create_bin_shim = True)
     assert res.returncode == 0, res.stderr
-    assert not (studio_home / "unsloth_studio").exists()
+    assert not (studio_home / "tunelabs_studio").exists()
 
 
 def test_default_mode_skips_sentinel_check(tmp_path):
@@ -115,7 +115,7 @@ def test_default_mode_skips_sentinel_check(tmp_path):
     res = _run_install_guard(studio_home, redirect = "default")
     assert res.returncode == 0, res.stderr
     assert "RESULT=ok" in res.stdout
-    assert not (studio_home / "unsloth_studio").exists()
+    assert not (studio_home / "tunelabs_studio").exists()
 
 
 def test_install_ps1_has_matching_env_mode_guard():
@@ -126,7 +126,7 @@ def test_install_ps1_has_matching_env_mode_guard():
         "$StudioRedirectMode -eq 'env'" in block
     ), "install.ps1 must gate Remove-Item $VenvDir on env-mode"
     assert "share\\studio.conf" in block, "install.ps1 guard must check share\\studio.conf sentinel"
-    assert "bin\\unsloth.exe" in block, "install.ps1 guard must check bin\\unsloth.exe sentinel"
+    assert "bin\\tunelabs.exe" in block, "install.ps1 guard must check bin\\tunelabs.exe sentinel"
     assert "Refusing to delete non-Studio venv" in block
 
 
@@ -136,22 +136,22 @@ def test_setup_ps1_has_writability_probe():
     block = src[idx : idx + 2000]
     assert (
         "WriteAllText" in block
-    ), "setup.ps1 must write-probe UNSLOTH_STUDIO_HOME like setup.sh:417"
+    ), "setup.ps1 must write-probe TUNELABS_STUDIO_HOME like setup.sh:417"
     assert (
         "is not writable" in block
     ), "setup.ps1 probe failure must produce a clear writable-error message"
 
 
-def test_env_mode_blocks_when_bin_unsloth_is_a_directory(tmp_path):
-    """A bare directory at bin/unsloth must NOT pass the sentinel (regression: `-e` accepted any type)."""
+def test_env_mode_blocks_when_bin_tunelabs_is_a_directory(tmp_path):
+    """A bare directory at bin/tunelabs must NOT pass the sentinel (regression: `-e` accepted any type)."""
     studio_home = tmp_path / "ws"
-    venv = studio_home / "unsloth_studio"
+    venv = studio_home / "tunelabs_studio"
     (venv / "bin").mkdir(parents = True)
     py = venv / "bin" / "python"
     py.write_text("#!/bin/sh\nexit 0\n")
     py.chmod(0o755)
     (venv / "important.txt").write_text("keep me")
-    (studio_home / "bin" / "unsloth").mkdir(parents = True)
+    (studio_home / "bin" / "tunelabs").mkdir(parents = True)
     script = _build_install_guard_script(studio_home, "env")
     res = subprocess.run(
         ["bash", "-c", script],
@@ -160,25 +160,25 @@ def test_env_mode_blocks_when_bin_unsloth_is_a_directory(tmp_path):
         capture_output = True,
     )
     assert res.returncode != 0, (
-        "directory at bin/unsloth must NOT satisfy the Studio sentinel; "
+        "directory at bin/tunelabs must NOT satisfy the Studio sentinel; "
         f"stdout={res.stdout!r} stderr={res.stderr!r}"
     )
     assert (venv / "important.txt").is_file(), "unrelated workspace data must survive"
 
 
-def test_env_mode_passes_when_bin_unsloth_is_a_symlink(tmp_path):
-    """A symlink at bin/unsloth (real installer artefact) must still satisfy the sentinel."""
+def test_env_mode_passes_when_bin_tunelabs_is_a_symlink(tmp_path):
+    """A symlink at bin/tunelabs (real installer artefact) must still satisfy the sentinel."""
     studio_home = tmp_path / "ws"
-    venv = studio_home / "unsloth_studio"
+    venv = studio_home / "tunelabs_studio"
     (venv / "bin").mkdir(parents = True)
     py = venv / "bin" / "python"
     py.write_text("#!/bin/sh\nexit 0\n")
     py.chmod(0o755)
     (studio_home / "bin").mkdir(parents = True)
-    target = studio_home / "bin" / "unsloth-real"
+    target = studio_home / "bin" / "tunelabs-real"
     target.write_text("#!/bin/sh\nexit 0\n")
     target.chmod(0o755)
-    (studio_home / "bin" / "unsloth").symlink_to(target)
+    (studio_home / "bin" / "tunelabs").symlink_to(target)
     script = _build_install_guard_script(studio_home, "env")
     res = subprocess.run(
         ["bash", "-c", script],
@@ -200,8 +200,8 @@ def test_install_ps1_sentinel_uses_pathtype_leaf():
         'share\\studio.conf") -PathType Leaf' in block
     ), "install.ps1 share\\studio.conf check must use -PathType Leaf"
     assert (
-        'bin\\unsloth.exe") -PathType Leaf' in block
-    ), "install.ps1 bin\\unsloth.exe check must use -PathType Leaf"
+        'bin\\tunelabs.exe") -PathType Leaf' in block
+    ), "install.ps1 bin\\tunelabs.exe check must use -PathType Leaf"
 
 
 def test_setup_ps1_stale_venv_has_env_mode_guard():
@@ -216,8 +216,8 @@ def test_setup_ps1_stale_venv_has_env_mode_guard():
         'share\\studio.conf") -PathType Leaf' in block
     ), "setup.ps1 stale-venv guard must check share\\studio.conf with -PathType Leaf"
     assert (
-        'bin\\unsloth.exe") -PathType Leaf' in block
-    ), "setup.ps1 stale-venv guard must check bin\\unsloth.exe with -PathType Leaf"
+        'bin\\tunelabs.exe") -PathType Leaf' in block
+    ), "setup.ps1 stale-venv guard must check bin\\tunelabs.exe with -PathType Leaf"
     # The guard must fire BEFORE the destructive call.
     guard_idx = block.index("$StudioHomeIsCustom")
     rm_idx = block.index("Remove-Item -LiteralPath $VenvDir")
@@ -255,29 +255,29 @@ def test_setup_ps1_prebuilt_llama_cpp_has_ownership_guard():
 
 
 def test_env_mode_passes_when_venv_marker_present(tmp_path):
-    """install.sh env-mode guard must accept the in-VENV .unsloth-studio-owned marker as a sentinel."""
+    """install.sh env-mode guard must accept the in-VENV .tunelabs-studio-owned marker as a sentinel."""
     studio_home = tmp_path / "ws"
     res = _run_install_guard(studio_home, redirect = "env", create_venv_marker = True)
     assert res.returncode == 0, (
         f"in-VENV marker must allow cleanup; " f"stdout={res.stdout!r} stderr={res.stderr!r}"
     )
     assert "RESULT=ok" in res.stdout
-    assert not (studio_home / "unsloth_studio").exists()
+    assert not (studio_home / "tunelabs_studio").exists()
 
 
-def test_env_mode_blocks_when_bin_unsloth_is_symlink_to_directory(tmp_path):
-    """install.sh guard must reject a symlink-to-directory at bin/unsloth; only -f (file/symlink-to-file) counts."""
+def test_env_mode_blocks_when_bin_tunelabs_is_symlink_to_directory(tmp_path):
+    """install.sh guard must reject a symlink-to-directory at bin/tunelabs; only -f (file/symlink-to-file) counts."""
     studio_home = tmp_path / "ws"
-    venv = studio_home / "unsloth_studio"
+    venv = studio_home / "tunelabs_studio"
     (venv / "bin").mkdir(parents = True)
     py = venv / "bin" / "python"
     py.write_text("#!/bin/sh\nexit 0\n")
     py.chmod(0o755)
     (venv / "important.txt").write_text("keep me")
     (studio_home / "bin").mkdir(parents = True)
-    target_dir = studio_home / "bin" / "unsloth-target-dir"
+    target_dir = studio_home / "bin" / "tunelabs-target-dir"
     target_dir.mkdir()
-    (studio_home / "bin" / "unsloth").symlink_to(target_dir)
+    (studio_home / "bin" / "tunelabs").symlink_to(target_dir)
     script = _build_install_guard_script(studio_home, "env")
     res = subprocess.run(
         ["bash", "-c", script],
@@ -286,23 +286,23 @@ def test_env_mode_blocks_when_bin_unsloth_is_symlink_to_directory(tmp_path):
         capture_output = True,
     )
     assert res.returncode != 0, (
-        "symlink-to-directory at bin/unsloth must NOT pass; "
+        "symlink-to-directory at bin/tunelabs must NOT pass; "
         f"stdout={res.stdout!r} stderr={res.stderr!r}"
     )
     assert (venv / "important.txt").is_file(), "unrelated workspace data must survive"
 
 
-def test_env_mode_blocks_when_bin_unsloth_is_broken_symlink(tmp_path):
-    """install.sh guard must reject a broken symlink at bin/unsloth."""
+def test_env_mode_blocks_when_bin_tunelabs_is_broken_symlink(tmp_path):
+    """install.sh guard must reject a broken symlink at bin/tunelabs."""
     studio_home = tmp_path / "ws"
-    venv = studio_home / "unsloth_studio"
+    venv = studio_home / "tunelabs_studio"
     (venv / "bin").mkdir(parents = True)
     py = venv / "bin" / "python"
     py.write_text("#!/bin/sh\nexit 0\n")
     py.chmod(0o755)
     (venv / "important.txt").write_text("keep me")
     (studio_home / "bin").mkdir(parents = True)
-    (studio_home / "bin" / "unsloth").symlink_to(studio_home / "bin" / "does-not-exist")
+    (studio_home / "bin" / "tunelabs").symlink_to(studio_home / "bin" / "does-not-exist")
     script = _build_install_guard_script(studio_home, "env")
     res = subprocess.run(
         ["bash", "-c", script],
@@ -311,39 +311,39 @@ def test_env_mode_blocks_when_bin_unsloth_is_broken_symlink(tmp_path):
         capture_output = True,
     )
     assert res.returncode != 0, (
-        "broken symlink at bin/unsloth must NOT pass; "
+        "broken symlink at bin/tunelabs must NOT pass; "
         f"stdout={res.stdout!r} stderr={res.stderr!r}"
     )
     assert (venv / "important.txt").is_file()
 
 
 def test_install_sh_writes_venv_marker_after_uv_venv():
-    """install.sh must write .unsloth-studio-owned into $VENV_DIR right after `uv venv` succeeds."""
+    """install.sh must write .tunelabs-studio-owned into $VENV_DIR right after `uv venv` succeeds."""
     src = INSTALL_SH.read_text()
     create_idx = src.index('run_install_cmd "create venv" uv venv "$VENV_DIR"')
     tail = src[create_idx : create_idx + 600]
     assert (
-        ".unsloth-studio-owned" in tail
-    ), "install.sh must write .unsloth-studio-owned after uv venv create"
+        ".tunelabs-studio-owned" in tail
+    ), "install.sh must write .tunelabs-studio-owned after uv venv create"
 
 
 def test_install_ps1_writes_venv_marker_after_uv_venv():
-    """install.ps1 must write .unsloth-studio-owned into $VenvDir after `uv venv` succeeds."""
+    """install.ps1 must write .tunelabs-studio-owned into $VenvDir after `uv venv` succeeds."""
     src = INSTALL_PS1.read_text()
     venv_create = src.index("uv venv $VenvDir --python")
     tail = src[venv_create : venv_create + 1500]
     assert (
-        ".unsloth-studio-owned" in tail
-    ), "install.ps1 must write .unsloth-studio-owned after uv venv create"
+        ".tunelabs-studio-owned" in tail
+    ), "install.ps1 must write .tunelabs-studio-owned after uv venv create"
 
 
 def test_install_ps1_guard_accepts_venv_marker():
-    """install.ps1 env-mode guard must accept the in-VENV .unsloth-studio-owned marker as a sentinel."""
+    """install.ps1 env-mode guard must accept the in-VENV .tunelabs-studio-owned marker as a sentinel."""
     src = INSTALL_PS1.read_text()
     block_start = src.index("if (Test-Path -LiteralPath $VenvPython)")
     block = src[block_start : block_start + 2000]
     assert (
-        '$VenvDir ".unsloth-studio-owned") -PathType Leaf' in block
+        '$VenvDir ".tunelabs-studio-owned") -PathType Leaf' in block
     ), "install.ps1 guard must check the in-VENV marker with -PathType Leaf"
 
 
@@ -435,7 +435,7 @@ def test_check_health_accepts_matching_studio_root_id():
     expected_id = "a" * 64
     rc = _run_check_health(
         expected_id,
-        f'{{"status":"healthy","service":"Unsloth UI Backend","studio_root_id":"{expected_id}"}}',
+        f'{{"status":"healthy","service":"TuneLabs UI Backend","studio_root_id":"{expected_id}"}}',
     )
     assert rc == 0, f"matching studio_root_id must allow attach (rc={rc})"
 
@@ -446,7 +446,7 @@ def test_check_health_rejects_mismatched_studio_root_id():
     other_id = "b" * 64
     rc = _run_check_health(
         expected_id,
-        f'{{"status":"healthy","service":"Unsloth UI Backend","studio_root_id":"{other_id}"}}',
+        f'{{"status":"healthy","service":"TuneLabs UI Backend","studio_root_id":"{other_id}"}}',
     )
     assert rc != 0, "mismatched studio_root_id must reject attach (workspace isolation)"
 
@@ -456,26 +456,26 @@ def test_check_health_rejects_missing_studio_root_id_field():
     expected_id = "a" * 64
     rc = _run_check_health(
         expected_id,
-        '{"status":"healthy","service":"Unsloth UI Backend"}',
+        '{"status":"healthy","service":"TuneLabs UI Backend"}',
     )
     assert rc != 0, "missing studio_root_id field must reject attach"
 
 
 def test_check_health_no_baked_id_accepts_any_healthy_backend():
-    """Empty _EXPECTED_STUDIO_ROOT_ID falls back to legacy contract: accept any healthy Unsloth backend."""
+    """Empty _EXPECTED_STUDIO_ROOT_ID falls back to legacy contract: accept any healthy TuneLabs backend."""
     rc = _run_check_health(
         "",
-        '{"status":"healthy","service":"Unsloth UI Backend","studio_root_id":"deadbeef"}',
+        '{"status":"healthy","service":"TuneLabs UI Backend","studio_root_id":"deadbeef"}',
     )
-    assert rc == 0, "no baked id → accept any healthy Unsloth backend"
+    assert rc == 0, "no baked id → accept any healthy TuneLabs backend"
 
 
-def test_check_health_rejects_non_unsloth_service():
+def test_check_health_rejects_non_tunelabs_service():
     rc = _run_check_health(
         "",
         '{"status":"healthy","service":"Other UI Backend"}',
     )
-    assert rc != 0, "non-Unsloth service must be rejected"
+    assert rc != 0, "non-TuneLabs service must be rejected"
 
 
 def test_check_health_handles_arbitrary_id_token():
@@ -483,7 +483,7 @@ def test_check_health_handles_arbitrary_id_token():
     expected_id = "f0" + ("ed" * 31)  # 64 hex chars, not derived from any path
     rc = _run_check_health(
         expected_id,
-        f'{{"status":"healthy","service":"Unsloth UI Backend","studio_root_id":"{expected_id}"}}',
+        f'{{"status":"healthy","service":"TuneLabs UI Backend","studio_root_id":"{expected_id}"}}',
     )
     assert rc == 0, "arbitrary 64-hex install id must round-trip cleanly (no JSON escape issue)"
 
@@ -553,7 +553,7 @@ def test_install_sh_bakes_studio_root_id_into_launcher():
 
 
 def test_tauri_preflight_scrubs_studio_home_env():
-    """Tauri CLI-spawn sites must env_remove UNSLOTH_STUDIO_HOME and STUDIO_HOME."""
+    """Tauri CLI-spawn sites must env_remove TUNELABS_STUDIO_HOME and STUDIO_HOME."""
     # PR #5341 split preflight into a submodule dir; read whichever shape is on disk.
     preflight_root = REPO_ROOT / "studio" / "src-tauri" / "src"
     preflight_paths = [
@@ -564,14 +564,14 @@ def test_tauri_preflight_scrubs_studio_home_env():
     commands = (REPO_ROOT / "studio" / "src-tauri" / "src" / "commands.rs").read_text()
     # Expect 2 scrubs in preflight (run_cli_probe + probe_cli_capability), 1 in commands.
     assert (
-        preflight.count('cmd.env_remove("UNSLOTH_STUDIO_HOME")') >= 2
-    ), "preflight must scrub UNSLOTH_STUDIO_HOME in both run_cli_probe and probe_cli_capability"
+        preflight.count('cmd.env_remove("TUNELABS_STUDIO_HOME")') >= 2
+    ), "preflight must scrub TUNELABS_STUDIO_HOME in both run_cli_probe and probe_cli_capability"
     assert (
         preflight.count('cmd.env_remove("STUDIO_HOME")') >= 2
     ), "preflight must scrub STUDIO_HOME in both run_cli_probe and probe_cli_capability"
     assert (
-        'cmd.env_remove("UNSLOTH_STUDIO_HOME")' in commands
-    ), "commands.rs check_install_status must scrub UNSLOTH_STUDIO_HOME"
+        'cmd.env_remove("TUNELABS_STUDIO_HOME")' in commands
+    ), "commands.rs check_install_status must scrub TUNELABS_STUDIO_HOME"
     assert (
         'cmd.env_remove("STUDIO_HOME")' in commands
     ), "commands.rs check_install_status must scrub STUDIO_HOME"
@@ -580,10 +580,10 @@ def test_tauri_preflight_scrubs_studio_home_env():
 def test_install_sh_shim_uses_atomic_replace():
     """install.sh shim install must use ln -sfn for atomic replace (rm+ln left a missing-shim window)."""
     src = INSTALL_SH.read_text()
-    shim_idx = src.index('_shim_path="$_LOCAL_BIN/unsloth"')
+    shim_idx = src.index('_shim_path="$_LOCAL_BIN/tunelabs"')
     block = src[shim_idx : shim_idx + 1500]
     assert (
-        'ln -sfn "$VENV_DIR/bin/unsloth" "$_shim_path"' in block
+        'ln -sfn "$VENV_DIR/bin/tunelabs" "$_shim_path"' in block
     ), "install.sh must use ln -sfn for atomic shim replacement"
     assert (
         'rm -f -- "$_shim_path"' not in block
@@ -667,7 +667,7 @@ def test_install_sh_bakes_installed_is_env_mode_flag_in_launcher():
 
 
 def test_install_sh_launcher_gates_port_file_on_baked_flag_not_runtime_env():
-    """Launcher PORT_FILE/LOCK_DIR must gate on baked $_INSTALLED_IS_ENV_MODE, not runtime $UNSLOTH_STUDIO_HOME."""
+    """Launcher PORT_FILE/LOCK_DIR must gate on baked $_INSTALLED_IS_ENV_MODE, not runtime $TUNELABS_STUDIO_HOME."""
     src = INSTALL_SH.read_text()
     heredoc_start = src.index("cat > \"$_css_launcher\" << 'LAUNCHER_EOF'")
     heredoc_end = src.index("LAUNCHER_EOF\n", heredoc_start)
@@ -680,15 +680,15 @@ def test_install_sh_launcher_gates_port_file_on_baked_flag_not_runtime_env():
     port_block = heredoc[port_block_start:port_block_end]
     assert 'PORT_FILE="$DATA_DIR/studio.port"' in port_block
     assert (
-        'if [ -n "${UNSLOTH_STUDIO_HOME:-}" ]; then\n    if command -v cksum' not in heredoc
-    ), "launcher must NOT gate PORT_FILE on runtime UNSLOTH_STUDIO_HOME"
+        'if [ -n "${TUNELABS_STUDIO_HOME:-}" ]; then\n    if command -v cksum' not in heredoc
+    ), "launcher must NOT gate PORT_FILE on runtime TUNELABS_STUDIO_HOME"
 
     def _run_launcher_gate(installed_flag: str, runtime_env: dict) -> str:
         # Run the LOCK_DIR/PORT_FILE init block in isolation.
         script = (
             f"_INSTALLED_IS_ENV_MODE={installed_flag!r}\n"
             "DATA_DIR=/tmp/test_data_dir\n"
-            'LOCK_DIR="${XDG_RUNTIME_DIR:-/tmp}/unsloth-studio-launcher-$(id -u).lock"\n'
+            'LOCK_DIR="${XDG_RUNTIME_DIR:-/tmp}/tunelabs-studio-launcher-$(id -u).lock"\n'
             'PORT_FILE=""\n' + port_block + '\necho "PORT_FILE=$PORT_FILE"\n'
         )
         env = {"PATH": "/usr/bin:/bin"}
@@ -704,10 +704,10 @@ def test_install_sh_launcher_gates_port_file_on_baked_flag_not_runtime_env():
                 return line[len("PORT_FILE=") :]
         return ""
 
-    # default-mode must keep PORT_FILE empty even if UNSLOTH_STUDIO_HOME leaks in.
+    # default-mode must keep PORT_FILE empty even if TUNELABS_STUDIO_HOME leaks in.
     assert (
-        _run_launcher_gate("false", {"UNSLOTH_STUDIO_HOME": "/tmp/leaked"}) == ""
-    ), "default-mode launcher must keep PORT_FILE empty even with UNSLOTH_STUDIO_HOME in env"
+        _run_launcher_gate("false", {"TUNELABS_STUDIO_HOME": "/tmp/leaked"}) == ""
+    ), "default-mode launcher must keep PORT_FILE empty even with TUNELABS_STUDIO_HOME in env"
     # env-mode must set PORT_FILE regardless of runtime env.
     assert (
         _run_launcher_gate("true", {}) == "/tmp/test_data_dir/studio.port"
@@ -803,12 +803,12 @@ def test_install_sh_install_id_survives_symlinked_studio_home(tmp_path):
     real.mkdir()
     link = tmp_path / "linkhome"
     link.symlink_to(real)
-    studio_home = real / ".unsloth" / "studio"
+    studio_home = real / ".tunelabs" / "studio"
     (studio_home / "share").mkdir(parents = True)
     valid_id = "ab12" * 16
     (studio_home / "share" / "studio_install_id").write_text(valid_id)
     # Canonical and symlinked paths must see the SAME content (cat and read_text agree).
-    raw_via_link = link / ".unsloth" / "studio" / "share" / "studio_install_id"
+    raw_via_link = link / ".tunelabs" / "studio" / "share" / "studio_install_id"
     raw_direct = studio_home / "share" / "studio_install_id"
     assert raw_via_link.read_text() == valid_id
     assert raw_direct.read_text() == valid_id

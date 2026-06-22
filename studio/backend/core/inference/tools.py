@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Tool definitions and executors for LLM tool calling: web search
 (DuckDuckGo), Python code execution, and terminal commands."""
@@ -9,7 +9,7 @@ import http.client
 import os
 import signal
 
-os.environ["UNSLOTH_IS_PRESENT"] = "1"
+os.environ["TUNELABS_IS_PRESENT"] = "1"
 
 import asyncio
 import random
@@ -537,7 +537,7 @@ def _sandbox_preexec():
     if _resource is not None:
         # RLIMIT_NPROC is per-real-UID, so the cap is well above normal usage.
         try:
-            nproc = int(os.environ.get("UNSLOTH_STUDIO_SANDBOX_NPROC", "10000"))
+            nproc = int(os.environ.get("TUNELABS_STUDIO_SANDBOX_NPROC", "10000"))
             _resource.setrlimit(_resource.RLIMIT_NPROC, (nproc, nproc))
         except (ValueError, OSError, AttributeError):
             pass
@@ -546,12 +546,12 @@ def _sandbox_preexec():
         except (ValueError, OSError):
             pass
         try:
-            as_bytes = int(os.environ.get("UNSLOTH_STUDIO_SANDBOX_AS_GB", "8")) * 1024 * 1024 * 1024
+            as_bytes = int(os.environ.get("TUNELABS_STUDIO_SANDBOX_AS_GB", "8")) * 1024 * 1024 * 1024
             _resource.setrlimit(_resource.RLIMIT_AS, (as_bytes, as_bytes))
         except (ValueError, OSError, AttributeError):
             pass
         try:
-            cpu_s = int(os.environ.get("UNSLOTH_STUDIO_SANDBOX_CPU_S", "600"))
+            cpu_s = int(os.environ.get("TUNELABS_STUDIO_SANDBOX_CPU_S", "600"))
             _resource.setrlimit(_resource.RLIMIT_CPU, (cpu_s, cpu_s))
         except (ValueError, OSError, AttributeError):
             pass
@@ -559,7 +559,7 @@ def _sandbox_preexec():
             # High enough for multi-shard safetensors mmaps; tunable via env.
             # Clamp to the inherited hard limit so setrlimit doesn't ValueError
             # when the parent's hard cap is below the request.
-            nofile = int(os.environ.get("UNSLOTH_STUDIO_SANDBOX_NOFILE", "16384"))
+            nofile = int(os.environ.get("TUNELABS_STUDIO_SANDBOX_NOFILE", "16384"))
             _soft_cur, hard_cur = _resource.getrlimit(_resource.RLIMIT_NOFILE)
             target = nofile if hard_cur == _resource.RLIM_INFINITY else min(nofile, hard_cur)
             _resource.setrlimit(_resource.RLIMIT_NOFILE, (target, target))
@@ -1488,8 +1488,8 @@ def _web_search(
 
 def _check_signal_escape_patterns(code: str):
     """Check for patterns that could escape signal-based timeouts. Returns
-    (safe: bool, details: dict). Vendored from unsloth_zoo.rl_environments to
-    avoid importing unsloth_zoo (needs GPU drivers; fails on Apple Silicon)."""
+    (safe: bool, details: dict). Vendored from tunelabs_zoo.rl_environments to
+    avoid importing tunelabs_zoo (needs GPU drivers; fails on Apple Silicon)."""
     try:
         tree = ast.parse(code)
     except SyntaxError as e:

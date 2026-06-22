@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { getAuthToken } from "@/features/auth";
 import { apiUrl, isTauri } from "@/lib/api-base";
@@ -8,7 +8,7 @@ import { useCallback, useEffect, useState } from "react";
 // Checked once per launch only (no polling), to avoid background load. A
 // re-check happens naturally the next time the user reopens the app.
 const WEB_UPDATE_CHECK_DELAY_MS = 5000;
-const DISMISS_PREFIX = "unsloth_web_update_dismissed";
+const DISMISS_PREFIX = "tunelabs_web_update_dismissed";
 const CAN_SHOW_KEY = "can_show_web_notification";
 const UPDATE_AVAILABLE_KEY = "update_available";
 const INSTALL_SOURCE_KEY = "install_source";

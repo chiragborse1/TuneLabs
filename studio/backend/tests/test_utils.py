@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Tests for utils/hardware and utils/utils: device detection, GPU memory, error formatting.
 
@@ -419,8 +419,8 @@ class TestPrintCudaDeviceList:
 
 class TestFormatErrorMessage:
     def test_not_found(self):
-        err = Exception("Repository not found for unsloth/test")
-        msg = format_error_message(err, "unsloth/test")
+        err = Exception("Repository not found for tunelabs/test")
+        msg = format_error_message(err, "tunelabs/test")
         assert "not found" in msg.lower()
         assert "test" in msg
 
@@ -456,7 +456,7 @@ class TestFormatErrorMessage:
     def test_mlx_oom(self):
         err = Exception("MLX backend out of memory")
         with patch("utils.hardware.get_device", return_value = DeviceType.MLX):
-            msg = format_error_message(err, "unsloth/huge-model")
+            msg = format_error_message(err, "tunelabs/huge-model")
         assert "Apple Silicon" in msg
 
     # --- OOM on CPU ---

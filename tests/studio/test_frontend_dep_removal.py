@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 """Edge-case suite for scripts/check_frontend_dep_removal.py.
 
 Each case patches a copy of package.json to remove/move a dependency,

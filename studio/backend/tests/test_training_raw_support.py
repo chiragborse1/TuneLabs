@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import asyncio
 import importlib.util
@@ -59,7 +59,7 @@ class TestTrainingRawSupport(unittest.TestCase):
         ):
             backend.start_training(
                 job_id = "test-cpt-raw",
-                model_name = "unsloth/test-bnb-4bit",
+                model_name = "tunelabs/test-bnb-4bit",
                 training_type = "Continued Pretraining",
                 format_type = "raw",
                 load_in_4bit = True,
@@ -104,7 +104,7 @@ class TestTrainingRawSupport(unittest.TestCase):
         ):
             backend.start_training(
                 job_id = "test-grad-clip",
-                model_name = "unsloth/test",
+                model_name = "tunelabs/test",
                 training_type = "LoRA/QLoRA",
                 max_grad_norm = 0.7,
                 max_grad_value = 3.0,
@@ -150,7 +150,7 @@ class TestTrainingRawSupport(unittest.TestCase):
         ):
             backend.start_training(
                 job_id = "test-seed",
-                model_name = "unsloth/test",
+                model_name = "tunelabs/test",
                 training_type = "LoRA/QLoRA",
                 random_seed = 1234,
             )
@@ -248,7 +248,7 @@ class TestTrainingRawSupport(unittest.TestCase):
     def test_mlx_worker_feature_detects_optional_mlx_config_fields(self):
         # `cast_norm_output_to_input_dtype`, `dataset_order`,
         # `max_grad_leaf_norm`, and `append_eos` ship in the paired
-        # unsloth-zoo update. Until that floor is in place, the
+        # tunelabs-zoo update. Until that floor is in place, the
         # worker must gate them so releases that predate those fields can
         # still construct MLXTrainingConfig without TypeError.
         source = (_BACKEND_ROOT / "core" / "training" / "worker.py").read_text()
@@ -311,7 +311,7 @@ class TestTrainingRawSupport(unittest.TestCase):
                 return True
 
         request = TrainingStartRequest(
-            model_name = "unsloth/test-bnb-4bit",
+            model_name = "tunelabs/test-bnb-4bit",
             training_type = "Continued Pretraining",
             format_type = "raw",
             load_in_4bit = True,
@@ -371,7 +371,7 @@ class TestTrainingRawSupport(unittest.TestCase):
 
         result = format_and_template_dataset(
             dataset,
-            model_name = "unsloth/test",
+            model_name = "tunelabs/test",
             tokenizer = None,
             format_type = "raw",
         )

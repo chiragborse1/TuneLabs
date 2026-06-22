@@ -39,9 +39,9 @@ datasets_mock.__spec__ = importlib.util.spec_from_loader("datasets", loader = No
 datasets_mock.Dataset = MockDataset
 sys.modules["datasets"] = datasets_mock
 
-# Import raw_text directly to avoid unsloth/__init__.py dependencies.
+# Import raw_text directly to avoid tunelabs/__init__.py dependencies.
 current_dir = os.path.dirname(__file__)
-raw_text_path = os.path.join(os.path.dirname(current_dir), "unsloth", "dataprep", "raw_text.py")
+raw_text_path = os.path.join(os.path.dirname(current_dir), "tunelabs", "dataprep", "raw_text.py")
 
 spec = importlib.util.spec_from_file_location("raw_text", raw_text_path)
 raw_text_module = importlib.util.module_from_spec(spec)

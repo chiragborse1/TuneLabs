@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 import os
 import sys
@@ -12,7 +12,7 @@ from models.inference import LoadRequest
 
 def _base_load_request(**overrides):
     data = {
-        "model_path": "unsloth/test-model-GGUF",
+        "model_path": "tunelabs/test-model-GGUF",
         "hf_token": None,
         "max_seq_length": 4096,
         "load_in_4bit": True,

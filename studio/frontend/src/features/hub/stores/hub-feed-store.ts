@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -27,12 +27,12 @@ export interface HubFeedState {
 export const FEED_CACHE_CAP = 24;
 
 export const FEED_TTL_MS: Record<ChannelId, number> = {
-  "unsloth-trending": 30 * 60 * 1000,
-  "unsloth-latest": 5 * 60 * 1000,
-  "unsloth-safetensors": 30 * 60 * 1000,
+  "tunelabs-trending": 30 * 60 * 1000,
+  "tunelabs-latest": 5 * 60 * 1000,
+  "tunelabs-safetensors": 30 * 60 * 1000,
 };
 
-const PERSIST_KEY = "unsloth.studio.hubFeed";
+const PERSIST_KEY = "tunelabs.studio.hubFeed";
 const PERSIST_VERSION = 1;
 const PERSIST_THROTTLE_MS = 1_000;
 

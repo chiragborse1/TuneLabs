@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Tests for the llama.cpp prebuilt freshness check.
 
@@ -55,7 +55,7 @@ def _write_marker(install_dir: Path, **overrides) -> Path:
         "requested_tag": "latest",
         "tag": "b9190",
         "release_tag": "b9190",
-        "published_repo": "unslothai/llama.cpp",
+        "published_repo": "tunelabsai/llama.cpp",
         "asset": "app-b9190-linux-x64-cuda13-newer.tar.gz",
         "asset_sha256": None,
         "source": "published",
@@ -70,8 +70,8 @@ def _write_marker(install_dir: Path, **overrides) -> Path:
     if "tag" in overrides and "release_tag" not in overrides:
         payload["release_tag"] = overrides["tag"]
     install_dir.mkdir(parents = True, exist_ok = True)
-    (install_dir / "UNSLOTH_PREBUILT_INFO.json").write_text(json.dumps(payload))
-    return install_dir / "UNSLOTH_PREBUILT_INFO.json"
+    (install_dir / "TUNELABS_PREBUILT_INFO.json").write_text(json.dumps(payload))
+    return install_dir / "TUNELABS_PREBUILT_INFO.json"
 
 
 def _fake_binary(install_dir: Path, *, layout: str = "cmake") -> Path:
@@ -112,7 +112,7 @@ def test_read_install_marker_finds_cmake_layout(tmp_path):
     marker = fr.read_install_marker(str(bin_path))
     assert marker is not None
     assert marker["tag"] == "b9190"
-    assert marker["published_repo"] == "unslothai/llama.cpp"
+    assert marker["published_repo"] == "tunelabsai/llama.cpp"
 
 
 def test_read_install_marker_finds_root_layout(tmp_path):
@@ -135,10 +135,10 @@ def test_read_install_marker_finds_windows_cmake_layout(tmp_path):
     assert marker["tag"] == "b8888"
 
 
-@pytest.mark.parametrize("repo", ["unslothai/llama.cpp", "ggml-org/llama.cpp"])
+@pytest.mark.parametrize("repo", ["tunelabsai/llama.cpp", "ggml-org/llama.cpp"])
 def test_read_install_marker_carries_published_repo_dynamically(tmp_path, repo):
     # The freshness check queries whichever release repo the marker records,
-    # so CUDA (unslothai), CPU/macOS (ggml-org), and ROCm all get the right
+    # so CUDA (tunelabsai), CPU/macOS (ggml-org), and ROCm all get the right
     # "latest" tag.
     install_dir = tmp_path / "llama.cpp"
     _write_marker(install_dir, tag = "b9000", published_repo = repo)
@@ -156,7 +156,7 @@ def test_read_install_marker_missing_returns_none(tmp_path):
 def test_read_install_marker_handles_invalid_json(tmp_path):
     install_dir = tmp_path / "llama.cpp"
     install_dir.mkdir(parents = True)
-    (install_dir / "UNSLOTH_PREBUILT_INFO.json").write_text("not json")
+    (install_dir / "TUNELABS_PREBUILT_INFO.json").write_text("not json")
     bin_path = _fake_binary(install_dir, layout = "root")
     assert fr.read_install_marker(str(bin_path)) is None
 
@@ -176,8 +176,8 @@ def test_latest_published_release_uses_disk_cache(monkeypatch):
         return "b9999"
 
     monkeypatch.setattr(fr, "_fetch_latest_release_tag", _fake_fetch)
-    first = fr.latest_published_release("unslothai/llama.cpp")
-    second = fr.latest_published_release("unslothai/llama.cpp")
+    first = fr.latest_published_release("tunelabsai/llama.cpp")
+    second = fr.latest_published_release("tunelabsai/llama.cpp")
     assert first == "b9999"
     assert second == "b9999"
     # Memo + disk cache -> only one fetch.
@@ -186,18 +186,18 @@ def test_latest_published_release_uses_disk_cache(monkeypatch):
 
 def test_latest_published_release_returns_none_on_network_failure(monkeypatch):
     monkeypatch.setattr(fr, "_fetch_latest_release_tag", lambda repo, timeout = 5.0: None)
-    assert fr.latest_published_release("unslothai/llama.cpp") is None
+    assert fr.latest_published_release("tunelabsai/llama.cpp") is None
 
 
 def test_latest_published_release_keeps_old_cache_on_transient_failure(monkeypatch, tmp_path):
     # Disk entry older than TTL + network fail -> return cached value.
     cache_dir = tmp_path / ".freshness"
     cache_dir.mkdir()
-    cache_file = cache_dir / "unslothai__llama.cpp.json"
+    cache_file = cache_dir / "tunelabsai__llama.cpp.json"
     yesterday = time.time() - 25 * 60 * 60  # > 24h
     cache_file.write_text(json.dumps({"fetched_at": yesterday, "latest_tag": "b9000"}))
     monkeypatch.setattr(fr, "_fetch_latest_release_tag", lambda repo, timeout = 5.0: None)
-    assert fr.latest_published_release("unslothai/llama.cpp") == "b9000"
+    assert fr.latest_published_release("tunelabsai/llama.cpp") == "b9000"
 
 
 # check_prebuilt_freshness end-to-end.
@@ -220,7 +220,7 @@ def test_check_prebuilt_freshness_reports_stale_when_old_and_behind(monkeypatch,
     assert info["installed_tag"] == "b9190"
     assert info["latest_tag"] == "b9300"
     assert info["age_days"] == 5
-    assert info["published_repo"] == "unslothai/llama.cpp"
+    assert info["published_repo"] == "tunelabsai/llama.cpp"
 
 
 def test_check_prebuilt_freshness_not_stale_when_tag_matches(monkeypatch, tmp_path):
@@ -314,7 +314,7 @@ def test_format_stale_warning_contains_actionable_command():
     assert "b9190" in msg
     assert "b9300" in msg
     assert "5 days" in msg
-    assert "unsloth studio update" in msg
+    assert "tunelabs studio update" in msg
 
 
 def test_format_stale_warning_singular_day():
@@ -432,7 +432,7 @@ def test_fetch_latest_release_tag_uses_publish_time(monkeypatch):
         },
     ]
     monkeypatch.setattr(urllib.request, "urlopen", lambda req, timeout = 5.0: _Resp(payload))
-    assert fr._fetch_latest_release_tag("unslothai/llama.cpp") == "b9596-mix-e6f2453"
+    assert fr._fetch_latest_release_tag("tunelabsai/llama.cpp") == "b9596-mix-e6f2453"
 
 
 # reset_caches(drop_disk=...) -- post-update stale same-base mix disk cache.
@@ -442,7 +442,7 @@ def _seed_disk_cache(tmp_path: Path, latest_tag: str) -> Path:
     # Matches _cache_path_for under the fixture's stubbed _cache_dir.
     cache_dir = tmp_path / ".freshness"
     cache_dir.mkdir(exist_ok = True)
-    cache_file = cache_dir / "unslothai__llama.cpp.json"
+    cache_file = cache_dir / "tunelabsai__llama.cpp.json"
     cache_file.write_text(json.dumps({"fetched_at": time.time(), "latest_tag": latest_tag}))
     return cache_file
 
@@ -534,23 +534,23 @@ def _patch_assets(monkeypatch, mapping):
     )
 
 
-def test_update_size_unsloth_prebuilt_exact_match(monkeypatch):
-    # The unsloth fork's own bundle (app-<tag>-<platform>): the want= exact match
+def test_update_size_tunelabs_prebuilt_exact_match(monkeypatch):
+    # The tunelabs fork's own bundle (app-<tag>-<platform>): the want= exact match
     # on app-<latest>-<suffix> wins.
     marker = {
         "asset": "app-b9190-linux-x64-cuda13-newer.tar.gz",
-        "published_repo": "unslothai/llama.cpp",
+        "published_repo": "tunelabsai/llama.cpp",
     }
     _patch_assets(
         monkeypatch,
         {
-            "unslothai/llama.cpp": {
+            "tunelabsai/llama.cpp": {
                 "app-b9300-linux-x64-cuda13-newer.tar.gz": 123_456_789,
                 "app-b9300-windows-x64-cuda13-newer.zip": 999,
             }
         },
     )
-    assert fr.update_download_size_bytes(marker, "b9300", "unslothai/llama.cpp") == 123_456_789
+    assert fr.update_download_size_bytes(marker, "b9300", "tunelabsai/llama.cpp") == 123_456_789
 
 
 def test_update_size_macos_fork_asset_suffix_fallback(monkeypatch):
@@ -558,13 +558,13 @@ def test_update_size_macos_fork_asset_suffix_fallback(monkeypatch):
     # endswith fallback in the publish repo.
     marker = {
         "asset": "llama-b9190-bin-macos-arm64.tar.gz",
-        "published_repo": "unslothai/llama.cpp",
+        "published_repo": "tunelabsai/llama.cpp",
     }
     _patch_assets(
         monkeypatch,
-        {"unslothai/llama.cpp": {"llama-b9300-bin-macos-arm64.tar.gz": 55_000_000}},
+        {"tunelabsai/llama.cpp": {"llama-b9300-bin-macos-arm64.tar.gz": 55_000_000}},
     )
-    assert fr.update_download_size_bytes(marker, "b9300", "unslothai/llama.cpp") == 55_000_000
+    assert fr.update_download_size_bytes(marker, "b9300", "tunelabsai/llama.cpp") == 55_000_000
 
 
 def test_update_size_upstream_ubuntu_uses_binary_repo(monkeypatch):
@@ -572,34 +572,34 @@ def test_update_size_upstream_ubuntu_uses_binary_repo(monkeypatch):
     # publish repo. The size must still resolve.
     marker = {
         "asset": "llama-b9190-bin-ubuntu-x64.tar.gz",
-        "published_repo": "unslothai/llama.cpp",
+        "published_repo": "tunelabsai/llama.cpp",
         "binary_repo": "ggml-org/llama.cpp",
     }
     _patch_assets(
         monkeypatch,
         {
-            "unslothai/llama.cpp": {"app-b9300-linux-x64-cuda13-newer.tar.gz": 1},
+            "tunelabsai/llama.cpp": {"app-b9300-linux-x64-cuda13-newer.tar.gz": 1},
             "ggml-org/llama.cpp": {
                 "llama-b9673-bin-ubuntu-x64.tar.gz": 42_000_000,
                 "llama-b9673-bin-ubuntu-vulkan-x64.tar.gz": 7,
             },
         },
     )
-    assert fr.update_download_size_bytes(marker, "b9300", "unslothai/llama.cpp") == 42_000_000
+    assert fr.update_download_size_bytes(marker, "b9300", "tunelabsai/llama.cpp") == 42_000_000
 
 
 def test_update_size_upstream_windows_uses_binary_repo(monkeypatch):
     # Regression (#6338 P2): the Windows upstream CPU prebuilt uses a win-* token.
     marker = {
         "asset": "llama-b9190-bin-win-cpu-x64.zip",
-        "published_repo": "unslothai/llama.cpp",
+        "published_repo": "tunelabsai/llama.cpp",
         "binary_repo": "ggml-org/llama.cpp",
     }
     _patch_assets(
         monkeypatch,
         {"ggml-org/llama.cpp": {"llama-b9673-bin-win-cpu-x64.zip": 33_000_000}},
     )
-    assert fr.update_download_size_bytes(marker, "b9300", "unslothai/llama.cpp") == 33_000_000
+    assert fr.update_download_size_bytes(marker, "b9300", "tunelabsai/llama.cpp") == 33_000_000
 
 
 def test_update_size_no_matching_asset_fails_open(monkeypatch):
@@ -607,27 +607,27 @@ def test_update_size_no_matching_asset_fails_open(monkeypatch):
     # the helper fails open to None rather than guessing a wrong artifact.
     marker = {
         "asset": "llama-b9190-bin-ubuntu-rocm-6.4-x64.tar.gz",
-        "published_repo": "unslothai/llama.cpp",
+        "published_repo": "tunelabsai/llama.cpp",
         "binary_repo": "ggml-org/llama.cpp",
     }
     _patch_assets(
         monkeypatch,
         {"ggml-org/llama.cpp": {"llama-b9673-bin-ubuntu-rocm-7.2-x64.tar.gz": 9}},
     )
-    assert fr.update_download_size_bytes(marker, "b9300", "unslothai/llama.cpp") is None
+    assert fr.update_download_size_bytes(marker, "b9300", "tunelabsai/llama.cpp") is None
 
 
 def test_update_size_missing_inputs_fail_open(monkeypatch):
     _patch_assets(
         monkeypatch,
-        {"unslothai/llama.cpp": {"app-b9300-linux-x64-cpu.tar.gz": 5}},
+        {"tunelabsai/llama.cpp": {"app-b9300-linux-x64-cpu.tar.gz": 5}},
     )
     # No marker, no latest tag, or no asset string -> None (never raise).
-    assert fr.update_download_size_bytes(None, "b9300", "unslothai/llama.cpp") is None
+    assert fr.update_download_size_bytes(None, "b9300", "tunelabsai/llama.cpp") is None
     assert (
         fr.update_download_size_bytes(
-            {"asset": "app-b9190-linux-x64-cpu.tar.gz"}, None, "unslothai/llama.cpp"
+            {"asset": "app-b9190-linux-x64-cpu.tar.gz"}, None, "tunelabsai/llama.cpp"
         )
         is None
     )
-    assert fr.update_download_size_bytes({"asset": None}, "b9300", "unslothai/llama.cpp") is None
+    assert fr.update_download_size_bytes({"asset": None}, "b9300", "tunelabsai/llama.cpp") is None

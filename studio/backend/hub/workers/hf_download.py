@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """HuggingFace Hub download worker, spawned as a subprocess so SIGKILL stops all chunk threads.
 
@@ -74,7 +74,7 @@ def _install_signal_handlers() -> None:
 
 
 def _parent_poll_seconds() -> float:
-    raw = os.environ.get("UNSLOTH_HF_WORKER_PARENT_POLL_SECONDS")
+    raw = os.environ.get("TUNELABS_HF_WORKER_PARENT_POLL_SECONDS")
     if raw:
         try:
             value = float(raw)
@@ -89,7 +89,7 @@ def _protected_blob_hashes() -> frozenset[str]:
     """Blob hashes a concurrent same-repo peer is writing (passed by the backend
     as a plain env list). Excluded from this worker's purge so a shared
     ``.incomplete`` (e.g. a bundled mmproj) is never deleted under the peer."""
-    raw = os.environ.get("UNSLOTH_PROTECTED_BLOB_HASHES", "")
+    raw = os.environ.get("TUNELABS_PROTECTED_BLOB_HASHES", "")
     return frozenset(h for h in raw.split(",") if h)
 
 

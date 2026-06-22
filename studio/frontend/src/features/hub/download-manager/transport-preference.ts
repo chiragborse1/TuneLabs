@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "@/lib/toast";
@@ -14,8 +14,8 @@ import {
 } from "./constants";
 export type { TransportMode } from "./constants";
 
-const STORAGE_KEY = "unsloth.studio.transportMode";
-const CHANGE_EVENT = "unsloth:transport-preference-change";
+const STORAGE_KEY = "tunelabs.studio.transportMode";
+const CHANGE_EVENT = "tunelabs:transport-preference-change";
 
 type TransportCapabilitiesState = {
   capabilities: DownloadTransportCapabilities | null;

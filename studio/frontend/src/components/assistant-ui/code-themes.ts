@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import oneDarkPro from "@shikijs/themes/one-dark-pro";
 import oneLight from "@shikijs/themes/one-light";
@@ -18,12 +18,12 @@ const withTransparentBg = (theme: ThemeRegistrationAny): ThemeRegistrationAny =>
   },
 });
 
-export const unslothLightTheme: ThemeRegistrationAny = {
+export const tunelabsLightTheme: ThemeRegistrationAny = {
   ...withTransparentBg(oneLight),
-  name: "unsloth-light",
+  name: "tunelabs-light",
 };
 
-export const unslothDarkTheme: ThemeRegistrationAny = {
+export const tunelabsDarkTheme: ThemeRegistrationAny = {
   ...withTransparentBg(oneDarkPro),
-  name: "unsloth-dark",
+  name: "tunelabs-dark",
 };

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { useCallback, useEffect, useRef } from "react";
 import { toast } from "@/lib/toast";
@@ -97,14 +97,14 @@ export function useDiscoverSearch({
   sortBy: HfSortKey;
   direction: HfSortDirection;
   channel: HfModelSearchChannel | null;
-  ownerScope: "unsloth" | "all";
+  ownerScope: "tunelabs" | "all";
   online: boolean;
 }): DiscoverSearch {
   const modelSearch = useHubModelSearch(debouncedQuery, {
     accessToken,
     sortBy,
     sortDirection: direction,
-    pinUnslothFirst: true,
+    pinTuneLabsFirst: true,
     ownerScope,
     enabled: online && isDiscoverTab && !isDatasetMode,
     keepUnsupportedTags: true,

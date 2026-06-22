@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 # Focused PR gate for the MLX dispatch surface, running on a real
 # Apple Silicon runner.
@@ -16,9 +16,9 @@
 # spoofed matrix PLUS three things only a real Apple Silicon host
 # can prove:
 #
-#   1. unsloth._IS_MLX flips True on Darwin+arm64 with mlx genuinely
+#   1. tunelabs._IS_MLX flips True on Darwin+arm64 with mlx genuinely
 #      installed (no spoof).
-#   2. Every PR-A MLX-only unsloth_zoo module (mlx_loader, mlx_trainer,
+#   2. Every PR-A MLX-only tunelabs_zoo module (mlx_loader, mlx_trainer,
 #      mlx_compile, mlx_utils, mlx_cce, gated_delta_vjp) imports
 #      against the real `mlx` + `mlx-lm` + `mlx-vlm` PyPI wheels --
 #      each does `import mlx.core as mx` at module top level, so this
@@ -29,7 +29,7 @@
 #      blocks `import mlx.core` for "no-mlx" profiles, faithfully
 #      simulating a Mac without mlx even when mlx IS installed).
 #   4. End-to-end MLX training + inference smoke test:
-#      run_real_mlx_smoke.py trains unsloth/gemma-3-270m-it for 7
+#      run_real_mlx_smoke.py trains tunelabs/gemma-3-270m-it for 7
 #      deterministic LoRA steps on a single repeated text row, then
 #      verifies the trained model can complete the prompt and that
 #      losses + grad norms are finite and well-behaved. This is the
@@ -40,7 +40,7 @@
 #   - test_hardware_dispatch_matrix.py    parametrized 7-profile matrix
 #                                         + 2 dispatch-priority canaries
 #   - test_is_mlx_dispatch_gate.py        AST + runtime guard on
-#                                         unsloth._IS_MLX
+#                                         tunelabs._IS_MLX
 #   - test_mlx_training_worker_behaviors.py  AST contract checks on
 #                                            studio/backend/core/training/worker.py
 #
@@ -48,8 +48,8 @@
 #
 # Security audit footprint: every package this workflow installs is
 # already covered by .github/workflows/security-audit.yml -- the deps
-# come from studio/backend/requirements/studio.txt and unsloth-zoo's
-# pyproject (resolved transitively). The git+ install of unsloth-zoo
+# come from studio/backend/requirements/studio.txt and tunelabs-zoo's
+# pyproject (resolved transitively). The git+ install of tunelabs-zoo
 # is intentionally skipped by the audit (pip-audit cannot resolve a
 # git URL through PyPI metadata; the audit comment in security-audit.yml
 # documents this). No new package is introduced solely by MLX CI.
@@ -59,8 +59,8 @@ name: MLX CI on Mac M1
 on:
   pull_request:
     paths:
-      - 'unsloth/__init__.py'
-      - 'unsloth/_gpu_init.py'
+      - 'tunelabs/__init__.py'
+      - 'tunelabs/_gpu_init.py'
       - 'studio/backend/utils/hardware/**'
       - 'studio/backend/core/training/worker.py'
       - 'studio/backend/core/inference/mlx_inference.py'
@@ -117,7 +117,7 @@ jobs:
       #    module top level.
       # 2. Same pytest / numpy / httpx stack the rest of the repo CI
       #    uses.
-      # 3. torch is explicitly installed: unsloth-zoo's pyproject
+      # 3. torch is explicitly installed: tunelabs-zoo's pyproject
       #    deliberately excludes torch on darwin+arm64 (mlx replaces
       #    it for runtime use), but the dispatch tests spoof
       #    torch.cuda / torch.xpu / torch.backends.mps via monkeypatch
@@ -126,19 +126,19 @@ jobs:
       #    explicit cpu+MPS arm64 wheel rather than something the
       #    default PyPI resolver might pick up. The CPU index hosts
       #    macosx_*_arm64 wheels alongside the Linux x86_64 ones.
-      # 4. unsloth-zoo from git main (NOT PyPI), WITH deps. PR-A's
-      #    MLX support landed after the most recent unsloth-zoo PyPI
+      # 4. tunelabs-zoo from git main (NOT PyPI), WITH deps. PR-A's
+      #    MLX support landed after the most recent tunelabs-zoo PyPI
       #    release; the wheel still raises NotImplementedError on
       #    Apple Silicon when device_type.get_device_type() runs
-      #    unguarded. Studio's own install.sh overlays unsloth-zoo
+      #    unguarded. Studio's own install.sh overlays tunelabs-zoo
       #    from git main for the same reason. Pulling deps lets pip
       #    resolve the platform-conditional MLX-only wheels (mlx,
-      #    mlx-lm, mlx-vlm gated on darwin+arm64 in unsloth-zoo's
+      #    mlx-lm, mlx-vlm gated on darwin+arm64 in tunelabs-zoo's
       #    pyproject) AND the shared deps (datasets, transformers,
-      #    sentencepiece, ...) that unsloth's MLX branch loads via
+      #    sentencepiece, ...) that tunelabs's MLX branch loads via
       #    dataprep/raw_text.py.
-      # 5. unsloth -e . --no-deps so the editable install does not
-      #    fight the unsloth-zoo dep set.
+      # 5. tunelabs -e . --no-deps so the editable install does not
+      #    fight the tunelabs-zoo dep set.
       #
       # All explicit pip installs are version-pinned to a single
       # released version (the latest as of 2026-05-07 within each
@@ -168,15 +168,15 @@ jobs:
           # github.com occasionally 500s on the git fetch; retry the
           # zoo install so a single upstream blip does not fail CI.
           for attempt in 1 2 3; do
-            if pip install "unsloth_zoo @ git+https://github.com/unslothai/unsloth-zoo"; then
+            if pip install "tunelabs_zoo @ git+https://github.com/tunelabsai/tunelabs-zoo"; then
               break
             fi
             if [ "$attempt" -eq 3 ]; then
-              echo "::error::pip install unsloth_zoo failed after 3 attempts"
+              echo "::error::pip install tunelabs_zoo failed after 3 attempts"
               exit 1
             fi
             delay=$((5 * attempt))
-            echo "::warning::unsloth_zoo install failed (attempt $attempt/3), retrying in ${delay}s..."
+            echo "::warning::tunelabs_zoo install failed (attempt $attempt/3), retrying in ${delay}s..."
             sleep "$delay"
           done
           pip install -e . --no-deps
@@ -189,29 +189,29 @@ jobs:
           import platform
           assert platform.system() == 'Darwin', platform.system()
           assert platform.machine() == 'arm64', platform.machine()
-          import unsloth
-          assert unsloth._IS_MLX is True, f'expected _IS_MLX=True on real Apple Silicon, got {unsloth._IS_MLX}'
+          import tunelabs
+          assert tunelabs._IS_MLX is True, f'expected _IS_MLX=True on real Apple Silicon, got {tunelabs._IS_MLX}'
           print('OK: _IS_MLX activated on real Apple Silicon')
           "
 
       # Real Apple Silicon sanity: confirm every PR-A MLX-only module
       # loads against real mlx + mlx-lm + mlx-vlm wheels.
-      - name: Smoke-import every MLX-only unsloth_zoo module
+      - name: Smoke-import every MLX-only tunelabs_zoo module
         run: |
           python -c "
           import importlib
           for name in [
-              'unsloth_zoo.mlx_loader',
-              'unsloth_zoo.mlx_trainer',
-              'unsloth_zoo.mlx_compile',
-              'unsloth_zoo.mlx_utils',
-              'unsloth_zoo.mlx_cce',
-              'unsloth_zoo.gated_delta_vjp',
+              'tunelabs_zoo.mlx_loader',
+              'tunelabs_zoo.mlx_trainer',
+              'tunelabs_zoo.mlx_compile',
+              'tunelabs_zoo.mlx_utils',
+              'tunelabs_zoo.mlx_cce',
+              'tunelabs_zoo.gated_delta_vjp',
           ]:
               importlib.import_module(name)
               print('OK:', name)
-          from unsloth_zoo.mlx_loader import FastMLXModel
-          from unsloth_zoo.mlx_trainer import MLXTrainer, MLXTrainingConfig
+          from tunelabs_zoo.mlx_loader import FastMLXModel
+          from tunelabs_zoo.mlx_trainer import MLXTrainer, MLXTrainingConfig
           assert hasattr(FastMLXModel, 'from_pretrained')
           print('OK: FastMLXModel + MLXTrainer surface present')
           "
@@ -224,7 +224,7 @@ jobs:
       - name: MLX dispatch tests (3 files, 36 tests)
         env:
           PYTHONPATH: ${{ github.workspace }}/studio
-          UNSLOTH_COMPILE_DISABLE: '1'
+          TUNELABS_COMPILE_DISABLE: '1'
         run: |
           python -m pytest -v --tb=short \
             tests/studio/test_hardware_dispatch_matrix.py \
@@ -233,12 +233,12 @@ jobs:
 
       # Studio prebuilt llama.cpp install + GGUF inference. Mirrors the
       # path Studio's setup.sh takes on macOS since #5963: plan against
-      # the unslothai/llama.cpp fork's latest release, which ships the
+      # the tunelabsai/llama.cpp fork's latest release, which ships the
       # bin-macos-arm64 bundle plus the llama-prebuilt-manifest.json the
       # default policy reads. After install, downloads a small published
-      # GGUF (unsloth/gemma-3-270m-it-GGUF, Q4_K_M) and validates
+      # GGUF (tunelabs/gemma-3-270m-it-GGUF, Q4_K_M) and validates
       # llama-server /completion end to end. An install failure or a
-      # non-zero binary exit is an Unsloth/Studio bug.
+      # non-zero binary exit is an TuneLabs/Studio bug.
       - name: Studio prebuilt llama.cpp install + GGUF inference (Mac M1)
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -251,14 +251,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          INSTALL_DIR="$HOME/.unsloth-studio-prebuilt-test/llama.cpp"
+          INSTALL_DIR="$HOME/.tunelabs-studio-prebuilt-test/llama.cpp"
           rm -rf "$INSTALL_DIR"
           # Mirror studio/setup.sh on macOS (the install.sh user path):
-          # it plans against the unslothai/llama.cpp fork's latest
+          # it plans against the tunelabsai/llama.cpp fork's latest
           # release with no policy or tag flags.
           python studio/install_llama_prebuilt.py \
             --install-dir "$INSTALL_DIR" \
-            --published-repo unslothai/llama.cpp
+            --published-repo tunelabsai/llama.cpp
 
           # Studio bundles only llama-server + llama-quantize from the
           # prebuilt (not llama-cli) -- inference goes through
@@ -276,7 +276,7 @@ jobs:
 
           mkdir -p /tmp/ggufs
           bash .github/scripts/hf-download-with-retry.sh \
-            'unsloth/gemma-3-270m-it-GGUF' \
+            'tunelabs/gemma-3-270m-it-GGUF' \
             'gemma-3-270m-it-Q4_K_M.gguf' \
             /tmp/ggufs
 
@@ -324,16 +324,16 @@ jobs:
           echo "OK: Studio prebuilt llama.cpp on Mac M1 + GGUF /completion works"
 
       # Real MLX training + inference smoke test. Trains
-      # unsloth/gemma-3-270m-it for 7 deterministic LoRA steps
+      # tunelabs/gemma-3-270m-it for 7 deterministic LoRA steps
       # (batch_size=2, gradient_accumulation_steps=3) on a single
-      # repeated row ("<<HELLO!!>> My name is Unsloth!"), then saves
+      # repeated row ("<<HELLO!!>> My name is TuneLabs!"), then saves
       # the trained model in 3 export formats. The `train` subcommand
       # captures per-phase timing + peak GPU + peak RSS into
       # train_metrics.json so we can detect regressions across CI runs.
       - name: MLX export round-trip — TRAIN + SAVE 3 formats
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          UNSLOTH_COMPILE_DISABLE: '1'
+          TUNELABS_COMPILE_DISABLE: '1'
         run: |
           mkdir -p mlx_workdir
           python tests/studio/run_real_mlx_smoke.py train \
@@ -349,7 +349,7 @@ jobs:
       - name: MLX export round-trip — RELOAD LoRA (fresh process)
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          UNSLOTH_COMPILE_DISABLE: '1'
+          TUNELABS_COMPILE_DISABLE: '1'
         run: |
           python tests/studio/run_real_mlx_smoke.py reload \
             --format lora \
@@ -358,7 +358,7 @@ jobs:
       - name: MLX export round-trip — RELOAD merged_16bit (fresh process)
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          UNSLOTH_COMPILE_DISABLE: '1'
+          TUNELABS_COMPILE_DISABLE: '1'
         run: |
           python tests/studio/run_real_mlx_smoke.py reload \
             --format merged \
@@ -367,7 +367,7 @@ jobs:
       # GGUF reload uses the llama-cli binary that save_pretrained_gguf
       # built. If save_pretrained_gguf was skipped during train (e.g.
       # llama.cpp's convert_hf_to_gguf asserts on the model's tokenizer
-      # vocab -- a downstream llama.cpp limitation, not an unsloth_zoo
+      # vocab -- a downstream llama.cpp limitation, not an tunelabs_zoo
       # bug), this step emits a workflow warning and exits 0 so the
       # LoRA + merged_16bit assertions remain the gating signal.
       - name: MLX export round-trip — RELOAD GGUF via llama-cli (fresh process)

@@ -1,10 +1,10 @@
 {#-
-  Gemma 4 chat template, vendored for Unsloth Studio.
+  Gemma 4 chat template, vendored for TuneLabs Studio.
   Source: google/gemma-4-31B-it HF discussion/PR #118 (adds the preserve_thinking
   flag plus null-rendering, string-arguments validation, balanced turn tags, empty
   messages handling, and OpenAI image_url/input_audio aliases).
   Studio-local change: preserve_thinking defaults to false (see SETUP block below).
-  Applied to unsloth/gemma-4-*-GGUF models so the embedded GGUF template does not
+  Applied to tunelabs/gemma-4-*-GGUF models so the embedded GGUF template does not
   need re-downloading. Keep in sync with upstream if PR #118 changes.
 -#}
 {%- macro format_parameters(properties, required, filter_keys=false) -%}
@@ -187,7 +187,7 @@
 {%- set ns = namespace(prev_message_type=None, prev_non_tool_role=None) -%}
 {%- set loop_messages = messages -%}
 {%- set enable_thinking = enable_thinking | default(false) -%}
-{#- Unsloth Studio: preserve_thinking defaults OFF (upstream PR #118 defaults true). -#}
+{#- TuneLabs Studio: preserve_thinking defaults OFF (upstream PR #118 defaults true). -#}
 {%- set preserve_thinking = preserve_thinking | default(false) -%}
 {{- bos_token -}}
 {#- Handle System/Tool Definitions Block -#}

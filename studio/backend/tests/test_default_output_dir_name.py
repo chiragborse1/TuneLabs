@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Auto-generated training output dir names stay inside outputs_root.
 
@@ -28,7 +28,7 @@ def _load_storage_roots():
 
 def test_repo_id_keeps_namespace():
     sr = _load_storage_roots()
-    assert sr.default_run_dir_name("unsloth/gemma-3-4b") == "unsloth_gemma-3-4b"
+    assert sr.default_run_dir_name("tunelabs/gemma-3-4b") == "tunelabs_gemma-3-4b"
     assert sr.default_run_dir_name("gemma-3-4b") == "gemma-3-4b"
 
 

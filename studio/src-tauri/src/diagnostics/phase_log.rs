@@ -163,7 +163,7 @@ impl PhaseLogWriter {
 
     fn header(&self) -> String {
         let mut lines = vec![
-            "# Unsloth Studio diagnostics phase log".to_string(),
+            "# TuneLabs Studio diagnostics phase log".to_string(),
             format!("diag_schema={SCHEMA_VERSION}"),
             format!("flow={}", self.flow),
             format!("segment_index={}", self.segment_index),
@@ -697,7 +697,7 @@ mod tests {
     #[test]
     fn phase_writer_keeps_latest_segments_and_terminal_lines() {
         let dir = std::env::temp_dir().join(format!(
-            "unsloth-phase-writer-{}-{}",
+            "tunelabs-phase-writer-{}-{}",
             std::process::id(),
             now_ms()
         ));
@@ -756,7 +756,7 @@ mod tests {
     #[test]
     fn repair_children_with_same_type_get_unique_segment_paths() {
         let dir = std::env::temp_dir().join(format!(
-            "unsloth-repair-paths-{}-{}",
+            "tunelabs-repair-paths-{}-{}",
             std::process::id(),
             now_ms()
         ));
@@ -795,7 +795,7 @@ mod tests {
     #[test]
     fn parses_latest_disk_group_by_metadata_not_mtime_only() {
         let dir = std::env::temp_dir().join(format!(
-            "unsloth-phase-parse-{}-{}",
+            "tunelabs-phase-parse-{}-{}",
             std::process::id(),
             now_ms()
         ));

@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Tests for the runtime managed-Node resolver (studio/backend/utils/node_runtime.py).
 
 The Studio frontend installer may provision an isolated Node under
-``<UNSLOTH_HOME>/node`` that is never added to the user's PATH. The backend OXC
+``<TUNELABS_HOME>/node`` that is never added to the user's PATH. The backend OXC
 validator must still find a usable Node at runtime: a version-adequate system
 Node, else the managed isolated one. These tests pin that resolution and the
 version floor (kept in sync with the setup scripts' Node decision).
@@ -55,7 +55,7 @@ def test_version_floor_matches_setup_bar(version, expected):
 
 
 def test_managed_binary_layout_is_host_aware(monkeypatch, tmp_path):
-    monkeypatch.setenv("UNSLOTH_STUDIO_HOME", str(tmp_path))
+    monkeypatch.setenv("TUNELABS_STUDIO_HOME", str(tmp_path))
     binary = nr.managed_node_binary()
     if os.name == "nt":
         assert binary == tmp_path / "node" / "node.exe"
@@ -64,10 +64,10 @@ def test_managed_binary_layout_is_host_aware(monkeypatch, tmp_path):
 
 
 def test_managed_dir_uses_legacy_sibling_by_default(monkeypatch):
-    # No env override -> ~/.unsloth/node (sibling of ~/.unsloth/studio).
-    monkeypatch.delenv("UNSLOTH_STUDIO_HOME", raising = False)
+    # No env override -> ~/.tunelabs/node (sibling of ~/.tunelabs/studio).
+    monkeypatch.delenv("TUNELABS_STUDIO_HOME", raising = False)
     monkeypatch.delenv("STUDIO_HOME", raising = False)
-    assert nr.managed_node_dir() == Path.home() / ".unsloth" / "node"
+    assert nr.managed_node_dir() == Path.home() / ".tunelabs" / "node"
 
 
 def _raise_oserror():
@@ -80,7 +80,7 @@ def test_managed_dir_fallback_honors_override(monkeypatch, tmp_path):
     import utils.paths.storage_roots as sr
 
     monkeypatch.setattr(sr, "studio_root", _raise_oserror)
-    monkeypatch.setenv("UNSLOTH_STUDIO_HOME", str(tmp_path))
+    monkeypatch.setenv("TUNELABS_STUDIO_HOME", str(tmp_path))
     assert nr.managed_node_dir() == tmp_path / "node"
 
 
@@ -88,29 +88,29 @@ def test_managed_dir_fallback_legacy_without_override(monkeypatch):
     import utils.paths.storage_roots as sr
 
     monkeypatch.setattr(sr, "studio_root", _raise_oserror)
-    monkeypatch.delenv("UNSLOTH_STUDIO_HOME", raising = False)
+    monkeypatch.delenv("TUNELABS_STUDIO_HOME", raising = False)
     monkeypatch.delenv("STUDIO_HOME", raising = False)
-    assert nr.managed_node_dir() == Path.home() / ".unsloth" / "node"
+    assert nr.managed_node_dir() == Path.home() / ".tunelabs" / "node"
 
 
 def test_managed_dir_honors_studio_home_alias(monkeypatch, tmp_path):
-    monkeypatch.delenv("UNSLOTH_STUDIO_HOME", raising = False)
+    monkeypatch.delenv("TUNELABS_STUDIO_HOME", raising = False)
     monkeypatch.setenv("STUDIO_HOME", str(tmp_path))
     assert nr.managed_node_dir() == tmp_path / "node"
 
 
-def test_managed_dir_unsloth_studio_home_wins_over_alias(monkeypatch, tmp_path):
-    monkeypatch.setenv("UNSLOTH_STUDIO_HOME", str(tmp_path))
+def test_managed_dir_tunelabs_studio_home_wins_over_alias(monkeypatch, tmp_path):
+    monkeypatch.setenv("TUNELABS_STUDIO_HOME", str(tmp_path))
     monkeypatch.setenv("STUDIO_HOME", str(tmp_path / "other"))
     assert nr.managed_node_dir() == tmp_path / "node"
 
 
 def test_managed_dir_legacy_valued_override_uses_sibling(monkeypatch):
     # An override set explicitly to the legacy default maps to the sibling
-    # ~/.unsloth/node (matching setup.sh / setup.ps1), not ~/.unsloth/studio/node.
-    legacy = Path.home() / ".unsloth" / "studio"
-    monkeypatch.setenv("UNSLOTH_STUDIO_HOME", str(legacy))
-    assert nr.managed_node_dir() == Path.home() / ".unsloth" / "node"
+    # ~/.tunelabs/node (matching setup.sh / setup.ps1), not ~/.tunelabs/studio/node.
+    legacy = Path.home() / ".tunelabs" / "studio"
+    monkeypatch.setenv("TUNELABS_STUDIO_HOME", str(legacy))
+    assert nr.managed_node_dir() == Path.home() / ".tunelabs" / "node"
 
 
 def test_resolve_prefers_adequate_system_node(monkeypatch):
@@ -122,7 +122,7 @@ def test_resolve_prefers_adequate_system_node(monkeypatch):
 
 
 def test_resolve_falls_back_to_managed_when_no_system(monkeypatch, tmp_path):
-    monkeypatch.setenv("UNSLOTH_STUDIO_HOME", str(tmp_path))
+    monkeypatch.setenv("TUNELABS_STUDIO_HOME", str(tmp_path))
     managed = nr.managed_node_binary()
     managed.parent.mkdir(parents = True, exist_ok = True)
     managed.write_text("#!/bin/sh\necho v24.17.0\n")
@@ -133,7 +133,7 @@ def test_resolve_falls_back_to_managed_when_no_system(monkeypatch, tmp_path):
 
 def test_resolve_prefers_managed_over_unsuitable_system(monkeypatch, tmp_path):
     # System node present but too old; managed isolated Node is adequate.
-    monkeypatch.setenv("UNSLOTH_STUDIO_HOME", str(tmp_path))
+    monkeypatch.setenv("TUNELABS_STUDIO_HOME", str(tmp_path))
     managed = nr.managed_node_binary()
     managed.parent.mkdir(parents = True, exist_ok = True)
     managed.write_text("fake")
@@ -144,14 +144,14 @@ def test_resolve_prefers_managed_over_unsuitable_system(monkeypatch, tmp_path):
 
 def test_resolve_returns_old_system_as_last_resort(monkeypatch, tmp_path):
     # Old system node, no managed install -> preserve pre-isolation behaviour.
-    monkeypatch.setenv("UNSLOTH_STUDIO_HOME", str(tmp_path))
+    monkeypatch.setenv("TUNELABS_STUDIO_HOME", str(tmp_path))
     monkeypatch.setattr(nr.shutil, "which", lambda name: "/old/node")
     monkeypatch.setattr(nr, "_node_version_ok", lambda exe: False)
     assert nr.resolve_node_executable() == "/old/node"
 
 
 def test_resolve_returns_none_when_nothing_available(monkeypatch, tmp_path):
-    monkeypatch.setenv("UNSLOTH_STUDIO_HOME", str(tmp_path))  # managed dir is empty
+    monkeypatch.setenv("TUNELABS_STUDIO_HOME", str(tmp_path))  # managed dir is empty
     monkeypatch.setattr(nr.shutil, "which", lambda name: None)
     monkeypatch.setattr(nr, "_node_version_ok", lambda exe: False)
     assert nr.resolve_node_executable() is None
@@ -160,7 +160,7 @@ def test_resolve_returns_none_when_nothing_available(monkeypatch, tmp_path):
 def test_negative_result_is_not_cached(monkeypatch, tmp_path):
     # A Node that appears after the first (empty) probe must be picked up without
     # a restart, so None must not be memoized.
-    monkeypatch.setenv("UNSLOTH_STUDIO_HOME", str(tmp_path))
+    monkeypatch.setenv("TUNELABS_STUDIO_HOME", str(tmp_path))
     monkeypatch.setattr(nr.shutil, "which", lambda name: None)
     monkeypatch.setattr(nr, "_node_version_ok", lambda exe: False)
     assert nr.resolve_node_executable() is None

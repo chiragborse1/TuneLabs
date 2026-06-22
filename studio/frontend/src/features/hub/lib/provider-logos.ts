@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 /**
- * Provider-logo registry for Unsloth re-uploads. Unsloth re-uploads upstream
- * models (e.g. unsloth/Qwen2.5-7B is Alibaba's Qwen); we show the upstream
- * provider's logo in place of the Unsloth picture (username stays "unsloth").
+ * Provider-logo registry for TuneLabs re-uploads. TuneLabs re-uploads upstream
+ * models (e.g. tunelabs/Qwen2.5-7B is Alibaba's Qwen); we show the upstream
+ * provider's logo in place of the TuneLabs picture (username stays "tunelabs").
  *
  * Matching: providers are evaluated in declaration order; a provider matches if
  * any of its `prefixes` is a prefix of the repo name (the part after "owner/").
@@ -284,7 +284,7 @@ export function matchProviderLogo(repoName: string): ProviderLogo | null {
 }
 
 // Owners whose avatars get swapped for the matched provider's logo.
-const RELABELED_OWNERS: ReadonlySet<string> = new Set(["unsloth"]);
+const RELABELED_OWNERS: ReadonlySet<string> = new Set(["tunelabs"]);
 
 /** True if the owner's avatars get replaced with the upstream provider's logo. */
 export function isProviderRelabeledOwner(

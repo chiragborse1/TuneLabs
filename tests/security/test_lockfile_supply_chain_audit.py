@@ -253,11 +253,11 @@ def test_advisory_finding_emitted_as_single_line_annotation(tmp_path):
 
 
 def test_skip_env_var_with_short_value_rejected(tmp_path):
-    """SF4: a short/boolean UNSLOTH_LOCKFILE_AUDIT_SKIP is rejected; a real justification is honored."""
+    """SF4: a short/boolean TUNELABS_LOCKFILE_AUDIT_SKIP is rejected; a real justification is honored."""
     fixture = FIXTURES / "clean_lockfile.json"
 
     # Case 1 -- "1" rejected, audit RUNS.
-    env_bad = {**os.environ, "UNSLOTH_LOCKFILE_AUDIT_SKIP": "1"}
+    env_bad = {**os.environ, "TUNELABS_LOCKFILE_AUDIT_SKIP": "1"}
     proc_bad = subprocess.run(
         [
             sys.executable,
@@ -285,7 +285,7 @@ def test_skip_env_var_with_short_value_rejected(tmp_path):
     )
 
     # Case 2 -- a real-looking justification accepted, audit skipped.
-    env_ok = {**os.environ, "UNSLOTH_LOCKFILE_AUDIT_SKIP": "ticket-5397"}
+    env_ok = {**os.environ, "TUNELABS_LOCKFILE_AUDIT_SKIP": "ticket-5397"}
     proc_ok = subprocess.run(
         [
             sys.executable,
@@ -310,7 +310,7 @@ def test_skip_env_var_with_short_value_rejected(tmp_path):
 
     # Case 3 -- the booleanish tokens are ALL rejected.
     for bad_val in ("true", "yes", "on", "0", ""):
-        env_b = {**os.environ, "UNSLOTH_LOCKFILE_AUDIT_SKIP": bad_val}
+        env_b = {**os.environ, "TUNELABS_LOCKFILE_AUDIT_SKIP": bad_val}
         p = subprocess.run(
             [
                 sys.executable,

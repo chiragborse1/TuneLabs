@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { XIcon } from "lucide-react";
 import { Tick02Icon } from "@/lib/tick-icon";
@@ -140,7 +140,7 @@ export function KnowledgeBaseComposerButton({
           align="start"
           sideOffset={2}
           avoidCollisions={true}
-          className="unsloth-plus-menu mcp-menu w-[232px]"
+          className="tunelabs-plus-menu mcp-menu w-[232px]"
         >
           <DropdownMenuLabel>Retrieve from</DropdownMenuLabel>
           <DropdownMenuItem

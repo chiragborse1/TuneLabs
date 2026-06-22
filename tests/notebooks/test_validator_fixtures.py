@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team.
-"""Golden-fixture tests for scripts/notebook_validator.py: each reconstructs a broken install cell from an unslothai/notebooks PR and asserts the matching rule fires (and falls silent after the fix).
+# Copyright 2026-present the TuneLabs AI Inc. team.
+"""Golden-fixture tests for scripts/notebook_validator.py: each reconstructs a broken install cell from an tunelabsai/notebooks PR and asserts the matching rule fires (and falls silent after the fix).
 
 Cross-references: PR #258->R-INST-003, #260->R-EXC-001, #261a->R-INST-004,
 #261b/#264->R-INST-005, #221->R-INST-001, 51b1462->R-DRIFT-001.
@@ -51,10 +51,10 @@ def test_r_inst_001_silent_after_pin():
     assert findings == []
 
 
-def test_r_inst_001_allowlist_unsloth_zoo_git():
+def test_r_inst_001_allowlist_tunelabs_zoo_git():
     cell = """%%capture
 !pip install --no-build-isolation git+https://github.com/state-spaces/mamba.git@main
-!pip install "unsloth_zoo[base] @ git+https://github.com/unslothai/unsloth-zoo"
+!pip install "tunelabs_zoo[base] @ git+https://github.com/tunelabsai/tunelabs-zoo"
 """
     findings = nv.rule_inst_001_git_plus(cell, "fixture", 0)
     assert findings == []
@@ -65,7 +65,7 @@ def test_r_inst_001_allowlist_unsloth_zoo_git():
 
 def test_r_inst_003_fires_when_peft_19_with_no_torchao_bump():
     cell = """%%capture
-!pip install --no-deps peft trl unsloth_zoo
+!pip install --no-deps peft trl tunelabs_zoo
 """
     findings = nv.rule_inst_003_peft_torchao(cell, COLAB_2026_05, "fixture", 0)
     assert any(f.rule == "R-INST-003" for f in findings)
@@ -73,7 +73,7 @@ def test_r_inst_003_fires_when_peft_19_with_no_torchao_bump():
 
 def test_r_inst_003_silent_when_torchao_bumped():
     cell = """%%capture
-!pip install --no-deps peft trl unsloth_zoo
+!pip install --no-deps peft trl tunelabs_zoo
 !pip install --no-deps --upgrade "torchao>=0.16.0"
 """
     findings = nv.rule_inst_003_peft_torchao(cell, COLAB_2026_05, "fixture", 0)
@@ -184,7 +184,7 @@ def _nb_with_code(*sources: str) -> dict:
 
 def test_r_api_003_fires_on_adamw_torch_fused():
     nb = _nb_with_code(
-        "%%capture\n!pip install unsloth\n",
+        "%%capture\n!pip install tunelabs\n",
         'from trl import SFTConfig\ntrainer = SFTConfig(optim="adamw_torch_fused")\n',
     )
     findings = nv.scan_user_cells(nb, "fixture")
@@ -193,7 +193,7 @@ def test_r_api_003_fires_on_adamw_torch_fused():
 
 def test_r_api_003_silent_on_adamw_8bit():
     nb = _nb_with_code(
-        "%%capture\n!pip install unsloth\n",
+        "%%capture\n!pip install tunelabs\n",
         'from trl import SFTConfig\ntrainer = SFTConfig(optim="adamw_8bit")\n',
     )
     findings = nv.scan_user_cells(nb, "fixture")
@@ -227,7 +227,7 @@ def test_environment_classifier(path, expected):
 def _live_notebooks_dir() -> Path | None:
     candidates = [
         Path(__file__).resolve().parents[3] / "notebooks",  # workspace sibling
-        Path("/mnt/disks/unslothai/ubuntu/workspace_12/notebooks"),
+        Path("/mnt/disks/tunelabsai/ubuntu/workspace_12/notebooks"),
     ]
     for p in candidates:
         if (p / "update_all_notebooks.py").is_file():
@@ -237,17 +237,17 @@ def _live_notebooks_dir() -> Path | None:
 
 @pytest.mark.skipif(
     _live_notebooks_dir() is None,
-    reason = "unslothai/notebooks not cloned at sibling path",
+    reason = "tunelabsai/notebooks not cloned at sibling path",
 )
 def test_exceptions_passes_on_head():
-    """L1.2 must be silent on live unslothai/notebooks HEAD; a fire means a DONT_UPDATE_EXCEPTIONS notebook lost its policy clause or the clause set is stale."""
+    """L1.2 must be silent on live tunelabsai/notebooks HEAD; a fire means a DONT_UPDATE_EXCEPTIONS notebook lost its policy clause or the clause set is stale."""
     findings = nv.rule_l12_exceptions_coverage(_live_notebooks_dir())
     assert findings == [], findings
 
 
 @pytest.mark.skipif(
     _live_notebooks_dir() is None,
-    reason = "unslothai/notebooks not cloned at sibling path",
+    reason = "tunelabsai/notebooks not cloned at sibling path",
 )
 def test_lint_smoke_no_module_errors():
     """The lint subcommand walks every nb/kaggle without crashing (findings are fine)."""

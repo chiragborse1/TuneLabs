@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Integration: GGUF Chat-Mode downloads route through the Xet->HTTP helper,
 preserving cancellation and the best-effort companion contract. No GPU, no
@@ -64,7 +64,7 @@ from huggingface_hub import constants as hf_constants
 from core.inference.llama_cpp import LlamaCppBackend
 from utils.hf_xet_fallback import DownloadStallError
 
-REPO = "unsloth/vision-GGUF"
+REPO = "tunelabs/vision-GGUF"
 
 
 @pytest.fixture

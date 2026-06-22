@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import type { ModelType, StepConfig } from "@/types/training";
 import type { PipelineType } from "@huggingface/hub";
@@ -110,7 +110,7 @@ export const DEFAULT_HYPERPARAMS = {
   contextLength: 2048,
   visionImageSize: null as number | null,
   learningRate: LR_DEFAULT_LORA,
-  // null = let backend auto-compute (lr/10 per Unsloth CPT recipe). Only used by CPT.
+  // null = let backend auto-compute (lr/10 per TuneLabs CPT recipe). Only used by CPT.
   embeddingLearningRate: null as number | null,
   optimizerType: "adamw_8bit",
   lrSchedulerType: "linear",
@@ -127,7 +127,7 @@ export const DEFAULT_HYPERPARAMS = {
   evalSteps: 0.00,
   packing: false,
   trainOnCompletions: false,
-  gradientCheckpointing: "unsloth" as const,
+  gradientCheckpointing: "tunelabs" as const,
   randomSeed: 3407,
   enableWandb: false,
   wandbToken: "",
@@ -153,20 +153,20 @@ export const MODEL_TYPE_TO_HF_TASK: Record<ModelType, PipelineType> = {
 
 
 export const PRIORITY_TRAINING_MODELS: readonly string[] = [
-  "unsloth/gemma-4-E2B-it",
-  "unsloth/gemma-4-E4B-it",
-  "unsloth/gemma-4-31B-it",
-  "unsloth/gemma-4-26B-A4B-it",
-  "unsloth/Qwen3.5-2B",
-  "unsloth/Qwen3.5-9B",
-  "unsloth/gpt-oss-20b",
-  "unsloth/NVIDIA-Nemotron-3-Nano-4B",
-  "unsloth/Qwen3-0.6B",
-  "unsloth/gemma-3-4b-it",
-  "unsloth/embeddinggemma-300m",
-  "unsloth/orpheus-3b-0.1-ft",
-  "unsloth/Llama-3.1-8B-Instruct",
-  "unsloth/Llama-3.2-3B-Instruct",
+  "tunelabs/gemma-4-E2B-it",
+  "tunelabs/gemma-4-E4B-it",
+  "tunelabs/gemma-4-31B-it",
+  "tunelabs/gemma-4-26B-A4B-it",
+  "tunelabs/Qwen3.5-2B",
+  "tunelabs/Qwen3.5-9B",
+  "tunelabs/gpt-oss-20b",
+  "tunelabs/NVIDIA-Nemotron-3-Nano-4B",
+  "tunelabs/Qwen3-0.6B",
+  "tunelabs/gemma-3-4b-it",
+  "tunelabs/embeddinggemma-300m",
+  "tunelabs/orpheus-3b-0.1-ft",
+  "tunelabs/Llama-3.1-8B-Instruct",
+  "tunelabs/Llama-3.2-3B-Instruct",
 ];
 
 /** Pin priority models to the top of a list of model IDs, preserving their defined order. */

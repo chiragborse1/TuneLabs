@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Verification for Tauri native path signed grants.
 
@@ -25,7 +25,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Iterable, Iterator, Mapping
 
-LEASE_SECRET_ENV = "UNSLOTH_STUDIO_NATIVE_PATH_LEASE_SECRET"
+LEASE_SECRET_ENV = "TUNELABS_STUDIO_NATIVE_PATH_LEASE_SECRET"
 _MAX_NATIVE_PATH_REDACTIONS = 100
 _MAX_NATIVE_PATH_LABELS = 10_000
 _MIN_LEASE_SECRET_BYTES = 32

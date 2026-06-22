@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 # Mac counterpart to studio-api-smoke.yml. Same tests/studio/
 # studio_api_smoke.py exercise (CORS hardening, auth state machine,
@@ -14,8 +14,8 @@ on:
   pull_request:
     paths:
       - 'studio/**'
-      - 'unsloth/**'
-      - 'unsloth_cli/**'
+      - 'tunelabs/**'
+      - 'tunelabs_cli/**'
       - 'install.sh'
       - 'pyproject.toml'
       - 'tests/studio/**'
@@ -37,7 +37,7 @@ jobs:
     runs-on: macos-14
     timeout-minutes: 25
     env:
-      GGUF_REPO: unsloth/gemma-3-270m-it-GGUF
+      GGUF_REPO: tunelabs/gemma-3-270m-it-GGUF
       GGUF_VARIANT: UD-Q4_K_XL
       GGUF_FILE: gemma-3-270m-it-UD-Q4_K_XL.gguf
       STUDIO_PORT: '18895'
@@ -99,9 +99,9 @@ jobs:
 
       - name: Reset auth + boot Studio (API-only)
         run: |
-          unsloth studio reset-password
+          tunelabs studio reset-password
           mkdir -p logs
-          UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p "$STUDIO_PORT" \
+          TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p "$STUDIO_PORT" \
             > logs/studio.log 2>&1 &
           echo "STUDIO_PID=$!" >> "$GITHUB_ENV"
 
@@ -117,7 +117,7 @@ jobs:
 
       - name: Pass bootstrap password + rotated targets to the test
         run: |
-          OLD=$(cat ~/.unsloth/studio/auth/.bootstrap_password)
+          OLD=$(cat ~/.tunelabs/studio/auth/.bootstrap_password)
           NEW="ApiSmoke-$(python -c 'import secrets; print(secrets.token_urlsafe(16))')"
           NEW2="ApiSmoke-$(python -c 'import secrets; print(secrets.token_urlsafe(16))')"
           echo "::add-mask::$OLD"
@@ -130,7 +130,7 @@ jobs:
       - name: Run Studio API & Auth tests
         env:
           BASE_URL: http://127.0.0.1:18895
-          STUDIO_AUTH_DIR: /Users/runner/.unsloth/studio/auth
+          STUDIO_AUTH_DIR: /Users/runner/.tunelabs/studio/auth
         run: python tests/studio/studio_api_smoke.py
 
       - name: Stop Studio

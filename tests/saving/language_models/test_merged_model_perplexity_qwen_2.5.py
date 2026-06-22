@@ -1,5 +1,5 @@
-from unsloth import FastLanguageModel, FastVisionModel, UnslothVisionDataCollator
-from unsloth.chat_templates import get_chat_template
+from tunelabs import FastLanguageModel, FastVisionModel, TuneLabsVisionDataCollator
+from tunelabs.chat_templates import get_chat_template
 from trl import SFTTrainer, SFTConfig
 from transformers import (
     DataCollatorForLanguageModeling,
@@ -80,11 +80,11 @@ def load_and_compute_8bit_ppl(
     load_in_8bit = False,
 ):
     """Load model and compute perplexity in subprocess."""
-    from unsloth import FastLanguageModel
+    from tunelabs import FastLanguageModel
     from tests.utils.perplexity_eval import ppl_model
 
     merged_model, merged_tokenizer = FastLanguageModel.from_pretrained(
-        model_name = "./unsloth_out/merged_qwen_text_model",
+        model_name = "./tunelabs_out/merged_qwen_text_model",
         max_seq_length = 2048,
         load_in_4bit = load_in_4bit,
         load_in_8bit = load_in_8bit,
@@ -172,7 +172,7 @@ if __name__ == "__main__":
         attn_implementation = "sdpa"
 
     model, tokenizer = FastLanguageModel.from_pretrained(
-        model_name = "unsloth/Qwen2.5-7B-Instruct",
+        model_name = "tunelabs/Qwen2.5-7B-Instruct",
         max_seq_length = 2048,
         dtype = compute_dtype,
         load_in_4bit = True,
@@ -204,13 +204,13 @@ if __name__ == "__main__":
         lora_alpha = 16,
         lora_dropout = 0,
         bias = "none",
-        use_gradient_checkpointing = "unsloth",
+        use_gradient_checkpointing = "tunelabs",
         random_state = 3407,
         use_rslora = False,
         loftq_config = None,
     )
 
-    from unsloth import is_bfloat16_supported
+    from tunelabs import is_bfloat16_supported
 
     trainer = SFTTrainer(
         model = model,
@@ -244,7 +244,7 @@ if __name__ == "__main__":
 
     print("merge and save to local disk")
     model.save_pretrained_merged(
-        save_directory = "./unsloth_out/merged_qwen_text_model", tokenizer = tokenizer
+        save_directory = "./tunelabs_out/merged_qwen_text_model", tokenizer = tokenizer
     )
 
     # print("cleaning")
@@ -255,7 +255,7 @@ if __name__ == "__main__":
 
     print("Loading merged model in 4 bit for perplexity test")
     merged_model, merged_tokenizer = FastLanguageModel.from_pretrained(
-        model_name = "./unsloth_out/merged_qwen_text_model",
+        model_name = "./tunelabs_out/merged_qwen_text_model",
         max_seq_length = 2048,
         load_in_4bit = True,
         load_in_8bit = False,
@@ -276,7 +276,7 @@ if __name__ == "__main__":
 
     print("Loading merged model in 16 bit for perplexity test")
     merged_model, merged_tokenizer = FastLanguageModel.from_pretrained(
-        model_name = "./unsloth_out/merged_qwen_text_model",
+        model_name = "./tunelabs_out/merged_qwen_text_model",
         max_seq_length = 2048,
         load_in_4bit = False,
         load_in_8bit = False,
@@ -290,5 +290,5 @@ if __name__ == "__main__":
     print_model_comparison()
 
     safe_remove_directory("./outputs")
-    safe_remove_directory("./unsloth_compiled_cache")
-    safe_remove_directory("./unsloth_out")
+    safe_remove_directory("./tunelabs_compiled_cache")
+    safe_remove_directory("./tunelabs_out")

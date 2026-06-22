@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import {
   ArrowDown01Icon,
@@ -68,7 +68,7 @@ function formatGitHubSourceSummary(
       typeof source.retry_after_sec === "number" && source.retry_after_sec > 0
         ? ` ~${formatMetricValue(source.retry_after_sec)}s`
         : "";
-    return `Waiting for GitHub rate limit${wait}. Unsloth will resume automatically.`;
+    return `Waiting for GitHub rate limit${wait}. TuneLabs will resume automatically.`;
   }
   if (source.status === "retrying") {
     return source.message ?? "GitHub request failed; retrying automatically.";

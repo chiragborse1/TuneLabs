@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -53,11 +53,11 @@ export function ModelTypeStep(): ReactElement {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="text-lg font-semibold">Welcome to Unsloth Studio</h2>
+        <h2 className="text-lg font-semibold">Welcome to TuneLabs Studio</h2>
         <p className="text-sm text-muted-foreground">
           Choose a path - fine-tune LLMs, vision, embedding, audio models or just chat.{" "}
           <a
-            href="https://unsloth.ai/docs/new/studio/start"
+            href="https://tunelabs.ai/docs/new/studio/start"
             target="_blank"
             rel="noreferrer"
             className="text-primary underline"
@@ -71,7 +71,7 @@ export function ModelTypeStep(): ReactElement {
         onValueChange={(v) => {
           if (!COMING_SOON.includes(v as ModelType)) {
             setChatOnlySelected(false);
-            sessionStorage.removeItem("unsloth_chat_only");
+            sessionStorage.removeItem("tunelabs_chat_only");
             setModelType(v as ModelType);
           }
         }}
@@ -180,7 +180,7 @@ export function ModelTypeStep(): ReactElement {
           onClick={() => {
             setChatOnlySelected(true);
             setModelType("text" as ModelType);
-            sessionStorage.setItem("unsloth_chat_only", "1");
+            sessionStorage.setItem("tunelabs_chat_only", "1");
           }}
         >
           <Card

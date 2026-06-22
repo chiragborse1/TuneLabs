@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Regression tests for Helper LLM startup pre-cache opt-in behavior."""
 
@@ -41,7 +41,7 @@ def _install_fake_studio_db(monkeypatch, *, stored = None):
 
 
 def test_helper_precache_defaults_off_when_setting_missing(monkeypatch):
-    monkeypatch.delenv("UNSLOTH_HELPER_MODEL_DISABLE", raising = False)
+    monkeypatch.delenv("TUNELABS_HELPER_MODEL_DISABLE", raising = False)
     _install_fake_studio_db(monkeypatch)
 
     assert helper_precache_settings.get_helper_precache_enabled() is False
@@ -50,7 +50,7 @@ def test_helper_precache_defaults_off_when_setting_missing(monkeypatch):
 
 def test_helper_precache_opt_in_is_blocked_by_existing_disable_env(monkeypatch):
     _install_fake_studio_db(monkeypatch, stored = True)
-    monkeypatch.setenv("UNSLOTH_HELPER_MODEL_DISABLE", "true")
+    monkeypatch.setenv("TUNELABS_HELPER_MODEL_DISABLE", "true")
 
     assert helper_precache_settings.get_helper_precache_enabled() is True
     assert helper_precache_settings.should_preload_helper_on_startup() is False
@@ -58,7 +58,7 @@ def test_helper_precache_opt_in_is_blocked_by_existing_disable_env(monkeypatch):
 
 def test_settings_route_persists_helper_precache_toggle(monkeypatch):
     values = _install_fake_studio_db(monkeypatch)
-    monkeypatch.delenv("UNSLOTH_HELPER_MODEL_DISABLE", raising = False)
+    monkeypatch.delenv("TUNELABS_HELPER_MODEL_DISABLE", raising = False)
 
     response = settings_route.update_helper_precache(
         settings_route.HelperPrecachePayload(enabled = True),
@@ -106,7 +106,7 @@ def test_ai_assist_route_still_calls_on_demand_advisor(monkeypatch):
             samples = [{"prompt": "x" * 250, "answer": "ok", "extra": "ignored"}],
             dataset_name = "owner/dataset",
             hf_token = "hf_test",
-            model_name = "unsloth/test",
+            model_name = "tunelabs/test",
             model_type = "text",
         ),
         current_subject = "test-user",
@@ -121,7 +121,7 @@ def test_ai_assist_route_still_calls_on_demand_advisor(monkeypatch):
             "samples": [{"prompt": "x" * 200, "answer": "ok"}],
             "dataset_name": "owner/dataset",
             "hf_token": "hf_test",
-            "model_name": "unsloth/test",
+            "model_name": "tunelabs/test",
             "model_type": "text",
         }
     ]

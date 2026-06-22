@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Resolve a usable Node.js executable at runtime.
 
-The installer provisions an isolated Node under ``<UNSLOTH_HOME>/node`` but only
+The installer provisions an isolated Node under ``<TUNELABS_HOME>/node`` but only
 puts it on PATH for the *setup* process, never the user's shell. So backend code
 that shells out to ``node`` at runtime (the OXC validator) cannot rely on PATH.
 ``resolve_node_executable`` prefers a version-adequate system Node, else the
@@ -36,15 +36,15 @@ def _version_meets_floor(version: str) -> bool:
 
 def managed_node_dir() -> Path:
     """Isolated Node install dir. Mirrors ``_find_llama_server_binary``: shares a
-    parent with llama.cpp -- ``<STUDIO_HOME>`` in custom mode, else legacy ``~/.unsloth``."""
-    legacy_node = Path.home() / ".unsloth" / "node"
+    parent with llama.cpp -- ``<STUDIO_HOME>`` in custom mode, else legacy ``~/.tunelabs``."""
+    legacy_node = Path.home() / ".tunelabs" / "node"
     try:
         # Lazy import (mirrors _find_llama_server_binary) so this module stays
         # importable even if utils.paths cannot be loaded.
         from utils.paths.storage_roots import studio_root
 
         resolved = studio_root()
-        legacy_studio = Path.home() / ".unsloth" / "studio"
+        legacy_studio = Path.home() / ".tunelabs" / "studio"
         try:
             is_legacy = resolved.resolve() == legacy_studio.resolve()
         except (OSError, ValueError):
@@ -54,7 +54,7 @@ def managed_node_dir() -> Path:
         # Degraded env (utils.paths unavailable): still honor an explicit
         # STUDIO_HOME override before the legacy default, mirroring studio_root().
         override = (
-            os.environ.get("UNSLOTH_STUDIO_HOME") or os.environ.get("STUDIO_HOME") or ""
+            os.environ.get("TUNELABS_STUDIO_HOME") or os.environ.get("STUDIO_HOME") or ""
         ).strip()
         if override:
             try:

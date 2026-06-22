@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 "use client";
 
 import { createCodePlugin } from "@/components/assistant-ui/code-plugin";
 import { CodeToggleIcon } from "@/components/assistant-ui/code-toggle-icon";
 import {
-  unslothDarkTheme,
-  unslothLightTheme,
+  tunelabsDarkTheme,
+  tunelabsLightTheme,
 } from "@/components/assistant-ui/code-themes";
 import { MascotImg } from "@/components/mascot-img";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,7 @@ import { getArtifactFilename } from "./types";
 
 const COPY_RESET_MS = 2000;
 const artifactSourceCodePlugin = createCodePlugin({
-  themes: [unslothLightTheme, unslothDarkTheme],
+  themes: [tunelabsLightTheme, tunelabsDarkTheme],
 });
 
 function buildHtmlFence(source: string): string {
@@ -337,7 +337,7 @@ export function ArtifactSurface({
               mode="streaming"
               plugins={{ code: artifactSourceCodePlugin }}
               controls={{ code: false }}
-              shikiTheme={[unslothLightTheme, unslothDarkTheme]}
+              shikiTheme={[tunelabsLightTheme, tunelabsDarkTheme]}
             >
               {sourceMarkdown}
             </Streamdown>

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """install_llama_prebuilt.py: host->repo mapping and the --resolve-prebuilt mode.
 
@@ -29,7 +29,7 @@ if not hasattr(ilp, "published_repo_for_host") or not hasattr(
 ):
     pytest.skip("PR symbols not present - check branch", allow_module_level = True)
 
-FORK = ilp.DEFAULT_PUBLISHED_REPO  # unslothai/llama.cpp
+FORK = ilp.DEFAULT_PUBLISHED_REPO  # tunelabsai/llama.cpp
 UPSTREAM = ilp.UPSTREAM_REPO  # ggml-org/llama.cpp
 
 
@@ -106,7 +106,7 @@ def test_published_repo_for_host():
 
 
 def test_macos_intel_and_arm_both_route_to_fork():
-    # macOS uses the unslothai fork's own Mac prebuilts for BOTH arm64 and Intel;
+    # macOS uses the tunelabsai fork's own Mac prebuilts for BOTH arm64 and Intel;
     # there is no longer any upstream-on-macOS default path, so the obsolete
     # pre-macOS-26 pin (b9415) is gone.
     assert (

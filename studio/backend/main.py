@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """
-Main FastAPI application for Unsloth UI Backend
+Main FastAPI application for TuneLabs UI Backend
 """
 
 import os
@@ -99,7 +99,7 @@ if sys.platform == "win32":
     # defaults; explicit caller values remain authoritative.
     if (
         "BNB_ROCM_VERSION" not in os.environ
-        or os.environ.get("UNSLOTH_BNB_ROCM_VERSION_SOURCE") == "sitecustomize"
+        or os.environ.get("TUNELABS_BNB_ROCM_VERSION_SOURCE") == "sitecustomize"
     ):
         import glob as _glob
         import logging as _logging
@@ -135,7 +135,7 @@ if sys.platform == "win32":
         if _found_rocm_bnb:
             _bnb_rocm_ver_final = _bnb_rocm_ver or os.environ.get("BNB_ROCM_VERSION") or "72"
             os.environ["BNB_ROCM_VERSION"] = _bnb_rocm_ver_final
-            os.environ["UNSLOTH_BNB_ROCM_VERSION_SOURCE"] = "detected"
+            os.environ["TUNELABS_BNB_ROCM_VERSION_SOURCE"] = "detected"
             _logging.getLogger(__name__).info(
                 "Windows ROCm: set BNB_ROCM_VERSION=%s (from installed BNB wheel)",
                 _bnb_rocm_ver_final,
@@ -175,8 +175,8 @@ from utils.cpu_threads import configure_cpu_threads
 try:
     configure_cpu_threads()
 except ValueError as exc:
-    _raw = os.environ.get("UNSLOTH_CPU_THREADS")
-    raise SystemExit(f"Error: Invalid UNSLOTH_CPU_THREADS value {_raw!r}: {exc}") from None
+    _raw = os.environ.get("TUNELABS_CPU_THREADS")
+    raise SystemExit(f"Error: Invalid TUNELABS_CPU_THREADS value {_raw!r}: {exc}") from None
 
 # Anaconda/conda-forge Python: seed platform._sys_version_cache before any
 # library import triggers attrs -> rich -> structlog -> platform crash.
@@ -184,28 +184,28 @@ except ValueError as exc:
 import _platform_compat  # noqa: F401
 
 # Direct `uvicorn main:app` launches bypass run.py, so re-export here too
-# (mirrors run.py). Required BEFORE the unsloth-zoo import below, whose
+# (mirrors run.py). Required BEFORE the tunelabs-zoo import below, whose
 # LLAMA_CPP_DEFAULT_DIR binding is import-time.
 from utils.paths.storage_roots import studio_root as _studio_root
 
 try:
-    _LEGACY_STUDIO_ROOT = (_Path.home() / ".unsloth" / "studio").resolve()
+    _LEGACY_STUDIO_ROOT = (_Path.home() / ".tunelabs" / "studio").resolve()
 except (OSError, ValueError):
-    _LEGACY_STUDIO_ROOT = _Path.home() / ".unsloth" / "studio"
+    _LEGACY_STUDIO_ROOT = _Path.home() / ".tunelabs" / "studio"
 try:
     _STUDIO_ROOT_RESOLVED = _studio_root().resolve()
 except (OSError, ValueError):
     _STUDIO_ROOT_RESOLVED = _studio_root()
 if _STUDIO_ROOT_RESOLVED != _LEGACY_STUDIO_ROOT:
-    if not os.environ.get("UNSLOTH_STUDIO_HOME"):
-        os.environ["UNSLOTH_STUDIO_HOME"] = str(_STUDIO_ROOT_RESOLVED)
-    if not os.environ.get("UNSLOTH_LLAMA_CPP_PATH"):
-        os.environ["UNSLOTH_LLAMA_CPP_PATH"] = str(_STUDIO_ROOT_RESOLVED / "llama.cpp")
+    if not os.environ.get("TUNELABS_STUDIO_HOME"):
+        os.environ["TUNELABS_STUDIO_HOME"] = str(_STUDIO_ROOT_RESOLVED)
+    if not os.environ.get("TUNELABS_LLAMA_CPP_PATH"):
+        os.environ["TUNELABS_LLAMA_CPP_PATH"] = str(_STUDIO_ROOT_RESOLVED / "llama.cpp")
 
-# The studio bundles unsloth_zoo; declare unsloth present (as `import unsloth`
+# The studio bundles tunelabs_zoo; declare tunelabs present (as `import tunelabs`
 # does) so its lazy submodule imports (export, hardware, mlx) and the
 # DiffusionGemma runner never trip the install guard on a clean install.
-os.environ.setdefault("UNSLOTH_IS_PRESENT", "1")
+os.environ.setdefault("TUNELABS_IS_PRESENT", "1")
 
 import hashlib
 import mimetypes
@@ -304,7 +304,7 @@ from utils.hardware import (
 )
 import utils.hardware.hardware as _hw_module
 
-from utils.cache_cleanup import clear_unsloth_compiled_cache
+from utils.cache_cleanup import clear_tunelabs_compiled_cache
 from utils.lifespan_shutdown import run_lifespan_shutdown
 from utils.native_path_leases import native_path_leases_supported
 from utils.update_status import (
@@ -315,13 +315,13 @@ from utils.studio_version import get_studio_version
 from utils.api_errors import install_api_error_handlers
 
 
-def get_unsloth_version() -> str:
+def get_tunelabs_version() -> str:
     try:
-        return package_version("unsloth")
+        return package_version("tunelabs")
     except PackageNotFoundError:
         pass
 
-    version_file = _Path(__file__).resolve().parents[2] / "unsloth" / "models" / "_utils.py"
+    version_file = _Path(__file__).resolve().parents[2] / "tunelabs" / "models" / "_utils.py"
     try:
         for line in version_file.read_text(encoding = "utf-8").splitlines():
             if line.startswith("__version__ = "):
@@ -331,13 +331,13 @@ def get_unsloth_version() -> str:
     return "dev"
 
 
-UNSLOTH_VERSION = get_unsloth_version()
+TUNELABS_VERSION = get_tunelabs_version()
 STUDIO_VERSION = get_studio_version()
 
 
 def _load_desktop_owner() -> dict[str, str] | None:
-    token = os.environ.pop("UNSLOTH_STUDIO_DESKTOP_OWNER_TOKEN", "")
-    kind = os.environ.pop("UNSLOTH_STUDIO_DESKTOP_OWNER_KIND", "")
+    token = os.environ.pop("TUNELABS_STUDIO_DESKTOP_OWNER_TOKEN", "")
+    kind = os.environ.pop("TUNELABS_STUDIO_DESKTOP_OWNER_KIND", "")
     if kind != "tauri" or not token:
         return None
     return {
@@ -351,7 +351,7 @@ _DESKTOP_OWNER = _load_desktop_owner()
 # The Tauri desktop app runs the backend on the owner's own machine, so local
 # stdio MCP servers are safe there. setdefault lets an explicit "0" opt out.
 if _DESKTOP_OWNER:
-    os.environ.setdefault("UNSLOTH_STUDIO_ALLOW_STDIO_MCP", "1")
+    os.environ.setdefault("TUNELABS_STUDIO_ALLOW_STDIO_MCP", "1")
 
 
 def _desktop_owner() -> dict[str, str] | None:
@@ -410,7 +410,7 @@ def _run_llama_cpp_startup_probes(app: FastAPI) -> None:
         if _caps.get("found") and not _caps.get("supports_mtp"):
             _msg = (
                 "llama.cpp prebuilt lacks MTP support "
-                "(--spec-type mtp/draft-mtp). Run `unsloth studio update`. "
+                "(--spec-type mtp/draft-mtp). Run `tunelabs studio update`. "
                 "MTP GGUFs will load without speculative decoding."
             )
             _log.warning(_msg)
@@ -429,7 +429,7 @@ def _start_llama_cpp_probes_if_enabled(app: FastAPI) -> None:
     critical path so they never delay `Application startup complete`. Skipped
     entirely when update checks are disabled, so a fully offline boot makes no
     background network calls."""
-    if os.environ.get("UNSLOTH_DISABLE_UPDATE_CHECK") == "1":
+    if os.environ.get("TUNELABS_DISABLE_UPDATE_CHECK") == "1":
         return
 
     threading.Thread(
@@ -443,7 +443,7 @@ def _start_llama_cpp_probes_if_enabled(app: FastAPI) -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup: detect hardware, seed default admin if needed. Shutdown: clean up compiled cache."""
-    clear_unsloth_compiled_cache()
+    clear_tunelabs_compiled_cache()
 
     # Remove stale .venv_overlay from old versions; switching now uses .venv_t5/.
     overlay_dir = Path(__file__).resolve().parent.parent.parent / ".venv_overlay"
@@ -456,7 +456,7 @@ async def lifespan(app: FastAPI):
     # Apple Silicon with MLX missing => Train/Export are greyed out (chat-only).
     # Reinstall mlx by name on a background thread (off the critical path) and
     # re-detect, so a reinstall/update that dropped mlx self-heals. No-op
-    # elsewhere; opt out with UNSLOTH_DISABLE_MLX_AUTOREPAIR=1.
+    # elsewhere; opt out with TUNELABS_DISABLE_MLX_AUTOREPAIR=1.
     try:
         from utils.mlx_repair import start_mlx_autorepair_if_needed
         start_mlx_autorepair_if_needed()
@@ -529,15 +529,15 @@ async def lifespan(app: FastAPI):
 
     await run_lifespan_shutdown(
         terminate_hub_downloads,
-        clear_unsloth_compiled_cache,
+        clear_tunelabs_compiled_cache,
         _hw_module,
     )
 
 
 app = FastAPI(
-    title = "Unsloth UI Backend",
-    version = UNSLOTH_VERSION,
-    description = "Backend API for Unsloth UI - Training and Model Management",
+    title = "TuneLabs UI Backend",
+    version = TUNELABS_VERSION,
+    description = "Backend API for TuneLabs UI - Training and Model Management",
     lifespan = lifespan,
 )
 
@@ -545,7 +545,7 @@ from loggers.config import LogConfig
 from loggers.handlers import LoggingMiddleware
 
 logger = LogConfig.setup_logging(
-    service_name = "unsloth-studio-backend",
+    service_name = "tunelabs-studio-backend",
     env = os.getenv("ENVIRONMENT_TYPE", "production"),
 )
 
@@ -651,7 +651,7 @@ class SecurityHeadersMiddleware:
                     "Permissions-Policy",
                     "camera=(), microphone=(self), geolocation=()",
                 )
-                headers["server"] = "unsloth-studio"
+                headers["server"] = "tunelabs-studio"
             await send(message)
 
         await self.app(scope, receive, send_wrapper)
@@ -855,7 +855,7 @@ async def _recipes_redirect(rest: str = ""):
     return _RedirectResponse(url = target, status_code = 308)
 
 
-_api_only = os.environ.get("UNSLOTH_API_ONLY") == "1"
+_api_only = os.environ.get("TUNELABS_API_ONLY") == "1"
 _cors_origins = ["*"]
 if _api_only:
     _cors_origins = [
@@ -926,7 +926,7 @@ async def health_check(request: Request):
     base = {
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
-        "service": "Unsloth UI Backend",
+        "service": "TuneLabs UI Backend",
         "chat_only": _hw_module.CHAT_ONLY,
         "desktop_protocol_version": 1,
         "desktop_manageability_version": 1,
@@ -960,7 +960,7 @@ async def health_check(request: Request):
         **base,
         # Why chat_only is set. This fingerprints the host, so keep it authed.
         "chat_only_reason": getattr(_hw_module, "CHAT_ONLY_REASON", None),
-        "version": UNSLOTH_VERSION,
+        "version": TUNELABS_VERSION,
         "studio_version": STUDIO_VERSION,
         "device_type": device_type,
         # API-screen fields (authed-only; they fingerprint how the host is exposed).
@@ -973,13 +973,13 @@ async def health_check(request: Request):
 @app.get("/api/studio/install-source")
 def studio_install_source(_current_subject: str = Depends(get_current_subject)):
     """Return source-aware install metadata without remote update checks."""
-    return get_studio_install_source_status(UNSLOTH_VERSION)
+    return get_studio_install_source_status(TUNELABS_VERSION)
 
 
 @app.get("/api/studio/update-status")
 def studio_update_status(_current_subject: str = Depends(get_current_subject)):
     """Return source-aware manual update status for browser-served Studio."""
-    return get_studio_update_status(UNSLOTH_VERSION)
+    return get_studio_update_status(TUNELABS_VERSION)
 
 
 @app.get(
@@ -992,7 +992,7 @@ def studio_download_transport_capabilities(_current_subject: str = Depends(get_c
 
 @app.post("/api/shutdown")
 async def shutdown_server(request: Request, current_subject: str = Depends(get_current_subject)):
-    """Gracefully shut down the Unsloth Studio server.
+    """Gracefully shut down the TuneLabs Studio server.
 
     Called by the frontend quit dialog so users can stop the server from the UI
     without the CLI or killing the process manually.
@@ -1130,7 +1130,7 @@ def _inject_bootstrap(html_bytes: bytes, app: FastAPI):
         }
     )
     nonce = _secrets.token_urlsafe(16)
-    tag = f'<script nonce="{nonce}">window.__UNSLOTH_BOOTSTRAP__={payload}</script>'
+    tag = f'<script nonce="{nonce}">window.__TUNELABS_BOOTSTRAP__={payload}</script>'
     html = html_bytes.decode("utf-8")
     html = html.replace("</head>", f"{tag}</head>", 1)
     return html.encode("utf-8"), nonce
@@ -1153,7 +1153,7 @@ def _canonical_origin(scheme: str, netloc: str) -> Optional[tuple[str, str, int]
     if "@" in netloc:
         netloc = netloc.rsplit("@", 1)[1]
     # IPv6 hosts use brackets (RFC 3986 sec 3.2.2): ``[::1]:8902``. Bare
-    # ``partition(":")`` mis-parses these, breaking ``unsloth studio -H ::1``.
+    # ``partition(":")`` mis-parses these, breaking ``tunelabs studio -H ::1``.
     if netloc.startswith("["):
         close = netloc.find("]")
         if close == -1:

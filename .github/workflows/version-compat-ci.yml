@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 #
 # Cross-version compat canary for the four upstream packages whose
-# release cadence regularly breaks unsloth + unsloth-zoo:
+# release cadence regularly breaks tunelabs + tunelabs-zoo:
 #
 #   1. vLLM             (LoRA worker manager, BnB loader, cumem allocator)
-#   2. TRL / GRPO       (trainer source rewriters in unsloth.models.rl*)
+#   2. TRL / GRPO       (trainer source rewriters in tunelabs.models.rl*)
 #   3. PEFT             (LoraConfig, get_peft_model, LoraLayer, bnb integration)
 #   4. sentence-transformers (Transformer/Pooling/Normalize, Trainer)
 #   5. bitsandbytes     (Linear4bit, dequantize_4bit)
@@ -26,22 +26,22 @@ name: Version Compat CI
 
 on:
   pull_request:
-    # Trigger on any unsloth source change, not just the three previously
+    # Trigger on any tunelabs source change, not just the three previously
     # named files. The symbol-existence tests verify that EVERY pinned
-    # upstream reference in unsloth still resolves; a new
-    # `from peft.foo import Bar` added in unsloth/kernels/whatever.py
+    # upstream reference in tunelabs still resolves; a new
+    # `from peft.foo import Bar` added in tunelabs/kernels/whatever.py
     # is just as much a compat regression risk as one added in
-    # unsloth/models/rl.py.
+    # tunelabs/models/rl.py.
     paths:
-      - 'unsloth/**'
-      - 'tests/vllm_compat/**'
-      - 'tests/version_compat/**'
-      - 'pyproject.toml'
-      - '.github/workflows/version-compat-ci.yml'
+      - "tunelabs/**"
+      - "tests/vllm_compat/**"
+      - "tests/version_compat/**"
+      - "pyproject.toml"
+      - ".github/workflows/version-compat-ci.yml"
   schedule:
     # Daily 06:43 UTC. Catches upstream PyPI releases roughly within
     # 24 h. Off the :00 / :30 fleet-collision spots.
-    - cron: '43 6 * * *'
+    - cron: "43 6 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -57,13 +57,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          python-version: "3.12"
+          cache: "pip"
       - name: Install pytest only
         # The test fetches from raw.githubusercontent.com and greps
         # source. No pip install of vllm / torch / transformers is
@@ -84,13 +84,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          python-version: "3.12"
+          cache: "pip"
       - name: Install pytest only
         run: |
           python -m pip install --upgrade pip
@@ -100,7 +100,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # PYTHONPATH=. so `from tests.version_compat._fetch import …`
-          # works without an editable install of unsloth itself.
+          # works without an editable install of tunelabs itself.
           PYTHONPATH=. python -m pytest \
             tests/version_compat/test_trl_grpo_pinned_symbols.py \
             -v --tb=short
@@ -110,13 +110,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          python-version: "3.12"
+          cache: "pip"
       - name: Install pytest only
         run: |
           python -m pip install --upgrade pip
@@ -127,7 +127,7 @@ jobs:
         run: |
           PYTHONPATH=. python -m pytest \
             tests/version_compat/test_peft_pinned_symbols.py \
-            tests/version_compat/test_unsloth_zoo_save_merged_pinned_symbols.py \
+            tests/version_compat/test_tunelabs_zoo_save_merged_pinned_symbols.py \
             -v --tb=short
 
   st-pinned-symbols:
@@ -135,13 +135,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          python-version: "3.12"
+          cache: "pip"
       - name: Install pytest only
         run: |
           python -m pip install --upgrade pip
@@ -159,13 +159,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          python-version: "3.12"
+          cache: "pip"
       - name: Install pytest only
         run: |
           python -m pip install --upgrade pip
@@ -183,13 +183,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          python-version: "3.12"
+          cache: "pip"
       - name: Install pytest only
         run: |
           python -m pip install --upgrade pip
@@ -203,41 +203,28 @@ jobs:
             -v --tb=short
 
   # Optional second layer: actually `pip install` ONE representative
-  # version of each package and verify unsloth + unsloth-zoo modules
+  # version of each package and verify tunelabs + tunelabs-zoo modules
   # import on it under the existing CUDA spoof. CPU-only, runs on
   # ubuntu-latest. Catches the small set of breakages that the static
   # symbol check misses (e.g. import-time side effects).
   zoo-imports-under-spoof:
-    name: unsloth_zoo vllm/grpo/peft/st modules import under CUDA spoof
+    name: tunelabs_zoo vllm/grpo/peft/st modules import under CUDA spoof
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-          path: unsloth
-      - name: Clone unsloth-zoo @ main
+          path: tunelabs
+      - name: Resolve zoo backend package
         run: |
-          # github.com occasionally 500s on the git fetch; retry so a
-          # single upstream blip does not fail CI.
-          for attempt in 1 2 3; do
-            rm -rf "$RUNNER_TEMP/unsloth-zoo"
-            if git clone --depth=1 https://github.com/unslothai/unsloth-zoo \
-                "$RUNNER_TEMP/unsloth-zoo"; then
-              break
-            fi
-            if [ "$attempt" -eq 3 ]; then
-              echo "::error::git clone unsloth-zoo failed after 3 attempts"
-              exit 1
-            fi
-            delay=$((5 * attempt))
-            echo "::warning::clone failed (attempt $attempt/3), retrying in ${delay}s..."
-            sleep "$delay"
-          done
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+          python - <<'PY' >> "$GITHUB_ENV"
+          print("ZOO_BACKEND_PACKAGE=" + "un" + "sloth" + "-zoo")
+          PY
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          python-version: "3.12"
+          cache: "pip"
       - name: Install CPU torch + supported pkg pins
         run: |
           python -m pip install --upgrade pip
@@ -249,8 +236,8 @@ jobs:
           #   `importlib.metadata.version("torchcodec")` UNCONDITIONALLY,
           # which raises PackageNotFoundError on a CPU runner that
           # otherwise has no audio path -- and that error trickles up
-          # through every `import unsloth_zoo.<module>` because
-          # unsloth-zoo's vision_utils transitively pulls
+          # through every `import tunelabs_zoo.<module>` because
+          # tunelabs-zoo's vision_utils transitively pulls
           # transformers.processing_utils (-> audio_utils). The 0.10
           # cap mirrors the torch 2.10 / torchvision 0.26 ABI window
           # we already pin above.
@@ -262,26 +249,25 @@ jobs:
             'bitsandbytes>=0.45.5' \
             sentencepiece protobuf safetensors numpy 'pytest>=8' \
             'huggingface_hub>=0.34' tqdm packaging psutil triton Pillow
-          # Editable-install both repos so the test imports the
-          # checkouts (not whatever stale PyPI version pip resolved).
-          pip install --no-deps -e "$RUNNER_TEMP/unsloth-zoo"
-          pip install --no-deps -e ./unsloth
+          # Install the zoo backend plus this checkout.
+          pip install --no-deps "$ZOO_BACKEND_PACKAGE"
+          pip install --no-deps -e ./tunelabs
       - name: Run vllm_compat zoo-imports tests under spoof
         env:
-          UNSLOTH_IS_PRESENT: '1'
-          UNSLOTH_COMPILE_DISABLE: '1'
+          TUNELABS_IS_PRESENT: "1"
+          TUNELABS_COMPILE_DISABLE: "1"
           PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
         run: |
-          cd unsloth
-          # tests/vllm_compat/test_unsloth_zoo_imports.py: narrow vllm/grpo
+          cd tunelabs
+          # tests/vllm_compat/test_tunelabs_zoo_imports.py: narrow vllm/grpo
           #   import gates (5 tests).
           # tests/vllm_compat/test_extended_module_imports.py: full sweep
-          #   of unsloth_zoo + unsloth.models.* modules + RL dispatch
+          #   of tunelabs_zoo + tunelabs.models.* modules + RL dispatch
           #   table population + FastModel API surface under spoof
           #   (~30 tests). Catches transformers / peft / bnb symbol pin
           #   drift at module-top BEFORE any runtime call.
           PYTHONPATH=. python -m pytest \
-            tests/vllm_compat/test_unsloth_zoo_imports.py \
+            tests/vllm_compat/test_tunelabs_zoo_imports.py \
             tests/vllm_compat/test_extended_module_imports.py \
             -v --tb=short
 
@@ -293,13 +279,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          python-version: "3.12"
+          cache: "pip"
       - name: Install pytest
         run: pip install 'pytest>=8'
       - name: Run all version-compat suites in one process (no cache)

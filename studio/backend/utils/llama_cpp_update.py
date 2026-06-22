@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """In-app llama.cpp prebuilt update.
 
@@ -47,7 +47,7 @@ from utils.process_lifetime import child_popen_kwargs
 
 logger = structlog.get_logger(__name__)
 
-DEFAULT_PUBLISHED_REPO = "unslothai/llama.cpp"
+DEFAULT_PUBLISHED_REPO = "tunelabsai/llama.cpp"
 _INSTALL_TIMEOUT_SECONDS = 1800  # 30 min ceiling for download + build/validate
 
 # Background job state. Single in-flight update at a time, guarded by _job_lock.
@@ -93,7 +93,7 @@ def _find_binary() -> Optional[str]:
 
 
 def _install_dir_for(binary_path: Optional[str]) -> Optional[Path]:
-    """The directory holding UNSLOTH_PREBUILT_INFO.json -- i.e. the install root
+    """The directory holding TUNELABS_PREBUILT_INFO.json -- i.e. the install root
     install_llama_prebuilt.py wrote and the one we re-install into. Walks up from
     the binary the same way read_install_marker() does."""
     if not binary_path:
@@ -106,11 +106,11 @@ def _install_dir_for(binary_path: Optional[str]) -> Optional[Path]:
 
 
 def _installer_script() -> Optional[Path]:
-    """Locate install_llama_prebuilt.py. Honours UNSLOTH_LLAMA_INSTALLER, then
+    """Locate install_llama_prebuilt.py. Honours TUNELABS_LLAMA_INSTALLER, then
     searches up from this file for both ``<root>/install_llama_prebuilt.py`` and
     ``<root>/studio/install_llama_prebuilt.py`` so it works in the dev tree and
     in an installed Studio layout."""
-    env = os.environ.get("UNSLOTH_LLAMA_INSTALLER")
+    env = os.environ.get("TUNELABS_LLAMA_INSTALLER")
     if env and Path(env).is_file():
         return Path(env)
     here = Path(__file__).resolve()
@@ -121,7 +121,7 @@ def _installer_script() -> Optional[Path]:
     return None
 
 
-# Markerless (source-build) installs have no UNSLOTH_PREBUILT_INFO.json, so we
+# Markerless (source-build) installs have no TUNELABS_PREBUILT_INFO.json, so we
 # ask the installer whether an official prebuilt now exists for this host. Memo
 # is 24h; only successful answers are cached so a network blip retries.
 _RESOLVE_TTL_SECONDS = 24 * 60 * 60
@@ -188,7 +188,7 @@ def get_installed_llama_version() -> Optional[str]:
     """Display string for the active llama.cpp install (e.g. 'b9585' or
     'b9601-mix-a0e2906'), or None.
 
-    Prefers the install marker's release_tag -- the full unsloth release
+    Prefers the install marker's release_tag -- the full tunelabs release
     identity, the same field the update banner compares as installed (see
     #6219) -- so a 'b9601-mix-a0e2906' build reads back in full rather than
     collapsing to its base 'b9601'. The marker's bare ``tag`` is only the
@@ -230,7 +230,7 @@ def _llama_install_root(binary: Optional[str]) -> Optional[Path]:
     """The Studio-managed llama.cpp root the active binary lives under, or None
     when the binary is unmanaged. Installing anywhere the active binary is not
     would not replace what _find_llama_server_binary runs (which prefers a pinned
-    LLAMA_SERVER_PATH, then UNSLOTH_LLAMA_CPP_PATH, then a llama.cpp tree), so we
+    LLAMA_SERVER_PATH, then TUNELABS_LLAMA_CPP_PATH, then a llama.cpp tree), so we
     refuse rather than silently install into an inactive or foreign tree."""
     marked = _install_dir_for(binary)
     if marked is not None:
@@ -242,7 +242,7 @@ def _llama_install_root(binary: Optional[str]) -> Optional[Path]:
     if os.environ.get("LLAMA_SERVER_PATH"):
         return None
     p = Path(binary)
-    env = os.environ.get("UNSLOTH_LLAMA_CPP_PATH")
+    env = os.environ.get("TUNELABS_LLAMA_CPP_PATH")
     if env and _is_under(p, Path(env)):
         return Path(env)
     for parent in p.parents:
@@ -451,7 +451,7 @@ def _run_update(install_dir: Path, repo: str, asset: Optional[str], script: Path
         cmd.extend(_rocm_install_args(asset))
         logger.info("llama update: installing", cmd = " ".join(cmd))
         # Stream progress lines into job["progress"].
-        env = dict(os.environ, UNSLOTH_PROGRESS_PERCENT_STEP = "5")
+        env = dict(os.environ, TUNELABS_PROGRESS_PERCENT_STEP = "5")
         proc = subprocess.Popen(
             cmd,
             stdout = subprocess.PIPE,

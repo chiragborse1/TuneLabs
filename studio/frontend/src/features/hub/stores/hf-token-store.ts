@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { create } from "zustand";
 import { bumpInventoryVersion } from "./inventory-events";
 
-const HF_TOKEN_KEY = "unsloth_hf_token";
-const HF_TOKEN_CHANGED_EVENT = "unsloth:hf-token-changed";
-const LEGACY_TRAINING_KEY = "unsloth_training_config_v1";
+const HF_TOKEN_KEY = "tunelabs_hf_token";
+const HF_TOKEN_CHANGED_EVENT = "tunelabs:hf-token-changed";
+const LEGACY_TRAINING_KEY = "tunelabs_training_config_v1";
 let storageSyncStarted = false;
 let storageSyncListener: ((event: StorageEvent) => void) | null = null;
 let tokenChangedListener: ((event: Event) => void) | null = null;

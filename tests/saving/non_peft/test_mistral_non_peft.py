@@ -1,4 +1,4 @@
-from unsloth import FastLanguageModel
+from tunelabs import FastLanguageModel
 from transformers import AutoModelForCausalLM
 from peft import PeftModel
 from pathlib import Path
@@ -16,7 +16,7 @@ print("🔍 PHASE 1: Loading Base Model")
 print(f"{'='*80}")
 
 model, tokenizer = FastLanguageModel.from_pretrained(
-    model_name = "unsloth/mistral-7b-v0.3",
+    model_name = "tunelabs/mistral-7b-v0.3",
     max_seq_length = 2048,
     dtype = None,
     load_in_4bit = True,
@@ -59,4 +59,4 @@ except Exception as e:
     assert False, f"Phase 3 failed: {e}"
 
 safe_remove_directory("./test_output")
-safe_remove_directory("./unsloth_compiled_cache")
+safe_remove_directory("./tunelabs_compiled_cache")

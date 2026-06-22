@@ -114,7 +114,7 @@ class TestLoaderSourceHasGuard(unittest.TestCase):
     def test_loader_source_has_guard(self):
         """Both SUPPORTS_LLAMA32 checks in loader.py include is_model and is_peft."""
         loader_path = os.path.join(
-            os.path.dirname(__file__), os.pardir, "unsloth", "models", "loader.py"
+            os.path.dirname(__file__), os.pardir, "tunelabs", "models", "loader.py"
         )
         with open(loader_path) as f:
             source = f.read()

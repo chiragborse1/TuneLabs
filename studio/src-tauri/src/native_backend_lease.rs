@@ -6,7 +6,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 type HmacSha256 = Hmac<Sha256>;
 
-pub const LEASE_SECRET_ENV: &str = "UNSLOTH_STUDIO_NATIVE_PATH_LEASE_SECRET";
+pub const LEASE_SECRET_ENV: &str = "TUNELABS_STUDIO_NATIVE_PATH_LEASE_SECRET";
 const LEASE_VERSION: u8 = 1;
 const LEASE_TTL: Duration = Duration::from_secs(2 * 60);
 

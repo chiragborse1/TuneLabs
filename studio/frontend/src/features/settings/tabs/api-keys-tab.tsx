@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import {
   Dialog,
@@ -93,7 +93,7 @@ export function ApiKeysTab() {
         <p className="text-xs text-muted-foreground">
           {t("settings.apiKeys.description")}{" "}
           <a
-            href="https://unsloth.ai/docs/basics/api"
+            href="https://tunelabs.ai/docs/basics/api"
             target="_blank"
             rel="noreferrer"
             className="font-medium text-foreground underline decoration-border underline-offset-2 transition-colors hover:decoration-foreground"

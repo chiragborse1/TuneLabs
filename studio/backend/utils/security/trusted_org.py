@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Trusted-org checks for the ``trust_remote_code`` auto-enable paths.
 
-A bare ``name.startswith("unsloth/")`` is spoofable by a local path like
-``./unsloth/evil``. ``is_trusted_org_repo`` rejects local paths, requires an
+A bare ``name.startswith("tunelabs/")`` is spoofable by a local path like
+``./tunelabs/evil``. ``is_trusted_org_repo`` rejects local paths, requires an
 ``org/repo`` under a trusted org, and (online) confirms via the Hub. Fails CLOSED
 on any uncertainty and never raises; a False just means "do not auto-enable".
 """
@@ -21,7 +21,7 @@ from utils.paths import is_local_path
 logger = get_logger(__name__)
 
 # Orgs we auto-enable remote code for.
-TRUSTED_ORGS: frozenset[str] = frozenset({"unsloth", "nvidia"})
+TRUSTED_ORGS: frozenset[str] = frozenset({"tunelabs", "nvidia"})
 
 # Keyed on (name, verify_remote, token) so an unauthenticated failure can't poison
 # a later authenticated lookup; token is hashed, never stored raw.

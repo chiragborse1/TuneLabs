@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """RAG config; every value is env-overridable."""
 
@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import os
 
-EMBEDDING_MODEL = os.environ.get("RAG_EMBEDDING_MODEL", "unsloth/bge-small-en-v1.5")
+EMBEDDING_MODEL = os.environ.get("RAG_EMBEDDING_MODEL", "tunelabs/bge-small-en-v1.5")
 # Under bge's 512 limit, leaving headroom for the 2 special tokens (else overflow:
 # llama-server 500s, ST truncates). Keep <= embedder_max - ~12.
 CHUNK_TOKENS = int(os.environ.get("RAG_CHUNK_TOKENS", "500"))
@@ -31,7 +31,7 @@ CAPTION_TIMEOUT_S = float(os.environ.get("RAG_CAPTION_TIMEOUT_S", "30"))
 EMBED_BACKEND = os.environ.get("RAG_EMBED_BACKEND", "auto")
 # llama-server backend only. F16 over Q8_0: faster (no per-block dequant for this
 # tiny model) and exact vs fp32, for ~30MB more on disk.
-EMBED_GGUF_REPO = os.environ.get("RAG_EMBED_GGUF_REPO", "unsloth/bge-small-en-v1.5-GGUF")
+EMBED_GGUF_REPO = os.environ.get("RAG_EMBED_GGUF_REPO", "tunelabs/bge-small-en-v1.5-GGUF")
 EMBED_GGUF_VARIANT = os.environ.get("RAG_EMBED_GGUF_VARIANT", "F16")
 EMBED_DEVICE = os.environ.get("RAG_EMBED_DEVICE", "auto")  # "auto" | "gpu" | "cpu"
 EMBED_HOST = os.environ.get("RAG_EMBED_HOST", "127.0.0.1")

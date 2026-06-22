@@ -9,7 +9,7 @@ assignees: ''
 
 For new models, have you tried:
 ```python
-from unsloth import FastModel
+from tunelabs import FastModel
 model, tokenizer = FastModel.from_pretrained(
     "microsoft/Phi-4-multimodal-instruct",
     trust_remote_code = True,

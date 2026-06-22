@@ -1,12 +1,12 @@
-; Unsloth Studio custom NSIS template.
+; TuneLabs Studio custom NSIS template.
 ; Source: https://raw.githubusercontent.com/tauri-apps/tauri/tauri-cli-v2.10.1/crates/tauri-bundler/src/bundle/windows/nsis/installer.nsi
 ; Source tags tauri-cli-v2.10.1 and tauri-bundler-v2.8.1 resolve to commit 9b17a7aeae9a83222ffe829aa4e2d8a5ba6bed8c.
 ; Verified release CLI: @tauri-apps/cli 2.10.1 / tauri-cli 2.10.1
 ; Verified bundler/template crate: tauri-bundler 2.8.1
 ; Copied: 2026-04-30
 ; Local patches:
-; - UNSLOTH_PATCH_START: non-WiX newer/unknown upgrades install in place.
-; - UNSLOTH_PATCH_START: guard non-WiX upgrade leave routing.
+; - TUNELABS_PATCH_START: non-WiX newer/unknown upgrades install in place.
+; - TUNELABS_PATCH_START: guard non-WiX upgrade leave routing.
 
 Unicode true
 ManifestDPIAware true
@@ -219,7 +219,7 @@ Function PageReinstall
   nsis_tauri_utils::SemverCompare "${VERSION}" $R0
   Pop $R0
 
-  ; UNSLOTH_PATCH_START: non-WiX newer/unknown upgrades install in place.
+  ; TUNELABS_PATCH_START: non-WiX newer/unknown upgrades install in place.
   ; Do not invoke stale internal NSIS uninstallers during normal desktop
   ; upgrades; continue to Section Install so Tauri handles the running app.
   ${If} $WixMode <> 1
@@ -234,7 +234,7 @@ Function PageReinstall
       ${EndIf}
     ${EndIf}
   ${EndIf}
-  ; UNSLOTH_PATCH_END
+  ; TUNELABS_PATCH_END
 
   ; Reinstalling the same version
   ${If} $R0 = 0
@@ -324,7 +324,7 @@ Function PageLeaveReinstall
     Goto reinst_done
   ${EndIf}
 
-  ; UNSLOTH_PATCH_START: guard non-WiX upgrade leave routing.
+  ; TUNELABS_PATCH_START: guard non-WiX upgrade leave routing.
   ; Passive/default upgrade choices must not ExecWait the old UninstallString.
   ${If} $WixMode <> 1
     ${If} $R0 = 1
@@ -335,7 +335,7 @@ Function PageLeaveReinstall
       ${EndIf}
     ${EndIf}
   ${EndIf}
-  ; UNSLOTH_PATCH_END
+  ; TUNELABS_PATCH_END
 
   ; $R0 holds whether same(0)/upgrading(1)/downgrading(-1) version
   ; $R1 holds the radio buttons state:

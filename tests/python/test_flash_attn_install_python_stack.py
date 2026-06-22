@@ -323,7 +323,7 @@ class TestEnsureFlashAttn:
             mock.patch.object(ips, "NO_TORCH", False),
             mock.patch.object(ips, "IS_WINDOWS", False),
             mock.patch.object(ips, "IS_MACOS", False),
-            mock.patch.dict(os.environ, {"UNSLOTH_STUDIO_SKIP_FLASHATTN_INSTALL": "1"}),
+            mock.patch.dict(os.environ, {"TUNELABS_STUDIO_SKIP_FLASHATTN_INSTALL": "1"}),
             mock.patch.object(ips, "probe_torch_wheel_env") as mock_probe,
             mock.patch.object(ips, "install_wheel") as mock_install_wheel,
             mock.patch("subprocess.run", return_value = self._import_check()),

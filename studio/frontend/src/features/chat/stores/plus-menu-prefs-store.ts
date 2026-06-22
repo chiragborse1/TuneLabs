@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -72,7 +72,7 @@ export const usePlusMenuPrefsStore = create<PlusMenuPrefsState>()(
         })),
     }),
     {
-      name: "unsloth_plus_menu_pins",
+      name: "tunelabs_plus_menu_pins",
       // Backfill any ids added in a later release so persisted state from an
       // older version still resolves every menu item.
       merge: (persisted, current) => {

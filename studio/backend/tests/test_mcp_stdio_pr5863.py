@@ -1,7 +1,7 @@
 """Verification tests for PR #5863 (stdio MCP server support).
 
 Covers the pure helpers, the route-level _validate_url gate, and that the
-UNSLOTH_STUDIO_ALLOW_STDIO_MCP gate blocks the stdio transport at every
+TUNELABS_STUDIO_ALLOW_STDIO_MCP gate blocks the stdio transport at every
 enforcement point (create/update/test/refresh/discovery/execute) when disabled
 and reaches it when enabled. The transport is stubbed so no subprocess spawns;
 a recorder asserts whether it was reached.
@@ -19,7 +19,7 @@ from utils import host_policy
 
 
 def _reset_db(tmp_path, monkeypatch):
-    monkeypatch.setenv("UNSLOTH_STUDIO_HOME", str(tmp_path))
+    monkeypatch.setenv("TUNELABS_STUDIO_HOME", str(tmp_path))
     monkeypatch.setattr(mcp_servers_db, "_schema_ready", False)
     # The discovered-tool cache is process-global and keyed by server id; tests
     # reuse "stdio1", so clear it (and the failure cool-off) for isolation —
@@ -28,11 +28,11 @@ def _reset_db(tmp_path, monkeypatch):
 
 
 def _enable(monkeypatch):
-    monkeypatch.setenv("UNSLOTH_STUDIO_ALLOW_STDIO_MCP", "1")
+    monkeypatch.setenv("TUNELABS_STUDIO_ALLOW_STDIO_MCP", "1")
 
 
 def _disable(monkeypatch):
-    monkeypatch.delenv("UNSLOTH_STUDIO_ALLOW_STDIO_MCP", raising = False)
+    monkeypatch.delenv("TUNELABS_STUDIO_ALLOW_STDIO_MCP", raising = False)
 
 
 @pytest.fixture(autouse = True)
@@ -42,16 +42,16 @@ def _isolate_stdio_env():
     # policy; snapshot/restore all three so nothing leaks between tests or files.
     from state import tool_policy
 
-    saved = os.environ.get("UNSLOTH_STUDIO_ALLOW_STDIO_MCP")
+    saved = os.environ.get("TUNELABS_STUDIO_ALLOW_STDIO_MCP")
     saved_policy = tool_policy.get_tool_policy()
     host_policy._reset_loopback_default_state()
     yield
     host_policy._reset_loopback_default_state()
     tool_policy.set_tool_policy(saved_policy)
     if saved is None:
-        os.environ.pop("UNSLOTH_STUDIO_ALLOW_STDIO_MCP", None)
+        os.environ.pop("TUNELABS_STUDIO_ALLOW_STDIO_MCP", None)
     else:
-        os.environ["UNSLOTH_STUDIO_ALLOW_STDIO_MCP"] = saved
+        os.environ["TUNELABS_STUDIO_ALLOW_STDIO_MCP"] = saved
 
 
 # ── transport stub + recorder ───────────────────────────────────────
@@ -191,14 +191,14 @@ def test_parse_windows_strips_wrapping_quotes(monkeypatch):
 
 @pytest.mark.parametrize("val", ["0", "false", "true", "", " 1 ", "yes", "2"])
 def test_stdio_disabled_for_non_exact_one(monkeypatch, val):
-    monkeypatch.setenv("UNSLOTH_STUDIO_ALLOW_STDIO_MCP", val)
+    monkeypatch.setenv("TUNELABS_STUDIO_ALLOW_STDIO_MCP", val)
     assert mcp_client.stdio_mcp_enabled() is False
 
 
 def test_stdio_enabled_only_for_exact_one(monkeypatch):
     _disable(monkeypatch)
     assert mcp_client.stdio_mcp_enabled() is False
-    monkeypatch.setenv("UNSLOTH_STUDIO_ALLOW_STDIO_MCP", "1")
+    monkeypatch.setenv("TUNELABS_STUDIO_ALLOW_STDIO_MCP", "1")
     assert mcp_client.stdio_mcp_enabled() is True
 
 
@@ -241,21 +241,21 @@ def test_colab_loopback_does_not_auto_enable(monkeypatch):
 def test_explicit_enable_survives_colab(monkeypatch):
     # An explicit operator opt-in still wins over the Colab exclusion (apply_
     # early-returns on an explicit value, before the is_colab check).
-    monkeypatch.setenv("UNSLOTH_STUDIO_ALLOW_STDIO_MCP", "1")
+    monkeypatch.setenv("TUNELABS_STUDIO_ALLOW_STDIO_MCP", "1")
     host_policy.apply_stdio_mcp_loopback_default("127.0.0.1", is_colab = True)
     assert mcp_client.stdio_mcp_enabled() is True
 
 
 def test_explicit_disable_survives_loopback(monkeypatch):
     # An explicit =0 must not be overridden by the loopback auto-default.
-    monkeypatch.setenv("UNSLOTH_STUDIO_ALLOW_STDIO_MCP", "0")
+    monkeypatch.setenv("TUNELABS_STUDIO_ALLOW_STDIO_MCP", "0")
     host_policy.apply_stdio_mcp_loopback_default("127.0.0.1")
     assert mcp_client.stdio_mcp_enabled() is False
 
 
 def test_explicit_enable_survives_network_bind(monkeypatch):
     # A deliberate network opt-in (-H 0.0.0.0 + var=1) must not be clobbered.
-    monkeypatch.setenv("UNSLOTH_STUDIO_ALLOW_STDIO_MCP", "1")
+    monkeypatch.setenv("TUNELABS_STUDIO_ALLOW_STDIO_MCP", "1")
     host_policy.apply_stdio_mcp_loopback_default("0.0.0.0")
     assert mcp_client.stdio_mcp_enabled() is True
 
@@ -278,7 +278,7 @@ def test_force_disable_after_auto_default_in_same_process(monkeypatch, second_ho
     _disable(monkeypatch)
     host_policy.apply_stdio_mcp_loopback_default("127.0.0.1")
     assert mcp_client.stdio_mcp_enabled() is True
-    monkeypatch.setenv("UNSLOTH_STUDIO_ALLOW_STDIO_MCP", "0")
+    monkeypatch.setenv("TUNELABS_STUDIO_ALLOW_STDIO_MCP", "0")
     host_policy.apply_stdio_mcp_loopback_default(second_host)
     assert mcp_client.stdio_mcp_enabled() is False
 
@@ -288,7 +288,7 @@ def test_cleared_env_after_auto_default_falls_back_to_host_default(monkeypatch):
     # re-enables -- the asymmetry the staleness guard documents.
     _disable(monkeypatch)
     host_policy.apply_stdio_mcp_loopback_default("127.0.0.1")
-    monkeypatch.delenv("UNSLOTH_STUDIO_ALLOW_STDIO_MCP", raising = False)
+    monkeypatch.delenv("TUNELABS_STUDIO_ALLOW_STDIO_MCP", raising = False)
     host_policy.apply_stdio_mcp_loopback_default("127.0.0.1")
     assert mcp_client.stdio_mcp_enabled() is True
 
@@ -306,12 +306,12 @@ def test_disable_tools_overrides_loopback_default(monkeypatch):
 
 
 def test_explicit_env_opt_in_survives_external_default_policy(monkeypatch):
-    # `UNSLOTH_STUDIO_ALLOW_STDIO_MCP=1 unsloth studio run -H 0.0.0.0` with no
+    # `TUNELABS_STUDIO_ALLOW_STDIO_MCP=1 tunelabs studio run -H 0.0.0.0` with no
     # --enable-tools: tool policy is False by the external-host default, not by
     # --disable-tools, so the explicit env opt-in must still win.
     from state import tool_policy
 
-    monkeypatch.setenv("UNSLOTH_STUDIO_ALLOW_STDIO_MCP", "1")
+    monkeypatch.setenv("TUNELABS_STUDIO_ALLOW_STDIO_MCP", "1")
     host_policy.apply_stdio_mcp_loopback_default("0.0.0.0")  # no-op: value is explicit
     tool_policy.set_tool_policy(False)
     assert mcp_client.stdio_mcp_enabled() is True
@@ -322,7 +322,7 @@ def test_explicit_env_opt_in_beats_disable_tools_on_loopback(monkeypatch):
     # loopback: apply_ leaves the auto-default inactive, so the veto doesn't apply.
     from state import tool_policy
 
-    monkeypatch.setenv("UNSLOTH_STUDIO_ALLOW_STDIO_MCP", "1")
+    monkeypatch.setenv("TUNELABS_STUDIO_ALLOW_STDIO_MCP", "1")
     host_policy.apply_stdio_mcp_loopback_default("127.0.0.1")  # no-op: value is explicit
     tool_policy.set_tool_policy(False)
     assert mcp_client.stdio_mcp_enabled() is True
@@ -337,7 +337,7 @@ def test_non_false_tool_policy_defers_to_env(monkeypatch, policy):
     tool_policy.set_tool_policy(policy)
     _disable(monkeypatch)
     assert mcp_client.stdio_mcp_enabled() is False
-    monkeypatch.setenv("UNSLOTH_STUDIO_ALLOW_STDIO_MCP", "1")
+    monkeypatch.setenv("TUNELABS_STUDIO_ALLOW_STDIO_MCP", "1")
     assert mcp_client.stdio_mcp_enabled() is True
 
 

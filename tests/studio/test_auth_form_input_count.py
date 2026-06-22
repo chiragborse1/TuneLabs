@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 """Pin the auth-form input-count contract on the change-password page.
 
@@ -44,10 +44,10 @@ def _conditional_extent(src: str) -> tuple[int, int]:
 
 
 def test_hasbootstrappassword_constant_is_derived_from_bootstrap_window_value():
-    """The guard must read from window.__UNSLOTH_BOOTSTRAP__, matching the backend's
+    """The guard must read from window.__TUNELABS_BOOTSTRAP__, matching the backend's
     bootstrap-injection contract in studio/backend/main.py::_inject_bootstrap."""
     src = AUTH_FORM.read_text()
-    assert "const hasBootstrapPassword = Boolean(window.__UNSLOTH_BOOTSTRAP__?.password);" in src, (
+    assert "const hasBootstrapPassword = Boolean(window.__TUNELABS_BOOTSTRAP__?.password);" in src, (
         "hasBootstrapPassword constant missing or its derivation drifted; "
         "this is the gate that hides the Current password input on first boot"
     )

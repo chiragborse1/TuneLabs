@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 set -euo pipefail
 
@@ -9,8 +9,8 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 RULE=$(printf '\342\224\200%.0s' {1..52})
 
 # ── Parse flags ──
-# --local: install from the local repo checkout (overlays unsloth as editable
-# and unsloth-zoo from git main). Mirrors install.sh --local for the Colab
+# --local: install from the local repo checkout (overlays tunelabs as editable
+# and tunelabs-zoo from git main). Mirrors install.sh --local for the Colab
 # path that runs setup.sh directly without going through install.sh.
 if [ "$#" -gt 0 ]; then
     for _arg in "$@"; do
@@ -64,7 +64,7 @@ step()    { printf "  ${C_DIM}%-15.15s${C_RST}${3:-$C_OK}%s${C_RST}\n" "$1" "$2"
 substep() { printf "  %-15s${2:-$C_DIM}%s${C_RST}\n" "" "$1"; }
 
 _is_verbose() {
-    [ "${UNSLOTH_VERBOSE:-0}" = "1" ]
+    [ "${TUNELABS_VERBOSE:-0}" = "1" ]
 }
 
 verbose_substep() {
@@ -316,7 +316,7 @@ print_llama_error_log() {
 
 installed_llama_prebuilt_release() {
     local install_dir=${1:-}
-    local metadata_path="$install_dir/UNSLOTH_PREBUILT_INFO.json"
+    local metadata_path="$install_dir/TUNELABS_PREBUILT_INFO.json"
     [ -f "$metadata_path" ] || return 0
     python - "$metadata_path" <<'PY' 2>/dev/null || true
 import json
@@ -341,7 +341,7 @@ if not repo or not release_tag:
     raise SystemExit(0)
 
 # For non-fork sources (e.g. ggml-org upstream prebuilts) the published_repo/
-# release_tag refer to the unsloth source tree while the actual binaries came
+# release_tag refer to the tunelabs source tree while the actual binaries came
 # from a different repo. Show both so the log is unambiguous.
 if source and source != "upstream" and binary_repo and binary_tag and binary_repo != repo:
     message = f"installed release: {repo}@{release_tag} + {source}@{binary_tag}"
@@ -364,20 +364,20 @@ print_installed_llama_prebuilt_release() {
 
 # ── Banner ──
 echo ""
-printf "  ${C_TITLE}%s${C_RST}\n" "🦥 Unsloth Studio Setup"
+printf "  ${C_TITLE}%s${C_RST}\n" "🦥 TuneLabs Studio Setup"
 printf "  ${C_DIM}%s${C_RST}\n" "$RULE"
 verbose_substep "verbose diagnostics enabled"
-_LLAMA_ONLY="${UNSLOTH_STUDIO_LLAMA_ONLY:-0}"
+_LLAMA_ONLY="${TUNELABS_STUDIO_LLAMA_ONLY:-0}"
 if [ "$_LLAMA_ONLY" = "1" ]; then
     substep "llama.cpp only mode"
 fi
 if [ "${STUDIO_LOCAL_INSTALL:-0}" = "1" ]; then
-    substep "local mode: overlaying $REPO_ROOT (editable) + unsloth-zoo from git main"
+    substep "local mode: overlaying $REPO_ROOT (editable) + tunelabs-zoo from git main"
 fi
 # ── Clean up stale caches ──
-rm -rf "$REPO_ROOT/unsloth_compiled_cache"
-rm -rf "$SCRIPT_DIR/backend/unsloth_compiled_cache"
-rm -rf "$SCRIPT_DIR/tmp/unsloth_compiled_cache"
+rm -rf "$REPO_ROOT/tunelabs_compiled_cache"
+rm -rf "$SCRIPT_DIR/backend/tunelabs_compiled_cache"
+rm -rf "$SCRIPT_DIR/tmp/tunelabs_compiled_cache"
 
 # ── Detect Colab ──
 IS_COLAB=false
@@ -388,13 +388,13 @@ fi
 
 # Resolve studio home + ownership marker before the llama-only split: the
 # llama.cpp section needs STUDIO_HOME / _STUDIO_HOME_IS_CUSTOM, but
-# UNSLOTH_STUDIO_LLAMA_ONLY=1 ('unsloth studio update') skips the base install.
-# UNSLOTH_STUDIO_HOME (or STUDIO_HOME alias) overrides the install root
-# (mirrors install.sh). UNSLOTH_STUDIO_HOME wins when both are set.
+# TUNELABS_STUDIO_LLAMA_ONLY=1 ('tunelabs studio update') skips the base install.
+# TUNELABS_STUDIO_HOME (or STUDIO_HOME alias) overrides the install root
+# (mirrors install.sh). TUNELABS_STUDIO_HOME wins when both are set.
 _studio_override_var=""
-_studio_override="${UNSLOTH_STUDIO_HOME:-}"
+_studio_override="${TUNELABS_STUDIO_HOME:-}"
 if [ -n "$_studio_override" ]; then
-    _studio_override_var="UNSLOTH_STUDIO_HOME"
+    _studio_override_var="TUNELABS_STUDIO_HOME"
 else
     _studio_override="${STUDIO_HOME:-}"
     [ -n "$_studio_override" ] && _studio_override_var="STUDIO_HOME"
@@ -406,26 +406,26 @@ case "$_studio_override" in
     "~/"*) _studio_override="$HOME/${_studio_override#'~/'}" ;;
 esac
 if [ -n "$_studio_override" ]; then
-    # setup.sh runs against an existing install (via 'unsloth studio update');
+    # setup.sh runs against an existing install (via 'tunelabs studio update');
     # a typo in the override must fail fast instead of materializing an
     # empty workspace dir. Mirrors setup.ps1 behavior.
     if [ ! -d "$_studio_override" ]; then
         echo "ERROR: $_studio_override_var=$_studio_override does not exist." >&2
-        echo "       Run install.sh to create the install root before 'unsloth studio update'." >&2
+        echo "       Run install.sh to create the install root before 'tunelabs studio update'." >&2
         exit 1
     fi
     [ -w "$_studio_override" ] || { echo "ERROR: $_studio_override_var=$_studio_override is not writable." >&2; exit 1; }
     STUDIO_HOME="$(CDPATH= cd -P -- "$_studio_override" && pwd -P)" || exit 1
 else
-    STUDIO_HOME="$HOME/.unsloth/studio"
+    STUDIO_HOME="$HOME/.tunelabs/studio"
 fi
-VENV_DIR="$STUDIO_HOME/unsloth_studio"
+VENV_DIR="$STUDIO_HOME/tunelabs_studio"
 VENV_T5_530_DIR="$STUDIO_HOME/.venv_t5_530"
 VENV_T5_550_DIR="$STUDIO_HOME/.venv_t5_550"
 VENV_T5_510_DIR="$STUDIO_HOME/.venv_t5_510"
 
-_STUDIO_OWNED_MARKER=".unsloth-studio-owned"
-_LEGACY_STUDIO_HOME="$HOME/.unsloth/studio"
+_STUDIO_OWNED_MARKER=".tunelabs-studio-owned"
+_LEGACY_STUDIO_HOME="$HOME/.tunelabs/studio"
 _studio_home_canon="$STUDIO_HOME"
 if [ -d "$_studio_home_canon" ]; then
     _studio_home_canon=$(CDPATH= cd -P -- "$_studio_home_canon" 2>/dev/null && pwd -P) \
@@ -433,19 +433,19 @@ if [ -d "$_studio_home_canon" ]; then
 fi
 if [ -d "$_LEGACY_STUDIO_HOME" ]; then
     _LEGACY_STUDIO_HOME=$(CDPATH= cd -P -- "$_LEGACY_STUDIO_HOME" 2>/dev/null && pwd -P) \
-        || _LEGACY_STUDIO_HOME="$HOME/.unsloth/studio"
+        || _LEGACY_STUDIO_HOME="$HOME/.tunelabs/studio"
 fi
 _STUDIO_HOME_IS_CUSTOM=false
 if [ "$_studio_home_canon" != "$_LEGACY_STUDIO_HOME" ]; then
     _STUDIO_HOME_IS_CUSTOM=true
 fi
 # Directory-local evidence Studio created "$1": only prebuilt-installer metadata
-# counts (UNSLOTH_PREBUILT_INFO.json for llama.cpp, UNSLOTH_NODE_PREBUILT_INFO.json
+# counts (TUNELABS_PREBUILT_INFO.json for llama.cpp, TUNELABS_NODE_PREBUILT_INFO.json
 # for Node), both written only by our installers. Mirrors the setup.ps1 Node guard.
 # A markerless source build stays strict since this runs right before an rm -rf.
 _studio_owned_adoptable() {
-    [ -f "$1/UNSLOTH_PREBUILT_INFO.json" ] && return 0
-    [ -f "$1/UNSLOTH_NODE_PREBUILT_INFO.json" ] && return 0
+    [ -f "$1/TUNELABS_PREBUILT_INFO.json" ] && return 0
+    [ -f "$1/TUNELABS_NODE_PREBUILT_INFO.json" ] && return 0
     return 1
 }
 _assert_studio_owned_or_absent() {
@@ -458,7 +458,7 @@ _assert_studio_owned_or_absent() {
             return 0
         fi
         echo "ERROR: $_aso_dir already exists and is not marked as a Studio-owned $_aso_label." >&2
-        echo "       Move it aside or choose an empty UNSLOTH_STUDIO_HOME before re-running." >&2
+        echo "       Move it aside or choose an empty TUNELABS_STUDIO_HOME before re-running." >&2
         exit 1
     fi
 }
@@ -496,8 +496,8 @@ else
 # Studio's frontend (Vite 8) needs Node ^20.19 || >=22.12 || >=23 and npm >= 11.
 # Three sources:
 #   system  -- system Node + npm already satisfy both; used read-only.
-#   bundled -- install a pinned isolated Node under $UNSLOTH_HOME/node, build-only.
-#   skip    -- UNSLOTH_SKIP_NODE_INSTALL=1 and system unsuitable; print manual fix.
+#   bundled -- install a pinned isolated Node under $TUNELABS_HOME/node, build-only.
+#   skip    -- TUNELABS_SKIP_NODE_INSTALL=1 and system unsuitable; print manual fix.
 # decide_node_source(node_v, npm_v, skip_flag) -> system | bundled | skip
 # (pure; unit-tested in tests/sh/test_node_decision.sh).
 decide_node_source() {
@@ -531,17 +531,17 @@ decide_node_source() {
     echo bundled
 }
 
-# Mirror the llama.cpp UNSLOTH_HOME derivation; the frontend build runs first.
+# Mirror the llama.cpp TUNELABS_HOME derivation; the frontend build runs first.
 if [ "$_STUDIO_HOME_IS_CUSTOM" = true ]; then
     _NODE_PARENT="$STUDIO_HOME"
 else
-    _NODE_PARENT="$HOME/.unsloth"
+    _NODE_PARENT="$HOME/.tunelabs"
 fi
 NODE_DIR="$_NODE_PARENT/node"
 
 _SYS_NODE_VER="$(node -v 2>/dev/null || true)"
 _SYS_NPM_VER="$(npm -v 2>/dev/null || true)"
-NODE_SOURCE="$(decide_node_source "$_SYS_NODE_VER" "$_SYS_NPM_VER" "${UNSLOTH_SKIP_NODE_INSTALL:-0}")"
+NODE_SOURCE="$(decide_node_source "$_SYS_NODE_VER" "$_SYS_NPM_VER" "${TUNELABS_SKIP_NODE_INSTALL:-0}")"
 _FRONTEND_SKIP=false
 
 if [ "$NODE_SOURCE" = system ]; then
@@ -549,7 +549,7 @@ if [ "$NODE_SOURCE" = system ]; then
 elif [ "$NODE_SOURCE" = bundled ]; then
     mkdir -p "$_NODE_PARENT"
     # install_node_prebuilt.py uses os.replace(); guard a custom-home dir so we
-    # never displace a user-owned $UNSLOTH_STUDIO_HOME/node.
+    # never displace a user-owned $TUNELABS_STUDIO_HOME/node.
     if [ "$_STUDIO_HOME_IS_CUSTOM" = true ]; then
         _assert_studio_owned_or_absent "$NODE_DIR" "Node install"
     fi
@@ -601,7 +601,7 @@ else
     _FRONTEND_SKIP=true
     step "frontend" "skipped (no suitable Node; system left untouched)" "$C_WARN"
     substep "found Node='${_SYS_NODE_VER:-none}' npm='${_SYS_NPM_VER:-none}'; Studio needs Node >=20.19/22.12/23 and npm >= 11"
-    substep "install a suitable Node + npm, or unset UNSLOTH_SKIP_NODE_INSTALL to let Unsloth manage an isolated Node"
+    substep "install a suitable Node + npm, or unset TUNELABS_SKIP_NODE_INSTALL to let TuneLabs manage an isolated Node"
 fi
 verbose_substep "node source: $NODE_SOURCE (sys node=${_SYS_NODE_VER:-none} npm=${_SYS_NPM_VER:-none}) dir=$NODE_DIR"
 
@@ -780,7 +780,7 @@ if [ ! -x "$VENV_DIR/bin/python" ]; then
     else
         step "python" "venv not found at $VENV_DIR" "$C_ERR"
         substep "Run install.sh first to create the environment:"
-        substep "curl -fsSL https://unsloth.ai/install.sh | sh"
+        substep "curl -fsSL https://tunelabs.ai/install.sh | sh"
         exit 1
     fi
 else
@@ -831,7 +831,7 @@ _SKIP_VERSION_CHECK=false
 if [ "$_COLAB_NO_VENV" = true ]; then
     _SKIP_VERSION_CHECK=true
 fi
-_PKG_NAME="${STUDIO_PACKAGE_NAME:-unsloth}"
+_PKG_NAME="${STUDIO_PACKAGE_NAME:-tunelabs}"
 if [ "$_SKIP_VERSION_CHECK" != true ] && [ "${SKIP_STUDIO_BASE:-0}" != "1" ] && [ "${STUDIO_LOCAL_INSTALL:-0}" != "1" ]; then
     # Only check when NOT called from install.sh (which just installed the package)
     INSTALLED_VER=$("$VENV_DIR/bin/python" -c "
@@ -988,10 +988,10 @@ elif [ "$_setup_amd_detected" = true ]; then
     fi
     _setup_gfx=$(printf '%s\n' "$_setup_gfx_all" | awk -v idx="$_setup_vis_idx" \
         'NF && !seen[$0]++ { a[n++]=$0 } END { if(idx>=n) idx=0; if(n>0) print a[idx] }')
-    # UNSLOTH_ROCM_GFX_ARCH env override (mirrors setup.ps1)
-    if [ -n "${UNSLOTH_ROCM_GFX_ARCH:-}" ]; then
-        _setup_gfx="${UNSLOTH_ROCM_GFX_ARCH}"
-        substep "gfx arch from UNSLOTH_ROCM_GFX_ARCH env override: $_setup_gfx"
+    # TUNELABS_ROCM_GFX_ARCH env override (mirrors setup.ps1)
+    if [ -n "${TUNELABS_ROCM_GFX_ARCH:-}" ]; then
+        _setup_gfx="${TUNELABS_ROCM_GFX_ARCH}"
+        substep "gfx arch from TUNELABS_ROCM_GFX_ARCH env override: $_setup_gfx"
     # Name-based arch inference when tools don't report gfx (mirrors setup.ps1 nameArchTable)
     elif [ -z "$_setup_gfx" ] && [ -n "$_setup_mkt" ]; then
         # Kept in sync with the table in install.sh (and the PS nameArchTable).
@@ -1011,7 +1011,7 @@ elif [ "$_setup_amd_detected" = true ]; then
         esac
         if [ -n "$_setup_gfx" ]; then
             substep "gfx arch inferred from GPU name: $_setup_gfx"
-            substep "Tip: set UNSLOTH_ROCM_GFX_ARCH=$_setup_gfx to skip inference next time"
+            substep "Tip: set TUNELABS_ROCM_GFX_ARCH=$_setup_gfx to skip inference next time"
         fi
     fi
     # ROCm version via hipconfig, then amd-smi
@@ -1042,19 +1042,19 @@ fi
 
 # ── 7. Prefer prebuilt llama.cpp bundles before any source build path ──
 # Nest llama.cpp under $STUDIO_HOME only for real env-overrides; legacy
-# default keeps ~/.unsloth/llama.cpp so pre-PR builds are still discovered.
+# default keeps ~/.tunelabs/llama.cpp so pre-PR builds are still discovered.
 if [ "$_STUDIO_HOME_IS_CUSTOM" = true ]; then
-    UNSLOTH_HOME="$STUDIO_HOME"
+    TUNELABS_HOME="$STUDIO_HOME"
 else
-    UNSLOTH_HOME="$HOME/.unsloth"
+    TUNELABS_HOME="$HOME/.tunelabs"
 fi
-mkdir -p "$UNSLOTH_HOME"
-LLAMA_CPP_DIR="$UNSLOTH_HOME/llama.cpp"
+mkdir -p "$TUNELABS_HOME"
+LLAMA_CPP_DIR="$TUNELABS_HOME/llama.cpp"
 LLAMA_SERVER_BIN="$LLAMA_CPP_DIR/build/bin/llama-server"
 _NEED_LLAMA_SOURCE_BUILD=false
 _LLAMA_CPP_DEGRADED=false
-_LLAMA_FORCE_COMPILE="${UNSLOTH_LLAMA_FORCE_COMPILE:-0}"
-_REQUESTED_LLAMA_TAG="${UNSLOTH_LLAMA_TAG:-${_DEFAULT_LLAMA_TAG}}"
+_LLAMA_FORCE_COMPILE="${TUNELABS_LLAMA_FORCE_COMPILE:-0}"
+_REQUESTED_LLAMA_TAG="${TUNELABS_LLAMA_TAG:-${_DEFAULT_LLAMA_TAG}}"
 _HOST_SYSTEM="$(uname -s 2>/dev/null || true)"
 _HOST_MACHINE="$(uname -m 2>/dev/null || true)"
 
@@ -1062,7 +1062,7 @@ _HOST_MACHINE="$(uname -m 2>/dev/null || true)"
 # The fork ships CUDA (Linux x64/arm64, Windows), ROCm (Linux/Windows) and
 # macOS bundles. Only the plain CPU/Vulkan bundles still come from ggml-org, so
 # CPU-only Linux (x86_64 and arm64) routes there; GPU Linux, Windows and macOS
-# use unslothai.
+# use tunelabsai.
 _LINUX_HAS_GPU=false
 # Route to the fork only for a usable GPU. NVIDIA counts only when a device is
 # actually enumerated and not hidden via CUDA_VISIBLE_DEVICES=""/-1
@@ -1083,14 +1083,14 @@ else
         fi
     done
 fi
-# UNSLOTH_ROCM_GFX_ARCH may be set on a host where no probe fired, so the override
+# TUNELABS_ROCM_GFX_ARCH may be set on a host where no probe fired, so the override
 # nested in the AMD-detected branch above never ran and _setup_gfx is still empty.
 # Honour it here so the routing guard below and the --rocm-gfx forwarding both see
 # it (install_llama_prebuilt.py reads the same env var as the --rocm-gfx default).
-if [ "$_setup_nvidia_usable" != true ] && [ -z "${_setup_gfx:-}" ] && [ -n "${UNSLOTH_ROCM_GFX_ARCH:-}" ]; then
-    _setup_gfx="${UNSLOTH_ROCM_GFX_ARCH}"
+if [ "$_setup_nvidia_usable" != true ] && [ -z "${_setup_gfx:-}" ] && [ -n "${TUNELABS_ROCM_GFX_ARCH:-}" ]; then
+    _setup_gfx="${TUNELABS_ROCM_GFX_ARCH}"
 fi
-# A resolved/forwarded gfx arch (UNSLOTH_ROCM_GFX_ARCH) means an AMD GPU even when
+# A resolved/forwarded gfx arch (TUNELABS_ROCM_GFX_ARCH) means an AMD GPU even when
 # no ROCm tooling is on PATH; route it to the fork so the per-gfx prebuilt is
 # picked instead of ggml-org / a source build.
 if [ "$_LINUX_HAS_GPU" = false ] && [ -n "${_setup_gfx:-}" ]; then
@@ -1112,12 +1112,12 @@ elif [ "$_HOST_SYSTEM" = "Linux" ] \
     _HELPER_RELEASE_REPO="ggml-org/llama.cpp"
 else
     # GPU Linux (x64 CUDA/ROCm, arm64 CUDA), Windows (CUDA/ROCm), and macOS.
-    _HELPER_RELEASE_REPO="unslothai/llama.cpp"
+    _HELPER_RELEASE_REPO="tunelabsai/llama.cpp"
 fi
 unset _GPU_TOOL
-_LLAMA_PR="${UNSLOTH_LLAMA_PR:-}"
+_LLAMA_PR="${TUNELABS_LLAMA_PR:-}"
 _SKIP_PREBUILT_INSTALL=false
-_LLAMA_PR_FORCE="${UNSLOTH_LLAMA_PR_FORCE:-${_DEFAULT_LLAMA_PR_FORCE}}"
+_LLAMA_PR_FORCE="${TUNELABS_LLAMA_PR_FORCE:-${_DEFAULT_LLAMA_PR_FORCE}}"
 _LLAMA_SOURCE="${_DEFAULT_LLAMA_SOURCE}"
 _LLAMA_SOURCE="${_LLAMA_SOURCE%.git}"  # normalize: strip trailing .git
 _RESOLVED_SOURCE_URL="$_LLAMA_SOURCE"
@@ -1139,10 +1139,10 @@ fi
 
 if [ -n "$_LLAMA_PR" ]; then
     if ! [[ "$_LLAMA_PR" =~ ^[0-9]+$ ]] || [ "$_LLAMA_PR" -le 0 ]; then
-        step "llama.cpp" "UNSLOTH_LLAMA_PR=$_LLAMA_PR is not a valid PR number" "$C_ERR"
+        step "llama.cpp" "TUNELABS_LLAMA_PR=$_LLAMA_PR is not a valid PR number" "$C_ERR"
         exit 1
     fi
-    step "llama.cpp" "UNSLOTH_LLAMA_PR=$_LLAMA_PR -- will build from PR head" "$C_WARN"
+    step "llama.cpp" "TUNELABS_LLAMA_PR=$_LLAMA_PR -- will build from PR head" "$C_WARN"
     _RESOLVED_LLAMA_TAG="pr-$_LLAMA_PR"
     _RESOLVED_SOURCE_URL="$_LLAMA_SOURCE"
     _RESOLVED_SOURCE_REF="pr-$_LLAMA_PR"
@@ -1154,7 +1154,7 @@ fi
 verbose_substep "requested llama.cpp tag: $_REQUESTED_LLAMA_TAG (repo: $_HELPER_RELEASE_REPO)"
 
 if [ "$_LLAMA_FORCE_COMPILE" = "1" ]; then
-    step "llama.cpp" "UNSLOTH_LLAMA_FORCE_COMPILE=1 -- skipping prebuilt" "$C_WARN"
+    step "llama.cpp" "TUNELABS_LLAMA_FORCE_COMPILE=1 -- skipping prebuilt" "$C_WARN"
     _NEED_LLAMA_SOURCE_BUILD=true
 elif [ "${_SKIP_PREBUILT_INSTALL:-false}" = true ]; then
     substep "prebuilt install skipped -- falling back to source build"
@@ -1164,7 +1164,7 @@ else
         substep "existing install detected -- validating update"
     fi
     # why: install_llama_prebuilt.py uses os.replace(), which would displace
-    # an unrelated $UNSLOTH_STUDIO_HOME/llama.cpp before the source-build
+    # an unrelated $TUNELABS_STUDIO_HOME/llama.cpp before the source-build
     # ownership check below ever runs.
     if [ "$_STUDIO_HOME_IS_CUSTOM" = true ]; then
         _assert_studio_owned_or_absent "$LLAMA_CPP_DIR" "llama.cpp install"
@@ -1175,8 +1175,8 @@ else
         --llama-tag "$_REQUESTED_LLAMA_TAG"
         --published-repo "$_HELPER_RELEASE_REPO"
     )
-    if [ -n "${UNSLOTH_LLAMA_RELEASE_TAG:-}" ]; then
-        _PREBUILT_CMD+=(--published-release-tag "$UNSLOTH_LLAMA_RELEASE_TAG")
+    if [ -n "${TUNELABS_LLAMA_RELEASE_TAG:-}" ]; then
+        _PREBUILT_CMD+=(--published-release-tag "$TUNELABS_LLAMA_RELEASE_TAG")
     fi
     # Forward the gfx arch resolved above so the per-gfx ROCm prebuilt is picked
     # even when the installer's own probe cannot report it (amd-smi-only hosts,
@@ -1298,9 +1298,9 @@ if [ "$_NEED_LLAMA_SOURCE_BUILD" = true ] && grep -qi microsoft /proc/version 2>
 fi
 
 # ── 9. Build llama.cpp binaries for GGUF inference + export when prebuilt install fails ──
-# Builds at ~/.unsloth/llama.cpp — a single shared location under the user's
+# Builds at ~/.tunelabs/llama.cpp — a single shared location under the user's
 # home directory. This is used by both the inference server and the GGUF
-# export pipeline (unsloth-zoo).
+# export pipeline (tunelabs-zoo).
 #   - llama-server: for GGUF model inference
 #   - llama-quantize: for GGUF export quantization (symlinked to root for check_llama_cpp())
 if [ "$_NEED_LLAMA_SOURCE_BUILD" = false ]; then
@@ -1321,7 +1321,7 @@ else
             _RESOLVED_SOURCE_URL="$_LLAMA_SOURCE"
             if [ "$_LLAMA_FORCE_COMPILE" = "1" ]; then
                 if [ "$_REQUESTED_LLAMA_TAG" = "latest" ]; then
-                    _RESOLVED_SOURCE_REF="${UNSLOTH_LLAMA_FORCE_COMPILE_REF:-${_DEFAULT_LLAMA_FORCE_COMPILE_REF}}"
+                    _RESOLVED_SOURCE_REF="${TUNELABS_LLAMA_FORCE_COMPILE_REF:-${_DEFAULT_LLAMA_FORCE_COMPILE_REF}}"
                     _RESOLVED_SOURCE_REF_KIND="branch"
                 else
                     _RESOLVED_SOURCE_REF="$_REQUESTED_LLAMA_TAG"
@@ -1381,7 +1381,7 @@ else
             fi
             if [ "$BUILD_OK" = true ]; then
                 run_quiet_no_exit "checkout source PR ref" \
-                    git -C "$_BUILD_TMP" checkout -B unsloth-llama-build FETCH_HEAD || BUILD_OK=false
+                    git -C "$_BUILD_TMP" checkout -B tunelabs-llama-build FETCH_HEAD || BUILD_OK=false
             fi
         elif [ "$_RESOLVED_SOURCE_REF_KIND" = "commit" ] && [ -n "$_RESOLVED_SOURCE_REF" ]; then
             run_quiet_no_exit "clone llama.cpp" \
@@ -1392,7 +1392,7 @@ else
             fi
             if [ "$BUILD_OK" = true ]; then
                 run_quiet_no_exit "checkout source commit" \
-                    git -C "$_BUILD_TMP" checkout -B unsloth-llama-build FETCH_HEAD || BUILD_OK=false
+                    git -C "$_BUILD_TMP" checkout -B tunelabs-llama-build FETCH_HEAD || BUILD_OK=false
             fi
         else
             _CLONE_ARGS=(git clone --depth 1)
@@ -1419,7 +1419,7 @@ else
             # older macOS too (else a macOS 26 host stamps minos=26). Set before
             # CPU_FALLBACK_CMAKE_ARGS copies CMAKE_ARGS so both paths inherit it.
             if [ "$_HOST_SYSTEM" = "Darwin" ]; then
-                _MACOS_DEPLOYMENT_TARGET="${UNSLOTH_MACOS_DEPLOYMENT_TARGET:-13.3}"
+                _MACOS_DEPLOYMENT_TARGET="${TUNELABS_MACOS_DEPLOYMENT_TARGET:-13.3}"
                 CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_OSX_DEPLOYMENT_TARGET=${_MACOS_DEPLOYMENT_TARGET}"
                 export MACOSX_DEPLOYMENT_TARGET="${_MACOS_DEPLOYMENT_TARGET}"
             fi
@@ -1735,7 +1735,7 @@ else
 fi  # end _SKIP_GGUF_BUILD check
 
 # ── arm64 Linux GPU: CPU prebuilt as a last resort ──
-# arm64 Linux with a GPU has no CUDA prebuilt anywhere (the unslothai fork is
+# arm64 Linux with a GPU has no CUDA prebuilt anywhere (the tunelabsai fork is
 # x64 only; ggml-org ships no Linux CUDA build), so it source-builds for the
 # GPU above. If that produced no binary, install ggml-org's arm64 CPU prebuilt
 # instead of leaving the host without llama.cpp.
@@ -1773,9 +1773,9 @@ elif [ "$IS_COLAB" = true ]; then
     echo ""
     printf "  ${C_DIM}%s${C_RST}\n" "$RULE"
     if [ "$_LLAMA_CPP_DEGRADED" = true ]; then
-        printf "  ${C_WARN}%s${C_RST}\n" "Unsloth Studio Setup Complete (limited: llama.cpp unavailable)"
+        printf "  ${C_WARN}%s${C_RST}\n" "TuneLabs Studio Setup Complete (limited: llama.cpp unavailable)"
     else
-        printf "  ${C_TITLE}%s${C_RST}\n" "Unsloth Studio Setup Complete"
+        printf "  ${C_TITLE}%s${C_RST}\n" "TuneLabs Studio Setup Complete"
     fi
     printf "  ${C_DIM}%s${C_RST}\n" "$RULE"
     substep "from colab import start"
@@ -1783,15 +1783,15 @@ elif [ "$IS_COLAB" = true ]; then
 else
     printf "  ${C_DIM}%s${C_RST}\n" "$RULE"
     if [ "$_LLAMA_CPP_DEGRADED" = true ]; then
-        printf "  ${C_WARN}%s${C_RST}\n" "Unsloth Studio Installed (limited: llama.cpp unavailable)"
+        printf "  ${C_WARN}%s${C_RST}\n" "TuneLabs Studio Installed (limited: llama.cpp unavailable)"
     else
-        printf "  ${C_TITLE}%s${C_RST}\n" "Unsloth Studio Installed"
+        printf "  ${C_TITLE}%s${C_RST}\n" "TuneLabs Studio Installed"
     fi
     printf "  ${C_DIM}%s${C_RST}\n" "$RULE"
     if [ "$_LLAMA_CPP_DEGRADED" = true ]; then
-        printf "  ${C_DIM}%-15s${C_WARN}%s${C_RST}\n" "launch" "unsloth studio -p 8888"
+        printf "  ${C_DIM}%-15s${C_WARN}%s${C_RST}\n" "launch" "tunelabs studio -p 8888"
     else
-        printf "  ${C_DIM}%-15s${C_OK}%s${C_RST}\n" "launch" "unsloth studio -p 8888"
+        printf "  ${C_DIM}%-15s${C_OK}%s${C_RST}\n" "launch" "tunelabs studio -p 8888"
     fi
     printf "  ${C_DIM}%-15s%s${C_RST}\n" "" "(add -H 0.0.0.0 to allow network / cloud access)"
 fi
@@ -1799,7 +1799,7 @@ echo ""
 
 # When called from install.sh (SKIP_STUDIO_BASE=1), exit non-zero so the
 # installer can report the GGUF failure after finishing PATH/shortcut setup.
-# When called directly via 'unsloth studio update', keep the install
+# When called directly via 'tunelabs studio update', keep the install
 # successful -- the footer above already reports the limitation and Studio
 # is still usable for non-GGUF workflows.
 if [ "$_LLAMA_CPP_DEGRADED" = true ] && [ "${SKIP_STUDIO_BASE:-0}" = "1" ]; then

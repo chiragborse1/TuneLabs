@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Tests for the server session log + native-crash capture in run.py.
 
@@ -56,17 +56,17 @@ class TestTeeStream:
 
 class TestSetupServerDiskLogging:
     def test_opt_out_env(self, monkeypatch):
-        monkeypatch.setenv("UNSLOTH_STUDIO_NO_FILE_LOG", "1")
+        monkeypatch.setenv("TUNELABS_STUDIO_NO_FILE_LOG", "1")
         assert run_mod._setup_server_disk_logging() is None
 
     def test_creates_log_and_enables_faulthandler(self, monkeypatch, tmp_path):
         import faulthandler
 
-        monkeypatch.delenv("UNSLOTH_STUDIO_NO_FILE_LOG", raising = False)
+        monkeypatch.delenv("TUNELABS_STUDIO_NO_FILE_LOG", raising = False)
         monkeypatch.delenv("PYTHONFAULTHANDLER", raising = False)
         # Both resolution paths (utils.paths.studio_root and the env
-        # fallback) honor UNSLOTH_STUDIO_HOME, so this redirects the log dir.
-        monkeypatch.setenv("UNSLOTH_STUDIO_HOME", str(tmp_path))
+        # fallback) honor TUNELABS_STUDIO_HOME, so this redirects the log dir.
+        monkeypatch.setenv("TUNELABS_STUDIO_HOME", str(tmp_path))
         orig_out, orig_err = sys.stdout, sys.stderr
         was_enabled = faulthandler.is_enabled()
         try:

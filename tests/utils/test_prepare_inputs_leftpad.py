@@ -1,6 +1,6 @@
 """Regression guard for batched left-padded generation (issues #1066, #3699).
 
-Guards `_fast_prepare_inputs_for_generation` (unsloth/models/llama.py),
+Guards `_fast_prepare_inputs_for_generation` (tunelabs/models/llama.py),
 shared by every decoder family wired through fix_prepare_inputs_for_generation,
 against two historical bugs:
   (a) 2D attention mask truncated to its last column during cached decode,
@@ -8,7 +8,7 @@ against two historical bugs:
   (b) position_ids taken from cache_position (which counts left-pad tokens),
       so padded rows generated garbage (fixed by #4100).
 
-Two CPU-only deterministic layers: (1) AST structural checks (no unsloth
+Two CPU-only deterministic layers: (1) AST structural checks (no tunelabs
 import); (2) behavioral checks calling the real function with synthetic
 left-padded masks and fake caches. Companion GPU check:
 tests/utils/test_batched_leftpad_generation_gpu.py
@@ -21,13 +21,13 @@ import pytest
 import torch
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-LLAMA_PY = REPO_ROOT / "unsloth" / "models" / "llama.py"
+LLAMA_PY = REPO_ROOT / "tunelabs" / "models" / "llama.py"
 
 FUNC_NAME = "_fast_prepare_inputs_for_generation"
 
 
 # --------------------------------------------------------------------------
-# Layer 1: AST structural guard (stdlib only, no unsloth import)
+# Layer 1: AST structural guard (stdlib only, no tunelabs import)
 # --------------------------------------------------------------------------
 
 # Model files that call fix_prepare_inputs_for_generation(...) and share the
@@ -204,7 +204,7 @@ def test_attention_mask_never_truncated_to_last_column():
 def test_model_families_stay_wired_to_shared_prepare_inputs():
     missing = []
     for fname in WIRED_MODEL_FILES:
-        path = REPO_ROOT / "unsloth" / "models" / fname
+        path = REPO_ROOT / "tunelabs" / "models" / fname
         if not path.exists():
             continue
         if "fix_prepare_inputs_for_generation(" not in path.read_text():
@@ -217,7 +217,7 @@ def test_model_families_stay_wired_to_shared_prepare_inputs():
 
 
 # --------------------------------------------------------------------------
-# Layer 2: behavioral guard (calls the real function, lazy unsloth import)
+# Layer 2: behavioral guard (calls the real function, lazy tunelabs import)
 # --------------------------------------------------------------------------
 
 PAST_LEN = 4
@@ -294,7 +294,7 @@ class FakeModelWith4DMask(FakeModel):
 
 
 def _prepare(model, input_ids, attention_mask, **kwargs):
-    from unsloth.models import llama as llama_mod
+    from tunelabs.models import llama as llama_mod
     return llama_mod._fast_prepare_inputs_for_generation(
         model, input_ids, attention_mask = attention_mask, **kwargs
     )

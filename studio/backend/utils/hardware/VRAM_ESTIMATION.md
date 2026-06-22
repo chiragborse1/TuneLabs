@@ -90,7 +90,7 @@ Gradient_bytes = trainable_params * 2    (fp16, accumulated in-place)
 
 ## 5. Activations
 
-Per-layer (from `unsloth_zoo/vllm_utils.py`):
+Per-layer (from `tunelabs_zoo/vllm_utils.py`):
 ```
 Per_layer = (S*B*(H+K+K) + S*B*2 + S*B*(M+M)) * 2 * 1.25
 ```
@@ -106,7 +106,7 @@ Non_flash_attention = B * num_attention_heads * S^2 * 2 * 12.0 * effective_layer
 Activations = max(Per_layer_with_gc, Non_flash_attention)
 ```
 
-Studio resolves the attention implementation with Unsloth's
+Studio resolves the attention implementation with TuneLabs's
 `resolve_attention_implementation` helper and uses that result directly. The
 estimator does not duplicate model-family attention policy.
 
@@ -114,7 +114,7 @@ estimator does not duplicate model-family attention policy.
 |---------|---------|------------|
 | none | `L` layers | `L` layers |
 | true (HF) | 2.0 | 1.0 |
-| unsloth | 1.5 | 1.0 |
+| tunelabs | 1.5 | 1.0 |
 
 ## 6. Floors
 

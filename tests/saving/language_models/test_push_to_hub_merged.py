@@ -1,5 +1,5 @@
-from unsloth import FastLanguageModel, FastVisionModel, UnslothVisionDataCollator
-from unsloth.chat_templates import get_chat_template
+from tunelabs import FastLanguageModel, FastVisionModel, TuneLabsVisionDataCollator
+from tunelabs.chat_templates import get_chat_template
 from trl import SFTTrainer, SFTConfig
 from transformers import (
     DataCollatorForLanguageModeling,
@@ -49,7 +49,7 @@ else:
     attn_implementation = "sdpa"
 
 model, tokenizer = FastLanguageModel.from_pretrained(
-    model_name = "unsloth/Llama-3.2-1B-Instruct",
+    model_name = "tunelabs/Llama-3.2-1B-Instruct",
     max_seq_length = 2048,
     dtype = compute_dtype,
     load_in_4bit = True,
@@ -63,7 +63,7 @@ tokenizer = get_chat_template(
     chat_template = "llama-3.1",
 )
 
-from unsloth.chat_templates import standardize_sharegpt
+from tunelabs.chat_templates import standardize_sharegpt
 
 dataset_train = load_dataset("allenai/openassistant-guanaco-reformatted", split = "train")
 dataset_ppl = load_dataset("allenai/openassistant-guanaco-reformatted", split = "eval")
@@ -88,13 +88,13 @@ model = FastLanguageModel.get_peft_model(
     lora_alpha = 16,
     lora_dropout = 0,
     bias = "none",
-    use_gradient_checkpointing = "unsloth",
+    use_gradient_checkpointing = "tunelabs",
     random_state = 3407,
     use_rslora = False,
     loftq_config = None,
 )
 
-from unsloth import is_bfloat16_supported
+from tunelabs import is_bfloat16_supported
 
 trainer = SFTTrainer(
     model = model,
@@ -122,7 +122,7 @@ trainer = SFTTrainer(
     ),
 )
 
-from unsloth.chat_templates import train_on_responses_only
+from tunelabs.chat_templates import train_on_responses_only
 
 trainer = train_on_responses_only(
     trainer,
@@ -193,4 +193,4 @@ else:
 
 # final cleanup.
 safe_remove_directory("./outputs")
-safe_remove_directory("./unsloth_compiled_cache")
+safe_remove_directory("./tunelabs_compiled_cache")

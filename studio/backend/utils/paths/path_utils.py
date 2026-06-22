@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """
 Path utilities for model and dataset handling
@@ -71,7 +71,7 @@ def is_local_path(path: str) -> bool:
 
     Examples:
         True: /home/user/model, C:\\models, ./model, ~/model
-        False: unsloth/llama-3.1-8b, microsoft/phi-2
+        False: tunelabs/llama-3.1-8b, microsoft/phi-2
     """
     if not path:
         return False

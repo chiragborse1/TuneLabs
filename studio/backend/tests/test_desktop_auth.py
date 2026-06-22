@@ -293,7 +293,7 @@ def test_desktop_session_uses_real_admin_identity_for_api_keys():
 
 
 def test_local_recipe_token_authenticates_as_admin_for_desktop_user(loaded_local_model):
-    # _inject_local_providers mints an internal sk-unsloth-* API key (not a
+    # _inject_local_providers mints an internal sk-tunelabs-* API key (not a
     # forwarded JWT) that validates as admin whether the session was desktop or web.
     from auth.authentication import create_access_token, get_current_subject
 
@@ -349,7 +349,7 @@ def test_desktop_login_rejects_invalid_secret():
 
 
 def test_write_desktop_secret_file_is_0600_on_unix(tmp_path):
-    from unsloth_cli.commands import studio as studio_cli
+    from tunelabs_cli.commands import studio as studio_cli
 
     path = tmp_path / ".desktop_secret"
     if platform.system() != "Windows":
@@ -365,7 +365,7 @@ def test_write_desktop_secret_file_is_0600_on_unix(tmp_path):
 
 def test_reset_password_removes_desktop_secret_files(tmp_path, monkeypatch):
     from typer.testing import CliRunner
-    from unsloth_cli.commands import studio as studio_cli
+    from tunelabs_cli.commands import studio as studio_cli
 
     auth_dir = tmp_path / "auth"
     auth_dir.mkdir()
@@ -384,7 +384,7 @@ def test_reset_password_removes_desktop_secret_files(tmp_path, monkeypatch):
 
 def test_reset_password_removes_desktop_secret_files_without_db(tmp_path, monkeypatch):
     from typer.testing import CliRunner
-    from unsloth_cli.commands import studio as studio_cli
+    from tunelabs_cli.commands import studio as studio_cli
 
     auth_dir = tmp_path / "auth"
     auth_dir.mkdir()
@@ -399,7 +399,7 @@ def test_reset_password_removes_desktop_secret_files_without_db(tmp_path, monkey
 
 def test_desktop_capabilities_json_reports_rollout_safe_flags():
     from typer.testing import CliRunner
-    import unsloth_cli.commands.studio as studio_cli
+    import tunelabs_cli.commands.studio as studio_cli
 
     result = CliRunner().invoke(
         studio_cli.studio_app,
@@ -506,7 +506,7 @@ def guarded_import(name, globals = None, locals = None, fromlist = (), level = 0
     return real_import(name, globals, locals, fromlist, level)
 
 builtins.__import__ = guarded_import
-from unsloth_cli.commands import studio as studio_cli
+from tunelabs_cli.commands import studio as studio_cli
 
 studio_cli.STUDIO_HOME = studio_home
 result = CliRunner().invoke(studio_cli.studio_app, ["provision-desktop-auth"])
@@ -552,7 +552,7 @@ if result.exit_code != 0:
     ).hex()
 
     assert bootstrap_password
-    assert user["username"] == "unsloth"
+    assert user["username"] == "tunelabs"
     assert user["must_change_password"] == 1
     assert bootstrap_hash == user["password_hash"]
     assert len(app_secrets["api_key_pbkdf2_salt"]) == 64
@@ -568,7 +568,7 @@ if result.exit_code != 0:
 
 def test_provision_desktop_auth_keeps_existing_admin_password(tmp_path, monkeypatch):
     from typer.testing import CliRunner
-    from unsloth_cli.commands import studio as studio_cli
+    from tunelabs_cli.commands import studio as studio_cli
 
     auth_dir = tmp_path / "auth"
     auth_dir.mkdir()
@@ -595,7 +595,7 @@ def test_provision_desktop_auth_keeps_existing_admin_password(tmp_path, monkeypa
             )
             VALUES (?, ?, ?, ?, ?)
             """,
-            ("unsloth", "existing-salt", "existing-hash", "existing-jwt", 0),
+            ("tunelabs", "existing-salt", "existing-hash", "existing-jwt", 0),
         )
         conn.commit()
     finally:
@@ -613,7 +613,7 @@ def test_provision_desktop_auth_keeps_existing_admin_password(tmp_path, monkeypa
             SELECT password_salt, password_hash, jwt_secret, must_change_password
             FROM auth_user WHERE username = ?
             """,
-            ("unsloth",),
+            ("tunelabs",),
         ).fetchone()
     finally:
         conn.close()

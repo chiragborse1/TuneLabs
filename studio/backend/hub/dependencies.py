@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Shared FastAPI dependencies for Hub routes."""
 
@@ -9,7 +9,7 @@ from typing import Optional
 
 from fastapi import Header
 
-HUB_HF_TOKEN_HEADER = "X-Unsloth-HF-Token"
+HUB_HF_TOKEN_HEADER = "X-TuneLabs-HF-Token"
 HUB_HF_TOKEN_MAX_LENGTH = 512
 
 

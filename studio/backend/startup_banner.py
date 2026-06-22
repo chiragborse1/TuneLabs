@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Terminal banner for Studio startup.
 
@@ -49,7 +49,7 @@ def print_studio_stop_hint() -> None:
             [
                 "",
                 style(
-                    "  To stop Unsloth Studio: press Ctrl+C in this terminal.",
+                    "  To stop TuneLabs Studio: press Ctrl+C in this terminal.",
                     stop_hint_style,
                 ),
                 style("  (On macOS this is Control+C, not Command+C.)", dim),
@@ -106,7 +106,7 @@ def print_studio_access_banner(
 
     lines: list[str] = [
         "",
-        style("🦥 Unsloth Studio is running", title),
+        style("🦥 TuneLabs Studio is running", title),
         style("─" * 52, dim),
         style("  On this machine -- open this in your browser:", dim),
         style(f"    {primary_url}", local_url_style),
@@ -169,7 +169,7 @@ def print_studio_access_banner(
                     secondary,
                 ),
                 style(
-                    f"    2. relaunch with:  unsloth studio -H 0.0.0.0 -p {port}",
+                    f"    2. relaunch with:  tunelabs studio -H 0.0.0.0 -p {port}",
                     secondary,
                 ),
                 style(
@@ -184,7 +184,7 @@ def print_studio_access_banner(
             [
                 "",
                 style(
-                    "  To stop Unsloth Studio: press Ctrl+C in this terminal.",
+                    "  To stop TuneLabs Studio: press Ctrl+C in this terminal.",
                     stop_hint_style,
                 ),
                 style("  (On macOS this is Control+C, not Command+C.)", dim),

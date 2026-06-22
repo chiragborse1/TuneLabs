@@ -15,7 +15,7 @@ cuda_available = torch.cuda.is_available()
 
 pytestmark = pytest.mark.skipif(not cuda_available, reason = "requires a CUDA GPU")
 
-MODEL_NAME = "unsloth/Qwen2.5-0.5B-Instruct"
+MODEL_NAME = "tunelabs/Qwen2.5-0.5B-Instruct"
 MAX_NEW_TOKENS = 32
 PREFIX_TOKENS = 16
 
@@ -29,7 +29,7 @@ PROMPTS = [
 
 @pytest.fixture(scope = "module")
 def model_and_tokenizer():
-    from unsloth import FastLanguageModel
+    from tunelabs import FastLanguageModel
 
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name = MODEL_NAME,

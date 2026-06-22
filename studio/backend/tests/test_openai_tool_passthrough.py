@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 """Tests for the OpenAI /v1/chat/completions client-side tool pass-through."""
 
@@ -305,7 +305,7 @@ class TestChatCompletionRequestToolFields:
         assert "seed" not in req.model_extra
         assert req.model_extra.get("response_format") == {"type": "json_object"}
 
-    def test_unsloth_extensions_still_work(self):
+    def test_tunelabs_extensions_still_work(self):
         req = self._make(
             enable_tools = True,
             enabled_tools = ["web_search", "python"],

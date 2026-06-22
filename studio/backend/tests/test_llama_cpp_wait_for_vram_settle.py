@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """``_wait_for_vram_settle`` helper contract.
 
@@ -350,7 +350,7 @@ def test_kill_orphaned_servers_returns_count():
     import os
 
     mypid = os.getpid()
-    fake_path = "/tmp/unsloth-test-llama/llama-server"
+    fake_path = "/tmp/tunelabs-test-llama/llama-server"
     killed: list[int] = []
 
     class _FakeProc:

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 "use client";
 
@@ -299,7 +299,7 @@ function PdfPreview({
 
 // Resizable preview width (px). Default matches the prior fixed 44rem; drag the
 // left edge to widen. Persisted so it survives reopen.
-const PREVIEW_WIDTH_KEY = "unsloth-rag-preview-width";
+const PREVIEW_WIDTH_KEY = "tunelabs-rag-preview-width";
 const MIN_PREVIEW_WIDTH = 384;
 const DEFAULT_PREVIEW_WIDTH = 704;
 

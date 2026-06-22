@@ -1,5 +1,5 @@
-from unsloth import FastLanguageModel
-from unsloth.chat_templates import get_chat_template
+from tunelabs import FastLanguageModel
+from tunelabs.chat_templates import get_chat_template
 from trl import SFTTrainer, SFTConfig
 from transformers import DataCollatorForSeq2Seq, TrainingArguments
 from datasets import load_dataset
@@ -34,7 +34,7 @@ else:
     attn_implementation = "sdpa"
 
 model, tokenizer = FastLanguageModel.from_pretrained(
-    model_name = "unsloth/Llama-3.1-8B-Instruct",
+    model_name = "tunelabs/Llama-3.1-8B-Instruct",
     max_seq_length = 2048,
     dtype = compute_dtype,
     load_in_4bit = True,
@@ -72,13 +72,13 @@ model = FastLanguageModel.get_peft_model(
     lora_alpha = 16,
     lora_dropout = 0,
     bias = "none",
-    use_gradient_checkpointing = "unsloth",
+    use_gradient_checkpointing = "tunelabs",
     random_state = 3407,
     use_rslora = False,
     loftq_config = None,
 )
 
-from unsloth import is_bfloat16_supported
+from tunelabs import is_bfloat16_supported
 
 trainer = SFTTrainer(
     model = model,
@@ -158,7 +158,7 @@ model_4bit = FastLanguageModel.get_peft_model(
     lora_alpha = 16,
     lora_dropout = 0,
     bias = "none",
-    use_gradient_checkpointing = "unsloth",
+    use_gradient_checkpointing = "tunelabs",
     random_state = 3407,
     use_rslora = False,
     loftq_config = None,
@@ -230,7 +230,7 @@ print(f"{'='*80}")
 
 safe_remove_directory("./outputs")
 safe_remove_directory("./outputs_4bit")
-safe_remove_directory("./unsloth_compiled_cache")
+safe_remove_directory("./tunelabs_compiled_cache")
 safe_remove_directory("./test_4bit_model")
 safe_remove_directory("./test_4bit_second")
 safe_remove_directory("./test_should_fail")

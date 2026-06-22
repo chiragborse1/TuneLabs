@@ -158,7 +158,7 @@ fn ensure_artifact_root(kind: NativeArtifactKind, canonical_path: &Path) -> Resu
     let Some(home) = dirs::home_dir() else {
         return Err("Could not determine home directory.".to_string());
     };
-    let studio = home.join(".unsloth").join("studio");
+    let studio = home.join(".tunelabs").join("studio");
     let allowed_root = match kind {
         NativeArtifactKind::TrainingOutput => studio.join("outputs"),
         NativeArtifactKind::Export => studio.join("exports"),
@@ -258,7 +258,7 @@ mod tests {
             .unwrap()
             .as_nanos();
         std::env::temp_dir().join(format!(
-            "unsloth-native-policy-{name}-{}-{nanos}",
+            "tunelabs-native-policy-{name}-{}-{nanos}",
             std::process::id()
         ))
     }

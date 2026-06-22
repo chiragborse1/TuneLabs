@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import {
   Tooltip,
@@ -8,8 +8,8 @@ import {
 } from "@/components/ui/tooltip";
 import { usePlatformStore } from "@/config/env";
 import {
-  type UnslothSupport,
-  classifyUnslothSupport,
+  type TuneLabsSupport,
+  classifyTuneLabsSupport,
 } from "@/features/hub/hooks/use-hub-model-search";
 import { useOnlineStatus } from "@/features/hub/hooks/use-online-status";
 import {
@@ -263,15 +263,15 @@ type VramInfo = { est: number; status: "fits" | "tight" | "exceeds" } | null;
 function ModelStatusChips({
   isDataset,
   isGguf,
-  unslothSupport,
+  tunelabsSupport,
   vramInfo,
 }: {
   isDataset: boolean;
   isGguf: boolean;
-  unslothSupport: UnslothSupport;
+  tunelabsSupport: TuneLabsSupport;
   vramInfo: VramInfo;
 }) {
-  const showUnsupported = !isDataset && unslothSupport.status === "unsupported";
+  const showUnsupported = !isDataset && tunelabsSupport.status === "unsupported";
   const showVram = !isDataset && vramInfo && !isGguf;
   if (!showUnsupported && !showVram) return null;
 
@@ -312,9 +312,9 @@ function ModelStatusChips({
             className="tooltip-compact max-w-xs"
           >
             This model may not be supported yet.
-            {unslothSupport.reason && (
+            {tunelabsSupport.reason && (
               <span className="mt-1 block text-[10.5px] font-normal text-white/75">
-                {unslothSupport.reason}
+                {tunelabsSupport.reason}
               </span>
             )}
             <span className="mt-1 block text-[10.5px] font-normal text-white/75">
@@ -439,8 +439,8 @@ export const ModelInspector = memo(function ModelInspector({
   const supportTagsKey = model?.tags?.join("\0") ?? "";
   const supportLibraryName = model?.libraryName;
   const supportQuantMethod = model?.quantMethod;
-  const unslothSupport = useMemo<UnslothSupport>(() => {
-    return classifyUnslothSupport({
+  const tunelabsSupport = useMemo<TuneLabsSupport>(() => {
+    return classifyTuneLabsSupport({
       modelId: supportModelId,
       pipelineTag: supportPipelineTag,
       tags: supportTagsKey ? supportTagsKey.split("\0") : undefined,
@@ -504,7 +504,7 @@ export const ModelInspector = memo(function ModelInspector({
   const paramsLabel = model.totalParams
     ? formatCompact(model.totalParams)
     : "N/A";
-  const trainingSupported = unslothSupport.status !== "unsupported";
+  const trainingSupported = tunelabsSupport.status !== "unsupported";
   const canRunModel =
     !isDataset && (model.runtimeCapabilities?.canChat ?? true);
   const canTrainModel =
@@ -544,9 +544,9 @@ export const ModelInspector = memo(function ModelInspector({
             </div>
             <div className="mt-0.5 flex min-w-0 items-center gap-1 text-[15px] leading-[24px] text-muted-foreground">
               <span className="truncate">{model.owner}</span>
-              {model.owner.toLowerCase() === "unsloth" && (
+              {model.owner.toLowerCase() === "tunelabs" && (
                 <span
-                  aria-label="Verified Unsloth"
+                  aria-label="Verified TuneLabs"
                   className="hub-verified-badge size-[18px] shrink-0 text-primary"
                 />
               )}
@@ -637,8 +637,8 @@ export const ModelInspector = memo(function ModelInspector({
               gpuGb={gpuGb}
               systemRamGb={systemRamGb}
               unsupportedReason={
-                unslothSupport.status === "unsupported"
-                  ? (unslothSupport.reason ?? "Unsupported format")
+                tunelabsSupport.status === "unsupported"
+                  ? (tunelabsSupport.reason ?? "Unsupported format")
                   : null
               }
               onLoad={onLoadLocal}
@@ -765,7 +765,7 @@ export const ModelInspector = memo(function ModelInspector({
         <ModelStatusChips
           isDataset={isDataset}
           isGguf={model.isGguf}
-          unslothSupport={unslothSupport}
+          tunelabsSupport={tunelabsSupport}
           vramInfo={vramInfo}
         />
       </div>

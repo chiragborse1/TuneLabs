@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Pydantic schemas for the Authentication API."""
 
@@ -32,7 +32,7 @@ class AuthStatusResponse(BaseModel):
 
     initialized: bool = Field(..., description = "True if the auth database contains a login user")
     default_username: str = Field(
-        "unsloth",
+        "tunelabs",
         description = "Default admin username for first-boot UI prefill.",
     )
     requires_password_change: bool = Field(
@@ -71,7 +71,7 @@ class ApiKeyResponse(BaseModel):
 
     id: int
     name: str
-    key_prefix: str = Field(..., description = "First 8 characters after sk-unsloth- for display")
+    key_prefix: str = Field(..., description = "First 8 characters after sk-tunelabs- for display")
     created_at: str
     last_used_at: Optional[str] = None
     expires_at: Optional[str] = None

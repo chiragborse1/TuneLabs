@@ -17,16 +17,16 @@ from storage import mcp_servers_db
 
 
 def _reset_db(tmp_path, monkeypatch):
-    monkeypatch.setenv("UNSLOTH_STUDIO_HOME", str(tmp_path))
+    monkeypatch.setenv("TUNELABS_STUDIO_HOME", str(tmp_path))
     monkeypatch.setattr(mcp_servers_db, "_schema_ready", False)
 
 
 def _enable(monkeypatch):
-    monkeypatch.setenv("UNSLOTH_STUDIO_ALLOW_STDIO_MCP", "1")
+    monkeypatch.setenv("TUNELABS_STUDIO_ALLOW_STDIO_MCP", "1")
 
 
 def _disable(monkeypatch):
-    monkeypatch.delenv("UNSLOTH_STUDIO_ALLOW_STDIO_MCP", raising = False)
+    monkeypatch.delenv("TUNELABS_STUDIO_ALLOW_STDIO_MCP", raising = False)
 
 
 # ── P1: _client() self-gates the stdio sink ─────────────────────────

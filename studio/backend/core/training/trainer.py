@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """
-Unsloth Training Backend
-Integrates Unsloth training with the FastAPI backend.
+TuneLabs Training Backend
+Integrates TuneLabs training with the FastAPI backend.
 """
 
 import gc
@@ -16,14 +16,14 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # Make compiled cache modules importable by any subprocess. On spawn platforms
 # (Windows/macOS) spawned dataset.map() workers re-import top-level modules, and
-# the cache's trainer files import torch + unsloth_zoo (inits CUDA). Propagating
-# UNSLOTH_COMPILE_LOCATION via PYTHONPATH lets any subprocess find them.
-# Do NOT import unsloth_zoo.compiler here -- it triggers heavy torch/triton imports.
+# the cache's trainer files import torch + tunelabs_zoo (inits CUDA). Propagating
+# TUNELABS_COMPILE_LOCATION via PYTHONPATH lets any subprocess find them.
+# Do NOT import tunelabs_zoo.compiler here -- it triggers heavy torch/triton imports.
 if sys.platform in ("win32", "darwin"):
-    _compile_cache = os.environ.get("UNSLOTH_COMPILE_LOCATION", "unsloth_compiled_cache")
+    _compile_cache = os.environ.get("TUNELABS_COMPILE_LOCATION", "tunelabs_compiled_cache")
     if not os.path.isabs(_compile_cache):
         _compile_cache = os.path.abspath(_compile_cache)
-        os.environ["UNSLOTH_COMPILE_LOCATION"] = _compile_cache
+        os.environ["TUNELABS_COMPILE_LOCATION"] = _compile_cache
     _pp = os.environ.get("PYTHONPATH", "")
     if _compile_cache not in _pp.split(os.pathsep):
         os.environ["PYTHONPATH"] = _compile_cache + (os.pathsep + _pp if _pp else "")
@@ -46,12 +46,12 @@ if hasattr(torch._dynamo.config, "recompile_limit"):
     torch._dynamo.config.recompile_limit = 64
 
 
-# Drop any unsloth/unsloth_zoo namespace-package shadow before importing them.
+# Drop any tunelabs/tunelabs_zoo namespace-package shadow before importing them.
 from core.import_guards import ensure_real_packages as _ensure_real_packages
 
-_ensure_real_packages("unsloth_zoo", "unsloth")
-from unsloth import FastLanguageModel, FastVisionModel, is_bfloat16_supported
-from unsloth.chat_templates import get_chat_template
+_ensure_real_packages("tunelabs_zoo", "tunelabs")
+from tunelabs import FastLanguageModel, FastVisionModel, is_bfloat16_supported
+from tunelabs.chat_templates import get_chat_template
 
 import json
 import threading
@@ -118,9 +118,9 @@ class TrainingProgress:
     eval_loss: Optional[float] = None
 
 
-class UnslothTrainer:
+class TuneLabsTrainer:
     """
-    Unsloth Training Backend
+    TuneLabs Training Backend
     """
 
     def __init__(self):
@@ -524,25 +524,25 @@ class UnslothTrainer:
             # to prevent deadlocks when forking dataset.map() workers
             self._cleanup_audio_artifacts()
 
-            # Reload Unsloth-patched modeling modules before clearing the cache.
-            # __UNSLOTH_PATCHED__ blocks re-compilation, so clearing the disk
+            # Reload TuneLabs-patched modeling modules before clearing the cache.
+            # __TUNELABS_PATCHED__ blocks re-compilation, so clearing the disk
             # cache alone would leave files missing; reloading restores original
-            # class defs so Unsloth re-compiles cleanly.
+            # class defs so TuneLabs re-compiles cleanly.
             import importlib
 
             for _key, _mod in list(sys.modules.items()):
                 if "transformers.models." in _key and ".modeling_" in _key:
-                    if hasattr(_mod, "__UNSLOTH_PATCHED__"):
+                    if hasattr(_mod, "__TUNELABS_PATCHED__"):
                         try:
                             importlib.reload(_mod)
                         except Exception:
-                            pass  # Non-critical — Unsloth handles stale modules
+                            pass  # Non-critical — TuneLabs handles stale modules
 
             # Remove stale compiled cache so the new model gets a fresh one
-            from utils.cache_cleanup import clear_unsloth_compiled_cache
+            from utils.cache_cleanup import clear_tunelabs_compiled_cache
 
-            _preserve = ["Unsloth*Trainer.py"] if sys.platform in ("win32", "darwin") else None
-            clear_unsloth_compiled_cache(preserve_patterns = _preserve)
+            _preserve = ["TuneLabs*Trainer.py"] if sys.platform in ("win32", "darwin") else None
+            clear_tunelabs_compiled_cache(preserve_patterns = _preserve)
             # Detect audio model type dynamically (config.json + tokenizer)
             self._audio_type = detect_audio_type(model_name, hf_token)
             # audio_vlm is detected as an audio_type now; handle separately
@@ -630,7 +630,7 @@ class UnslothTrainer:
 
             # AMD ROCm without native bf16 (e.g. RDNA2/gfx103x) crashes with an
             # LLVM error on the first bf16 kernel if dtype=None auto-picks bf16, so
-            # force float16 there. NVIDIA keeps dtype=None so unsloth's auto-detect
+            # force float16 there. NVIDIA keeps dtype=None so tunelabs's auto-detect
             # (incl. FORCE_FLOAT32) is honored -- T4/V100 must NOT be coerced to
             # float16. Derive ROCm inline since hardware.IS_ROCM may be unset here.
             _is_rocm = (
@@ -641,7 +641,7 @@ class UnslothTrainer:
             # Branch based on model type
             if self._audio_type == "csm":
                 # CSM: FastModel, auto_model=CsmForConditionalGeneration, load_in_4bit=False
-                from unsloth import FastModel
+                from tunelabs import FastModel
                 from transformers import CsmForConditionalGeneration
 
                 self.model, self.tokenizer = FastModel.from_pretrained(
@@ -659,7 +659,7 @@ class UnslothTrainer:
 
             elif self._audio_type == "whisper":
                 # Whisper: FastModel, auto_model=WhisperForConditionalGeneration, load_in_4bit=False
-                from unsloth import FastModel
+                from tunelabs import FastModel
                 from transformers import WhisperForConditionalGeneration
 
                 self.model, self.tokenizer = FastModel.from_pretrained(
@@ -698,17 +698,17 @@ class UnslothTrainer:
             elif self._audio_type == "bicodec":
                 # Spark-TTS: download full repo (sparktts + BiCodec weights), then
                 # load only the LLM subfolder. model_name may be
-                # "Spark-TTS-0.5B/LLM" (YAML mapping) or "unsloth/Spark-TTS-0.5B".
-                from unsloth import FastModel
+                # "Spark-TTS-0.5B/LLM" (YAML mapping) or "tunelabs/Spark-TTS-0.5B".
+                from tunelabs import FastModel
                 from huggingface_hub import snapshot_download
 
                 if model_name.endswith("/LLM"):
                     # "Spark-TTS-0.5B/LLM" → parent="Spark-TTS-0.5B"
                     local_dir = model_name.rsplit("/", 1)[0]
-                    hf_repo = f"unsloth/{local_dir}"
+                    hf_repo = f"tunelabs/{local_dir}"
                     llm_path = model_name
                 else:
-                    # "unsloth/Spark-TTS-0.5B" → local_dir="Spark-TTS-0.5B"
+                    # "tunelabs/Spark-TTS-0.5B" → local_dir="Spark-TTS-0.5B"
                     hf_repo = model_name
                     local_dir = model_name.split("/")[-1]
                     llm_path = f"{local_dir}/LLM"
@@ -731,7 +731,7 @@ class UnslothTrainer:
 
             elif self._audio_type == "dac":
                 # OuteTTS: uses FastModel (not FastLanguageModel) with load_in_4bit=False
-                from unsloth import FastModel
+                from tunelabs import FastModel
                 self.model, self.tokenizer = FastModel.from_pretrained(
                     model_name,
                     max_seq_length = max_seq_length,
@@ -746,7 +746,7 @@ class UnslothTrainer:
             elif self.is_audio_vlm:
                 # Audio VLM: multimodal model trained on audio (e.g. Gemma 3N).
                 # FastModel (general loader) returns (model, processor).
-                from unsloth import FastModel
+                from tunelabs import FastModel
                 self.model, self.tokenizer = FastModel.from_pretrained(
                     model_name = model_name,
                     max_seq_length = max_seq_length,
@@ -817,7 +817,7 @@ class UnslothTrainer:
             if "could not get source code" in str(e) and not getattr(
                 self, "_source_code_retried", False
             ):
-                # Unsloth patching can leave stale state that breaks
+                # TuneLabs patching can leave stale state that breaks
                 # inspect.getsource() when switching model families (e.g. gemma3 →
                 # gemma3n); the first failure clears it, so a retry succeeds.
                 self._source_code_retried = True
@@ -891,7 +891,7 @@ class UnslothTrainer:
         lora_r: int = 16,
         lora_alpha: int = 16,
         lora_dropout: float = 0.0,
-        use_gradient_checkpointing: str = "unsloth",
+        use_gradient_checkpointing: str = "tunelabs",
         use_rslora: bool = False,
         use_loftq: bool = False,
         modules_to_save: list = None,
@@ -929,27 +929,27 @@ class UnslothTrainer:
                     "down_proj",
                 ]
 
-            # Normalize gradient_checkpointing to True, False, or "unsloth"
+            # Normalize gradient_checkpointing to True, False, or "tunelabs"
             if isinstance(use_gradient_checkpointing, str):
                 use_gradient_checkpointing = use_gradient_checkpointing.strip().lower()
-                if use_gradient_checkpointing == "" or use_gradient_checkpointing == "unsloth":
-                    use_gradient_checkpointing = "unsloth"
+                if use_gradient_checkpointing == "" or use_gradient_checkpointing == "tunelabs":
+                    use_gradient_checkpointing = "tunelabs"
                 elif use_gradient_checkpointing in ("true", "1", "yes"):
                     use_gradient_checkpointing = True
                 elif use_gradient_checkpointing in ("false", "0", "no"):
                     use_gradient_checkpointing = False
                 else:
-                    # Invalid value -> "unsloth"
+                    # Invalid value -> "tunelabs"
                     logger.warning(
-                        f"Invalid gradient_checkpointing value: {use_gradient_checkpointing}, defaulting to 'unsloth'"
+                        f"Invalid gradient_checkpointing value: {use_gradient_checkpointing}, defaulting to 'tunelabs'"
                     )
-                    use_gradient_checkpointing = "unsloth"
-            elif use_gradient_checkpointing not in (True, False, "unsloth"):
-                # Invalid type/value -> "unsloth"
+                    use_gradient_checkpointing = "tunelabs"
+            elif use_gradient_checkpointing not in (True, False, "tunelabs"):
+                # Invalid type/value -> "tunelabs"
                 logger.warning(
-                    f"Invalid gradient_checkpointing type/value: {use_gradient_checkpointing}, defaulting to 'unsloth'"
+                    f"Invalid gradient_checkpointing type/value: {use_gradient_checkpointing}, defaulting to 'tunelabs'"
                 )
-                use_gradient_checkpointing = "unsloth"
+                use_gradient_checkpointing = "tunelabs"
 
             # Verify model is loaded
             if self.model is None:
@@ -975,7 +975,7 @@ class UnslothTrainer:
             # Branch by model type: audio, audio_vlm, vision, or text
             if self._audio_type in ("csm", "bicodec", "dac") or self.is_audio_vlm:
                 # Use FastModel.get_peft_model (codec audio + audio VLM)
-                from unsloth import FastModel
+                from tunelabs import FastModel
 
                 label = self._audio_type or "audio_vlm"
                 logger.info(f"{label} LoRA configuration:")
@@ -1011,7 +1011,7 @@ class UnslothTrainer:
 
             elif self._audio_type == "whisper":
                 # Whisper: FastModel.get_peft_model with task_type=None
-                from unsloth import FastModel
+                from tunelabs import FastModel
 
                 logger.info(f"Audio model (whisper) LoRA configuration:")
                 logger.info(f"  - Target modules: {target_modules}\n")
@@ -1165,7 +1165,7 @@ class UnslothTrainer:
             logits_to_keep = 0,
             **kwargs,
         ):
-            # Strip non-standard kwargs from Unsloth/PEFT.
+            # Strip non-standard kwargs from TuneLabs/PEFT.
             output_attentions = kwargs.pop("output_attentions", None)
             output_hidden_states = kwargs.pop("output_hidden_states", None)
             kwargs.pop("return_dict", None)
@@ -2659,7 +2659,7 @@ class UnslothTrainer:
         packing: bool = False,
         train_on_completions: bool = False,
         enable_wandb: bool = False,
-        wandb_project: str = "unsloth-training",
+        wandb_project: str = "tunelabs-training",
         wandb_token: str = None,
         enable_tensorboard: bool = False,
         tensorboard_dir: str | None = None,
@@ -2675,7 +2675,7 @@ class UnslothTrainer:
             self._update_progress(error = "Model not loaded")
             return False
 
-        # Pre-import heavy transformers modules on the main thread. Unsloth's
+        # Pre-import heavy transformers modules on the main thread. TuneLabs's
         # patched_import hook isn't thread-safe with importlib's cache, causing
         # KeyError: 'size' if first imported in the worker thread.
         import transformers  # noqa: F401 – ensures submodules are cached
@@ -2804,7 +2804,7 @@ class UnslothTrainer:
         try:
             # On spawn platforms, register compiled-cache dirs on sys.path/PYTHONPATH
             # before any dataset.map() so spawned workers can import compiled
-            # modules such as UnslothSFTTrainer.
+            # modules such as TuneLabsSFTTrainer.
             if sys.platform in ("win32", "darwin"):
                 from utils.cache_cleanup import register_compiled_cache_on_path
                 register_compiled_cache_on_path()
@@ -2823,7 +2823,7 @@ class UnslothTrainer:
             if training_args.get("enable_wandb", False) and training_args.get("wandb_token"):
                 os.environ["WANDB_API_KEY"] = training_args["wandb_token"]
                 import wandb
-                wandb.init(project = training_args.get("wandb_project", "unsloth-training"))
+                wandb.init(project = training_args.get("wandb_project", "tunelabs-training"))
 
             # Create output directory
             output_dir = str(resolve_output_dir(training_args.get("output_dir")))
@@ -2981,7 +2981,7 @@ class UnslothTrainer:
                         "Failed to install DeepSeek OCR module. "
                         "Please install manually: "
                         "from huggingface_hub import snapshot_download; "
-                        "snapshot_download('unsloth/DeepSeek-OCR', local_dir='deepseek_ocr')"
+                        "snapshot_download('tunelabs/DeepSeek-OCR', local_dir='deepseek_ocr')"
                     )
                     logger.error(error_msg)
                     self._update_progress(error = error_msg, is_training = False)
@@ -3058,16 +3058,16 @@ class UnslothTrainer:
 
             elif self.is_vlm and not raw_text_mode:
                 # Standard VLM collator (images)
-                logger.info("Using UnslothVisionDataCollator for vision model\n")
-                from unsloth.trainer import UnslothVisionDataCollator
+                logger.info("Using TuneLabsVisionDataCollator for vision model\n")
+                from tunelabs.trainer import TuneLabsVisionDataCollator
 
                 FastVisionModel.for_training(self.model)
                 vision_image_size = training_args.get("vision_image_size")
                 if vision_image_size is None:
-                    data_collator = UnslothVisionDataCollator(self.model, self.tokenizer)
+                    data_collator = TuneLabsVisionDataCollator(self.model, self.tokenizer)
                 else:
                     logger.info(f"Vision image resize: {vision_image_size} (max dimension)\n")
-                    data_collator = UnslothVisionDataCollator(
+                    data_collator = TuneLabsVisionDataCollator(
                         self.model,
                         self.tokenizer,
                         resize = vision_image_size,
@@ -3282,35 +3282,35 @@ class UnslothTrainer:
 
                 if is_cpt:
                     try:
-                        from unsloth import (
-                            UnslothTrainer as _UnslothCPTTrainer,
-                            UnslothTrainingArguments as _UnslothTrainingArguments,
+                        from tunelabs import (
+                            TuneLabsTrainer as _TuneLabsCPTTrainer,
+                            TuneLabsTrainingArguments as _TuneLabsTrainingArguments,
                         )
                     except ImportError as exc:
                         raise RuntimeError(
-                            "CPT requires a newer Unsloth install that exports "
-                            "`UnslothTrainer` and `UnslothTrainingArguments` "
+                            "CPT requires a newer TuneLabs install that exports "
+                            "`TuneLabsTrainer` and `TuneLabsTrainingArguments` "
                             "(for embedding_learning_rate support). "
-                            "Upgrade with: `pip install -U unsloth unsloth_zoo`."
+                            "Upgrade with: `pip install -U tunelabs tunelabs_zoo`."
                         ) from exc
 
                     embedding_lr = training_args.get("embedding_learning_rate")
                     logger.info(
-                        f"CPT: using UnslothTrainer with embedding_learning_rate={embedding_lr}\n"
+                        f"CPT: using TuneLabsTrainer with embedding_learning_rate={embedding_lr}\n"
                     )
                     trainer_kwargs = {
                         "model": self.model,
                         "tokenizer": sft_tokenizer,
                         "train_dataset": dataset["dataset"],
                         "data_collator": data_collator,
-                        "args": _UnslothTrainingArguments(
+                        "args": _TuneLabsTrainingArguments(
                             embedding_learning_rate = embedding_lr,
                             **config_args,
                         ),
                     }
                     if eval_dataset is not None:
                         trainer_kwargs["eval_dataset"] = eval_dataset
-                    self.trainer = _UnslothCPTTrainer(**trainer_kwargs)
+                    self.trainer = _TuneLabsCPTTrainer(**trainer_kwargs)
                 else:
                     trainer_kwargs = {
                         "model": self.model,
@@ -3395,7 +3395,7 @@ class UnslothTrainer:
                 and not (is_deepseek_ocr or dataset_final_format == "alpaca")
             ):
                 try:
-                    from unsloth.chat_templates import train_on_responses_only
+                    from tunelabs.chat_templates import train_on_responses_only
 
                     self.trainer = train_on_responses_only(
                         self.trainer,
@@ -3408,7 +3408,7 @@ class UnslothTrainer:
                     # Safety net: train_on_responses_only masks non-response
                     # tokens with -100. If max_seq_length is too short, the
                     # response is truncated away, every sample becomes all -100,
-                    # and Unsloth drops them, leaving 0 usable samples.
+                    # and TuneLabs drops them, leaving 0 usable samples.
                     filtered_len = len(self.trainer.train_dataset)
                     original_len = len(dataset["dataset"])
                     dropped = original_len - filtered_len
@@ -3517,7 +3517,7 @@ class UnslothTrainer:
             self.is_training = False
 
     def _patch_adapter_config(self, output_dir: str) -> None:
-        """Patch adapter_config.json with unsloth_training_method.
+        """Patch adapter_config.json with tunelabs_training_method.
 
         Values: 'qlora', 'lora', 'FT', 'CPT', 'DPO', 'GRPO', etc.
         For LoRA/QLoRA, the distinction comes from load_in_4bit.
@@ -3539,8 +3539,8 @@ class UnslothTrainer:
             else:
                 method = "lora"
 
-            config["unsloth_training_method"] = method
-            logger.info(f"Patching adapter_config.json with unsloth_training_method='{method}'")
+            config["tunelabs_training_method"] = method
+            logger.info(f"Patching adapter_config.json with tunelabs_training_method='{method}'")
 
             with open(config_path, "w") as f:
                 json.dump(config, f, indent = 2)
@@ -3610,7 +3610,7 @@ def _ensure_deepseek_ocr_installed():
         # Download to project root as 'deepseek_ocr' folder
         local_dir = os.path.join(parent_dir, "deepseek_ocr")
 
-        snapshot_download("unsloth/DeepSeek-OCR", local_dir = local_dir, local_dir_use_symlinks = False)
+        snapshot_download("tunelabs/DeepSeek-OCR", local_dir = local_dir, local_dir_use_symlinks = False)
 
         if parent_dir not in sys.path:
             sys.path.insert(0, parent_dir)
@@ -3631,9 +3631,9 @@ def _ensure_deepseek_ocr_installed():
 _trainer_instance = None
 
 
-def get_trainer() -> UnslothTrainer:
+def get_trainer() -> TuneLabsTrainer:
     """Get global trainer instance"""
     global _trainer_instance
     if _trainer_instance is None:
-        _trainer_instance = UnslothTrainer()
+        _trainer_instance = TuneLabsTrainer()
     return _trainer_instance

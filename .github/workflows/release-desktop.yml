@@ -8,7 +8,7 @@ on:
         type: string
         required: true
       pypi_version:
-        description: 'Exact PyPI unsloth version just published/stamped (for example, 2026.5.3); leave blank to use MIN_DESKTOP_BACKEND_VERSION'
+        description: 'Exact PyPI tunelabs version just published/stamped (for example, 2026.5.3); leave blank to use MIN_DESKTOP_BACKEND_VERSION'
         type: string
         required: false
       draft:
@@ -116,12 +116,12 @@ jobs:
 
           if input_pypi_version:
               print(
-                  'Using exact PyPI unsloth version from pypi_version input: '
+                  'Using exact PyPI tunelabs version from pypi_version input: '
                   f'{pypi_version} (desktop minimum: {min_backend_version})'
               )
           else:
               print(
-                  'Using exact PyPI unsloth version from MIN_DESKTOP_BACKEND_VERSION: '
+                  'Using exact PyPI tunelabs version from MIN_DESKTOP_BACKEND_VERSION: '
                   f'{pypi_version}'
               )
 
@@ -150,9 +150,9 @@ jobs:
           import urllib.request
 
           pypi_version = os.environ['PYPI_VERSION']
-          dist_dir = pathlib.Path(os.environ['RUNNER_TEMP'], 'pypi-unsloth-dist')
+          dist_dir = pathlib.Path(os.environ['RUNNER_TEMP'], 'pypi-tunelabs-dist')
           dist_dir.mkdir(parents=True, exist_ok=True)
-          metadata_url = f'https://pypi.org/pypi/unsloth/{pypi_version}/json'
+          metadata_url = f'https://pypi.org/pypi/tunelabs/{pypi_version}/json'
 
           last_error = None
           for attempt in range(1, 6):
@@ -165,17 +165,17 @@ jobs:
                   if attempt < 5:
                       time.sleep(10 * attempt)
           else:
-              sys.exit(f'Publish unsloth=={pypi_version} to PyPI before the desktop release ({last_error})')
+              sys.exit(f'Publish tunelabs=={pypi_version} to PyPI before the desktop release ({last_error})')
 
           files = metadata.get('urls') or []
           if not files:
-              sys.exit(f'PyPI returned no distribution files for unsloth=={pypi_version}')
+              sys.exit(f'PyPI returned no distribution files for tunelabs=={pypi_version}')
 
           for file_info in files:
               filename = file_info.get('filename')
               url = file_info.get('url')
               if not filename or '/' in filename or not url:
-                  sys.exit(f'Unexpected PyPI file entry for unsloth=={pypi_version}: {file_info!r}')
+                  sys.exit(f'Unexpected PyPI file entry for tunelabs=={pypi_version}: {file_info!r}')
               target = dist_dir / filename
               for attempt in range(1, 4):
                   try:
@@ -191,12 +191,12 @@ jobs:
           PY
 
           if [ -f scripts/stamp_studio_release.py ]; then
-            mapfile -t dists < <(find "$RUNNER_TEMP/pypi-unsloth-dist" -type f \( -name '*.whl' -o -name '*.tar.gz' \) | sort)
+            mapfile -t dists < <(find "$RUNNER_TEMP/pypi-tunelabs-dist" -type f \( -name '*.whl' -o -name '*.tar.gz' \) | sort)
             if [ "${#dists[@]}" -eq 0 ]; then
-              echo "No PyPI wheel/sdist artifacts downloaded for unsloth==$PYPI_VERSION" >&2
+              echo "No PyPI wheel/sdist artifacts downloaded for tunelabs==$PYPI_VERSION" >&2
               exit 1
             fi
-            python3 scripts/stamp_studio_release.py --verify-dist "$RUNNER_TEMP/pypi-unsloth-dist" --expected "$STUDIO_VERSION"
+            python3 scripts/stamp_studio_release.py --verify-dist "$RUNNER_TEMP/pypi-tunelabs-dist" --expected "$STUDIO_VERSION"
           else
             echo "scripts/stamp_studio_release.py not found; release-desktop requires #5308 to verify the PyPI Studio stamp." >&2
             exit 1
@@ -386,7 +386,7 @@ jobs:
           node <<'JS'
           const { readFileSync } = require('node:fs');
 
-          const expected = 'https://github.com/unslothai/unsloth/releases/download/desktop-latest/latest.json';
+          const expected = 'https://github.com/tunelabsai/tunelabs/releases/download/desktop-latest/latest.json';
           const config = JSON.parse(readFileSync('studio/src-tauri/tauri.conf.json', 'utf8'));
           const endpoints = config.plugins?.updater?.endpoints;
           if (!Array.isArray(endpoints) || endpoints.length !== 1) {
@@ -499,12 +499,12 @@ jobs:
           cargo_lock = pathlib.Path('Cargo.lock')
           lock_text = cargo_lock.read_text()
           lock_text, count = re.subn(
-              r'(?m)(^\[\[package\]\]\nname = "unsloth-studio"\nversion = ")[^"]+(")',
+              r'(?m)(^\[\[package\]\]\nname = "tunelabs-studio"\nversion = ")[^"]+(")',
               lambda match: f'{match.group(1)}{app_version}{match.group(2)}',
               lock_text,
           )
           if count != 1:
-              sys.exit(f'Could not patch unsloth-studio version in Cargo.lock (matches={count})')
+              sys.exit(f'Could not patch tunelabs-studio version in Cargo.lock (matches={count})')
           cargo_lock.write_text(lock_text)
           PY
 
@@ -517,9 +517,9 @@ jobs:
 
           app_version = os.environ['APP_VERSION']
           metadata = json.loads(pathlib.Path(os.environ['RUNNER_TEMP'], 'cargo-metadata.json').read_text())
-          versions = [package['version'] for package in metadata.get('packages', []) if package.get('name') == 'unsloth-studio']
+          versions = [package['version'] for package in metadata.get('packages', []) if package.get('name') == 'tunelabs-studio']
           if versions != [app_version]:
-              sys.exit(f'cargo metadata unsloth-studio version mismatch: expected {app_version}, got {versions}')
+              sys.exit(f'cargo metadata tunelabs-studio version mismatch: expected {app_version}, got {versions}')
           PY
 
           git diff -- Cargo.toml Cargo.lock
@@ -574,9 +574,9 @@ jobs:
           projectPath: studio
           tauriScript: npx --prefix . tauri
           tagName: ${{ needs.prepare-version.outputs.desktop_release_tag }}
-          releaseName: 'Unsloth Studio (Desktop) ${{ needs.prepare-version.outputs.studio_version }}'
+          releaseName: 'TuneLabs Studio (Desktop) ${{ needs.prepare-version.outputs.studio_version }}'
           releaseBody: |
-            Desktop app for Unsloth Studio.
+            Desktop app for TuneLabs Studio.
 
             **macOS**: Download the Apple Silicon `.dmg`.
             **Windows**: Download the `-setup.exe` installer.
@@ -605,9 +605,9 @@ jobs:
           projectPath: studio
           tauriScript: npx --prefix . tauri
           tagName: ${{ needs.prepare-version.outputs.desktop_release_tag }}
-          releaseName: 'Unsloth Studio (Desktop) ${{ needs.prepare-version.outputs.studio_version }}'
+          releaseName: 'TuneLabs Studio (Desktop) ${{ needs.prepare-version.outputs.studio_version }}'
           releaseBody: |
-            Desktop app for Unsloth Studio.
+            Desktop app for TuneLabs Studio.
 
             **macOS**: Download the Apple Silicon `.dmg`.
             **Windows**: Download the `-setup.exe` installer.
@@ -637,9 +637,9 @@ jobs:
           projectPath: studio
           tauriScript: npx --prefix . tauri
           tagName: ${{ needs.prepare-version.outputs.desktop_release_tag }}
-          releaseName: 'Unsloth Studio (Desktop) ${{ needs.prepare-version.outputs.studio_version }}'
+          releaseName: 'TuneLabs Studio (Desktop) ${{ needs.prepare-version.outputs.studio_version }}'
           releaseBody: |
-            Desktop app for Unsloth Studio.
+            Desktop app for TuneLabs Studio.
 
             **macOS**: Download the Apple Silicon `.dmg`.
             **Windows**: Download the `-setup.exe` installer.
@@ -730,7 +730,7 @@ jobs:
               'linux-x86_64': False,
               'windows-x86_64': False,
           }
-          expected_prefix = f'https://github.com/unslothai/unsloth/releases/download/{release_tag}/'
+          expected_prefix = f'https://github.com/tunelabsai/tunelabs/releases/download/{release_tag}/'
           forbidden_fragments = ('/releases/latest/', '/releases/download/desktop-latest/')
 
           for platform, entry in platforms.items():
@@ -764,7 +764,7 @@ jobs:
           channel_json="$RUNNER_TEMP/desktop-latest-release.json"
           if ! gh api "repos/${GITHUB_REPOSITORY}/releases/tags/desktop-latest" > "$channel_json" 2>/dev/null; then
             gh release create desktop-latest \
-              --title "Unsloth Studio Desktop updater channel" \
+              --title "TuneLabs Studio Desktop updater channel" \
               --notes "Machine-managed desktop updater channel; latest.json is replaced by release-desktop.yml." \
               --prerelease \
               --latest=false \

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Tests for the cache-aware disk-space preflight in ``LlamaCppBackend.load_model``.
 
@@ -85,7 +85,7 @@ def _preflight(
     repo_files,
     cached_files,
     free_bytes,
-    hf_repo = "unsloth/Example-GGUF",
+    hf_repo = "tunelabs/Example-GGUF",
     hf_token = None,
 ):
     """Run the llama_cpp.py preflight arithmetic; return the decision as a dict.

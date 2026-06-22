@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { createCodePlugin } from "@/components/assistant-ui/code-plugin";
 import {
-  unslothDarkTheme,
-  unslothLightTheme,
+  tunelabsDarkTheme,
+  tunelabsLightTheme,
 } from "@/components/assistant-ui/code-themes";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -67,7 +67,7 @@ const OS_AWARE: Record<ExampleType, boolean> = {
 
 const CURL_TYPES = new Set<ExampleType>(["curl", "curlTools", "curlAdvanced"]);
 
-const PROMPT = "Can Unsloth Studio do API calling?";
+const PROMPT = "Can TuneLabs Studio do API calling?";
 // web_search + python + terminal are the reliable built-in tools.
 const TOOLS = ["web_search", "python", "terminal"];
 // Sampling/thinking knobs for the "+ advanced" examples.
@@ -83,23 +83,23 @@ const ADV = {
 const DOC_LINKS = [
   {
     label: "Claude Code",
-    href: "https://unsloth.ai/docs/basics/claude-code",
+    href: "https://tunelabs.ai/docs/basics/claude-code",
   },
   {
     label: "Codex",
-    href: "https://unsloth.ai/docs/basics/codex",
+    href: "https://tunelabs.ai/docs/basics/codex",
   },
   {
     label: "OpenClaw",
-    href: "https://unsloth.ai/docs/integrations/openclaw",
+    href: "https://tunelabs.ai/docs/integrations/openclaw",
   },
   {
     label: "OpenCode",
-    href: "https://unsloth.ai/docs/integrations/opencode",
+    href: "https://tunelabs.ai/docs/integrations/opencode",
   },
   {
     label: "Hermes Agent",
-    href: "https://unsloth.ai/docs/integrations/hermes-agent",
+    href: "https://tunelabs.ai/docs/integrations/hermes-agent",
   },
 ];
 
@@ -196,7 +196,7 @@ function pythonSnippet(
   model: string,
   variant: Variant,
 ): string {
-  // Standard OpenAI args are named; Unsloth extensions go through extra_body.
+  // Standard OpenAI args are named; TuneLabs extensions go through extra_body.
   const named =
     variant === "advanced"
       ? `
@@ -261,11 +261,11 @@ function buildSnippets(
   };
 }
 
-const KEY_PLACEHOLDER = "sk-unsloth-YOUR_KEY";
-const MODEL_FALLBACK = "unsloth/gemma-4-E4B-it-GGUF:UD-Q5_K_XL";
+const KEY_PLACEHOLDER = "sk-tunelabs-YOUR_KEY";
+const MODEL_FALLBACK = "tunelabs/gemma-4-E4B-it-GGUF:UD-Q5_K_XL";
 
 // Default ON: when a tunnel exists, examples should show the public base_url.
-const USE_TUNNEL_KEY = "unsloth_api_use_tunnel";
+const USE_TUNNEL_KEY = "tunelabs_api_use_tunnel";
 
 function readUseTunnelPref(): boolean {
   if (typeof window === "undefined") return true;
@@ -301,9 +301,9 @@ function useLoadedModelName(): string {
 }
 
 // shiki highlighting via the app's shared code plugin + themes (same as chat).
-const SHIKI_THEMES = [unslothLightTheme, unslothDarkTheme] as [
-  typeof unslothLightTheme,
-  typeof unslothDarkTheme,
+const SHIKI_THEMES = [tunelabsLightTheme, tunelabsDarkTheme] as [
+  typeof tunelabsLightTheme,
+  typeof tunelabsDarkTheme,
 ];
 const codePlugin = createCodePlugin({ themes: SHIKI_THEMES });
 

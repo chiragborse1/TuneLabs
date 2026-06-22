@@ -258,7 +258,7 @@ class TestSetupShHardening:
         assert "_setup_run_smi nvidia-smi" in body
 
 
-# TEST: install.sh -- UNSLOTH_TORCH_BACKEND classified on the final path segment
+# TEST: install.sh -- TUNELABS_TORCH_BACKEND classified on the final path segment
 
 
 class TestBackendExportLeafClassification:
@@ -272,9 +272,9 @@ class TestBackendExportLeafClassification:
         anchor = install_src.find("_torch_index_leaf=")
         assert anchor >= 0, "backend export must classify on the final path segment"
         window = install_src[anchor : anchor + 500]
-        assert 'export UNSLOTH_TORCH_BACKEND="rocm"' in window
-        assert 'export UNSLOTH_TORCH_BACKEND="cpu"' in window
-        assert 'export UNSLOTH_TORCH_BACKEND="cuda"' in window
+        assert 'export TUNELABS_TORCH_BACKEND="rocm"' in window
+        assert 'export TUNELABS_TORCH_BACKEND="cpu"' in window
+        assert 'export TUNELABS_TORCH_BACKEND="cuda"' in window
 
     def test_leaf_classification_behaviour(self, tmp_path):
         import subprocess as sp
@@ -287,7 +287,7 @@ class TestBackendExportLeafClassification:
         script.write_text(
             "#!/bin/sh\n"
             'TORCH_INDEX_URL="$1"\n' + block + "\n"
-            'printf "%s" "$UNSLOTH_TORCH_BACKEND"\n'
+            'printf "%s" "$TUNELABS_TORCH_BACKEND"\n'
         )
         cases = {
             "https://download.pytorch.org/whl/cu128": "cuda",

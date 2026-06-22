@@ -127,19 +127,19 @@ class TestCudaMappingParity:
 
 
 class TestPyTorchMirrorEnvVar:
-    """Both install scripts must support the UNSLOTH_PYTORCH_MIRROR env var."""
+    """Both install scripts must support the TUNELABS_PYTORCH_MIRROR env var."""
 
     def test_install_sh_has_mirror_var(self):
         text = INSTALL_SH.read_text(encoding = "utf-8")
         assert (
-            "UNSLOTH_PYTORCH_MIRROR" in text
-        ), "install.sh should reference UNSLOTH_PYTORCH_MIRROR"
+            "TUNELABS_PYTORCH_MIRROR" in text
+        ), "install.sh should reference TUNELABS_PYTORCH_MIRROR"
 
     def test_install_ps1_has_mirror_var(self):
         text = INSTALL_PS1.read_text(encoding = "utf-8")
         assert (
-            "UNSLOTH_PYTORCH_MIRROR" in text
-        ), "install.ps1 should reference UNSLOTH_PYTORCH_MIRROR"
+            "TUNELABS_PYTORCH_MIRROR" in text
+        ), "install.ps1 should reference TUNELABS_PYTORCH_MIRROR"
 
 
 class TestUvBytecodeCompileTimeout:

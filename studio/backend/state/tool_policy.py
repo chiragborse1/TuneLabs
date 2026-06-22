@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 """Process-level server-side tool policy.
 
-Set by `unsloth run` at startup; consulted by the inference route gates.
+Set by `tunelabs run` at startup; consulted by the inference route gates.
 
   None  -> no CLI override (default). Per-request `enable_tools` is honored.
   True  -> CLI forced tools on for every request.

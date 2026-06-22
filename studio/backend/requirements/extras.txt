@@ -4,7 +4,7 @@ tomli-w
 
 # ExecuTorch dependencies
 ruamel.yaml
-# coremltools                    # 10.2 MB - Apple CoreML, no imports in unsloth/zoo/studio
+# coremltools                    # 10.2 MB - Apple CoreML, no imports in tunelabs/zoo/studio
 expecttest
 flatbuffers
 hydra-core

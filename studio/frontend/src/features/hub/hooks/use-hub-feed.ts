@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type ChannelId, findChannel } from "../lib/channels";
@@ -28,7 +28,7 @@ export interface UseHubFeedResult {
 
 // Only the trending row is rendered in the feed now; "Fine-tune ready" moved
 // into the format dropdown and loads its channel on demand (channel-list mode).
-const CHANNEL_IDS: readonly ChannelId[] = ["unsloth-trending"];
+const CHANNEL_IDS: readonly ChannelId[] = ["tunelabs-trending"];
 const FEED_PAGE_SIZE = 20;
 const MAX_RETRIES = 5;
 const BACKOFF_BASE_MS = 800;
@@ -45,9 +45,9 @@ function isAbortError(err: unknown): boolean {
 
 function channelRecord<T>(value: T): Record<ChannelId, T> {
   return {
-    "unsloth-trending": value,
-    "unsloth-latest": value,
-    "unsloth-safetensors": value,
+    "tunelabs-trending": value,
+    "tunelabs-latest": value,
+    "tunelabs-safetensors": value,
   };
 }
 
@@ -252,7 +252,7 @@ export function useHubFeed(opts: {
   );
 
   return {
-    trending: buildSection("unsloth-trending"),
+    trending: buildSection("tunelabs-trending"),
     refetch,
   };
 }

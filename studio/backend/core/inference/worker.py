@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """
 Inference subprocess entry point.
@@ -102,15 +102,15 @@ def _needs_nemotron_trust(model_name: str, hf_token: str | None = None) -> bool:
     """Whether *model_name* is a NemotronH/Nano model that needs trust_remote_code.
 
     NemotronH/Nano have config-parsing bugs that require it. Must NOT match
-    Llama-Nemotron (standard Llama arch), so also require the unsloth/ or nvidia/
+    Llama-Nemotron (standard Llama arch), so also require the tunelabs/ or nvidia/
     namespace, and a genuine first-party Hub repo (not a local path or a spoof
-    name starting with "unsloth/"). The repo check is authenticated so private
+    name starting with "tunelabs/"). The repo check is authenticated so private
     first-party repos still resolve, and runs only after the cheap checks pass.
     """
     mn = model_name.lower()
     if not (
         any(sub in mn for sub in _NEMOTRON_TRUST_SUBSTRINGS)
-        and (mn.startswith("unsloth/") or mn.startswith("nvidia/"))
+        and (mn.startswith("tunelabs/") or mn.startswith("nvidia/"))
     ):
         return False
 
@@ -138,7 +138,7 @@ def _resolve_lora_4bit(mc, load_in_4bit: bool) -> bool:
     try:
         with open(adapter_cfg_path) as f:
             adapter_cfg = json.load(f)
-        training_method = adapter_cfg.get("unsloth_training_method")
+        training_method = adapter_cfg.get("tunelabs_training_method")
         if training_method == "lora" and load_in_4bit:
             logger.info("adapter_config.json says lora — setting load_in_4bit=False")
             return False
@@ -576,7 +576,7 @@ def run_inference_process(*, cmd_queue: Any, resp_queue: Any, cancel_event, conf
         warnings.filterwarnings("ignore")
 
     LogConfig.setup_logging(
-        service_name = "unsloth-studio-inference-worker",
+        service_name = "tunelabs-studio-inference-worker",
         env = os.getenv("ENVIRONMENT_TYPE", "production"),
     )
 
@@ -710,16 +710,16 @@ def run_inference_process(*, cmd_queue: Any, resp_queue: Any, cancel_event, conf
             resp_queue,
             {
                 "type": "status",
-                "message": "Importing Unsloth...",
+                "message": "Importing TuneLabs...",
             },
         )
 
         _ensure_backend_on_path()
 
-        # Recover from any namespace-package shadow before importing Unsloth.
+        # Recover from any namespace-package shadow before importing TuneLabs.
         from core.import_guards import ensure_real_packages
 
-        ensure_real_packages("unsloth_zoo", "unsloth")
+        ensure_real_packages("tunelabs_zoo", "tunelabs")
 
         from core.inference.inference import InferenceBackend
 

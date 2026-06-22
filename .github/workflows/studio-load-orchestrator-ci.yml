@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 #
 # Event-loop regression test for the Studio model-load orchestrator.
 # Pins down issue #5642 (Win10 UI freeze on model load): the /load
@@ -11,7 +11,7 @@
 # asyncio.to_thread so concurrent /api/inference/load-progress polling
 # stays responsive. CPU-only, no torch, no real llama.cpp binary, no
 # GPU -- the matching cross-OS staging proof lives on
-# danielhanchen/unsloth-staging-2 (Ubuntu / macOS / Windows all
+# danielhanchen/tunelabs-staging-2 (Ubuntu / macOS / Windows all
 # green at PR time).
 
 name: Studio load-orchestrator CI
@@ -51,7 +51,7 @@ jobs:
         with:
           python-version: '3.12'
           cache: 'pip'
-      - name: Install minimal deps (no torch, no unsloth)
+      - name: Install minimal deps (no torch, no tunelabs)
         # The test stubs `loggers` and `structlog`, imports
         # core.inference.llama_cpp directly, and drives a small
         # FastAPI app. Nothing here pulls torch or any GPU code,

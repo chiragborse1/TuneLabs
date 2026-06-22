@@ -55,15 +55,15 @@ def _install_fake_fast_mlx(monkeypatch, calls):
                 return _DummyModel(), _DummyProcessor()
             return _DummyModel(), _DummyTokenizer()
 
-    unsloth_zoo_pkg = types.ModuleType("unsloth_zoo")
-    mlx_pkg = types.ModuleType("unsloth_zoo.mlx")
-    mlx_loader = types.ModuleType("unsloth_zoo.mlx.loader")
+    tunelabs_zoo_pkg = types.ModuleType("tunelabs_zoo")
+    mlx_pkg = types.ModuleType("tunelabs_zoo.mlx")
+    mlx_loader = types.ModuleType("tunelabs_zoo.mlx.loader")
     mlx_loader.FastMLXModel = _FastMLXModel
-    unsloth_zoo_pkg.mlx = mlx_pkg
+    tunelabs_zoo_pkg.mlx = mlx_pkg
     mlx_pkg.loader = mlx_loader
-    monkeypatch.setitem(sys.modules, "unsloth_zoo", unsloth_zoo_pkg)
-    monkeypatch.setitem(sys.modules, "unsloth_zoo.mlx", mlx_pkg)
-    monkeypatch.setitem(sys.modules, "unsloth_zoo.mlx.loader", mlx_loader)
+    monkeypatch.setitem(sys.modules, "tunelabs_zoo", tunelabs_zoo_pkg)
+    monkeypatch.setitem(sys.modules, "tunelabs_zoo.mlx", mlx_pkg)
+    monkeypatch.setitem(sys.modules, "tunelabs_zoo.mlx.loader", mlx_loader)
 
 
 def test_mlx_inference_text_load_forwards_studio_settings(monkeypatch):
@@ -102,7 +102,7 @@ def test_mlx_inference_text_load_forwards_studio_settings(monkeypatch):
     assert isinstance(backend._tokenizer, _DummyTokenizer)
 
 
-def test_mlx_inference_vlm_lora_uses_unsloth_loader_without_native_adapter_rewrite(
+def test_mlx_inference_vlm_lora_uses_tunelabs_loader_without_native_adapter_rewrite(
     monkeypatch, tmp_path
 ):
     _install_fake_mlx(monkeypatch)

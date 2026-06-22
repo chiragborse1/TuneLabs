@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """
 Hardware detection — run once at startup, read everywhere.
@@ -113,7 +113,7 @@ def _has_mlx() -> bool:
 
 def _has_usable_mlx_stack() -> bool:
     """True only when the FULL Studio MLX training/export stack is usable
-    (mlx + mlx-lm + mlx-vlm at the minimum versions unsloth-zoo requires), not
+    (mlx + mlx-lm + mlx-vlm at the minimum versions tunelabs-zoo requires), not
     just a bare ``import mlx.core``. A backtracked/old mlx-vlm still imports but
     breaks VLM Train/Export, so the training gate must match the self-heal's own
     criterion (utils.mlx_repair.mlx_stack_available) -- otherwise detect_hardware
@@ -234,11 +234,11 @@ def detect_hardware() -> DeviceType:
     if is_apple_silicon():
         # Reached the CPU fallback on Apple Silicon, so the MLX stack is missing,
         # too old, or broken. This is usually an environment problem recoverable
-        # with `unsloth studio update`.
+        # with `tunelabs studio update`.
         CHAT_ONLY_REASON = "mlx_unavailable"
         logger.warning(
             "Apple Silicon detected but the MLX stack is incomplete or too old; "
-            "Train/Export disabled (chat-only). Run `unsloth studio update` to "
+            "Train/Export disabled (chat-only). Run `tunelabs studio update` to "
             "restore MLX training."
         )
     elif platform.system() == "Darwin":
@@ -440,10 +440,10 @@ def get_package_versions() -> Dict[str, Optional[str]]:
     Return installed versions of key ML packages.
 
     Uses importlib.metadata (stdlib), no subprocess. CUDA version from
-    torch.version.cuda. Returns dict keyed unsloth/torch/transformers/cuda;
+    torch.version.cuda. Returns dict keyed tunelabs/torch/transformers/cuda;
     missing packages yield None.
     """
-    packages = ("unsloth", "torch", "transformers")
+    packages = ("tunelabs", "torch", "transformers")
     versions: Dict[str, Optional[str]] = {}
 
     for name in packages:
@@ -1258,7 +1258,7 @@ def _determine_attention_impl_for_gpu_estimate(config) -> str:
     except ImportError:
         pass
 
-    from unsloth.models._utils import resolve_attention_implementation
+    from tunelabs.models._utils import resolve_attention_implementation
     from transformers import AutoModel, AutoModelForCausalLM
 
     # why: resolve_attention_implementation writes _attn_implementation onto the
@@ -1294,10 +1294,10 @@ def _estimate_fp16_model_size_bytes_from_vllm_utils(config) -> Optional[int]:
     if config is None:
         return None
 
-    previous_unsloth_present = os.environ.get("UNSLOTH_IS_PRESENT")
-    os.environ["UNSLOTH_IS_PRESENT"] = "1"
+    previous_tunelabs_present = os.environ.get("TUNELABS_IS_PRESENT")
+    os.environ["TUNELABS_IS_PRESENT"] = "1"
     try:
-        from unsloth_zoo import vllm_utils as _vllm_utils
+        from tunelabs_zoo import vllm_utils as _vllm_utils
 
         synthetic_total_bytes = 1024 * (1024**3)
         original_get_mem_info = _vllm_utils.get_mem_info
@@ -1322,10 +1322,10 @@ def _estimate_fp16_model_size_bytes_from_vllm_utils(config) -> Optional[int]:
         logger.debug("Could not estimate model size via vllm_utils: %s", e)
         return None
     finally:
-        if previous_unsloth_present is None:
-            os.environ.pop("UNSLOTH_IS_PRESENT", None)
+        if previous_tunelabs_present is None:
+            os.environ.pop("TUNELABS_IS_PRESENT", None)
         else:
-            os.environ["UNSLOTH_IS_PRESENT"] = previous_unsloth_present
+            os.environ["TUNELABS_IS_PRESENT"] = previous_tunelabs_present
 
     model_size_gb = 1024.0 - memory_left_for_kv_cache_gb
     if model_size_gb <= 0:
@@ -1380,7 +1380,7 @@ def estimate_required_model_memory_gb(
     max_seq_length: int = 2048,
     lora_rank: int = 16,
     target_modules: Optional[list] = None,
-    gradient_checkpointing: str = "unsloth",
+    gradient_checkpointing: str = "tunelabs",
     optimizer: str = "adamw_8bit",
 ) -> tuple[Optional[float], Dict[str, Any]]:
     from .vram_estimation import (
@@ -1509,7 +1509,7 @@ def auto_select_gpu_ids(
     max_seq_length: int = 2048,
     lora_rank: int = 16,
     target_modules: Optional[list] = None,
-    gradient_checkpointing: str = "unsloth",
+    gradient_checkpointing: str = "tunelabs",
     optimizer: str = "adamw_8bit",
 ) -> tuple[Optional[list[int]], Dict[str, Any]]:
     metadata: Dict[str, Any] = {"selection_mode": "auto"}
@@ -1654,7 +1654,7 @@ def prepare_gpu_selection(
     max_seq_length: int = 2048,
     lora_rank: int = 16,
     target_modules: Optional[list] = None,
-    gradient_checkpointing: str = "unsloth",
+    gradient_checkpointing: str = "tunelabs",
     optimizer: str = "adamw_8bit",
 ) -> tuple[Optional[list[int]], Dict[str, Any]]:
     """Resolve which physical GPUs to use for a model load.
@@ -2012,7 +2012,7 @@ def safe_num_proc(desired: Optional[int] = None) -> int:
     Return a safe ``num_proc`` for ``dataset.map()`` calls.
 
     On Windows always returns 1: Python uses ``spawn`` not ``fork``, so
-    re-importing torch/transformers/unsloth per worker is typically slower
+    re-importing torch/transformers/tunelabs per worker is typically slower
     than single-process for normal dataset sizes.
 
     On multi-GPU machines (multiple GPUs *visible* to this process) the
@@ -2027,7 +2027,7 @@ def safe_num_proc(desired: Optional[int] = None) -> int:
     Returns:
         A safe integer ≥ 1.
     """
-    # Windows/macOS use 'spawn'; re-importing torch/transformers/unsloth per
+    # Windows/macOS use 'spawn'; re-importing torch/transformers/tunelabs per
     # worker is typically slower than single-process.
     if sys.platform in ("win32", "darwin"):
         return 1

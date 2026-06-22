@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Parent-process offline regression tests (follow-up to #5505).
 
@@ -107,7 +107,7 @@ class TestTransformersVersionOfflineShortCircuits:
     ):
         # No local config + offline env -> must NOT call urlopen.
         monkeypatch.setenv("HF_HUB_OFFLINE", "1")
-        unique = f"unsloth/never-cached-{tmp_path.name}"
+        unique = f"tunelabs/never-cached-{tmp_path.name}"
 
         def boom(*a, **k):
             raise AssertionError("urlopen must not be called when offline")
@@ -117,7 +117,7 @@ class TestTransformersVersionOfflineShortCircuits:
 
     def test_config_550_skips_urllib_when_offline(self, monkeypatch, clean_offline_env, tmp_path):
         monkeypatch.setenv("HF_HUB_OFFLINE", "1")
-        unique = f"unsloth/never-cached-{tmp_path.name}-cfg"
+        unique = f"tunelabs/never-cached-{tmp_path.name}-cfg"
 
         def boom(*a, **k):
             raise AssertionError("urlopen must not be called when offline")
@@ -148,7 +148,7 @@ class TestLoraDetectOffline:
         with patch("huggingface_hub.model_info", mock):
             try:
                 ModelConfig.from_identifier(
-                    model_id = "unsloth/Qwen3.5-4B",
+                    model_id = "tunelabs/Qwen3.5-4B",
                     hf_token = None,
                     gguf_variant = None,
                 )
@@ -173,7 +173,7 @@ class TestLoraDetectOffline:
         snap = repo / "snapshots" / ("a" * 40)
         snap.mkdir(parents = True)
         (snap / "adapter_config.json").write_text(
-            '{"base_model_name_or_path": "unsloth/Llama-3-8B"}'
+            '{"base_model_name_or_path": "tunelabs/Llama-3-8B"}'
         )
         monkeypatch.setattr(hf_constants, "HF_HUB_CACHE", str(tmp_path))
         monkeypatch.setenv("HF_HUB_OFFLINE", "1")

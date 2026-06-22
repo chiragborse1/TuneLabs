@@ -1,5 +1,5 @@
-from unsloth import FastVisionModel, is_bf16_supported
-from unsloth.trainer import UnslothVisionDataCollator
+from tunelabs import FastVisionModel, is_bf16_supported
+from tunelabs.trainer import TuneLabsVisionDataCollator
 
 import torch
 import os
@@ -72,7 +72,7 @@ print("=" * 80 + "\n")
 print("🤖 Loading base vision model...")
 try:
     model, tokenizer = FastVisionModel.from_pretrained(
-        model_name = "unsloth/Qwen2-VL-7B-Instruct",
+        model_name = "tunelabs/Qwen2-VL-7B-Instruct",
         max_seq_length = 2048,  # Choose any for long context!
         load_in_4bit = True,  # 4 bit quantization to reduce memory
         load_in_8bit = False,  # [NEW!] A bit more accurate, uses 2x memory
@@ -94,7 +94,7 @@ try:
         lora_alpha = 32,
         lora_dropout = 0,  # Supports any, but = 0 is optimized
         bias = "none",  # Supports any, but = "none" is optimized
-        use_gradient_checkpointing = "unsloth",  # True or "unsloth" for very long context
+        use_gradient_checkpointing = "tunelabs",  # True or "tunelabs" for very long context
         random_state = 3407,
         use_rslora = False,  # We support rank stabilized LoRA
         loftq_config = None,  # And LoftQ
@@ -120,7 +120,7 @@ try:
     trainer = SFTTrainer(
         model = model,
         tokenizer = tokenizer,
-        data_collator = UnslothVisionDataCollator(model, tokenizer),
+        data_collator = TuneLabsVisionDataCollator(model, tokenizer),
         train_dataset = train_dataset,
         args = SFTConfig(
             # per_device_train_batch_size = 4,
@@ -178,8 +178,8 @@ print("=" * 80 + "\n")
 
 print("💾 Saving adapter model and tokenizer locally...")
 try:
-    model.save_pretrained("unsloth-qwen2-7vl-french-ocr-adapter", tokenizer)
-    tokenizer.save_pretrained("unsloth-qwen2-7vl-french-ocr-adapter")
+    model.save_pretrained("tunelabs-qwen2-7vl-french-ocr-adapter", tokenizer)
+    tokenizer.save_pretrained("tunelabs-qwen2-7vl-french-ocr-adapter")
     print("✅ Model saved locally!")
 except Exception as e:
     print(f"❌ Failed to save model locally: {e}")
@@ -269,8 +269,8 @@ else:
 
 print("\n🧹 Cleaning up temporary files...")
 safe_remove_directory("./checkpoints")
-safe_remove_directory("./unsloth_compiled_cache")
-safe_remove_directory("./unsloth-qwen2-7vl-french-ocr-adapter")
+safe_remove_directory("./tunelabs_compiled_cache")
+safe_remove_directory("./tunelabs-qwen2-7vl-french-ocr-adapter")
 
 print("\n🎯 Pipeline completed successfully!")
 print("=" * 80)

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { Spinner } from "@/components/ui/spinner";
@@ -89,7 +89,7 @@ const INSTALL_STEPS = [
   "Setting up package manager",
   "Creating Python environment",
   "Installing ML framework",
-  "Installing Unsloth",
+  "Installing TuneLabs",
   "Finalizing setup",
 ] as const;
 
@@ -102,8 +102,8 @@ const EASE_OUT_QUART: [number, number, number, number] = [0.165, 0.84, 0.44, 1];
 function Logo() {
   return (
     <div className="flex flex-col items-center gap-4">
-      <img src="/sticker.png" alt="Unsloth" className="h-[72px] w-[72px] object-contain" />
-      <img src="/studio.png" alt="Unsloth Studio" className="h-auto w-[250px] object-contain dark:invert" />
+      <img src="/sticker.png" alt="TuneLabs" className="h-[72px] w-[72px] object-contain" />
+      <img src="/studio.png" alt="TuneLabs Studio" className="h-auto w-[250px] object-contain dark:invert" />
     </div>
   );
 }
@@ -153,7 +153,7 @@ function NotInstalledContent({ onInstall }: { onInstall: () => void }) {
       <div className="flex flex-1 flex-col items-center justify-center">
         <Logo />
         <p className="mt-4 text-xs font-bold text-muted-foreground">
-          To install Unsloth, click Get Started.
+          To install TuneLabs, click Get Started.
         </p>
       </div>
       <div className="mb-10">
@@ -220,7 +220,7 @@ function RepairingContent({
       </div>
       <div className="mb-10 flex flex-col items-center gap-2">
         <Spinner className="size-6 text-primary" />
-        <p className="text-sm font-bold text-foreground">Updating existing Unsloth install...</p>
+        <p className="text-sm font-bold text-foreground">Updating existing TuneLabs install...</p>
         {latest && (
           <p className="max-w-xs text-center text-xs text-muted-foreground">{latest}</p>
         )}

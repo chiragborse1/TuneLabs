@@ -44,9 +44,9 @@ fn setup_logging() {
         simplelog::ColorChoice::Auto,
     ));
 
-    // Try to set up file logging to ~/.unsloth/studio/tauri.log
+    // Try to set up file logging to ~/.tunelabs/studio/tauri.log
     if let Some(home) = dirs::home_dir() {
-        let log_dir = home.join(".unsloth").join("studio");
+        let log_dir = home.join(".tunelabs").join("studio");
         if fs::create_dir_all(&log_dir).is_ok() {
             let log_path = log_dir.join("tauri.log");
             let rotated_path = log_dir.join("tauri.log.1");
@@ -116,7 +116,7 @@ fn setup_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
     TrayIconBuilder::new()
         .menu(&menu)
-        .tooltip("Unsloth Studio (Desktop)")
+        .tooltip("TuneLabs Studio (Desktop)")
         .icon(app.default_window_icon().unwrap().clone())
         .on_menu_event(move |app, event| match event.id().as_ref() {
             "open" => {
@@ -166,7 +166,7 @@ fn main() {
     let _ = fix_path_env::fix();
 
     setup_logging();
-    info!("Unsloth Studio desktop app starting");
+    info!("TuneLabs Studio desktop app starting");
     windows_job::initialize();
 
     tauri::Builder::default()

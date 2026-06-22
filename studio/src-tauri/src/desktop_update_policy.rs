@@ -1,10 +1,10 @@
 use serde::Serialize;
 use std::collections::HashMap;
 
-const DESKTOP_RELEASE_PAGE_BASE_URL: &str = "https://github.com/unslothai/unsloth/releases/tag/";
+const DESKTOP_RELEASE_PAGE_BASE_URL: &str = "https://github.com/tunelabsai/tunelabs/releases/tag/";
 const DESKTOP_RELEASE_TAG_PREFIX: &str = "desktop-v";
 const DESKTOP_UPDATER_CHANNEL_URL: &str =
-    "https://github.com/unslothai/unsloth/releases/download/desktop-latest/latest.json";
+    "https://github.com/tunelabsai/tunelabs/releases/download/desktop-latest/latest.json";
 
 #[allow(dead_code)]
 #[derive(Debug, Serialize)]
@@ -113,7 +113,7 @@ fn validate_channel_metadata(
     }
 
     let expected_prefix = format!(
-        "https://github.com/unslothai/unsloth/releases/download/desktop-v{normalized_version}/"
+        "https://github.com/tunelabsai/tunelabs/releases/download/desktop-v{normalized_version}/"
     );
     for (platform, entry) in &metadata.platforms {
         if entry.url.trim().is_empty() {

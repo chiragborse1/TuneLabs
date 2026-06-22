@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { listDatasets } from "@huggingface/hub";
 import { useCallback, useMemo } from "react";
@@ -162,8 +162,8 @@ const OCR_OR_VISION_TEXT_TASKS = new Set([
 
 const CURATED_EMPTY_QUERY_DATASET_IDS: Partial<Record<ModelType, string[]>> = {
   text: [
-    "unsloth/alpaca-cleaned",
-    "unsloth/OpenMathReasoning-mini",
+    "tunelabs/alpaca-cleaned",
+    "tunelabs/OpenMathReasoning-mini",
     "mlabonne/FineTome-100k",
     "openai/gsm8k",
     "philschmid/guanaco-sharegpt-style",
@@ -186,9 +186,9 @@ const CURATED_EMPTY_QUERY_DATASET_IDS: Partial<Record<ModelType, string[]>> = {
     "openbmb/UltraInteract_sft",
   ],
   vision: [
-    "unsloth/LaTeX_OCR",
-    "unsloth/llava-instruct-mix-vsft-mini",
-    "unsloth/Radiology_mini",
+    "tunelabs/LaTeX_OCR",
+    "tunelabs/llava-instruct-mix-vsft-mini",
+    "tunelabs/Radiology_mini",
     "AI4Math/MathVista",
     "AI4Math/MathVerse",
     "ChongyanChen/VQAonline",

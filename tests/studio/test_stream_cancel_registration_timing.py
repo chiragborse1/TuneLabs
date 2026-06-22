@@ -637,7 +637,7 @@ def test_stream_chunks_cancel_branch_resets_backend_state():
 # ── Behavioral simulations for the iter-1 fixes ──────────────
 
 
-def test_unsloth_stream_loop_breaks_on_external_cancel_event():
+def test_tunelabs_stream_loop_breaks_on_external_cancel_event():
     cancel_event = threading.Event()
     reset_calls = [0]
 
@@ -844,7 +844,7 @@ def test_audio_stream_stays_responsive_under_blocking_next():
     ), f"post-fix loop must not drain all chunks; got {len(postfix_seen)}"
 
 
-def test_unsloth_stream_loop_emits_zero_tokens_on_preset_cancel():
+def test_tunelabs_stream_loop_emits_zero_tokens_on_preset_cancel():
     # Pending-cancel replay: cancel_event pre-set, so the top-of-loop check must
     # short-circuit iteration 1 (zero tokens). Catches moving the check below next().
     cancel_event = threading.Event()
@@ -894,7 +894,7 @@ def test_unsloth_stream_loop_emits_zero_tokens_on_preset_cancel():
 
 
 def test_audio_stream_emits_zero_chunks_on_preset_cancel():
-    # Symmetric to the Unsloth pre-set test: the audio loop must skip
+    # Symmetric to the TuneLabs pre-set test: the audio loop must skip
     # asyncio.to_thread(next, ...) when cancel_event was pre-set via pending-replay.
     cancel_event = threading.Event()
     cancel_event.set()

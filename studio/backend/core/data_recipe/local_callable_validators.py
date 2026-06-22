@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from utils.paths import ensure_dir, oxc_validator_tmp_root
 
 logger = get_logger(__name__)
 
-OXC_VALIDATION_FN_MARKER = "unsloth_oxc_validator"
+OXC_VALIDATION_FN_MARKER = "tunelabs_oxc_validator"
 
 _OXC_LANG_TO_NODE_LANG = {
     "javascript": "js",

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import type { PipelineType } from "@huggingface/hub";
 import { listModels } from "@huggingface/hub";
@@ -22,11 +22,11 @@ import { EMBEDDING_TAGS, estimateSizeFromDtypes } from "../lib/hf-model-meta";
 import { detectBaseModel } from "../lib/model-capabilities";
 import { isGgufLike } from "../lib/model-identifiers";
 import {
-  classifyUnslothSupport,
+  classifyTuneLabsSupport,
   excludedFormatTagsForDevice,
-  type UnslothSupport,
-  type UnslothSupportStatus,
-} from "../lib/unsloth-support";
+  type TuneLabsSupport,
+  type TuneLabsSupportStatus,
+} from "../lib/tunelabs-support";
 
 const ALL_FIELDS: (
   | "safetensors"
@@ -44,8 +44,8 @@ const ALL_FIELDS: (
   "downloadsAllTime",
 ];
 
-export { classifyUnslothSupport };
-export type { UnslothSupport, UnslothSupportStatus };
+export { classifyTuneLabsSupport };
+export type { TuneLabsSupport, TuneLabsSupportStatus };
 
 export type HfSortKey =
   | "trendingScore"
@@ -205,7 +205,7 @@ function makeMapModel(
     // opts out via keepUnsupportedTags to render them with a "may not be supported"
     // dot. Embeddings skip the gate: their pipeline tag is unsupported for chat but trainable.
     if (!keepUnsupportedTags && !isEmbedding) {
-      const support = classifyUnslothSupport({
+      const support = classifyTuneLabsSupport({
         modelId: m.name,
         pipelineTag,
         tags: m.tags,
@@ -248,12 +248,12 @@ function makeMapModel(
   };
 }
 
-/** Unsloth results pulled up-front before yielding general results. */
-const UNSLOTH_PREFETCH = 20;
-/** With a typed query, float only a few unsloth results before the general listing. */
-const UNSLOTH_QUERY_PREFETCH = 3;
-/** With a publisher query, fewer unsloth results before the pinned publisher model. */
-const UNSLOTH_PINNED_PREFETCH = 4;
+/** TuneLabs results pulled up-front before yielding general results. */
+const TUNELABS_PREFETCH = 20;
+/** With a typed query, float only a few tunelabs results before the general listing. */
+const TUNELABS_QUERY_PREFETCH = 3;
+/** With a publisher query, fewer tunelabs results before the pinned publisher model. */
+const TUNELABS_PINNED_PREFETCH = 4;
 /** Matches a valid "owner/repo" identifier (exactly two non-empty segments). */
 const PUBLISHER_RE = /^([^/\s]+)\/([^/\s]+)$/;
 
@@ -274,7 +274,7 @@ function primeFromListing(
   }
 }
 
-/** Merged generator yielding unsloth-owned models first, then deduped general results. */
+/** Merged generator yielding tunelabs-owned models first, then deduped general results. */
 async function* mergedModelIterator(
   query: string,
   task?: HfTaskFilter,
@@ -292,11 +292,11 @@ async function* mergedModelIterator(
     ...(accessToken ? { credentials: { accessToken } } : {}),
   };
 
-  const unslothIter = mergeTaskIterators(
+  const tunelabsIter = mergeTaskIterators(
     tasks,
     (task) =>
       listModels({
-        search: { query, owner: "unsloth", ...(task ? { task } : {}) },
+        search: { query, owner: "tunelabs", ...(task ? { task } : {}) },
         ...common,
       }) as AsyncGenerator<unknown>,
   );
@@ -320,15 +320,15 @@ async function* mergedModelIterator(
     : null;
 
   const limit = pinnedId
-    ? UNSLOTH_PINNED_PREFETCH
+    ? TUNELABS_PINNED_PREFETCH
     : query.trim()
-      ? UNSLOTH_QUERY_PREFETCH
-      : UNSLOTH_PREFETCH;
+      ? TUNELABS_QUERY_PREFETCH
+      : TUNELABS_PREFETCH;
 
-  // Phase 1: unsloth models first
+  // Phase 1: tunelabs models first
   const seen = new Set<string>();
   let count = 0;
-  for await (const model of unslothIter) {
+  for await (const model of tunelabsIter) {
     const m = model as { name?: string };
     if (m.name) {
       seen.add(m.name);
@@ -364,7 +364,7 @@ async function* mergedModelIterator(
   }
 }
 
-/** Yields priority models (fetched individually for full metadata), then the unsloth listing. */
+/** Yields priority models (fetched individually for full metadata), then the tunelabs listing. */
 async function* priorityThenListingIterator(
   priorityIds: readonly string[],
   task?: HfTaskFilter,
@@ -405,7 +405,7 @@ async function* priorityThenListingIterator(
     tasks,
     (task) =>
       listModels({
-        search: { owner: "unsloth", ...(task ? { task } : {}) },
+        search: { owner: "tunelabs", ...(task ? { task } : {}) },
         ...common,
       }) as AsyncGenerator<unknown>,
   );
@@ -454,13 +454,13 @@ function createChannelIterator(
   }) as AsyncGenerator<unknown>;
 }
 
-// Bound the unsloth pass so a huge unsloth slice can't starve the general listing under scroll.
-const UNSLOTH_CHANNEL_PREFETCH = 60;
+// Bound the tunelabs pass so a huge tunelabs slice can't starve the general listing under scroll.
+const TUNELABS_CHANNEL_PREFETCH = 60;
 
-// For tag/format channels without a fixed owner (e.g. GGUF filter), yield unsloth
-// models first (in sort order), then the rest with already-seen unsloth repos removed,
-// floating unsloth to the top even when sorting by downloads/likes.
-async function* channelUnslothFirstIterator(
+// For tag/format channels without a fixed owner (e.g. GGUF filter), yield tunelabs
+// models first (in sort order), then the rest with already-seen tunelabs repos removed,
+// floating tunelabs to the top even when sorting by downloads/likes.
+async function* channelTuneLabsFirstIterator(
   channel: { tags?: string[]; query?: string },
   opts: {
     query?: string;
@@ -476,10 +476,10 @@ async function* channelUnslothFirstIterator(
     : {};
   const seen = new Set<string>();
 
-  const unslothIter = listModels({
+  const tunelabsIter = listModels({
     search: {
       ...(queryString ? { query: queryString } : {}),
-      owner: "unsloth",
+      owner: "tunelabs",
       ...(channel.tags ? { tags: channel.tags } : {}),
     },
     additionalFields: ALL_FIELDS,
@@ -488,11 +488,11 @@ async function* channelUnslothFirstIterator(
     ...creds,
   }) as AsyncGenerator<unknown>;
   let count = 0;
-  for await (const model of unslothIter) {
+  for await (const model of tunelabsIter) {
     const name = (model as { name?: string }).name;
     if (name) seen.add(name);
     yield model;
-    if (++count >= UNSLOTH_CHANNEL_PREFETCH) break;
+    if (++count >= TUNELABS_CHANNEL_PREFETCH) break;
   }
 
   const generalIter = listModels({
@@ -577,12 +577,12 @@ export function useHubModelSearch(
     priorityIds?: readonly string[];
     sortBy?: HfSortKey;
     sortDirection?: HfSortDirection;
-    pinUnslothFirst?: boolean;
+    pinTuneLabsFirst?: boolean;
     /**
-     * "unsloth" restricts listings to the unsloth org; "all" surfaces the whole
-     * Hub with unsloth floated to the top. Owner-fixed channel presets ignore this.
+     * "tunelabs" restricts listings to the tunelabs org; "all" surfaces the whole
+     * Hub with tunelabs floated to the top. Owner-fixed channel presets ignore this.
      */
-    ownerScope?: "unsloth" | "all";
+    ownerScope?: "tunelabs" | "all";
     enabled?: boolean;
     keepUnsupportedTags?: boolean;
     channel?: HfModelSearchChannel | null;
@@ -595,13 +595,13 @@ export function useHubModelSearch(
     priorityIds,
     sortBy = "downloads",
     sortDirection = "desc",
-    pinUnslothFirst = true,
+    pinTuneLabsFirst = true,
     ownerScope = "all",
     enabled = true,
     keepUnsupportedTags = false,
     channel = null,
   } = options ?? {};
-  const unslothOnly = ownerScope === "unsloth";
+  const tunelabsOnly = ownerScope === "tunelabs";
 
   const channelOwner = channel?.owner ?? null;
   const channelTagsKey = channel?.tags ? channel.tags.join("|") : "";
@@ -617,7 +617,7 @@ export function useHubModelSearch(
   const { isPublisherQuery, searchQuery, pinnedId, trimmed } = useMemo(() => {
     const t = query.trim();
     const m = PUBLISHER_RE.exec(t);
-    const is = !!m && m[1].toLowerCase() !== "unsloth";
+    const is = !!m && m[1].toLowerCase() !== "tunelabs";
     return {
       isPublisherQuery: is,
       searchQuery: is ? m![2] : t,
@@ -628,18 +628,18 @@ export function useHubModelSearch(
 
   const createIter = useCallback(
     (signal: AbortSignal) => {
-      // Channel scoping bypasses the unsloth-merge iterator: a hard owner/tag
+      // Channel scoping bypasses the tunelabs-merge iterator: a hard owner/tag
       // filter shows just that curated slice, with the user's text query forwarded in.
       if (channelOwner || channelTagsKey || channelQuery) {
         const channelTags = channelTagsKey
           ? channelTagsKey.split("|")
           : undefined;
-        // Unsloth-only scope on an ownerless tag/format channel (e.g. GGUF filter):
-        // hard-restrict the slice to unsloth-owned repos.
-        if (unslothOnly && !channelOwner) {
+        // TuneLabs-only scope on an ownerless tag/format channel (e.g. GGUF filter):
+        // hard-restrict the slice to tunelabs-owned repos.
+        if (tunelabsOnly && !channelOwner) {
           return createChannelIterator(
             {
-              owner: "unsloth",
+              owner: "tunelabs",
               tags: channelTags,
               query: channelQuery || undefined,
             },
@@ -652,9 +652,9 @@ export function useHubModelSearch(
             },
           );
         }
-        // Ownerless tag/format channels (e.g. GGUF filter): float unsloth-owned models first.
-        if (pinUnslothFirst && channelTagsKey && !channelOwner) {
-          return channelUnslothFirstIterator(
+        // Ownerless tag/format channels (e.g. GGUF filter): float tunelabs-owned models first.
+        if (pinTuneLabsFirst && channelTagsKey && !channelOwner) {
+          return channelTuneLabsFirstIterator(
             { tags: channelTags, query: channelQuery || undefined },
             {
               query: trimmed || undefined,
@@ -683,7 +683,7 @@ export function useHubModelSearch(
         );
       }
       if (!trimmed) {
-        // No query: show priority models first (with full metadata), then general unsloth listing
+        // No query: show priority models first (with full metadata), then general tunelabs listing
         if (stablePriorityIds && stablePriorityIds.length > 0) {
           return priorityThenListingIterator(
             stablePriorityIds,
@@ -698,9 +698,9 @@ export function useHubModelSearch(
           normalizeTaskFilter(task),
           (task) =>
             listModels({
-              // Unsloth-only scope restricts the plain sort browse to the org.
+              // TuneLabs-only scope restricts the plain sort browse to the org.
               search: {
-                ...(unslothOnly ? { owner: "unsloth" } : {}),
+                ...(tunelabsOnly ? { owner: "tunelabs" } : {}),
                 ...(task ? { task } : {}),
               },
               additionalFields: ALL_FIELDS,
@@ -710,11 +710,11 @@ export function useHubModelSearch(
             }) as AsyncGenerator<unknown>,
         );
       }
-      // Unsloth-only typed query: search within the org rather than floating
-      // a few unsloth hits above the global relevance ranking.
-      if (unslothOnly) {
+      // TuneLabs-only typed query: search within the org rather than floating
+      // a few tunelabs hits above the global relevance ranking.
+      if (tunelabsOnly) {
         return listModels({
-          search: { query: searchQuery, owner: "unsloth" },
+          search: { query: searchQuery, owner: "tunelabs" },
           additionalFields: ALL_FIELDS,
           fetch: makeSortFetch(sortBy, sortDirection, signal),
           sort: sortBy,
@@ -723,8 +723,8 @@ export function useHubModelSearch(
       }
       // Typed query: drop the task filter so searched models appear despite
       // wrong/missing HF task metadata. For an "owner/repo" query, strip the org
-      // prefix so unsloth variants surface, then pin the original publisher model.
-      // Unsloth-owned queries are left as-is for the full prefetch + secondary sort.
+      // prefix so tunelabs variants surface, then pin the original publisher model.
+      // TuneLabs-owned queries are left as-is for the full prefetch + secondary sort.
       return mergedModelIterator(
         searchQuery,
         undefined,
@@ -747,8 +747,8 @@ export function useHubModelSearch(
       channelOwner,
       channelTagsKey,
       channelQuery,
-      pinUnslothFirst,
-      unslothOnly,
+      pinTuneLabsFirst,
+      tunelabsOnly,
     ],
   );
 
@@ -774,11 +774,11 @@ export function useHubModelSearch(
   const search = useHubPaginatedSearch(createIter, mapModel, { enabled });
 
   // Secondary sort only with no user query (merged iterator already floats
-  // unsloth results; re-sorting would bury matches) and outside channel scoping.
+  // tunelabs results; re-sorting would bury matches) and outside channel scoping.
   //
   // STABLE-APPEND CONTRACT: when a later page lands, keep the sorted prefix
   // verbatim and append only the new tail. Re-sorting the whole array would let
-  // a late unsloth/* repo jump to an earlier index and bump the viewport during
+  // a late tunelabs/* repo jump to an earlier index and bump the viewport during
   // infinite scroll, so we only sort when the listing resets (length shrinks or
   // zeros), where re-ordering is safe.
   const [stableCache, setStableCache] = useState<{
@@ -790,9 +790,9 @@ export function useHubModelSearch(
 
   const incoming = search.results;
   // Owner-scoped channels return a single owner, so re-sorting is a no-op there;
-  // tag/format channels (e.g. GGUF) and plain browsing still float unsloth first.
+  // tag/format channels (e.g. GGUF) and plain browsing still float tunelabs first.
   const sortingDisabled =
-    !pinUnslothFirst || isPublisherQuery || trimmed || Boolean(channelOwner);
+    !pinTuneLabsFirst || isPublisherQuery || trimmed || Boolean(channelOwner);
   const { results, nextCache } = useMemo(() => {
     let results: HfModelResult[];
     let nextCache = stableCache;
@@ -829,8 +829,8 @@ export function useHubModelSearch(
         stableCache.source !== incoming)
     ) {
       const sorted = [...incoming].sort((a, b) => {
-        const aFirst = a.id.startsWith("unsloth/") ? 0 : 1;
-        const bFirst = b.id.startsWith("unsloth/") ? 0 : 1;
+        const aFirst = a.id.startsWith("tunelabs/") ? 0 : 1;
+        const bFirst = b.id.startsWith("tunelabs/") ? 0 : 1;
         return aFirst - bFirst;
       });
       results = sorted;

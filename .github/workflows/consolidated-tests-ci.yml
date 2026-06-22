@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 # One consolidated CPU-only job that runs every test_* function the existing
-# CI does not already cover from this repo plus the full unsloth_zoo@main
-# CPU test suite plus unsloth_zoo.compiler.test_apply_fused_lm_head.
+# CI does not already cover from this repo plus the full tunelabs_zoo@main
+# CPU test suite plus tunelabs_zoo.compiler.test_apply_fused_lm_head.
 #
 # Why a separate workflow:
 #   - studio-backend-ci.yml's "Repo tests (CPU)" job already auto-discovers
@@ -12,19 +12,19 @@
 #     historically excluded with their GPU siblings); pulling them out into
 #     a sibling job keeps the existing 760-passed baseline stable while we
 #     prove the new pieces are green.
-#   - unsloth_zoo has no CI on main today (.github/workflows/ is empty
+#   - tunelabs_zoo has no CI on main today (.github/workflows/ is empty
 #     upstream as of HEAD 030e4ba). 106 of its 111 test_* functions are
 #     CPU-runnable; the 5 GPU/vLLM ones are deselected here.
-#   - test_apply_fused_lm_head lives at unsloth_zoo/compiler.py:1983, not
+#   - test_apply_fused_lm_head lives at tunelabs_zoo/compiler.py:1983, not
 #     under tests/, so it is not picked up by `pytest tests/`. It is a
 #     plain function with no fixtures: pure regex over transformers source
 #     strings, ~5-15 s wall, no GPU.
 #
 # Strict mode: every test step is gating (no `continue-on-error`). The
 # upstream patch fixes that previously caused per-cell red have landed:
-#   - unslothai/unsloth#5319 (patch_fast_lora import, patch_sft_trainer
+#   - tunelabsai/tunelabs#5319 (patch_fast_lora import, patch_sft_trainer
 #     Union, openenv OSError graceful skip).
-#   - unslothai/unsloth-zoo#628 (MoE coverage canary so old transformers
+#   - tunelabsai/tunelabs-zoo#628 (MoE coverage canary so old transformers
 #     skips legitimately while real discovery regressions still fail).
 # After those merges every observed cell failure was one of these two
 # things; if they regress we want a red cell, not a green-with-fail-prints
@@ -35,8 +35,8 @@ name: Core
 on:
   pull_request:
     paths:
-      - 'unsloth/**'
-      - 'unsloth_cli/**'
+      - 'tunelabs/**'
+      - 'tunelabs_cli/**'
       - 'studio/**'
       - 'tests/**'
       - 'pyproject.toml'
@@ -45,8 +45,8 @@ on:
     branches: [main, pip]
   workflow_dispatch:
     inputs:
-      unsloth_zoo_ref:
-        description: 'unsloth_zoo git ref to test against (default main)'
+      tunelabs_zoo_ref:
+        description: 'tunelabs_zoo git ref to test against (default main)'
         required: false
         default: 'main'
 
@@ -63,7 +63,7 @@ jobs:
     # PR cares about:
     #   1. transformers==4.57.6 + TRL latest <1.0.0 (the just-before-5.x line)
     #   2. transformers latest 5.x + TRL latest 1.x (the absolute upstream tip;
-    #      currently 5.8.0 + 1.3.0, both BEYOND the unsloth/unsloth_zoo
+    #      currently 5.8.0 + 1.3.0, both BEYOND the tunelabs/tunelabs_zoo
     #      <=5.5.0 / <=0.24.0 caps -- the cell exists explicitly to surface
     #      drift signal)
     #   3. transformers + TRL pinned by pyproject.toml's dependency entries
@@ -99,11 +99,11 @@ jobs:
     # the runtime check shim handles patches that legitimately cannot
     # run on a CPU-only runner (real CUDA dispatcher, runtime args).
     env:
-      UNSLOTH_ZOO_REF: ${{ inputs.unsloth_zoo_ref || 'main' }}
+      TUNELABS_ZOO_REF: ${{ inputs.tunelabs_zoo_ref || 'main' }}
       MATRIX_TRANSFORMERS_SPEC: ${{ matrix.combo.transformers_spec }}
       MATRIX_TRL_SPEC: ${{ matrix.combo.trl_spec }}
       MATRIX_COMBO_ID: ${{ matrix.combo.id }}
-      # Hoisted to job-level so every step (Sanity, Bucket-A, unsloth_zoo
+      # Hoisted to job-level so every step (Sanity, Bucket-A, tunelabs_zoo
       # pytest, test_apply_fused_lm_head) inherits it. transformers' bundled
       # *_pb2.py was generated against an older protoc; the C++ protobuf
       # 4+/5+/6 implementation rejects them with "Descriptors cannot be
@@ -111,14 +111,14 @@ jobs:
       # speed cost is negligible for these tests.
       PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
       PYTHONPATH: ${{ github.workspace }}/studio
-      UNSLOTH_COMPILE_DISABLE: '1'
-      # unsloth_zoo/__init__.py:314 raises ImportError unless UNSLOTH_IS_PRESENT
-      # is set — normally it is set by unsloth.__init__ when unsloth is imported
-      # first. In this job we sometimes import unsloth_zoo.* (e.g.
-      # unsloth_zoo.saving_utils, unsloth_zoo.temporary_patches) without going
-      # through `import unsloth` first; pin the env var to 1 so unsloth_zoo's
-      # bootstrap accepts it. Setting it has no effect on unsloth itself.
-      UNSLOTH_IS_PRESENT: '1'
+      TUNELABS_COMPILE_DISABLE: '1'
+      # tunelabs_zoo/__init__.py:314 raises ImportError unless TUNELABS_IS_PRESENT
+      # is set — normally it is set by tunelabs.__init__ when tunelabs is imported
+      # first. In this job we sometimes import tunelabs_zoo.* (e.g.
+      # tunelabs_zoo.saving_utils, tunelabs_zoo.temporary_patches) without going
+      # through `import tunelabs` first; pin the env var to 1 so tunelabs_zoo's
+      # bootstrap accepts it. Setting it has no effect on tunelabs itself.
+      TUNELABS_IS_PRESENT: '1'
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
@@ -137,13 +137,13 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install uv (some unsloth_zoo dev tooling expects it on PATH)
+      - name: Install uv (some tunelabs_zoo dev tooling expects it on PATH)
         run: pip install uv
 
       - name: Resolve matrix specs (handle __from_pyproject__ sentinel)
         # The pyproject cell uses a sentinel; resolve the real `transformers`
         # and `trl` constraints from the project's pyproject.toml at job time.
-        # unsloth's pyproject puts the LLM stack pins in
+        # tunelabs's pyproject puts the LLM stack pins in
         # [project.optional-dependencies] under the `huggingfacenotorch`
         # extra (top-level [project.dependencies] is just typer/pydantic/etc.),
         # so we walk every optional extra and pick the first matching spec.
@@ -191,7 +191,7 @@ jobs:
         #     does `from transformers.utils import sentencepiece_model_pb2`,
         #     which imports `google.protobuf`. Not pulled by transformers'
         #     base install.
-        #   - triton: unsloth/_gpu_init.py:232 does an unconditional
+        #   - triton: tunelabs/_gpu_init.py:232 does an unconditional
         #     `import triton`. The triton PyPI wheel installs cleanly on
         #     Linux x86_64 even without CUDA (the import succeeds; runtime
         #     GPU work is what would fail, which we never do here).
@@ -208,30 +208,30 @@ jobs:
             psutil packaging tqdm safetensors datasets \
             'peft>=0.18,<0.20' 'accelerate>=0.34,<2' \
             ipython
-          # torchvision: unsloth_zoo.vision_utils imports it at module scope.
+          # torchvision: tunelabs_zoo.vision_utils imports it at module scope.
           pip install --index-url https://download.pytorch.org/whl/cpu \
             'torch>=2.4,<2.11' 'torchvision<0.26'
           # transformers + trl from the matrix combo.
           pip install "$RESOLVED_TRANSFORMERS_SPEC"
           pip install "$RESOLVED_TRL_SPEC"
-          # bitsandbytes: hard import in unsloth/models/_utils.py. Recent
+          # bitsandbytes: hard import in tunelabs/models/_utils.py. Recent
           # versions ship a CPU build that imports cleanly on Linux.
           pip install 'bitsandbytes>=0.45'
-          # unsloth itself, editable, no-deps so pip does not fight the
+          # tunelabs itself, editable, no-deps so pip does not fight the
           # explicit torch CPU-index install above.
           pip install -e . --no-deps
-          echo "::group::Installed transformers + trl + torch + unsloth versions"
+          echo "::group::Installed transformers + trl + torch + tunelabs versions"
           pip show transformers
           pip show trl
           pip show torch
-          pip show unsloth
+          pip show tunelabs
           echo "::endgroup::"
 
-      - name: Clone unsloth_zoo @ ${{ env.UNSLOTH_ZOO_REF }}
+      - name: Clone tunelabs_zoo @ ${{ env.TUNELABS_ZOO_REF }}
         # We need the repository tree (the wheel does not ship tests/), so
-        # clone shallow then editable-install so unsloth_zoo.* imports
+        # clone shallow then editable-install so tunelabs_zoo.* imports
         # resolve to the cloned tree. We use `pip show` for the location
-        # check rather than `import unsloth_zoo` because the latter calls
+        # check rather than `import tunelabs_zoo` because the latter calls
         # device_type.get_device_type() at module load and raises on a
         # GPU-less runner; pytest steps below route through the existing
         # tests/conftest.py spoof which handles that.
@@ -240,27 +240,27 @@ jobs:
           # github.com occasionally 500s on the git fetch; retry so a
           # single upstream blip does not fail CI.
           for attempt in 1 2 3; do
-            rm -rf "$RUNNER_TEMP/unsloth-zoo"
-            if git clone --depth=1 --branch="$UNSLOTH_ZOO_REF" \
-                https://github.com/unslothai/unsloth-zoo \
-                "$RUNNER_TEMP/unsloth-zoo"; then
+            rm -rf "$RUNNER_TEMP/tunelabs-zoo"
+            if git clone --depth=1 --branch="$TUNELABS_ZOO_REF" \
+                https://github.com/tunelabsai/tunelabs-zoo \
+                "$RUNNER_TEMP/tunelabs-zoo"; then
               break
             fi
             if [ "$attempt" -eq 3 ]; then
-              echo "::error::git clone unsloth-zoo failed after 3 attempts"
+              echo "::error::git clone tunelabs-zoo failed after 3 attempts"
               exit 1
             fi
             delay=$((5 * attempt))
             echo "::warning::clone failed (attempt $attempt/3), retrying in ${delay}s..."
             sleep "$delay"
           done
-          pip install -e "$RUNNER_TEMP/unsloth-zoo" --no-deps
-          pip show unsloth_zoo
+          pip install -e "$RUNNER_TEMP/tunelabs-zoo" --no-deps
+          pip show tunelabs_zoo
 
       - name: Sanity — collection only (both repos)
         # Catches import-time breakage before we run the suite. Cheap; bails
         # the job out fast if a transformers/torch resolution went sideways.
-        # Inherits PYTHONPATH / UNSLOTH_COMPILE_DISABLE / PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION
+        # Inherits PYTHONPATH / TUNELABS_COMPILE_DISABLE / PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION
         # from the job-level env block.
         run: |
           set -euxo pipefail
@@ -271,11 +271,11 @@ jobs:
             tests/utils/test_attention_masks.py \
             tests/utils/test_trunc_normal_patch.py \
             tests/python/test_fast_language_model_text_only.py
-          python -m pytest --collect-only -q "$RUNNER_TEMP/unsloth-zoo/tests/"
+          python -m pytest --collect-only -q "$RUNNER_TEMP/tunelabs-zoo/tests/"
 
       - name: import_fixes drift detectors (18 tests, HARD GATE)
         # One drift detector per fix_* / patch_* function in
-        # unsloth/import_fixes.py. The detectors assert the *healthy*
+        # tunelabs/import_fixes.py. The detectors assert the *healthy*
         # upstream shape that the fix expects ABSENT the regression;
         # ANY DRIFT DETECTED -> pytest.fail (NEVER skip) so the
         # matrix cell goes red and the maintainer triages on the
@@ -302,16 +302,16 @@ jobs:
         #     patch_trunc_normal_precision_issue)
         #   * xformers post-num_splits-key fix version
         # HARD GATE: a red cell here is a real upstream regression
-        # without a corresponding zoo / unsloth-side workaround.
+        # without a corresponding zoo / tunelabs-side workaround.
         run: |
           python -m pytest -v --tb=short tests/test_import_fixes_drift.py
 
       - name: public-api surface drift detectors (9 tests, HARD GATE)
         # Companion to test_import_fixes_drift.py: that file catches
-        # third-party drift; this one catches drift in unsloth's OWN
+        # third-party drift; this one catches drift in tunelabs's OWN
         # public surface (FastLanguageModel / FastVisionModel /
         # FastModel + their classmethods + is_bf16_supported). A
-        # rename here would silently break the unslothai/notebooks tree
+        # rename here would silently break the tunelabsai/notebooks tree
         # one PR cycle later -- this gate catches it BEFORE the
         # breakage reaches users.
         run: |
@@ -319,24 +319,24 @@ jobs:
 
       - name: callback signature drift detector (HARD GATE)
         # Catches the MLX-style bug from PR #5498: a producer in
-        # unsloth_zoo (or unsloth) grows a callback arg, but a consumer
+        # tunelabs_zoo (or tunelabs) grows a callback arg, but a consumer
         # callback def still declares the old arity. The producer's
         # try/except swallows the resulting TypeError and the symptom is
         # "callback never fires" -- usually diagnosed downstream as a
         # confusing assertion several seconds later. This static AST
-        # check fails fast at PR time. UNSLOTH_ZOO_SRC points at the
+        # check fails fast at PR time. TUNELABS_ZOO_SRC points at the
         # freshly cloned main so the detector sees platform-specific
-        # submodules (e.g. unsloth_zoo/mlx/) that the released wheel
+        # submodules (e.g. tunelabs_zoo/mlx/) that the released wheel
         # may strip.
         env:
-          UNSLOTH_ZOO_SRC: ${{ runner.temp }}/unsloth-zoo
+          TUNELABS_ZOO_SRC: ${{ runner.temp }}/tunelabs-zoo
         run: |
           python -m pytest -v --tb=short tests/test_callback_signature_drift.py
 
       - name: generation correctness guards (HARD GATE)
         # Deterministic CPU guards, each validated to fail on its pre-fix code:
         # leftpad = batched left-padded generation (#1066/#3699, fixed by
-        # #2216 + #4100; staging proof: unsloth-staging-2 PRs 170/172);
+        # #2216 + #4100; staging proof: tunelabs-staging-2 PRs 170/172);
         # rope_scaling_drift = config.rope_scaling dropped by replaced rotary
         # classes (#2405). AST checks run first so import breakage cannot mask them.
         run: |
@@ -344,7 +344,7 @@ jobs:
             tests/utils/test_prepare_inputs_leftpad.py \
             tests/utils/test_rope_scaling_drift.py
 
-      - name: unsloth Bucket-A — CPU tests not in Repo tests (CPU)
+      - name: tunelabs Bucket-A — CPU tests not in Repo tests (CPU)
         # CPU tests across 6 files under tests/saving/, tests/utils/, tests/python/
         # that Repo tests (CPU) --ignores. AST/protobuf/regex plus tiny CPU model
         # loads; run cleanly here (transformers/torch installed).
@@ -362,41 +362,41 @@ jobs:
           # requires CUDA + dev toolchain, which the CPU-only ubuntu-latest
           # runner does not have. The other Bucket-A tests pass cleanly.
 
-      - name: unsloth_zoo @ ${{ env.UNSLOTH_ZOO_REF }} — full pytest (CPU)
-        # 106 of 111 test_* in unsloth_zoo are CPU-only. The two CUDA-skip
+      - name: tunelabs_zoo @ ${{ env.TUNELABS_ZOO_REF }} — full pytest (CPU)
+        # 106 of 111 test_* in tunelabs_zoo are CPU-only. The two CUDA-skip
         # cases below auto-skip on a GPU-less runner; deselect them
         # explicitly so the no-CUDA outcome is "deselected", not "skipped",
         # making intent visible in the report. Env inherited from job block.
         #
         # test_get_peft_model_passes_finetune_last_n_layers_through is
-        # deselected because unsloth_zoo/mlx/loader.py at line 2972 calls
+        # deselected because tunelabs_zoo/mlx/loader.py at line 2972 calls
         # model.trainable_parameters() on the fake-model fixture, which
         # the test never stubbed; this fails on every platform regardless
-        # of CUDA. Tracked upstream as an unsloth_zoo bug; deselecting
-        # here unblocks unsloth CI until the loader fixture is fixed.
-        working-directory: ${{ runner.temp }}/unsloth-zoo
+        # of CUDA. Tracked upstream as an tunelabs_zoo bug; deselecting
+        # here unblocks tunelabs CI until the loader fixture is fixed.
+        working-directory: ${{ runner.temp }}/tunelabs-zoo
         run: |
           python -m pytest -q --tb=short tests/ \
-            --deselect tests/test_unsloth_zoo_lora_merge.py::test_active_merge_device_returns_string_on_cuda_host \
-            --deselect tests/test_unsloth_zoo_lora_merge.py::test_merge_lora_moves_cpu_inputs_to_active_device \
+            --deselect tests/test_tunelabs_zoo_lora_merge.py::test_active_merge_device_returns_string_on_cuda_host \
+            --deselect tests/test_tunelabs_zoo_lora_merge.py::test_merge_lora_moves_cpu_inputs_to_active_device \
             --deselect tests/test_mlx_finetune_last_n_layers.py::test_get_peft_model_passes_finetune_last_n_layers_through
 
-      - name: unsloth_zoo — test_apply_fused_lm_head (lives in compiler.py)
-        # `test_apply_fused_lm_head` lives at unsloth_zoo/compiler.py:1983,
+      - name: tunelabs_zoo — test_apply_fused_lm_head (lives in compiler.py)
+        # `test_apply_fused_lm_head` lives at tunelabs_zoo/compiler.py:1983,
         # not under tests/, so pytest's default discovery does not pick it up.
         # We route it through pytest by writing a one-shot shim test file
-        # inside the unsloth checkout's tests/ — pytest then walks UP and
+        # inside the tunelabs checkout's tests/ — pytest then walks UP and
         # picks up tests/conftest.py, whose GPU-spoof harness (lines 84-141)
         # patches torch.cuda.is_available, torch.cuda.memory.mem_get_info,
         # torch.cuda.get_device_capability, and is_bf16_supported. That full
-        # spoof is required because unsloth_zoo/temporary_patches/gpt_oss.py
+        # spoof is required because tunelabs_zoo/temporary_patches/gpt_oss.py
         # at module load reads torch.cuda.memory.mem_get_info(0), which
         # bare `is_available = True` doesn't cover. Env inherited.
         run: |
           set -euxo pipefail
           cat > tests/_zoo_apply_fused_lm_head_shim.py <<'PY'
           # Auto-generated by .github/workflows/consolidated-tests-ci.yml.
-          # Wraps unsloth_zoo.compiler.test_apply_fused_lm_head so that
+          # Wraps tunelabs_zoo.compiler.test_apply_fused_lm_head so that
           # tests/conftest.py's GPU-spoof harness applies before the import.
           # _zoo_aggressive_cuda_spoof extends conftest's harness with deeper
           # patches (see tests/_zoo_aggressive_cuda_spoof.py).
@@ -404,14 +404,14 @@ jobs:
           sys.path.insert(0, str(pathlib.Path(__file__).parent))
           import _zoo_aggressive_cuda_spoof as _spoof
           _spoof.apply()
-          from unsloth_zoo.compiler import test_apply_fused_lm_head as _zoo_test
+          from tunelabs_zoo.compiler import test_apply_fused_lm_head as _zoo_test
           def test_zoo_apply_fused_lm_head_runs():
               _zoo_test()
           PY
           python -m pytest -q --tb=short tests/_zoo_apply_fused_lm_head_shim.py
           rm -f tests/_zoo_apply_fused_lm_head_shim.py
 
-      - name: Static checks — unsloth/trainer.py + unsloth/models/rl.py against latest pip TRL
+      - name: Static checks — tunelabs/trainer.py + tunelabs/models/rl.py against latest pip TRL
         # AST-only sanity: confirm both files parse and that every TRL symbol
         # they reference still exists in the installed `trl`. Catches API
         # drift (renamed / removed TRL classes) without running training.
@@ -424,8 +424,8 @@ jobs:
           # specific (transformers, trl) combination the cell selected).
           python <<'PY'
           import ast, importlib, pathlib, sys
-          paths = [pathlib.Path("unsloth/trainer.py"),
-                   pathlib.Path("unsloth/models/rl.py")]
+          paths = [pathlib.Path("tunelabs/trainer.py"),
+                   pathlib.Path("tunelabs/models/rl.py")]
           for p in paths:
               src = p.read_text()
               tree = ast.parse(src, filename=str(p))
@@ -444,17 +444,17 @@ jobs:
                   sys.exit(1)
           PY
 
-      - name: Static checks — unsloth_zoo/tiled_mlp.py against latest pip transformers
+      - name: Static checks — tunelabs_zoo/tiled_mlp.py against latest pip transformers
         # AST parse + transformers symbol-resolution. The user flagged tiled
         # MLP patching as the path that breaks first when transformers ships
         # an MLP class rename; this step is the canary against whatever
         # transformers version the matrix cell selected.
-        working-directory: ${{ runner.temp }}/unsloth-zoo
+        working-directory: ${{ runner.temp }}/tunelabs-zoo
         run: |
           set -euxo pipefail
           python <<'PY'
           import ast, importlib, pathlib, sys
-          p = pathlib.Path("unsloth_zoo/tiled_mlp.py")
+          p = pathlib.Path("tunelabs_zoo/tiled_mlp.py")
           src = p.read_text()
           tree = ast.parse(src, filename=str(p))
           missing = []
@@ -475,13 +475,13 @@ jobs:
               sys.exit(1)
           PY
 
-      - name: Static checks — unsloth_zoo/hf_utils.py syntax + import-graph
-        working-directory: ${{ runner.temp }}/unsloth-zoo
+      - name: Static checks — tunelabs_zoo/hf_utils.py syntax + import-graph
+        working-directory: ${{ runner.temp }}/tunelabs-zoo
         run: |
           set -euxo pipefail
           python <<'PY'
           import ast, pathlib
-          p = pathlib.Path("unsloth_zoo/hf_utils.py")
+          p = pathlib.Path("tunelabs_zoo/hf_utils.py")
           tree = ast.parse(p.read_text(), filename=str(p))
           # Surface every public function + class so the PR check log shows
           # what's covered, not just OK/FAIL.
@@ -494,9 +494,9 @@ jobs:
 
       - name: Runtime checks — invoke every zero-arg patch_* across both repos (via pytest shim)
         # Routed through pytest so tests/conftest.py's GPU-spoof harness
-        # applies before any unsloth_zoo.temporary_patches.* import.
+        # applies before any tunelabs_zoo.temporary_patches.* import.
         # Locally validated 50/51 zero-arg patches succeed; the lone failure
-        # surfaces a real bug (unsloth.models._utils.patch_fast_lora raises
+        # surfaces a real bug (tunelabs.models._utils.patch_fast_lora raises
         # NameError: name 'fast_lora_forward' is not defined). The shim
         # reports the full ledger but only fails when one of the two
         # `required` helpers is absent.
@@ -515,24 +515,24 @@ jobs:
           import importlib, inspect
 
           MODULES = [
-              "unsloth.models._utils", "unsloth.models.rl", "unsloth.import_fixes",
-              "unsloth.kernels.cross_entropy_loss", "unsloth.kernels.rms_layernorm",
-              "unsloth.tokenizer_utils", "unsloth.save",
-              "unsloth_zoo.patching_utils", "unsloth_zoo.gradient_checkpointing",
-              "unsloth_zoo.loss_utils", "unsloth_zoo.tokenizer_utils",
-              "unsloth_zoo.tiled_mlp", "unsloth_zoo.dataset_utils",
-              "unsloth_zoo.patch_torch_functions",
-              "unsloth_zoo.temporary_patches.gemma",
-              "unsloth_zoo.temporary_patches.ministral",
-              "unsloth_zoo.temporary_patches.pixtral",
-              "unsloth_zoo.temporary_patches.deepseek_v3_moe",
-              "unsloth_zoo.temporary_patches.qwen3_5_moe",
-              "unsloth_zoo.temporary_patches.mxfp4",
-              "unsloth_zoo.temporary_patches.bitsandbytes",
-              "unsloth_zoo.temporary_patches.flex_attention_bwd",
+              "tunelabs.models._utils", "tunelabs.models.rl", "tunelabs.import_fixes",
+              "tunelabs.kernels.cross_entropy_loss", "tunelabs.kernels.rms_layernorm",
+              "tunelabs.tokenizer_utils", "tunelabs.save",
+              "tunelabs_zoo.patching_utils", "tunelabs_zoo.gradient_checkpointing",
+              "tunelabs_zoo.loss_utils", "tunelabs_zoo.tokenizer_utils",
+              "tunelabs_zoo.tiled_mlp", "tunelabs_zoo.dataset_utils",
+              "tunelabs_zoo.patch_torch_functions",
+              "tunelabs_zoo.temporary_patches.gemma",
+              "tunelabs_zoo.temporary_patches.ministral",
+              "tunelabs_zoo.temporary_patches.pixtral",
+              "tunelabs_zoo.temporary_patches.deepseek_v3_moe",
+              "tunelabs_zoo.temporary_patches.qwen3_5_moe",
+              "tunelabs_zoo.temporary_patches.mxfp4",
+              "tunelabs_zoo.temporary_patches.bitsandbytes",
+              "tunelabs_zoo.temporary_patches.flex_attention_bwd",
           ]
           REQUIRED = {
-              "patch_unsloth_smart_gradient_checkpointing",
+              "patch_tunelabs_smart_gradient_checkpointing",
               "patch_gradient_accumulation_fix",
           }
           # Patches whose signature looks zero-arg (`()` or all-defaulted)
@@ -542,15 +542,15 @@ jobs:
           #   patch_linear_scaling / patch_llama_rope_scaling: defaults are
           #     None placeholders; the bodies start with
           #     `assert <param> is not None`.
-          #   patch_unsloth_smart_gradient_checkpointing: legitimately
+          #   patch_tunelabs_smart_gradient_checkpointing: legitimately
           #     allocates CUDA tensors via aten::empty.memory_format inside
-          #     initialize_unsloth_gradient_checkpointing(); the
+          #     initialize_tunelabs_gradient_checkpointing(); the
           #     torch.cuda.* spoof can't intercept that at the dispatcher
           #     level.
           NEEDS_PRECONDITION = {
               "patch_linear_scaling",
               "patch_llama_rope_scaling",
-              "patch_unsloth_smart_gradient_checkpointing",
+              "patch_tunelabs_smart_gradient_checkpointing",
           }
 
           def test_zero_arg_patch_invocations():
@@ -621,8 +621,8 @@ jobs:
 
       - name: Runtime checks — patch_tiled_mlp on a synthetic MLP module (via pytest shim)
         # Same shim pattern: pytest picks up tests/conftest.py before importing
-        # unsloth_zoo.tiled_mlp, so the GPU-spoof harness covers
-        # unsloth_zoo.temporary_patches.gpt_oss's mem_get_info call.
+        # tunelabs_zoo.tiled_mlp, so the GPU-spoof harness covers
+        # tunelabs_zoo.temporary_patches.gpt_oss's mem_get_info call.
         run: |
           set -euxo pipefail
           cat > tests/_tiled_mlp_check_shim.py <<'PY'
@@ -633,7 +633,7 @@ jobs:
           _spoof.apply()
           import torch
           import torch.nn as nn
-          from unsloth_zoo.tiled_mlp import patch_tiled_mlp, patch_mlp
+          from tunelabs_zoo.tiled_mlp import patch_tiled_mlp, patch_mlp
 
           class _MLP(nn.Module):
               def __init__(self, hidden=64, intermediate=128):
@@ -696,18 +696,18 @@ jobs:
           rm -f tests/_tiled_mlp_check_shim.py
 
       - name: Compiler cache hygiene + source-rewriter invariants (synthetic inputs)
-        # Lightweight pipeline coverage for unsloth_zoo.compiler. Pure regex
+        # Lightweight pipeline coverage for tunelabs_zoo.compiler. Pure regex
         # / tokenize / ast paths driven by tiny synthetic source strings:
         #   - higher_precision_softmax (basic + idempotent)
         #   - fix_rotary_embedding_dtype (no-op + active under
-        #     UNSLOTH_FORCE_CUSTOM_DTYPE)
+        #     TUNELABS_FORCE_CUSTOM_DTYPE)
         #   - fix_attention_dtype_consistency (insert + idempotent)
         #   - convert_attention_masks_to_bool (rewrite + no-op)
         #   - create_new_function happy-path (versioning block, license
         #     header, AST parse, importlib re-import)
         #   - create_new_function **kwargs collision (exercises
         #     _rewrite_kwargs_param + _insert_kwargs_alias)
-        #   - UNSLOTH_COMPILE_OVERWRITE=0 forced-recompile on transformers
+        #   - TUNELABS_COMPILE_OVERWRITE=0 forced-recompile on transformers
         #     version mismatch (compiler.py:947-963)
         #   - matching short-circuit when versions are equal
         # No real transformers modeling module is loaded; complements the
@@ -716,7 +716,7 @@ jobs:
           set -euxo pipefail
           cat > tests/_compiler_cache_invariants_shim.py <<'PY'
           # Auto-generated by .github/workflows/consolidated-tests-ci.yml.
-          # Cache-hygiene + source-rewriter invariants for unsloth_zoo.compiler.
+          # Cache-hygiene + source-rewriter invariants for tunelabs_zoo.compiler.
           import sys, pathlib, os, ast, importlib, importlib.util, time
           sys.path.insert(0, str(pathlib.Path(__file__).parent))
           import _zoo_aggressive_cuda_spoof as _spoof
@@ -726,15 +726,15 @@ jobs:
 
 
           def _isolate_cache(tmp_path, monkeypatch):
-              """Point UNSLOTH_COMPILE_LOCATION at tmp_path and reset module
+              """Point TUNELABS_COMPILE_LOCATION at tmp_path and reset module
               globals. The compiler.py global is captured at module load
               (line 75/179), so we delete + reimport per test."""
-              monkeypatch.setenv("UNSLOTH_COMPILE_LOCATION", str(tmp_path))
-              if "unsloth_zoo.compiler" in sys.modules:
-                  del sys.modules["unsloth_zoo.compiler"]
-              import unsloth_zoo.compiler as compiler
-              compiler.UNSLOTH_COMPILE_LOCATION = str(tmp_path)
-              compiler.UNSLOTH_COMPILE_USE_TEMP = False
+              monkeypatch.setenv("TUNELABS_COMPILE_LOCATION", str(tmp_path))
+              if "tunelabs_zoo.compiler" in sys.modules:
+                  del sys.modules["tunelabs_zoo.compiler"]
+              import tunelabs_zoo.compiler as compiler
+              compiler.TUNELABS_COMPILE_LOCATION = str(tmp_path)
+              compiler.TUNELABS_COMPILE_USE_TEMP = False
               return compiler
 
 
@@ -747,7 +747,7 @@ jobs:
               out = c.higher_precision_softmax(src)
               assert "dtype = torch.float32).to(x.dtype)" in out
               assert "dtype = torch.float32).to(a.dtype)" in out
-              # Idempotency landed in unslothai/unsloth-zoo#631
+              # Idempotency landed in tunelabsai/tunelabs-zoo#631
               # (negative-lookahead on `.to(<var>.dtype)` so a second
               # pass does not append another cast).
               assert c.higher_precision_softmax(out) == out
@@ -755,7 +755,7 @@ jobs:
 
           def test_fix_rotary_dtype_no_op_without_env(tmp_path, monkeypatch):
               c = _isolate_cache(tmp_path, monkeypatch)
-              monkeypatch.delenv("UNSLOTH_FORCE_CUSTOM_DTYPE", raising=False)
+              monkeypatch.delenv("TUNELABS_FORCE_CUSTOM_DTYPE", raising=False)
               src = "out = cos.to(dtype=x.dtype) + sin.to(dtype=x.dtype)\n"
               assert c.fix_rotary_embedding_dtype(src) == src
 
@@ -763,10 +763,10 @@ jobs:
           def test_fix_rotary_dtype_active(tmp_path, monkeypatch):
               c = _isolate_cache(tmp_path, monkeypatch)
               monkeypatch.setenv(
-                  "UNSLOTH_FORCE_CUSTOM_DTYPE",
+                  "TUNELABS_FORCE_CUSTOM_DTYPE",
                   "float16;torch.float32;torch.bfloat16;torch.float16;pass",
               )
-              monkeypatch.setenv("UNSLOTH_FORCE_FLOAT32", "1")
+              monkeypatch.setenv("TUNELABS_FORCE_FLOAT32", "1")
               src = "out = cos.to(dtype=x.dtype) + sin.to(dtype=x.dtype)\n"
               out = c.fix_rotary_embedding_dtype(src)
               # Active form rewrites cos.to / sin.to. Either the conditional
@@ -811,7 +811,7 @@ jobs:
           def _versioning_lines(file_text):
               """Extract the four version strings from the versioning block."""
               assert file_text.startswith('"""\n'), "missing opening triple-quote"
-              head = file_text.split("__UNSLOTH_VERSIONING__", 1)[0]
+              head = file_text.split("__TUNELABS_VERSIONING__", 1)[0]
               lines = [ln for ln in head.splitlines() if ln and ln != '"""']
               return lines
 
@@ -846,12 +846,12 @@ jobs:
               name = "vmismatch"
               cached = tmp_path / f"{name}.py"
               stub = (
-                  '"""\n0.0.0\n0.0.0\n0.0.0-stub\n0.0.0\n__UNSLOTH_VERSIONING__\n"""\n'
+                  '"""\n0.0.0\n0.0.0\n0.0.0-stub\n0.0.0\n__TUNELABS_VERSIONING__\n"""\n'
                   + c._full_license_header
                   + "def vmismatch(x):\n    return x\n"
               )
               cached.write_text(stub, encoding="utf-8")
-              monkeypatch.setenv("UNSLOTH_COMPILE_OVERWRITE", "0")
+              monkeypatch.setenv("TUNELABS_COMPILE_OVERWRITE", "0")
               src = "def vmismatch(x):\n    return x + 1\n"
               c.create_new_function(
                   name=name, new_source=src, model_location="builtins",
@@ -879,7 +879,7 @@ jobs:
               cached = tmp_path / f"{name}.py"
               mtime_before = cached.stat().st_mtime_ns
               time.sleep(0.05)
-              monkeypatch.setenv("UNSLOTH_COMPILE_OVERWRITE", "0")
+              monkeypatch.setenv("TUNELABS_COMPILE_OVERWRITE", "0")
               c.create_new_function(
                   name=name, new_source=src, model_location="builtins",
                   functions=[], overwrite=False,
@@ -892,24 +892,24 @@ jobs:
           rm -f tests/_compiler_cache_invariants_shim.py
 
       - name: Compiler full-model-sweep (every transformers.models.*) + SFT trainer round-trip
-        # Calls `unsloth_compile_transformers(model_type=...)` against EVERY
+        # Calls `tunelabs_compile_transformers(model_type=...)` against EVERY
         # `transformers.models.<x>` package the matrix's transformers ships
         # (pkgutil.iter_modules walk -- 383 packages on 4.57.6, similar on
         # latest), then ast.parse / importlib-load / introspect the
-        # generated unsloth_compiled_cache/*.py file per model. Catches
+        # generated tunelabs_compiled_cache/*.py file per model. Catches
         # regex / source-rewriter drift across the matrix's (transformers,
         # trl) combination -- the dominant failure mode of
-        # `unsloth_compile_transformers` after a transformers point release.
+        # `tunelabs_compile_transformers` after a transformers point release.
         #
         # 21 model_types currently break the compiler (verified locally on
         # transformers 4.57.6). They are listed in KNOWN_BROKEN below with
         # their failure mode so the sweep stays green and any NEW breakage
         # surfaces as red. Each entry is tracked for an individual fix
-        # PR on unsloth-zoo. The list is split by failure category so
+        # PR on tunelabs-zoo. The list is split by failure category so
         # follow-up PRs can target one bug at a time.
         #
         # Hermetic cache dir per pytest invocation; we override the
-        # job-level UNSLOTH_COMPILE_DISABLE=1 inside the shim so
+        # job-level TUNELABS_COMPILE_DISABLE=1 inside the shim so
         # compilation actually runs here. Wall-time estimate ~2-3 min
         # warm (mean ~0.3s/model, 383 models = ~110s on the runner).
         run: |
@@ -923,23 +923,23 @@ jobs:
           _spoof.apply()
 
           # Hermetic cache dir + force compile path. The compiler's
-          # globals (UNSLOTH_COMPILE_LOCATION, UNSLOTH_COMPILE_USE_TEMP)
+          # globals (TUNELABS_COMPILE_LOCATION, TUNELABS_COMPILE_USE_TEMP)
           # are captured at module load; an earlier conftest `import
-          # unsloth` may have already imported unsloth_zoo.compiler with
-          # the default "unsloth_compiled_cache" path. Mutate the live
+          # tunelabs` may have already imported tunelabs_zoo.compiler with
+          # the default "tunelabs_compiled_cache" path. Mutate the live
           # module globals after import so this shim is robust to that
           # ordering. Otherwise the compiler silently writes to the
           # default cache and the per-model file assertion fails.
-          _CACHE = pathlib.Path(tempfile.mkdtemp(prefix="unsloth_cache_"))
-          os.environ["UNSLOTH_COMPILE_LOCATION"] = str(_CACHE)
-          os.environ["UNSLOTH_COMPILE_OVERWRITE"] = "1"
-          os.environ.pop("UNSLOTH_COMPILE_DISABLE", None)
+          _CACHE = pathlib.Path(tempfile.mkdtemp(prefix="tunelabs_cache_"))
+          os.environ["TUNELABS_COMPILE_LOCATION"] = str(_CACHE)
+          os.environ["TUNELABS_COMPILE_OVERWRITE"] = "1"
+          os.environ.pop("TUNELABS_COMPILE_DISABLE", None)
 
           import pytest
-          import unsloth_zoo.compiler as _zoo_compiler
-          _zoo_compiler.UNSLOTH_COMPILE_LOCATION = str(_CACHE)
-          _zoo_compiler.UNSLOTH_COMPILE_USE_TEMP = False
-          from unsloth_zoo.compiler import unsloth_compile_transformers
+          import tunelabs_zoo.compiler as _zoo_compiler
+          _zoo_compiler.TUNELABS_COMPILE_LOCATION = str(_CACHE)
+          _zoo_compiler.TUNELABS_COMPILE_USE_TEMP = False
+          from tunelabs_zoo.compiler import tunelabs_compile_transformers
 
 
           def _verify_file(path: pathlib.Path, must_expose):
@@ -958,11 +958,11 @@ jobs:
 
           # ---------- Full transformers.models.* compile sweep ----------
           # Track the model_types that currently break the compiler on
-          # transformers >=5,<6. After unsloth-zoo#632 landed, transformers
+          # transformers >=5,<6. After tunelabs-zoo#632 landed, transformers
           # 4.57.6 has zero failures across all model_types; the 27 entries
           # below are the residual failures on the tf 5.x line. New breakage
           # on any OTHER model_type fails the cell. Each entry is a
-          # tracking item for a follow-up unsloth-zoo PR.
+          # tracking item for a follow-up tunelabs-zoo PR.
           KNOWN_BROKEN_COMPILE = {
               # Category A: `string index out of range` in source rewriter.
               "colpali":         "string index out of range",
@@ -1014,7 +1014,7 @@ jobs:
 
 
           def test_compile_every_transformers_model_type():
-              """Run unsloth_compile_transformers across every model_type
+              """Run tunelabs_compile_transformers across every model_type
               the matrix's transformers ships. Allowed outcomes:
                 ok      -> compile emitted a parseable, importable cache file
                 skipped -> no `modeling_<x>.py` file (expected for some
@@ -1048,7 +1048,7 @@ jobs:
                           continue
                       signal.alarm(60)
                       try:
-                          unsloth_compile_transformers(
+                          tunelabs_compile_transformers(
                               model_type=model_type, fast_lora_forwards=False,
                           )
                       except Exception as e:
@@ -1082,7 +1082,7 @@ jobs:
               if len(new_failures) > 30:
                   print(f"  ...and {len(new_failures)-30} more new failures")
               assert not new_failures, (
-                  f"unsloth_compile_transformers introduced new failures on "
+                  f"tunelabs_compile_transformers introduced new failures on "
                   f"{len(new_failures)} model_types not in the known-broken "
                   f"list: {[m for m, _ in new_failures]}"
               )
@@ -1105,7 +1105,7 @@ jobs:
               emitted cache file has the model-specific RMSNorm class
               attribute, not just that the file parses + imports.
 
-              ``unsloth_compile_transformers`` is not idempotent in-
+              ``tunelabs_compile_transformers`` is not idempotent in-
               process: calling it twice on the same modeling module
               after rewriting class attributes corrupts the inspect
               source/line cache and the second emitted file is malformed
@@ -1122,22 +1122,22 @@ jobs:
                   pytest.skip(
                       f"transformers build lacks model_type={model_type}"
                   )
-              combined = _CACHE / f"unsloth_compiled_module_{model_type}.py"
+              combined = _CACHE / f"tunelabs_compiled_module_{model_type}.py"
               if not combined.exists():
-                  unsloth_compile_transformers(
+                  tunelabs_compile_transformers(
                       model_type=model_type, fast_lora_forwards=False,
                   )
                   modeling = _il.import_module(
                       f"transformers.models.{model_type}.modeling_{model_type}"
                   )
-              assert getattr(modeling, "__UNSLOTH_PATCHED__", False) is True
+              assert getattr(modeling, "__TUNELABS_PATCHED__", False) is True
               _verify_file(combined, must_expose=[rms_class])
 
 
           def test_compile_disable_writes_nothing():
-              """Negative control: when UNSLOTH_COMPILE_DISABLE=1 the
+              """Negative control: when TUNELABS_COMPILE_DISABLE=1 the
               compile path must early-return without producing new files."""
-              os.environ["UNSLOTH_COMPILE_DISABLE"] = "1"
+              os.environ["TUNELABS_COMPILE_DISABLE"] = "1"
               try:
                   before = set(_CACHE.iterdir())
                   # Pick a model_type that still resolves on this transformers.
@@ -1152,7 +1152,7 @@ jobs:
                           continue
                   else:
                       pytest.skip("no probe model_type available")
-                  unsloth_compile_transformers(
+                  tunelabs_compile_transformers(
                       model_type=mt, fast_lora_forwards=False,
                   )
                   after = set(_CACHE.iterdir())
@@ -1160,36 +1160,36 @@ jobs:
                       f"DISABLE=1 still wrote: {[p.name for p in after - before]}"
                   )
               finally:
-                  os.environ.pop("UNSLOTH_COMPILE_DISABLE", None)
+                  os.environ.pop("TUNELABS_COMPILE_DISABLE", None)
 
 
           def test_compile_sft_trainer_patch():
               """Round-trip TRL's SFTTrainer through the rl.py patch path
-              and verify the generated UnslothSFTTrainer.py."""
+              and verify the generated TuneLabsSFTTrainer.py."""
               pytest.importorskip("trl")
               try:
-                  from unsloth.models.rl import _patch_trl_rl_trainers
+                  from tunelabs.models.rl import _patch_trl_rl_trainers
               except ImportError:
-                  pytest.skip("unsloth.models.rl._patch_trl_rl_trainers absent")
+                  pytest.skip("tunelabs.models.rl._patch_trl_rl_trainers absent")
               try:
                   _patch_trl_rl_trainers("sft_trainer")
               except Exception as e:
                   # TRL 1.x renames break the patch helper internally; we
                   # accept that here and skip rather than fail the cell.
                   pytest.skip(f"_patch_trl_rl_trainers raised: {type(e).__name__}: {e}")
-              sft = _CACHE / "UnslothSFTTrainer.py"
+              sft = _CACHE / "TuneLabsSFTTrainer.py"
               if not sft.exists():
                   pytest.skip(
                       "_patch_trl_rl_trainers ran but did not emit "
-                      "UnslothSFTTrainer.py on this TRL version."
+                      "TuneLabsSFTTrainer.py on this TRL version."
                   )
-              _verify_file(sft, must_expose=["UnslothSFTTrainer"])
+              _verify_file(sft, must_expose=["TuneLabsSFTTrainer"])
           PY
           python -m pytest -q --tb=short tests/_zoo_compiler_cache_shim.py
           rm -f tests/_zoo_compiler_cache_shim.py
 
       - name: TRL trainer + Config auto-discovery + dynamic patch coverage
-        # Mirror unsloth/models/rl.py:patch_trl_rl_trainers AND verify the
+        # Mirror tunelabs/models/rl.py:patch_trl_rl_trainers AND verify the
         # dynamic per-version patch surface:
         #   1. AST-parse every *_trainer / *_config submodule.
         #   2. Apply the same *Trainer / *Config discovery rules
@@ -1198,7 +1198,7 @@ jobs:
         #      <x>_config OR an inline *Config.
         #   4. Dynamic count: enumerate every canonical trainer that
         #      imports cleanly, run patch_trl_rl_trainers(), assert
-        #      every one ends up Unsloth-prefixed in-place. Floor matches
+        #      every one ends up TuneLabs-prefixed in-place. Floor matches
         #      the cohort sizes from the version sweep:
         #        TRL 0.22-0.23 -> 18 canonical trainers
         #        TRL 0.24-0.28 -> 15 canonical trainers
@@ -1214,8 +1214,8 @@ jobs:
           cat > tests/_trl_trainer_discovery_shim.py <<'PY'
           # Auto-generated by .github/workflows/consolidated-tests-ci.yml.
           # Walks every *_trainer / *_config module in trl.trainer and
-          # validates that unsloth's auto-discovery rules in
-          # unsloth/models/rl.py:_patch_trl_rl_trainers (lines 542-620,
+          # validates that tunelabs's auto-discovery rules in
+          # tunelabs/models/rl.py:_patch_trl_rl_trainers (lines 542-620,
           # 1934-1949) still pick out exactly one *Trainer and one
           # *Config per module on the matrix's TRL version.
           import sys, pathlib, importlib, importlib.util, ast, inspect
@@ -1311,7 +1311,7 @@ jobs:
               assert not fail, f"AST parse failed for {len(fail)} TRL modules"
 
 
-          def _apply_unsloth_discovery_rules(mod, trainer_file):
+          def _apply_tunelabs_discovery_rules(mod, trainer_file):
               """Replicate the four endswith filters in
               rl.py:553-569 verbatim."""
               prefix = trainer_file.split("_")[0]
@@ -1373,8 +1373,8 @@ jobs:
               return []
 
 
-          def test_unsloth_auto_discovery_finds_trainer_and_config_per_module():
-              """Stage 2: drive the same unsloth rules over every trainer
+          def test_tunelabs_auto_discovery_finds_trainer_and_config_per_module():
+              """Stage 2: drive the same tunelabs rules over every trainer
               file. import-failures (optional deps) are recorded as
               `import-skipped`, mirroring rl.py:1944-1948 try/except."""
               ok = 0
@@ -1388,7 +1388,7 @@ jobs:
                   except Exception as e:
                       import_skipped.append((qual, f"{type(e).__name__}: {e}"))
                       continue
-                  trainers, configs = _apply_unsloth_discovery_rules(
+                  trainers, configs = _apply_tunelabs_discovery_rules(
                       mod, trainer_file,
                   )
                   if len(trainers) != 1:
@@ -1424,7 +1424,7 @@ jobs:
               # via one of the three rules. import-skipped + discovery-
               # skipped (no/multiple *Trainer) are tolerated.
               assert not fail, (
-                  f"unsloth discovery rules failed for {len(fail)} trainers"
+                  f"tunelabs discovery rules failed for {len(fail)} trainers"
               )
               # Sanity: at least 3 trainers should fully discover on any
               # matrix cell (sft + reward + dpo are the historical core).
@@ -1438,7 +1438,7 @@ jobs:
               """Stage 3: every <x>_trainer module should have a sibling
               <x>_config (TRL 0.26+ convention) OR an inline *Config. An
               ORPHAN <x>_trainer with neither is a TRL refactor we want
-              to know about: it would silently break unsloth's
+              to know about: it would silently break tunelabs's
               auto-discovery without raising."""
               orphans = []
               for trainer_file in _trainer_files():
@@ -1458,7 +1458,7 @@ jobs:
                       # Optional-dep failure -> skip; the AST-parse stage
                       # already covered the file.
                       continue
-                  _, configs = _apply_unsloth_discovery_rules(
+                  _, configs = _apply_tunelabs_discovery_rules(
                       mod, trainer_file,
                   )
                   if not configs:
@@ -1466,25 +1466,25 @@ jobs:
               assert not orphans, (
                   "Orphan TRL trainer modules with neither sibling "
                   f"<x>_config.py nor an inline *Config: {orphans}. "
-                  "unsloth auto-discovery would silently skip these."
+                  "tunelabs auto-discovery would silently skip these."
               )
 
 
-          # ---- Dynamic patch coverage: count + verify Unsloth-prefixed ----
+          # ---- Dynamic patch coverage: count + verify TuneLabs-prefixed ----
 
           def _enumerate_canonical_trainer_classes():
               """Walk trl.trainer/*_trainer.py on disk (the source of
               truth for what `dir(trl.trainer)` should expose) and return
               [(trainer_file, TrainerClass), ...] for every entry that
               imports + has exactly-one resolvable *Trainer per the
-              unsloth rules. Skips optional-dep ImportErrors."""
+              tunelabs rules. Skips optional-dep ImportErrors."""
               out = []
               for trainer_file in _trainer_files():
                   try:
                       mod = getattr(trl.trainer, trainer_file)
                   except Exception:
                       continue
-                  trainers, _ = _apply_unsloth_discovery_rules(mod, trainer_file)
+                  trainers, _ = _apply_tunelabs_discovery_rules(mod, trainer_file)
                   if len(trainers) != 1:
                       continue
                   try:
@@ -1527,11 +1527,11 @@ jobs:
               return hits
 
 
-          def _is_unsloth_patched(cls) -> bool:
-              return getattr(cls, "__name__", "").startswith("Unsloth")
+          def _is_tunelabs_patched(cls) -> bool:
+              return getattr(cls, "__name__", "").startswith("TuneLabs")
 
 
-          def test_unsloth_patches_every_canonical_trainer_in_this_trl_version():
+          def test_tunelabs_patches_every_canonical_trainer_in_this_trl_version():
               """Verify the count + identity of canonically-patched trainers
               matches the trainer surface this TRL version actually ships.
 
@@ -1539,22 +1539,22 @@ jobs:
               For TRL 0.24.x-0.28.x: ~15 canonical trainers expected.
               For TRL 0.29.x-1.x:    6 canonical (rest are experimental
               thin-wrappers; covered by the next test)."""
-              from unsloth.models.rl import patch_trl_rl_trainers
+              from tunelabs.models.rl import patch_trl_rl_trainers
               before = _enumerate_canonical_trainer_classes()
               before_count = len(before)
               before_unpatched = [
                   (tf, cls.__name__) for tf, cls in before
-                  if not _is_unsloth_patched(cls)
+                  if not _is_tunelabs_patched(cls)
               ]
-              # Apply unsloth's umbrella patch.
+              # Apply tunelabs's umbrella patch.
               patch_trl_rl_trainers()
               # Re-enumerate (some classes may have been replaced in-module).
               after = _enumerate_canonical_trainer_classes()
               after_count = len(after)
               patched = [(tf, cls.__name__) for tf, cls in after
-                         if _is_unsloth_patched(cls)]
+                         if _is_tunelabs_patched(cls)]
               unpatched = [(tf, cls.__name__) for tf, cls in after
-                           if not _is_unsloth_patched(cls)]
+                           if not _is_tunelabs_patched(cls)]
               print(
                   f"\nCanonical trainer surface for TRL {trl.__version__}: "
                   f"discoverable_before={before_count} "
@@ -1566,7 +1566,7 @@ jobs:
               for tf, n in unpatched:
                   print(f"  UNPATCHED {tf}: {n}")
               # Hard contract: every canonical trainer that imports
-              # cleanly must end up Unsloth-prefixed after the umbrella
+              # cleanly must end up TuneLabs-prefixed after the umbrella
               # patch. If a trainer was discoverable BEFORE the patch but
               # is missing from `after`, that is a separate (rare) issue
               # we surface as failure.
@@ -1576,7 +1576,7 @@ jobs:
                   f"after={[n for _, n in unpatched]}"
               )
               assert not unpatched, (
-                  "unsloth.models.rl.patch_trl_rl_trainers did NOT patch: "
+                  "tunelabs.models.rl.patch_trl_rl_trainers did NOT patch: "
                   + ", ".join(f"{tf}:{n}" for tf, n in unpatched)
               )
               # Floor matches the cohort sizes from the TRL version sweep:
@@ -1587,21 +1587,21 @@ jobs:
               )
 
 
-          def test_unsloth_patches_experimental_trainers_via_thin_wrappers():
+          def test_tunelabs_patches_experimental_trainers_via_thin_wrappers():
               """TRL 0.29+ ships canonical-`trl.trainer.<x>_trainer` modules
               for many trainers as deprecation thin-wrappers that forward
-              to `trl.experimental.<x>`. unsloth's
+              to `trl.experimental.<x>`. tunelabs's
               `_patch_trl_rl_trainers` (rl.py:677-702) detects
               `trl.experimental` in the trainer source and resolves to
               the parent class -- so patching the canonical entry should
-              also Unsloth-prefix the experimental class via in-module
+              also TuneLabs-prefix the experimental class via in-module
               setattr.
 
               Verify by walking trl.experimental.* AST for every *Trainer
               class, then checking whether it (or any class with the same
-              name in the experimental package) carries the Unsloth
+              name in the experimental package) carries the TuneLabs
               prefix after the umbrella patch."""
-              from unsloth.models.rl import patch_trl_rl_trainers
+              from tunelabs.models.rl import patch_trl_rl_trainers
               patch_trl_rl_trainers()
               experimental_pkgs = _enumerate_experimental_trainer_packages()
               if not experimental_pkgs:
@@ -1618,7 +1618,7 @@ jobs:
                       pkg_mod = importlib.import_module(qual)
                   except Exception as e:
                       # Optional-dep ImportError: experimental package
-                      # could not be loaded. Match unsloth's runtime
+                      # could not be loaded. Match tunelabs's runtime
                       # tolerance: this would also be silently skipped
                       # by `_patch_trl_rl_trainers`. Record but do not
                       # fail.
@@ -1647,11 +1647,11 @@ jobs:
                       if cls is None:
                           missing.append((pkg_name, cls_name))
                           continue
-                      if _is_unsloth_patched(cls):
+                      if _is_tunelabs_patched(cls):
                           found.append((pkg_name, cls_name))
                           print(f"  PATCHED   trl.experimental.{pkg_name}.{cls_name}")
                       else:
-                          # Not Unsloth-prefixed: either unsloth chose
+                          # Not TuneLabs-prefixed: either tunelabs chose
                           # not to patch this surface (e.g. the canonical
                           # thin-wrapper module did not exist) or the
                           # patch silently failed. Record both
@@ -1660,7 +1660,7 @@ jobs:
                           # canonical test enforces the hard contract.
                           print(
                               f"  NOT-PATCHED trl.experimental.{pkg_name}."
-                              f"{cls_name} (no Unsloth-prefix on the "
+                              f"{cls_name} (no TuneLabs-prefix on the "
                               "experimental surface)"
                           )
               total_experimental = sum(len(cs) for _, cs in experimental_pkgs)
@@ -1668,7 +1668,7 @@ jobs:
                   f"\nExperimental trainer surface (TRL {trl.__version__}): "
                   f"{len(experimental_pkgs)} packages, "
                   f"{total_experimental} *Trainer classes; "
-                  f"unsloth-patched={len(found)} class-missing={len(missing)}"
+                  f"tunelabs-patched={len(found)} class-missing={len(missing)}"
               )
               # Hard contract: a *Trainer class declared in a python
               # source file must be locatable in its package after import.
@@ -1686,15 +1686,15 @@ jobs:
         # Catches the recurring class of bugs that PR #624 (gemma4 missing
         # extractor), PR #612 (gemma4 GRPO patch silently dropped), PR #607
         # (gate_up LoRA dropped from grad graph), PR #601 (qwen MoE shape
-        # mismatch), unsloth#4934 (TRL disable_gradient_checkpointing
-        # corrupts unsloth GC), and unsloth#3598 (gradient_accumulation
+        # mismatch), tunelabs#4934 (TRL disable_gradient_checkpointing
+        # corrupts tunelabs GC), and tunelabs#3598 (gradient_accumulation
         # double-scale on accepts_loss_kwargs=False) targeted. Coverage:
         #
         #   1. Per-MoE-family side-effect contract: for every patch_*_moe
-        #      function in unsloth_zoo.temporary_patches, if its target
+        #      function in tunelabs_zoo.temporary_patches, if its target
         #      transformers class is importable on this matrix cell, the
-        #      patch must mark the class with `_unsloth_already_patched=True`
-        #      after running. This is exactly what unsloth_zoo's existing
+        #      patch must mark the class with `_tunelabs_already_patched=True`
+        #      after running. This is exactly what tunelabs_zoo's existing
         #      test_moe_lora_extractor_coverage walks at the registration
         #      level; here we tie each patch fn to its declared target so a
         #      silent early-return (PR #612 style) surfaces as red rather
@@ -1702,7 +1702,7 @@ jobs:
         #
         #   2. PR #4934 (GRPO + TRL 1.0): patch_trl_disable_gradient_checkpointing
         #      must rebind trl.models.utils.disable_gradient_checkpointing to
-        #      the unsloth no-op AND propagate the rebinding to every trl.*
+        #      the tunelabs no-op AND propagate the rebinding to every trl.*
         #      module that imported the symbol by reference.
         #
         #   3. PR #3598 (gradient_accumulation): patch_gradient_accumulation_fix
@@ -1712,14 +1712,14 @@ jobs:
         #      caused double loss-scaling; here we verify the rewrite path
         #      itself does not raise on a CPU-resolvable shape.
         #
-        #   4. unsloth/kernels/moe/grouped_gemm AST smoke: the Triton kernels
+        #   4. tunelabs/kernels/moe/grouped_gemm AST smoke: the Triton kernels
         #      are GPU-only at runtime, but a SyntaxError or stray
         #      string-literal in the source still surfaces as a test-time
         #      ImportError on every install. ast.parse the .py files without
         #      executing.
         #
         # Wall-time per cell ~30-60s. Routed through pytest for the spoof
-        # harness so unsloth_zoo.temporary_patches imports are clean.
+        # harness so tunelabs_zoo.temporary_patches imports are clean.
         run: |
           set -euxo pipefail
           cat > tests/_moe_coverage_shim.py <<'PY'
@@ -1732,9 +1732,9 @@ jobs:
           import pytest
 
           # Map each MoE patch function to the transformers classes it is
-          # contractually responsible for marking with _unsloth_already_patched
+          # contractually responsible for marking with _tunelabs_already_patched
           # after a successful run. Sourced from
-          # unsloth_zoo/temporary_patches/<family>_moe.py:
+          # tunelabs_zoo/temporary_patches/<family>_moe.py:
           #   - qwen3_moe.py:382-398 patches Qwen3MoeExperts (new path) or
           #     Qwen3MoeSparseMoeBlock (old path).
           #   - qwen3_5_moe.py + qwen3_next_moe.py + qwen3_vl_moe.py register
@@ -1750,7 +1750,7 @@ jobs:
           # importable target are exercised.
           # Each entry = ((patch_module, patch_fn), targets, env_setup,
           # version_gate). env_setup runs before the patch fn (e.g. set
-          # UNSLOTH_MODEL_NAME for gpt_oss). version_gate is a callable
+          # TUNELABS_MODEL_NAME for gpt_oss). version_gate is a callable
           # returning True when the patch SHOULD run on this transformers;
           # if False, the test skips with a documented reason.
           def _v5_or_later():
@@ -1763,7 +1763,7 @@ jobs:
 
           MOE_PATCHES = [
               {
-                  "module": "unsloth_zoo.temporary_patches.qwen3_moe",
+                  "module": "tunelabs_zoo.temporary_patches.qwen3_moe",
                   "fn": "patch_qwen3_moe",
                   "targets": [
                       ("transformers.models.qwen3_moe.modeling_qwen3_moe", "Qwen3MoeExperts"),
@@ -1774,7 +1774,7 @@ jobs:
                   "gate_reason": "",
               },
               {
-                  "module": "unsloth_zoo.temporary_patches.qwen3_5_moe",
+                  "module": "tunelabs_zoo.temporary_patches.qwen3_5_moe",
                   "fn": "patch_qwen3_5_moe",
                   "targets": [
                       ("transformers.models.qwen3_5_moe.modeling_qwen3_5_moe", "Qwen3_5MoeExperts"),
@@ -1782,7 +1782,7 @@ jobs:
                   "env": {}, "gate": lambda: True, "gate_reason": "",
               },
               {
-                  "module": "unsloth_zoo.temporary_patches.qwen3_next_moe",
+                  "module": "tunelabs_zoo.temporary_patches.qwen3_next_moe",
                   "fn": "patch_qwen3_next_moe",
                   "targets": [
                       ("transformers.models.qwen3_next.modeling_qwen3_next", "Qwen3NextExperts"),
@@ -1790,7 +1790,7 @@ jobs:
                   "env": {}, "gate": lambda: True, "gate_reason": "",
               },
               {
-                  "module": "unsloth_zoo.temporary_patches.qwen3_vl_moe",
+                  "module": "tunelabs_zoo.temporary_patches.qwen3_vl_moe",
                   "fn": "patch_qwen3_vl_moe",
                   "targets": [
                       ("transformers.models.qwen3_vl_moe.modeling_qwen3_vl_moe", "Qwen3VLMoeTextExperts"),
@@ -1798,7 +1798,7 @@ jobs:
                   "env": {}, "gate": lambda: True, "gate_reason": "",
               },
               {
-                  "module": "unsloth_zoo.temporary_patches.gemma4_moe",
+                  "module": "tunelabs_zoo.temporary_patches.gemma4_moe",
                   "fn": "patch_gemma4_moe",
                   "targets": [
                       ("transformers.models.gemma4.modeling_gemma4", "Gemma4TextExperts"),
@@ -1806,7 +1806,7 @@ jobs:
                   "env": {}, "gate": lambda: True, "gate_reason": "",
               },
               {
-                  "module": "unsloth_zoo.temporary_patches.glm4_moe",
+                  "module": "tunelabs_zoo.temporary_patches.glm4_moe",
                   "fn": "patch_glm4_moe",
                   "targets": [
                       ("transformers.models.glm4_moe.modeling_glm4_moe", "Glm4MoeLiteNaiveMoe"),
@@ -1814,7 +1814,7 @@ jobs:
                   "env": {}, "gate": lambda: True, "gate_reason": "",
               },
               {
-                  "module": "unsloth_zoo.temporary_patches.deepseek_v3_moe",
+                  "module": "tunelabs_zoo.temporary_patches.deepseek_v3_moe",
                   "fn": "patch_deepseek_v3_moe",
                   "targets": [
                       ("transformers.models.deepseek_v3.modeling_deepseek_v3", "DeepseekV3NaiveMoe"),
@@ -1822,17 +1822,17 @@ jobs:
                   "env": {}, "gate": lambda: True, "gate_reason": "",
               },
               {
-                  "module": "unsloth_zoo.temporary_patches.gpt_oss",
+                  "module": "tunelabs_zoo.temporary_patches.gpt_oss",
                   "fn": "patch_gpt_oss_moe_for_lora",
                   "targets": [
                       ("transformers.models.gpt_oss.modeling_gpt_oss", "GptOssExperts"),
                   ],
-                  # The patch reads UNSLOTH_MODEL_NAME and only runs when
+                  # The patch reads TUNELABS_MODEL_NAME and only runs when
                   # "gpt_oss" is in the normalized form. Set it explicitly
                   # so the gate at gpt_oss.py:1387 passes; otherwise the
                   # patch silently early-returns and the test would
                   # spuriously fail.
-                  "env": {"UNSLOTH_MODEL_NAME": "gpt_oss"},
+                  "env": {"TUNELABS_MODEL_NAME": "gpt_oss"},
                   # Additionally only runs on transformers >= 5
                   # (gpt_oss.py:1392 `_is_transformers_v5()` gate).
                   "gate": _v5_or_later,
@@ -1907,21 +1907,21 @@ jobs:
                       f"{type(e).__name__}: {e}"
                   )
               # At least one importable target must now carry SOME marker
-              # showing unsloth touched it. Accepted signals (each is set
-              # by a different patch flow in unsloth_zoo):
-              #   - `_unsloth_already_patched=True`            (gemma4, deepseek_v3, glm4)
-              #   - `_unsloth_lora_patched=True`               (gpt_oss_moe_for_lora)
-              #   - `_unsloth_lora_extractor_fn` is callable   (qwen3_*, glm4_moe)
+              # showing tunelabs touched it. Accepted signals (each is set
+              # by a different patch flow in tunelabs_zoo):
+              #   - `_tunelabs_already_patched=True`            (gemma4, deepseek_v3, glm4)
+              #   - `_tunelabs_lora_patched=True`               (gpt_oss_moe_for_lora)
+              #   - `_tunelabs_lora_extractor_fn` is callable   (qwen3_*, glm4_moe)
               #   - `_original_<modeling_tail>_<ClassName>_forward` attr
               #     (set by patch_function: qwen3_moe SparseMoeBlock, etc.)
               #   - `_original_forward` attribute              (gpt_oss in-place patch)
               # Accept any one as "patched".
               def _is_patched(cls) -> bool:
-                  if getattr(cls, "_unsloth_already_patched", False) is True:
+                  if getattr(cls, "_tunelabs_already_patched", False) is True:
                       return True
-                  if getattr(cls, "_unsloth_lora_patched", False) is True:
+                  if getattr(cls, "_tunelabs_lora_patched", False) is True:
                       return True
-                  if callable(getattr(cls, "_unsloth_lora_extractor_fn", None)):
+                  if callable(getattr(cls, "_tunelabs_lora_extractor_fn", None)):
                       return True
                   if "_original_forward" in dir(cls):
                       return True
@@ -1938,9 +1938,9 @@ jobs:
               if not marked:
                   raise AssertionError(
                       f"{patch_name}() ran without exception but no target "
-                      f"in {importable} carries any of the unsloth markers "
-                      "(_unsloth_already_patched / _unsloth_lora_patched / "
-                      "_unsloth_lora_extractor_fn / _original_*_forward). "
+                      f"in {importable} carries any of the tunelabs markers "
+                      "(_tunelabs_already_patched / _tunelabs_lora_patched / "
+                      "_tunelabs_lora_extractor_fn / _original_*_forward). "
                       "Patch silently no-op'd (PR #612 class of bug)."
                   )
               print(f"  {patch_name}: marked {marked}")
@@ -1949,9 +1949,9 @@ jobs:
           # ---- PR #4934 (TRL 1.0+ GRPO disable_gradient_checkpointing) ----
 
           def test_patch_trl_disable_gradient_checkpointing():
-              """unsloth/models/rl.py:patch_trl_disable_gradient_checkpointing
+              """tunelabs/models/rl.py:patch_trl_disable_gradient_checkpointing
               must rebind trl.models.utils.disable_gradient_checkpointing to
-              the unsloth no-op when TRL >= 1.0. Pre-1.0 TRL has no such
+              the tunelabs no-op when TRL >= 1.0. Pre-1.0 TRL has no such
               symbol -> the patch returns early."""
               try:
                   import trl.models.utils as _tmu
@@ -1959,11 +1959,11 @@ jobs:
                   pytest.skip("trl not installed")
               had_symbol = hasattr(_tmu, "disable_gradient_checkpointing")
               try:
-                  from unsloth.models.rl import patch_trl_disable_gradient_checkpointing
+                  from tunelabs.models.rl import patch_trl_disable_gradient_checkpointing
               except ImportError:
                   pytest.skip(
-                      "unsloth.models.rl.patch_trl_disable_gradient_checkpointing "
-                      "absent (older unsloth than #4934)"
+                      "tunelabs.models.rl.patch_trl_disable_gradient_checkpointing "
+                      "absent (older tunelabs than #4934)"
                   )
               patch_trl_disable_gradient_checkpointing()
               if not had_symbol:
@@ -1978,9 +1978,9 @@ jobs:
                   "trl.models.utils.disable_gradient_checkpointing missing "
                   "after patch -- patch removed the symbol entirely?"
               )
-              assert getattr(fn, "_unsloth_noop_patched", False) is True, (
+              assert getattr(fn, "_tunelabs_noop_patched", False) is True, (
                   "trl.models.utils.disable_gradient_checkpointing was NOT "
-                  "rebound to the unsloth no-op. PR #4934 regression."
+                  "rebound to the tunelabs no-op. PR #4934 regression."
               )
               # PR #4934 also walks sys.modules to rebind trl.* modules
               # that imported the symbol by reference. Verify at least the
@@ -1996,7 +1996,7 @@ jobs:
                   if bound is None:
                       continue
                   checked += 1
-                  if not getattr(bound, "_unsloth_noop_patched", False):
+                  if not getattr(bound, "_tunelabs_noop_patched", False):
                       missed.append(mod_name)
               print(f"  rebound disable_gradient_checkpointing in {checked} trl.* modules")
               assert not missed, (
@@ -2016,10 +2016,10 @@ jobs:
               without raising on a synthetic Trainer carrying that
               signature."""
               try:
-                  from unsloth.models._utils import patch_gradient_accumulation_fix
+                  from tunelabs.models._utils import patch_gradient_accumulation_fix
               except ImportError:
                   pytest.skip(
-                      "unsloth.models._utils.patch_gradient_accumulation_fix absent"
+                      "tunelabs.models._utils.patch_gradient_accumulation_fix absent"
                   )
               try:
                   from transformers import Trainer
@@ -2037,12 +2037,12 @@ jobs:
                       f"transformers.Trainer: {type(e).__name__}: {e}"
                   )
               # Idempotency: second call must not raise either (the rewrite
-              # adds `_unsloth_training_step` marker so the second call
+              # adds `_tunelabs_training_step` marker so the second call
               # short-circuits per _utils.py:1692-1693).
               patch_gradient_accumulation_fix(Trainer)
 
 
-          # ---- unsloth/kernels/moe/grouped_gemm AST smoke ----
+          # ---- tunelabs/kernels/moe/grouped_gemm AST smoke ----
 
           def _walk_py_files(root: pathlib.Path):
               for p in root.rglob("*.py"):
@@ -2051,21 +2051,21 @@ jobs:
                   yield p
 
 
-          def test_unsloth_kernels_moe_grouped_gemm_ast_parses():
-              """unsloth/kernels/moe/grouped_gemm hosts the Triton MoE
+          def test_tunelabs_kernels_moe_grouped_gemm_ast_parses():
+              """tunelabs/kernels/moe/grouped_gemm hosts the Triton MoE
               kernels (GPU-only at runtime). A SyntaxError or stray token
               at the SOURCE level still surfaces as ImportError on every
               install, so AST-parse the .py files without executing."""
-              # Locate `unsloth/kernels/moe/grouped_gemm` via the installed
-              # `unsloth` package.
-              import unsloth as _unsloth
+              # Locate `tunelabs/kernels/moe/grouped_gemm` via the installed
+              # `tunelabs` package.
+              import tunelabs as _tunelabs
               kernel_root = (
-                  pathlib.Path(_unsloth.__file__).parent
+                  pathlib.Path(_tunelabs.__file__).parent
                   / "kernels" / "moe" / "grouped_gemm"
               )
               if not kernel_root.exists():
                   pytest.skip(
-                      f"{kernel_root} not present in this unsloth checkout."
+                      f"{kernel_root} not present in this tunelabs checkout."
                   )
               fail = []
               ok = 0
@@ -2108,15 +2108,15 @@ jobs:
           python -c "import sys, platform; print(sys.version); print(platform.platform())"
           python -c "import torch; print('torch', torch.__version__, 'cuda?', torch.cuda.is_available())"
           python -c "import transformers; print('transformers', transformers.__version__)"
-          # `pip show` instead of `import unsloth_zoo` — its __init__ raises
+          # `pip show` instead of `import tunelabs_zoo` — its __init__ raises
           # without an accelerator and the spoof harness only kicks in under
           # pytest. Cheap and accurate.
-          pip show unsloth_zoo
+          pip show tunelabs_zoo
           echo "::endgroup::"
           echo "Consolidated job done. Coverage:"
-          echo "  - 16 unsloth Bucket-A tests under tests/saving/ + tests/utils/"
-          echo "  - unsloth_zoo @ ${UNSLOTH_ZOO_REF} pytest tests/ (5 GPU cases deselected)"
-          echo "  - unsloth_zoo.compiler.test_apply_fused_lm_head"
+          echo "  - 16 tunelabs Bucket-A tests under tests/saving/ + tests/utils/"
+          echo "  - tunelabs_zoo @ ${TUNELABS_ZOO_REF} pytest tests/ (5 GPU cases deselected)"
+          echo "  - tunelabs_zoo.compiler.test_apply_fused_lm_head"
 
   llama-cpp-smoke:
     # Standalone llama.cpp build + smoke. Earlier this lived inside every
@@ -2130,15 +2130,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      UNSLOTH_ZOO_REF: ${{ inputs.unsloth_zoo_ref || 'main' }}
+      TUNELABS_ZOO_REF: ${{ inputs.tunelabs_zoo_ref || 'main' }}
       # Same env contract the matrix cells use: protobuf python parser
       # (transformers' bundled *_pb2.py needs it), studio on PYTHONPATH,
-      # compile-disable + UNSLOTH_IS_PRESENT so unsloth_zoo's __init__
+      # compile-disable + TUNELABS_IS_PRESENT so tunelabs_zoo's __init__
       # bootstrap accepts a pure-import.
       PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
       PYTHONPATH: ${{ github.workspace }}/studio
-      UNSLOTH_COMPILE_DISABLE: '1'
-      UNSLOTH_IS_PRESENT: '1'
+      TUNELABS_COMPILE_DISABLE: '1'
+      TUNELABS_IS_PRESENT: '1'
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
@@ -2149,8 +2149,8 @@ jobs:
           python-version: '3.12'
           cache: 'pip'
 
-      - name: Install runtime deps for unsloth_zoo.llama_cpp
-        # unsloth_zoo's `__init__` imports `temporary_patches`, which
+      - name: Install runtime deps for tunelabs_zoo.llama_cpp
+        # tunelabs_zoo's `__init__` imports `temporary_patches`, which
         # in turn pulls per-architecture submodules (gemma3n, gemma4,
         # qwen3_*_moe, glm4_moe, deepseek_v3_moe, pixtral, ministral,
         # mxfp4, bitsandbytes, flex_attention_bwd) -- many of those
@@ -2164,7 +2164,7 @@ jobs:
         run: |
           set -euxo pipefail
           python -m pip install --upgrade pip
-          # Match the matrix job's torch path so unsloth_zoo's
+          # Match the matrix job's torch path so tunelabs_zoo's
           # `import torch` resolves to the same CPU build.
           pip install --index-url https://download.pytorch.org/whl/cpu \
             'torch>=2.4,<2.11' 'torchvision<0.26'
@@ -2178,36 +2178,36 @@ jobs:
           pip install transformers trl
           pip install -e . --no-deps
 
-      - name: Clone unsloth_zoo @ ${{ env.UNSLOTH_ZOO_REF }}
+      - name: Clone tunelabs_zoo @ ${{ env.TUNELABS_ZOO_REF }}
         # Same shallow clone as the matrix job; we install editable so
-        # `unsloth_zoo.llama_cpp` resolves to the cloned tree (and any
+        # `tunelabs_zoo.llama_cpp` resolves to the cloned tree (and any
         # main-branch fixes flow into the smoke without a release).
         run: |
           set -euxo pipefail
           # github.com occasionally 500s on the git fetch; retry so a
           # single upstream blip does not fail CI.
           for attempt in 1 2 3; do
-            rm -rf "$RUNNER_TEMP/unsloth-zoo"
-            if git clone --depth=1 --branch="$UNSLOTH_ZOO_REF" \
-                https://github.com/unslothai/unsloth-zoo \
-                "$RUNNER_TEMP/unsloth-zoo"; then
+            rm -rf "$RUNNER_TEMP/tunelabs-zoo"
+            if git clone --depth=1 --branch="$TUNELABS_ZOO_REF" \
+                https://github.com/tunelabsai/tunelabs-zoo \
+                "$RUNNER_TEMP/tunelabs-zoo"; then
               break
             fi
             if [ "$attempt" -eq 3 ]; then
-              echo "::error::git clone unsloth-zoo failed after 3 attempts"
+              echo "::error::git clone tunelabs-zoo failed after 3 attempts"
               exit 1
             fi
             delay=$((5 * attempt))
             echo "::warning::clone failed (attempt $attempt/3), retrying in ${delay}s..."
             sleep "$delay"
           done
-          pip install -e "$RUNNER_TEMP/unsloth-zoo" --no-deps
-          pip show unsloth_zoo
+          pip install -e "$RUNNER_TEMP/tunelabs-zoo" --no-deps
+          pip show tunelabs_zoo
 
-      - name: llama.cpp install via unsloth_zoo.llama_cpp + `llama-cli --help` smoke
-        # Exercise the canonical `unsloth_zoo.llama_cpp.install_llama_cpp`
+      - name: llama.cpp install via tunelabs_zoo.llama_cpp + `llama-cli --help` smoke
+        # Exercise the canonical `tunelabs_zoo.llama_cpp.install_llama_cpp`
         # flow that GGUF export uses at runtime: clone ggml-org/llama.cpp
-        # into ~/.unsloth/llama.cpp, build the LLAMA_CPP_TARGETS list
+        # into ~/.tunelabs/llama.cpp, build the LLAMA_CPP_TARGETS list
         # (llama-quantize, llama-cli, llama-mtmd-cli, llama-gguf-split,
         # llama-server) via cmake, then run `llama-cli --help`.
         #
@@ -2216,7 +2216,7 @@ jobs:
         # "no ubuntu-x64 prebuilt asset" when ggml-org's release-asset
         # naming drifted (the regex `bin-ubuntu-x64.*\.zip$` no longer
         # matched their current asset names). The build path is the same
-        # one Unsloth users hit in production via `model.save_pretrained_gguf`.
+        # one TuneLabs users hit in production via `model.save_pretrained_gguf`.
         #
         # Wall-time budget: ~3-5 min cold, dominated by cmake build of
         # 5 targets on the runner's 4 cores. Apt-package install is
@@ -2233,9 +2233,9 @@ jobs:
           python <<'PY'
           import os, shutil, subprocess, sys, pathlib
           # Apply the same CPU spoof the pytest shims use BEFORE any
-          # unsloth_zoo import: unsloth_zoo/__init__.py calls
+          # tunelabs_zoo import: tunelabs_zoo/__init__.py calls
           # device_type.get_device_type() at module load and raises
-          # `NotImplementedError: Unsloth cannot find any torch
+          # `NotImplementedError: TuneLabs cannot find any torch
           # accelerator` on a GPU-less runner. The spoof flips
           # torch.cuda.is_available() to True so the device probe takes
           # the cuda branch; we never actually run CUDA tensor ops in
@@ -2243,12 +2243,12 @@ jobs:
           sys.path.insert(0, str(pathlib.Path("tests").resolve()))
           import _zoo_aggressive_cuda_spoof as _spoof
           _spoof.apply()
-          from unsloth_zoo.llama_cpp import (
+          from tunelabs_zoo.llama_cpp import (
               install_llama_cpp,
               LLAMA_CPP_DEFAULT_DIR,
               LLAMA_CPP_TARGETS,
           )
-          print(f"Unsloth llama.cpp default dir: {LLAMA_CPP_DEFAULT_DIR}")
+          print(f"TuneLabs llama.cpp default dir: {LLAMA_CPP_DEFAULT_DIR}")
           print(f"Build targets: {LLAMA_CPP_TARGETS}")
           # install_llama_cpp returns (quantizer_path, converter_script_path).
           # The quantizer's directory is the `llama.cpp` install root, which

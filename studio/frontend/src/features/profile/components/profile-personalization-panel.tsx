@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { publicAssetUrl } from "@/components/mascot-img";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ import { resizeImageFileToDataUrl } from "../utils/resize-image-file";
 import { useUserProfileStore } from "../stores/user-profile-store";
 import { UserAvatar } from "./user-avatar";
 
-const PROFILE_STORAGE_KEY = "unsloth_user_profile";
+const PROFILE_STORAGE_KEY = "tunelabs_user_profile";
 
 function readPersistedProfile(): {
   displayName: string;
@@ -67,7 +67,7 @@ export function ProfilePersonalizationPanel() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const sessionSub = decodeJwtSubject(getAuthToken()) ?? "";
-  const previewName = draftName.trim() || sessionSub || "Unsloth";
+  const previewName = draftName.trim() || sessionSub || "TuneLabs";
   const hasNameChanges = useMemo(
     () => draftName.trim() !== displayName.trim(),
     [draftName, displayName],
@@ -190,7 +190,7 @@ export function ProfilePersonalizationPanel() {
               }
             }}
             autoComplete="off"
-            placeholder={sessionSub || "Unsloth"}
+            placeholder={sessionSub || "TuneLabs"}
             className="h-10 min-w-0 flex-1 rounded-full text-sm"
           />
           <Button type="button" size="sm" className="h-10 px-5" onClick={saveName} disabled={!hasNameChanges}>

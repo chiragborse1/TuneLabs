@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team.
+# Copyright 2026-present the TuneLabs AI Inc. team.
 """Pinned-symbol + source-pattern transformers compat checks via GitHub raw-fetch + grep.
 
-Catches breakage classes from unsloth#3998/5036/5155/5259 and
-unsloth-zoo#572/571/549/543/541/495/491/488/472/393/388/583/584/159.
+Catches breakage classes from tunelabs#3998/5036/5155/5259 and
+tunelabs-zoo#572/571/549/543/541/495/491/488/472/393/388/583/584/159.
 CPU-only, no install. Anchor versions: transformers 4.57.6, 5.5.0.
 """
 
@@ -33,7 +33,7 @@ TRANSFORMERS_TAGS = [
 ]
 
 
-# Trainer surface: unsloth/models/_utils.py rewrites Trainer.{__init__, training_step, get_batch_samples, compute_loss}.
+# Trainer surface: tunelabs/models/_utils.py rewrites Trainer.{__init__, training_step, get_batch_samples, compute_loss}.
 
 
 @pytest.mark.parametrize("tag", TRANSFORMERS_TAGS)
@@ -48,7 +48,7 @@ def test_trainer_class_importable_path(tag: str):
 
 @pytest.mark.parametrize("tag", TRANSFORMERS_TAGS)
 def test_trainer_compute_loss_num_items_in_batch_param(tag: str):
-    """unsloth-zoo#159 + unsloth#4998 + #4616: Trainer.compute_loss must accept num_items_in_batch kwarg."""
+    """tunelabs-zoo#159 + tunelabs#4998 + #4616: Trainer.compute_loss must accept num_items_in_batch kwarg."""
     candidates = ["src/transformers/trainer.py", "src/transformers/trainer/__init__.py"]
     hit = first_match("huggingface/transformers", tag, candidates)
     assert hit is not None
@@ -58,13 +58,13 @@ def test_trainer_compute_loss_num_items_in_batch_param(tag: str):
         pytest.fail(f"{tag}: Trainer.compute_loss not found in source")
     assert "num_items_in_batch" in m.group(1), (
         f"{tag}: Trainer.compute_loss signature missing num_items_in_batch param; "
-        f"unsloth grad-accum patches assume this kwarg present"
+        f"tunelabs grad-accum patches assume this kwarg present"
     )
 
 
 @pytest.mark.parametrize("tag", TRANSFORMERS_TAGS)
 def test_trainer_training_step_grad_accum_pattern(tag: str):
-    """unsloth#3598 patches Trainer.training_step source; drift = silent no-op = double-scale loss bug."""
+    """tunelabs#3598 patches Trainer.training_step source; drift = silent no-op = double-scale loss bug."""
     candidates = ["src/transformers/trainer.py", "src/transformers/trainer/__init__.py"]
     hit = first_match("huggingface/transformers", tag, candidates)
     assert hit is not None
@@ -79,14 +79,14 @@ def test_trainer_training_step_grad_accum_pattern(tag: str):
     if len(missing) == len(needed):
         pytest.fail(
             f"{tag}: Trainer.training_step has none of the grad-accum "
-            f"fingerprints {needed}; unsloth/models/_utils.py:1689-1791 "
+            f"fingerprints {needed}; tunelabs/models/_utils.py:1689-1791 "
             f"patch silently no-ops -> double-scale loss"
         )
 
 
 @pytest.mark.parametrize("tag", TRANSFORMERS_TAGS)
 def test_trainer_get_batch_samples_returns_num_items(tag: str):
-    """unsloth-zoo loss_utils.py:241 replaces Trainer.get_batch_samples; must keep the num_items_in_batch return."""
+    """tunelabs-zoo loss_utils.py:241 replaces Trainer.get_batch_samples; must keep the num_items_in_batch return."""
     candidates = ["src/transformers/trainer.py", "src/transformers/trainer/__init__.py"]
     hit = first_match("huggingface/transformers", tag, candidates)
     assert hit is not None
@@ -100,7 +100,7 @@ def test_trainer_get_batch_samples_returns_num_items(tag: str):
 
 @pytest.mark.parametrize("tag", TRANSFORMERS_TAGS)
 def test_trainer_inner_training_loop_inplace_loss_v5(tag: str):
-    """unsloth-zoo#543: transformers 5.0+ switched out-of-place tr_loss add to in-place `self._tr_loss +=`."""
+    """tunelabs-zoo#543: transformers 5.0+ switched out-of-place tr_loss add to in-place `self._tr_loss +=`."""
     candidates = ["src/transformers/trainer.py", "src/transformers/trainer/__init__.py"]
     hit = first_match("huggingface/transformers", tag, candidates)
     assert hit is not None
@@ -111,7 +111,7 @@ def test_trainer_inner_training_loop_inplace_loss_v5(tag: str):
     assert has_inplace or has_outplace, (
         f"{tag}: Trainer._inner_training_loop has neither "
         f"`tr_loss = tr_loss + tr_loss_step` nor `self._tr_loss +=`; "
-        f"unsloth-zoo#543 patch breaks"
+        f"tunelabs-zoo#543 patch breaks"
     )
 
 
@@ -120,7 +120,7 @@ def test_trainer_inner_training_loop_inplace_loss_v5(tag: str):
 
 @pytest.mark.parametrize("tag", TRANSFORMERS_TAGS)
 def test_modeling_utils_exposes_checkpoint(tag: str):
-    """unsloth-zoo#549: transformers 5.2+ uses modeling_utils.checkpoint; patch must replace it, not just torch's."""
+    """tunelabs-zoo#549: transformers 5.2+ uses modeling_utils.checkpoint; patch must replace it, not just torch's."""
     src = fetch_text("huggingface/transformers", tag, "src/transformers/modeling_utils.py")
     if src is None:
         pytest.skip(f"{tag}: modeling_utils.py missing")
@@ -136,13 +136,13 @@ def test_modeling_utils_exposes_checkpoint(tag: str):
     )
     assert has_import, (
         f"{tag}: transformers.modeling_utils does not import / re-bind "
-        f"torch.utils.checkpoint.checkpoint; unsloth-zoo#549 patch breaks"
+        f"torch.utils.checkpoint.checkpoint; tunelabs-zoo#549 patch breaks"
     )
 
 
 @pytest.mark.parametrize("tag", TRANSFORMERS_TAGS)
 def test_pushtohubmixin_create_repo_status(tag: str):
-    """unsloth-zoo#393: transformers 5.x removed PushToHubMixin._create_repo; snapshot which side."""
+    """tunelabs-zoo#393: transformers 5.x removed PushToHubMixin._create_repo; snapshot which side."""
     src = fetch_text("huggingface/transformers", tag, "src/transformers/modeling_utils.py")
     if src is None:
         pytest.skip(f"{tag}: modeling_utils.py missing")
@@ -168,7 +168,7 @@ def test_integrations_bitsandbytes_module_present(tag: str):
 
 @pytest.mark.parametrize("tag", TRANSFORMERS_TAGS)
 def test_quantizers_should_convert_module_signature(tag: str):
-    """unsloth-zoo#491/#488: 5.x moved is_replaceable to quantizers_utils.should_convert_module; snapshot its form."""
+    """tunelabs-zoo#491/#488: 5.x moved is_replaceable to quantizers_utils.should_convert_module; snapshot its form."""
     src = fetch_text(
         "huggingface/transformers",
         tag,
@@ -189,7 +189,7 @@ def test_quantizers_should_convert_module_signature(tag: str):
 
 @pytest.mark.parametrize("tag", TRANSFORMERS_TAGS)
 def test_fp8linear_init_param_names(tag: str):
-    """unsloth-zoo#572: transformers 5.x renamed FP8Linear.__init__ `bias` -> `has_bias`."""
+    """tunelabs-zoo#572: transformers 5.x renamed FP8Linear.__init__ `bias` -> `has_bias`."""
     src = fetch_text(
         "huggingface/transformers",
         tag,
@@ -211,14 +211,14 @@ def test_fp8linear_init_param_names(tag: str):
 
 @pytest.mark.parametrize("tag", TRANSFORMERS_TAGS)
 def test_processing_utils_unpack_importable(tag: str):
-    """unsloth-zoo#583/584: transformers.processing_utils.Unpack must keep importing."""
+    """tunelabs-zoo#583/584: transformers.processing_utils.Unpack must keep importing."""
     src = fetch_text("huggingface/transformers", tag, "src/transformers/processing_utils.py")
     if src is None:
         pytest.skip(f"{tag}: processing_utils.py missing")
     has_unpack = bool(re.search(r"^Unpack\b\s*=", src, re.MULTILINE) or "Unpack" in src)
     assert has_unpack, (
         f"{tag}: transformers.processing_utils.Unpack missing; "
-        f"unsloth-zoo#583/584 import guard breaks"
+        f"tunelabs-zoo#583/584 import guard breaks"
     )
 
 
@@ -249,12 +249,12 @@ def test_gpt_oss_model_forward_present(tag: str):
     assert has_def(src, "GptOssModel", "class"), f"{tag}: class GptOssModel missing"
 
 
-# auto_factory: unsloth#5155 _LazyAutoMapping private API.
+# auto_factory: tunelabs#5155 _LazyAutoMapping private API.
 
 
 @pytest.mark.parametrize("tag", TRANSFORMERS_TAGS)
 def test_auto_factory_lazy_mapping_private_api(tag: str):
-    """unsloth#5155: resolve_model_class needs all four _LazyAutoMapping private attrs to remain."""
+    """tunelabs#5155: resolve_model_class needs all four _LazyAutoMapping private attrs to remain."""
     src = fetch_text(
         "huggingface/transformers",
         tag,
@@ -271,7 +271,7 @@ def test_auto_factory_lazy_mapping_private_api(tag: str):
     missing = [n for n in needed if n not in src]
     assert not missing, (
         f"{tag}: _LazyAutoMapping private API missing {missing}; "
-        f"unsloth/models/_utils.py:resolve_model_class breaks (unsloth#5155)"
+        f"tunelabs/models/_utils.py:resolve_model_class breaks (tunelabs#5155)"
     )
 
 
@@ -280,7 +280,7 @@ def test_auto_factory_lazy_mapping_private_api(tag: str):
 
 @pytest.mark.parametrize("tag", TRANSFORMERS_TAGS)
 def test_configuration_utils_alias(tag: str):
-    """transformers 5.x renamed PretrainedConfig -> PreTrainedConfig; unsloth-zoo imports both defensively."""
+    """transformers 5.x renamed PretrainedConfig -> PreTrainedConfig; tunelabs-zoo imports both defensively."""
     src = fetch_text(
         "huggingface/transformers",
         tag,
@@ -301,7 +301,7 @@ def test_configuration_utils_alias(tag: str):
 
 @pytest.mark.parametrize("tag", TRANSFORMERS_TAGS)
 def test_apply_chat_template_signature_present(tag: str):
-    """unsloth-zoo#572: apply_chat_template `return_dict` default flipped False -> True in transformers 5.x."""
+    """tunelabs-zoo#572: apply_chat_template `return_dict` default flipped False -> True in transformers 5.x."""
     src = fetch_text(
         "huggingface/transformers",
         tag,
@@ -314,12 +314,12 @@ def test_apply_chat_template_signature_present(tag: str):
     ), f"{tag}: apply_chat_template missing in tokenization_utils_base.py"
 
 
-# Generic-importability sweep: every transformers symbol unsloth/zoo imports must stay reachable.
+# Generic-importability sweep: every transformers symbol tunelabs/zoo imports must stay reachable.
 
 
 @pytest.mark.parametrize("tag", TRANSFORMERS_TAGS)
 def test_modeling_attn_mask_utils_symbols(tag: str):
-    """_prepare_4d_attention_mask_for_sdpa is imported by unsloth/models/llama.py + sentence_transformer.py."""
+    """_prepare_4d_attention_mask_for_sdpa is imported by tunelabs/models/llama.py + sentence_transformer.py."""
     src = fetch_text(
         "huggingface/transformers",
         tag,
@@ -351,5 +351,5 @@ def test_training_args_parallel_mode_importable(tag: str):
         pytest.skip(f"{tag}: training_args.py missing")
     assert "ParallelMode" in src, (
         f"{tag}: transformers.training_args.ParallelMode missing; "
-        f"unsloth-zoo loss_utils.py:232 ImportError"
+        f"tunelabs-zoo loss_utils.py:232 ImportError"
     )

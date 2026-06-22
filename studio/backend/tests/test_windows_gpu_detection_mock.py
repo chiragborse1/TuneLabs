@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Windows GPU-detection regression test on a synthetic layout.
 
@@ -300,7 +300,7 @@ class TestWindowsGpuDetectionAfter5106Fix:
             )
 
     def test_no_pip_nvidia_wheels_still_works_via_install_dir(self, tmp_path):
-        """No pip nvidia wheels (CPU-only torch / standalone unsloth):
+        """No pip nvidia wheels (CPU-only torch / standalone tunelabs):
         cudart still resolves via #5322's binary_dir drop."""
         prefix = tmp_path / "bare_venv"
         prefix.mkdir()

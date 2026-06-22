@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import type { DictationAdapter } from "@assistant-ui/react";
 import { toast } from "sonner";
@@ -18,7 +18,7 @@ const describeMediaError = (error: unknown): string => {
     return "Dictation could not access the microphone.";
   }
   if (error.name === "NotAllowedError") {
-    return "Microphone access is blocked. Allow microphone access for this Unsloth page, then try again.";
+    return "Microphone access is blocked. Allow microphone access for this TuneLabs page, then try again.";
   }
   if (error.name === "NotFoundError") {
     return "No microphone was found for dictation.";
@@ -31,7 +31,7 @@ const describeMediaError = (error: unknown): string => {
 
 const describeSpeechError = (error: string, message?: string): string => {
   if (error === "not-allowed") {
-    return "Speech recognition was blocked by the browser. Check microphone permissions for this Unsloth page.";
+    return "Speech recognition was blocked by the browser. Check microphone permissions for this TuneLabs page.";
   }
   if (error === "service-not-allowed") {
     return "Speech recognition is blocked by the browser speech service.";

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Path validators and storage roots for the Hub layer."""
 
@@ -25,10 +25,10 @@ def _infer_studio_home_from_venv() -> Optional[Path]:
         prefix = Path(sys.prefix).resolve()
     except (OSError, ValueError):
         return None
-    if prefix.name != "unsloth_studio":
+    if prefix.name != "tunelabs_studio":
         return None
     candidate = prefix.parent
-    shim_name = "unsloth.exe" if os.name == "nt" else "unsloth"
+    shim_name = "tunelabs.exe" if os.name == "nt" else "tunelabs"
     try:
         if (candidate / "share" / "studio.conf").is_file() or (
             candidate / "bin" / shim_name
@@ -40,7 +40,7 @@ def _infer_studio_home_from_venv() -> Optional[Path]:
 
 
 def studio_root() -> Path:
-    override = (os.environ.get("UNSLOTH_STUDIO_HOME") or "").strip()
+    override = (os.environ.get("TUNELABS_STUDIO_HOME") or "").strip()
     if not override:
         override = (os.environ.get("STUDIO_HOME") or "").strip()
     if override:
@@ -51,7 +51,7 @@ def studio_root() -> Path:
     inferred = _infer_studio_home_from_venv()
     if inferred is not None:
         return inferred
-    return Path.home() / ".unsloth" / "studio"
+    return Path.home() / ".tunelabs" / "studio"
 
 
 def cache_root() -> Path:
@@ -83,7 +83,7 @@ def exports_root() -> Path:
 
 
 def tmp_root() -> Path:
-    return Path(tempfile.gettempdir()) / "unsloth-studio"
+    return Path(tempfile.gettempdir()) / "tunelabs-studio"
 
 
 def ensure_dir(path: Path) -> Path:

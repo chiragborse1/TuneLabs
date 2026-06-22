@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Regression tests for resumable training run eligibility."""
 
@@ -30,7 +30,7 @@ def _stopped_run(**overrides):
         "status": "stopped",
         "final_step": 5,
         "total_steps": 10,
-        "output_dir": "/tmp/unsloth-output",
+        "output_dir": "/tmp/tunelabs-output",
         "resumed_later": False,
         "config_json": json.dumps({"hf_dataset": "org/dataset"}),
     }
@@ -75,13 +75,13 @@ def test_can_resume_run_rejects_s3_metadata_marker(monkeypatch):
 def test_list_runs_includes_config_json_for_resume_policy(monkeypatch, tmp_path):
     from storage import studio_db
 
-    monkeypatch.setenv("UNSLOTH_STUDIO_HOME", str(tmp_path))
+    monkeypatch.setenv("TUNELABS_STUDIO_HOME", str(tmp_path))
     monkeypatch.setattr(studio_db, "_schema_ready", False)
     config_json = json.dumps({"dataset_source": "s3", "s3_dataset": {"bucket": "training-data"}})
 
     studio_db.create_run(
         id = "run-s3",
-        model_name = "unsloth/test-model",
+        model_name = "tunelabs/test-model",
         dataset_name = "s3://training-data",
         config_json = config_json,
         started_at = "2026-01-01T00:00:00Z",

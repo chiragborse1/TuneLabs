@@ -38,7 +38,7 @@ pub(super) async fn backend_health(client: &reqwest::Client, port: u16) -> Optio
     let service = json
         .get("service")
         .and_then(|v| v.as_str())
-        .map(|s| s == "Unsloth UI Backend")
+        .map(|s| s == "TuneLabs UI Backend")
         .unwrap_or(false);
     if !healthy || !service {
         return None;

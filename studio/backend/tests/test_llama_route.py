@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """routes/llama.py: the source_build field is exposed and the handlers run the
 (now subprocess-touching) detection off the event loop via a worker thread.
@@ -66,7 +66,7 @@ def test_status_response_exposes_source_build():
         "stale": False,
         "installed_tag": None,
         "latest_tag": "b9585",
-        "published_repo": "unslothai/llama.cpp",
+        "published_repo": "tunelabsai/llama.cpp",
         "installed_at_utc": None,
         "age_days": None,
         "source_build": True,
@@ -86,7 +86,7 @@ def test_status_response_exposes_update_size_bytes():
         "stale": False,
         "installed_tag": "b9493",
         "latest_tag": "b9518",
-        "published_repo": "unslothai/llama.cpp",
+        "published_repo": "tunelabsai/llama.cpp",
         "installed_at_utc": None,
         "age_days": None,
         "source_build": False,

@@ -211,15 +211,15 @@ def test_hydrate_source_tree_extracts_upstream_archive_contents(
 def test_release_asset_download_url():
     fn = INSTALL_LLAMA_PREBUILT.release_asset_download_url
     assert fn(
-        "unslothai/llama.cpp", "b9000-mix-abc1234", "llama.cpp-source-commit-deadbeef.tar.gz"
+        "tunelabsai/llama.cpp", "b9000-mix-abc1234", "llama.cpp-source-commit-deadbeef.tar.gz"
     ) == (
-        "https://github.com/unslothai/llama.cpp/releases/download/"
+        "https://github.com/tunelabsai/llama.cpp/releases/download/"
         "b9000-mix-abc1234/llama.cpp-source-commit-deadbeef.tar.gz"
     )
     # Any missing component -> None (no asset url, caller falls back to codeload).
     assert fn(None, "b9000", "x.tar.gz") is None
-    assert fn("unslothai/llama.cpp", None, "x.tar.gz") is None
-    assert fn("unslothai/llama.cpp", "b9000", None) is None
+    assert fn("tunelabsai/llama.cpp", None, "x.tar.gz") is None
+    assert fn("tunelabsai/llama.cpp", "b9000", None) is None
 
 
 def _mk_source_tarball(path: Path, tag: str) -> None:
@@ -243,10 +243,10 @@ def test_hydrate_source_tree_prefers_release_asset_for_mix(
     archive_path = tmp_path / "merged-source.tar.gz"
     _mk_source_tarball(archive_path, f"b9000-mix-{commit[:7]}")
     asset_url = INSTALL_LLAMA_PREBUILT.release_asset_download_url(
-        "unslothai/llama.cpp", "b9000-mix-abc1234", f"llama.cpp-source-commit-{commit}.tar.gz"
+        "tunelabsai/llama.cpp", "b9000-mix-abc1234", f"llama.cpp-source-commit-{commit}.tar.gz"
     )
     codeload_urls = set(
-        INSTALL_LLAMA_PREBUILT.commit_source_archive_urls("unslothai/llama.cpp", commit)
+        INSTALL_LLAMA_PREBUILT.commit_source_archive_urls("tunelabsai/llama.cpp", commit)
     )
     seen = []
 
@@ -266,7 +266,7 @@ def test_hydrate_source_tree_prefers_release_asset_for_mix(
         commit,
         install_dir,
         work_dir,
-        source_repo = "unslothai/llama.cpp",
+        source_repo = "tunelabsai/llama.cpp",
         expected_sha256 = sha256_file(archive_path),
         exact_source = True,
         asset_url = asset_url,
@@ -284,9 +284,9 @@ def test_hydrate_source_tree_falls_back_to_codeload_when_asset_missing(
     archive_path = tmp_path / "vanilla-source.tar.gz"
     _mk_source_tarball(archive_path, f"commit-{commit[:7]}")
     asset_url = INSTALL_LLAMA_PREBUILT.release_asset_download_url(
-        "unslothai/llama.cpp", "b9000", f"llama.cpp-source-commit-{commit}.tar.gz"
+        "tunelabsai/llama.cpp", "b9000", f"llama.cpp-source-commit-{commit}.tar.gz"
     )
-    codeload_urls = INSTALL_LLAMA_PREBUILT.commit_source_archive_urls("unslothai/llama.cpp", commit)
+    codeload_urls = INSTALL_LLAMA_PREBUILT.commit_source_archive_urls("tunelabsai/llama.cpp", commit)
 
     def fake_download_file(url: str, destination: Path) -> None:
         if url == asset_url:
@@ -303,7 +303,7 @@ def test_hydrate_source_tree_falls_back_to_codeload_when_asset_missing(
         commit,
         install_dir,
         work_dir,
-        source_repo = "unslothai/llama.cpp",
+        source_repo = "tunelabsai/llama.cpp",
         expected_sha256 = sha256_file(archive_path),
         exact_source = True,
         asset_url = asset_url,
@@ -439,7 +439,7 @@ def test_validate_prebuilt_choice_creates_repo_shaped_linux_install(
     assert (install_dir / "build" / "bin" / "libllama.so").exists()
     assert (install_dir / "llama-server").exists()
     assert (install_dir / "llama-quantize").exists()
-    assert (install_dir / "UNSLOTH_PREBUILT_INFO.json").exists()
+    assert (install_dir / "TUNELABS_PREBUILT_INFO.json").exists()
     assert (install_dir / "BUILD_INFO.txt").exists()
 
 
@@ -553,7 +553,7 @@ def test_validate_prebuilt_choice_creates_repo_shaped_windows_install(
     assert (install_dir / "build" / "bin" / "Release" / "llama-quantize.exe").exists()
     assert (install_dir / "build" / "bin" / "Release" / "llama.dll").exists()
     assert not (install_dir / "llama-server.exe").exists()
-    assert (install_dir / "UNSLOTH_PREBUILT_INFO.json").exists()
+    assert (install_dir / "TUNELABS_PREBUILT_INFO.json").exists()
     assert (install_dir / "BUILD_INFO.txt").exists()
 
 
@@ -765,7 +765,7 @@ def test_install_prebuilt_falls_back_to_older_release_plan(
     )
 
     first_choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "old-release",
         name = "app-b9002-linux-x64.tar.gz",
         url = "https://example.com/app-b9002-linux-x64.tar.gz",
@@ -773,7 +773,7 @@ def test_install_prebuilt_falls_back_to_older_release_plan(
         install_kind = "linux-cpu",
     )
     second_choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "older-release",
         name = "app-b9001-linux-x64.tar.gz",
         url = "https://example.com/app-b9001-linux-x64.tar.gz",
@@ -786,7 +786,7 @@ def test_install_prebuilt_falls_back_to_older_release_plan(
         release_tag = "release-2",
         attempts = [first_choice],
         approved_checksums = ApprovedReleaseChecksums(
-            repo = "unslothai/llama.cpp",
+            repo = "tunelabsai/llama.cpp",
             release_tag = "release-2",
             upstream_tag = "b9002",
             source_commit = None,
@@ -799,7 +799,7 @@ def test_install_prebuilt_falls_back_to_older_release_plan(
         release_tag = "release-1",
         attempts = [second_choice],
         approved_checksums = ApprovedReleaseChecksums(
-            repo = "unslothai/llama.cpp",
+            repo = "tunelabsai/llama.cpp",
             release_tag = "release-1",
             upstream_tag = "b9001",
             source_commit = None,
@@ -866,7 +866,7 @@ def test_install_prebuilt_falls_back_to_older_release_plan(
         lambda install_dir, llama_tag: ensured_tags.append(llama_tag),
     )
 
-    install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
+    install_prebuilt(install_dir, "latest", "tunelabsai/llama.cpp", "")
 
     assert call_log == [("b9002", False), ("b9001", True)]
     assert activated["install_dir"] == install_dir
@@ -959,7 +959,7 @@ def test_existing_install_matches_plan_with_fingerprint_linux(tmp_path: Path):
         has_usable_nvidia = False,
     )
     choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-1",
         name = "llama-b9001-bin-ubuntu-x64.tar.gz",
         url = "https://example.com/llama-b9001-bin-ubuntu-x64.tar.gz",
@@ -968,7 +968,7 @@ def test_existing_install_matches_plan_with_fingerprint_linux(tmp_path: Path):
         expected_sha256 = "a" * 64,
     )
     checksums = ApprovedReleaseChecksums(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = "release-1",
         upstream_tag = "b9001",
         source_commit = "deadbeef",
@@ -1012,7 +1012,7 @@ def test_existing_install_matches_plan_false_without_fingerprint(tmp_path: Path)
     install_dir = tmp_path / "llama.cpp"
     install_dir.mkdir()
     write_linux_install_shape(install_dir)
-    (install_dir / "UNSLOTH_PREBUILT_INFO.json").write_text(
+    (install_dir / "TUNELABS_PREBUILT_INFO.json").write_text(
         json.dumps({"tag": "b9001", "asset": "llama-b9001-bin-ubuntu-x64.tar.gz"}) + "\n",
         encoding = "utf-8",
     )
@@ -1033,7 +1033,7 @@ def test_existing_install_matches_plan_false_without_fingerprint(tmp_path: Path)
         has_usable_nvidia = False,
     )
     choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-1",
         name = "llama-b9001-bin-ubuntu-x64.tar.gz",
         url = "https://example.com/x.tar.gz",
@@ -1042,7 +1042,7 @@ def test_existing_install_matches_plan_false_without_fingerprint(tmp_path: Path)
         expected_sha256 = "a" * 64,
     )
     checksums = ApprovedReleaseChecksums(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = "release-1",
         upstream_tag = "b9001",
         source_commit = "deadbeef",
@@ -1076,7 +1076,7 @@ def test_existing_install_matches_plan_false_with_malformed_metadata(tmp_path: P
     install_dir = tmp_path / "llama.cpp"
     install_dir.mkdir()
     write_linux_install_shape(install_dir)
-    (install_dir / "UNSLOTH_PREBUILT_INFO.json").write_text("{not-json\n", encoding = "utf-8")
+    (install_dir / "TUNELABS_PREBUILT_INFO.json").write_text("{not-json\n", encoding = "utf-8")
 
     host = HostInfo(
         system = "Linux",
@@ -1094,7 +1094,7 @@ def test_existing_install_matches_plan_false_with_malformed_metadata(tmp_path: P
         has_usable_nvidia = False,
     )
     choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-1",
         name = "llama-b9001-bin-ubuntu-x64.tar.gz",
         url = "https://example.com/x.tar.gz",
@@ -1103,7 +1103,7 @@ def test_existing_install_matches_plan_false_with_malformed_metadata(tmp_path: P
         expected_sha256 = "a" * 64,
     )
     checksums = ApprovedReleaseChecksums(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = "release-1",
         upstream_tag = "b9001",
         source_commit = "deadbeef",
@@ -1154,7 +1154,7 @@ def test_existing_install_matches_plan_windows_cpu_requires_llama_dll(tmp_path: 
         has_usable_nvidia = False,
     )
     choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-1",
         name = "llama-b9001-bin-win-cpu-x64.zip",
         url = "https://example.com/x.zip",
@@ -1163,7 +1163,7 @@ def test_existing_install_matches_plan_windows_cpu_requires_llama_dll(tmp_path: 
         expected_sha256 = "a" * 64,
     )
     checksums = ApprovedReleaseChecksums(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = "release-1",
         upstream_tag = "b9001",
         source_commit = "deadbeef",
@@ -1177,7 +1177,7 @@ def test_existing_install_matches_plan_windows_cpu_requires_llama_dll(tmp_path: 
             choice.name: ApprovedArtifactHash(
                 asset_name = choice.name,
                 sha256 = choice.expected_sha256,
-                repo = "unslothai/llama.cpp",
+                repo = "tunelabsai/llama.cpp",
                 kind = "prebuilt",
             ),
         },
@@ -1225,7 +1225,7 @@ def test_existing_install_matches_plan_windows_cuda_requires_cuda_dll(tmp_path: 
         has_usable_nvidia = True,
     )
     choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-1",
         name = "llama-b9001-bin-win-cuda-12.4-x64.zip",
         url = "https://example.com/x.zip",
@@ -1235,7 +1235,7 @@ def test_existing_install_matches_plan_windows_cuda_requires_cuda_dll(tmp_path: 
         expected_sha256 = "a" * 64,
     )
     checksums = ApprovedReleaseChecksums(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = "release-1",
         upstream_tag = "b9001",
         source_commit = "deadbeef",
@@ -1249,7 +1249,7 @@ def test_existing_install_matches_plan_windows_cuda_requires_cuda_dll(tmp_path: 
             choice.name: ApprovedArtifactHash(
                 asset_name = choice.name,
                 sha256 = choice.expected_sha256,
-                repo = "unslothai/llama.cpp",
+                repo = "tunelabsai/llama.cpp",
                 kind = "prebuilt",
             ),
         },
@@ -1303,7 +1303,7 @@ def test_existing_install_matches_plan_windows_cuda_paired_requires_cudart(tmp_p
         has_usable_nvidia = True,
     )
     choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-1",
         name = "llama-b9001-bin-win-cuda-12.4-x64.zip",
         url = "https://example.com/x.zip",
@@ -1316,7 +1316,7 @@ def test_existing_install_matches_plan_windows_cuda_paired_requires_cudart(tmp_p
         runtime_sha256 = "c" * 64,
     )
     checksums = ApprovedReleaseChecksums(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = "release-1",
         upstream_tag = "b9001",
         source_commit = "deadbeef",
@@ -1330,13 +1330,13 @@ def test_existing_install_matches_plan_windows_cuda_paired_requires_cudart(tmp_p
             choice.name: ApprovedArtifactHash(
                 asset_name = choice.name,
                 sha256 = choice.expected_sha256,
-                repo = "unslothai/llama.cpp",
+                repo = "tunelabsai/llama.cpp",
                 kind = "prebuilt",
             ),
             choice.runtime_name: ApprovedArtifactHash(
                 asset_name = choice.runtime_name,
                 sha256 = choice.runtime_sha256,
-                repo = "unslothai/llama.cpp",
+                repo = "tunelabsai/llama.cpp",
                 kind = "prebuilt",
             ),
         },
@@ -1413,7 +1413,7 @@ def test_existing_install_matches_plan_windows_cuda_unpaired_skips_cudart_check(
         has_usable_nvidia = True,
     )
     choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-1",
         name = "llama-b9001-bin-win-cuda-12.4-x64.zip",
         url = "https://example.com/x.zip",
@@ -1423,7 +1423,7 @@ def test_existing_install_matches_plan_windows_cuda_unpaired_skips_cudart_check(
         expected_sha256 = "a" * 64,
     )
     checksums = ApprovedReleaseChecksums(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = "release-1",
         upstream_tag = "b9001",
         source_commit = "deadbeef",
@@ -1437,7 +1437,7 @@ def test_existing_install_matches_plan_windows_cuda_unpaired_skips_cudart_check(
             choice.name: ApprovedArtifactHash(
                 asset_name = choice.name,
                 sha256 = choice.expected_sha256,
-                repo = "unslothai/llama.cpp",
+                repo = "tunelabsai/llama.cpp",
                 kind = "prebuilt",
             ),
         },
@@ -1489,7 +1489,7 @@ def test_existing_install_fingerprint_changes_when_cudart_pair_added(tmp_path: P
         has_usable_nvidia = True,
     )
     legacy_choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-1",
         name = "llama-b9001-bin-win-cuda-12.4-x64.zip",
         url = "https://example.com/x.zip",
@@ -1499,7 +1499,7 @@ def test_existing_install_fingerprint_changes_when_cudart_pair_added(tmp_path: P
         expected_sha256 = "a" * 64,
     )
     paired_choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-1",
         name = "llama-b9001-bin-win-cuda-12.4-x64.zip",
         url = "https://example.com/x.zip",
@@ -1512,7 +1512,7 @@ def test_existing_install_fingerprint_changes_when_cudart_pair_added(tmp_path: P
         runtime_sha256 = "c" * 64,
     )
     checksums = ApprovedReleaseChecksums(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = "release-1",
         upstream_tag = "b9001",
         source_commit = "deadbeef",
@@ -1526,13 +1526,13 @@ def test_existing_install_fingerprint_changes_when_cudart_pair_added(tmp_path: P
             legacy_choice.name: ApprovedArtifactHash(
                 asset_name = legacy_choice.name,
                 sha256 = legacy_choice.expected_sha256,
-                repo = "unslothai/llama.cpp",
+                repo = "tunelabsai/llama.cpp",
                 kind = "prebuilt",
             ),
             paired_choice.runtime_name: ApprovedArtifactHash(
                 asset_name = paired_choice.runtime_name,
                 sha256 = paired_choice.runtime_sha256,
-                repo = "unslothai/llama.cpp",
+                repo = "tunelabsai/llama.cpp",
                 kind = "prebuilt",
             ),
         },
@@ -1598,7 +1598,7 @@ def test_existing_install_matches_plan_macos_requires_dylibs(tmp_path: Path):
         has_usable_nvidia = False,
     )
     choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-1",
         name = "llama-b9001-bin-macos-arm64.tar.gz",
         url = "https://example.com/x.tar.gz",
@@ -1607,7 +1607,7 @@ def test_existing_install_matches_plan_macos_requires_dylibs(tmp_path: Path):
         expected_sha256 = "a" * 64,
     )
     checksums = ApprovedReleaseChecksums(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = "release-1",
         upstream_tag = "b9001",
         source_commit = "deadbeef",
@@ -1621,7 +1621,7 @@ def test_existing_install_matches_plan_macos_requires_dylibs(tmp_path: Path):
             choice.name: ApprovedArtifactHash(
                 asset_name = choice.name,
                 sha256 = choice.expected_sha256,
-                repo = "unslothai/llama.cpp",
+                repo = "tunelabsai/llama.cpp",
                 kind = "prebuilt",
             ),
         },
@@ -1671,7 +1671,7 @@ def test_install_prebuilt_skips_download_when_existing_install_matches(
         has_usable_nvidia = False,
     )
     choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-1",
         name = "llama-b9001-bin-ubuntu-x64.tar.gz",
         url = "https://example.com/llama-b9001-bin-ubuntu-x64.tar.gz",
@@ -1680,7 +1680,7 @@ def test_install_prebuilt_skips_download_when_existing_install_matches(
         expected_sha256 = "a" * 64,
     )
     checksums = ApprovedReleaseChecksums(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = "release-1",
         upstream_tag = "b9001",
         source_commit = "deadbeef",
@@ -1734,7 +1734,7 @@ def test_install_prebuilt_skips_download_when_existing_install_matches(
         ),
     )
 
-    install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
+    install_prebuilt(install_dir, "latest", "tunelabsai/llama.cpp", "")
 
 
 def test_install_prebuilt_does_not_skip_unhealthy_existing_install(
@@ -1761,7 +1761,7 @@ def test_install_prebuilt_does_not_skip_unhealthy_existing_install(
         has_usable_nvidia = False,
     )
     choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-1",
         name = "llama-b9001-bin-ubuntu-x64.tar.gz",
         url = "https://example.com/llama-b9001-bin-ubuntu-x64.tar.gz",
@@ -1770,7 +1770,7 @@ def test_install_prebuilt_does_not_skip_unhealthy_existing_install(
         expected_sha256 = "a" * 64,
     )
     checksums = ApprovedReleaseChecksums(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = "release-1",
         upstream_tag = "b9001",
         source_commit = "deadbeef",
@@ -1827,7 +1827,7 @@ def test_install_prebuilt_does_not_skip_unhealthy_existing_install(
     with pytest.raises(
         AssertionError, match = "unhealthy install must continue into normal install flow"
     ):
-        install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
+        install_prebuilt(install_dir, "latest", "tunelabsai/llama.cpp", "")
 
 
 def test_install_prebuilt_skips_when_older_release_fallback_matches_existing_install(
@@ -1853,7 +1853,7 @@ def test_install_prebuilt_skips_when_older_release_fallback_matches_existing_ins
         has_usable_nvidia = False,
     )
     latest_choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-2",
         name = "llama-b9002-bin-ubuntu-x64.tar.gz",
         url = "https://example.com/llama-b9002-bin-ubuntu-x64.tar.gz",
@@ -1862,7 +1862,7 @@ def test_install_prebuilt_skips_when_older_release_fallback_matches_existing_ins
         expected_sha256 = "c" * 64,
     )
     fallback_choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-1",
         name = "llama-b9001-bin-ubuntu-x64.tar.gz",
         url = "https://example.com/llama-b9001-bin-ubuntu-x64.tar.gz",
@@ -1871,7 +1871,7 @@ def test_install_prebuilt_skips_when_older_release_fallback_matches_existing_ins
         expected_sha256 = "a" * 64,
     )
     latest_checksums = ApprovedReleaseChecksums(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = "release-2",
         upstream_tag = "b9002",
         source_commit = "beadfeed",
@@ -1891,7 +1891,7 @@ def test_install_prebuilt_skips_when_older_release_fallback_matches_existing_ins
         },
     )
     fallback_checksums = ApprovedReleaseChecksums(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = "release-1",
         upstream_tag = "b9001",
         source_commit = "deadbeef",
@@ -1982,7 +1982,7 @@ def test_install_prebuilt_skips_when_older_release_fallback_matches_existing_ins
         ),
     )
 
-    install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
+    install_prebuilt(install_dir, "latest", "tunelabsai/llama.cpp", "")
 
     assert call_log == ["b9002"]
 
@@ -2010,7 +2010,7 @@ def test_install_prebuilt_skips_same_release_fallback_attempt_when_installed(
         has_usable_nvidia = False,
     )
     first_choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-1",
         name = "llama-b9001-bin-ubuntu-x64-bad.tar.gz",
         url = "https://example.com/llama-b9001-bin-ubuntu-x64-bad.tar.gz",
@@ -2019,7 +2019,7 @@ def test_install_prebuilt_skips_same_release_fallback_attempt_when_installed(
         expected_sha256 = "c" * 64,
     )
     fallback_choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-1",
         name = "llama-b9001-bin-ubuntu-x64-good.tar.gz",
         url = "https://example.com/llama-b9001-bin-ubuntu-x64-good.tar.gz",
@@ -2028,7 +2028,7 @@ def test_install_prebuilt_skips_same_release_fallback_attempt_when_installed(
         expected_sha256 = "a" * 64,
     )
     checksums = ApprovedReleaseChecksums(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = "release-1",
         upstream_tag = "b9001",
         source_commit = "deadbeef",
@@ -2042,7 +2042,7 @@ def test_install_prebuilt_skips_same_release_fallback_attempt_when_installed(
             first_choice.name: ApprovedArtifactHash(
                 asset_name = first_choice.name,
                 sha256 = first_choice.expected_sha256,
-                repo = "unslothai/llama.cpp",
+                repo = "tunelabsai/llama.cpp",
                 kind = "prebuilt",
             ),
             fallback_choice.name: ApprovedArtifactHash(
@@ -2131,12 +2131,12 @@ def test_install_prebuilt_skips_same_release_fallback_attempt_when_installed(
         ),
     )
 
-    install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
+    install_prebuilt(install_dir, "latest", "tunelabsai/llama.cpp", "")
 
     assert attempted_names == [first_choice.name]
 
 
-def test_install_prebuilt_same_tag_upstream_failure_uses_older_unsloth_release_plan(
+def test_install_prebuilt_same_tag_upstream_failure_uses_older_tunelabs_release_plan(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ):
     install_dir = tmp_path / "llama.cpp"
@@ -2166,7 +2166,7 @@ def test_install_prebuilt_same_tag_upstream_failure_uses_older_unsloth_release_p
         expected_sha256 = "a" * 64,
     )
     older_release_choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-1",
         name = "llama-b9001-bin-ubuntu-x64.tar.gz",
         url = "https://example.com/llama-b9001-bin-ubuntu-x64.tar.gz",
@@ -2180,7 +2180,7 @@ def test_install_prebuilt_same_tag_upstream_failure_uses_older_unsloth_release_p
         release_tag = "release-2",
         attempts = [same_tag_upstream_choice],
         approved_checksums = ApprovedReleaseChecksums(
-            repo = "unslothai/llama.cpp",
+            repo = "tunelabsai/llama.cpp",
             release_tag = "release-2",
             upstream_tag = "b9002",
             source_commit = None,
@@ -2193,7 +2193,7 @@ def test_install_prebuilt_same_tag_upstream_failure_uses_older_unsloth_release_p
         release_tag = "release-1",
         attempts = [older_release_choice],
         approved_checksums = ApprovedReleaseChecksums(
-            repo = "unslothai/llama.cpp",
+            repo = "tunelabsai/llama.cpp",
             release_tag = "release-1",
             upstream_tag = "b9001",
             source_commit = None,
@@ -2262,7 +2262,7 @@ def test_install_prebuilt_same_tag_upstream_failure_uses_older_unsloth_release_p
         lambda install_dir, llama_tag: None,
     )
 
-    install_prebuilt(install_dir, "latest", "unslothai/llama.cpp", "")
+    install_prebuilt(install_dir, "latest", "tunelabsai/llama.cpp", "")
 
     assert attempted == [("b9002", "release-2", "upstream"), ("b9001", "release-1", "upstream")]
     assert activated["install_dir"] == install_dir
@@ -2314,7 +2314,7 @@ def test_existing_install_matches_choice_fails_when_install_tree_incomplete(tmp_
         has_usable_nvidia = False,
     )
     choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-1",
         name = "llama-b9001-bin-ubuntu-x64.tar.gz",
         url = "https://example.com/llama-b9001-bin-ubuntu-x64.tar.gz",
@@ -2323,7 +2323,7 @@ def test_existing_install_matches_choice_fails_when_install_tree_incomplete(tmp_
         expected_sha256 = "a" * 64,
     )
     checksums = ApprovedReleaseChecksums(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = "release-1",
         upstream_tag = "b9001",
         source_commit = "deadbeef",
@@ -2402,7 +2402,7 @@ def test_existing_install_matches_choice_fails_when_install_tree_incomplete_maco
         has_usable_nvidia = False,
     )
     choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-1",
         name = "llama-b9001-bin-macos-arm64.tar.gz",
         url = "https://example.com/llama-b9001-bin-macos-arm64.tar.gz",
@@ -2411,7 +2411,7 @@ def test_existing_install_matches_choice_fails_when_install_tree_incomplete_maco
         expected_sha256 = "a" * 64,
     )
     checksums = ApprovedReleaseChecksums(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = "release-1",
         upstream_tag = "b9001",
         source_commit = "deadbeef",
@@ -2541,7 +2541,7 @@ def test_runtime_overlay_cannot_overwrite_main_archive_payload(tmp_path: Path) -
     runtime_sha = hashlib.sha256(runtime_zip.read_bytes()).hexdigest()
 
     choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "release-1",
         name = main_zip.name,
         url = f"https://example.com/{main_zip.name}",
@@ -2641,7 +2641,7 @@ def test_linux_runtime_overlay_copies_llama_tool_impl_libraries(tmp_path: Path) 
 
     bundle_sha = hashlib.sha256(bundle.read_bytes()).hexdigest()
     choice = AssetChoice(
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         tag = "b9334",
         name = bundle.name,
         url = f"https://example.com/{bundle.name}",

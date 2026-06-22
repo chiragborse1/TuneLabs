@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Structured logging handlers and middleware.
 
@@ -31,11 +31,11 @@ def _env_int(name: str, default: int) -> int:
 # Drop duplicate successful-GET access logs repeated within the window: the SPA
 # fans one cache invalidation into many identical list fetches; only the first
 # informs. Loading polls, mutations, and errors are unaffected. 0 = log all.
-_ACCESS_LOG_DEDUP_MS = _env_int("UNSLOTH_STUDIO_ACCESS_LOG_DEDUP_MS", 300)
+_ACCESS_LOG_DEDUP_MS = _env_int("TUNELABS_STUDIO_ACCESS_LOG_DEDUP_MS", 300)
 # Pure-liveness/UI polls whose access line carries no signal beyond "client still
 # polling" (state changes are logged by their own modules). Collapsed to a longer
 # heartbeat instead of one line per poll; first hit and any error still log. 0 = off.
-_QUIET_POLL_DEDUP_MS = _env_int("UNSLOTH_STUDIO_ACCESS_LOG_POLL_DEDUP_MS", 10000)
+_QUIET_POLL_DEDUP_MS = _env_int("TUNELABS_STUDIO_ACCESS_LOG_POLL_DEDUP_MS", 10000)
 _QUIET_POLL_PATHS = {
     "/api/health",
     "/api/auth/status",

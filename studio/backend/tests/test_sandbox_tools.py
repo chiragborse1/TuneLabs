@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 """Tests for the sandboxed-Python AST policy in core/inference/tools.py."""
 
@@ -66,7 +66,7 @@ class TestTrustedHostAllowlist:
             "https://fr.wikipedia.org/wiki/Python_(langage)",
             "https://www.google.com/search?q=foo",
             "https://duckduckgo.com/?q=foo",
-            "https://huggingface.co/unsloth",
+            "https://huggingface.co/tunelabs",
             "https://cdn-lfs.huggingface.co/repos/abc/def/file.bin",
             "https://raw.githubusercontent.com/foo/bar/main/README.md",
             "https://api.github.com/repos/foo/bar",
@@ -91,10 +91,10 @@ class TestTrustedHostAllowlist:
         _ok('import urllib.request; urllib.request.urlopen("https://m.en.wikipedia.org/wiki/Foo")')
 
     def test_hf_co_short_form_passes(self):
-        _ok('import requests; requests.get("https://hf.co/unsloth/Qwen3.5-4B-GGUF")')
+        _ok('import requests; requests.get("https://hf.co/tunelabs/Qwen3.5-4B-GGUF")')
 
     def test_github_io_pages_pass(self):
-        _ok('import requests; requests.get("https://unslothai.github.io/")')
+        _ok('import requests; requests.get("https://tunelabsai.github.io/")')
 
 
 class TestUntrustedHostBlock:
@@ -321,7 +321,7 @@ class TestSandboxCpuRlimitDefault:
 
     def test_default_cpu_s_is_600(self):
         src = (_BACKEND_ROOT / "core" / "inference" / "tools.py").read_text()
-        assert 'UNSLOTH_STUDIO_SANDBOX_CPU_S", "600"' in src
+        assert 'TUNELABS_STUDIO_SANDBOX_CPU_S", "600"' in src
 
     def test_clone_newnet_removed(self):
         src = (_BACKEND_ROOT / "core" / "inference" / "tools.py").read_text()
@@ -332,14 +332,14 @@ class TestSandboxCpuRlimitDefault:
     def test_nofile_env_tunable(self):
         src = (_BACKEND_ROOT / "core" / "inference" / "tools.py").read_text()
         # Parity with the other rlimits: must come from the env, not be hardcoded.
-        assert "UNSLOTH_STUDIO_SANDBOX_NOFILE" in src
+        assert "TUNELABS_STUDIO_SANDBOX_NOFILE" in src
 
 
 class TestMaxBodyDefault:
     def test_default_is_500_mb(self):
         src = (_BACKEND_ROOT / "utils" / "upload_limits.py").read_text()
         assert "DEFAULT_UPLOAD_LIMIT_MB = 500" in src
-        assert "UNSLOTH_STUDIO_MAX_BODY_MB" in src
+        assert "TUNELABS_STUDIO_MAX_BODY_MB" in src
 
 
 class TestBashBlocklistPosition:

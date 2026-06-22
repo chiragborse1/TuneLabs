@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Llama 3.1 (3B) GRPO LoRA train + merged-model save/eval."""
 
-from unsloth import FastLanguageModel
+from tunelabs import FastLanguageModel
 import torch
 import sys
 from pathlib import Path
@@ -25,7 +25,7 @@ def evaluate_merged_model(
     load_in_4bit = False,
     load_in_8bit = False,
 ):
-    from unsloth import FastLanguageModel
+    from tunelabs import FastLanguageModel
     from tests.utils.aime_eval import evaluate_model_aime
 
     max_seq_length = 2048
@@ -176,12 +176,12 @@ def training_run(result_queue):
         print(f"Prompt lengths - Min: {min_length}, Max: {max_length}, Avg: {avg_length:.1f}")
         return max_length, avg_length
 
-    def extract_unsloth_answer(
+    def extract_tunelabs_answer(
         text,
         start_tag = "<SOLUTION>",
         end_tag = "</SOLUTION>",
     ):
-        """Extract answer from Unsloth SOLUTION tags"""
+        """Extract answer from TuneLabs SOLUTION tags"""
         pattern = re.escape(start_tag) + r"(.*?)" + re.escape(end_tag)
         matches = re.findall(pattern, text, re.DOTALL)
 
@@ -215,9 +215,9 @@ def training_run(result_queue):
         encoding = tokenizer_instance(text, return_tensors = "pt")
         return len(encoding["input_ids"][0])
 
-    def check_format_compliance(text, format_type = "unsloth"):
+    def check_format_compliance(text, format_type = "tunelabs"):
         """Check if response follows expected format"""
-        if format_type == "unsloth":
+        if format_type == "tunelabs":
             reasoning_start = "<start_reasoning>"
             reasoning_end = "<end_reasoning>"
             solution_start = "<SOLUTION>"
@@ -457,7 +457,7 @@ def training_run(result_queue):
         seed = 0,
     )
 
-    from unsloth.chat_templates import get_chat_template
+    from tunelabs.chat_templates import get_chat_template
 
     tokenizer = get_chat_template(
         tokenizer,
@@ -481,7 +481,7 @@ def training_run(result_queue):
 
     from trl import SFTTrainer
     from transformers import DataCollatorForSeq2Seq, TrainingArguments
-    from unsloth import is_bfloat16_supported
+    from tunelabs import is_bfloat16_supported
 
     print(f"\n{'*'*60}")
     print("🎯 STAGE 1: Qlora Fine-Tuning on LIMO")
@@ -500,7 +500,7 @@ def training_run(result_queue):
             "down_proj",
         ],
         lora_alpha = lora_rank,
-        use_gradient_checkpointing = "unsloth",
+        use_gradient_checkpointing = "tunelabs",
         random_state = 3407,
     )
 
@@ -533,7 +533,7 @@ def training_run(result_queue):
             ),
         )
 
-        from unsloth.chat_templates import train_on_responses_only
+        from tunelabs.chat_templates import train_on_responses_only
 
         trainer = train_on_responses_only(
             trainer,
@@ -690,7 +690,7 @@ def training_run(result_queue):
 
     print("💾 Model saving complete!")
 
-    safe_remove_directory("./unsloth_compiled_cache")
+    safe_remove_directory("./tunelabs_compiled_cache")
 
     result_queue.put(results)
 
@@ -715,7 +715,7 @@ def training_run(result_queue):
     # torch.cuda.empty_cache()
     # gc.collect()
     #
-    # safe_remove_directory("./unsloth_compiled_cache")
+    # safe_remove_directory("./tunelabs_compiled_cache")
     #
     # # Merged model load 8 bits model AIME eval
     #
@@ -756,7 +756,7 @@ if __name__ == "__main__":
 
     merged_load_16bits = result_queue.get()
     all_results.append(merged_load_16bits)
-    safe_remove_directory("./unsloth_compiled_cache")
+    safe_remove_directory("./tunelabs_compiled_cache")
 
     # Merged model load 8 bits model AIME eval
     p = mp.Process(target = evaluate_merged_model, args = (result_queue, False, True))
@@ -766,7 +766,7 @@ if __name__ == "__main__":
     merged_load_8bits = result_queue.get()
     all_results.append(merged_load_8bits)
 
-    safe_remove_directory("./unsloth_compiled_cache")
+    safe_remove_directory("./tunelabs_compiled_cache")
 
     # Merged model load 4 bits model AIME eval
     p = mp.Process(target = evaluate_merged_model, args = (result_queue, True, False))
@@ -776,7 +776,7 @@ if __name__ == "__main__":
     merged_load_4bits = result_queue.get()
     all_results.append(merged_load_4bits)
 
-    safe_remove_directory("./unsloth_compiled_cache")
+    safe_remove_directory("./tunelabs_compiled_cache")
 
     print(f"\n{'='*80}")
     print("🏆 FINAL TRAINING PIPELINE RESULTS")

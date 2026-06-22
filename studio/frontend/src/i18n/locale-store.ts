@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { useSyncExternalStore } from "react";
 import { isSupportedLocale, type Locale } from "./messages";
 
 export const DEFAULT_LOCALE: Locale = "en";
-export const LOCALE_STORAGE_KEY = "unsloth_locale";
+export const LOCALE_STORAGE_KEY = "tunelabs_locale";
 
 const subscribers = new Set<() => void>();
 

@@ -2,7 +2,7 @@ import ast
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-GPU_INIT = REPO_ROOT / "unsloth" / "_gpu_init.py"
+GPU_INIT = REPO_ROOT / "tunelabs" / "_gpu_init.py"
 
 
 def _find_geteuid_guard(tree: ast.AST):

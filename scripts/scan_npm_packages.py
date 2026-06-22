@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 #
 # .github/workflows/security-audit.yml's npm-scan-packages job depends
 # on this file existing at scripts/scan_npm_packages.py.
@@ -743,7 +743,7 @@ def download_tarball(
     req = urllib.request.Request(
         entry.resolved,
         headers = {
-            "User-Agent": "unsloth-scan-npm-packages/1.0 (+supply-chain audit)",
+            "User-Agent": "tunelabs-scan-npm-packages/1.0 (+supply-chain audit)",
             "Accept": "application/octet-stream",
         },
         method = "GET",

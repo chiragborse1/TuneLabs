@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Automatic transformers version switching.
 
 Some newer model architectures (Ministral-3, GLM-4.7-Flash, Qwen3-30B-A3B MoE,
 tiny_qwen3_moe) require transformers>=5.3.0, while Gemma 4 models require a
 newer 5.x sidecar.  Everything else needs the default 4.57.x that ships with
-Unsloth.
+TuneLabs.
 
 Two separate target directories are maintained:
   - .venv_t5_530/  — transformers 5.3.0 (Ministral-3, GLM, Qwen3 MoE, etc.)
@@ -234,7 +234,7 @@ def _resolve_base_model(model_name: str) -> str:
         try:
             with open(config_json_path) as f:
                 cfg = json.load(f)
-            # Unsloth writes "model_name"; HF writes "_name_or_path"
+            # TuneLabs writes "model_name"; HF writes "_name_or_path"
             base = cfg.get("model_name") or cfg.get("_name_or_path")
             if base and base != str(local_path):
                 logger.info(
@@ -309,7 +309,7 @@ def _check_tokenizer_config_needs_v5(model_name: str) -> bool:
 
     url = f"https://huggingface.co/{model_name}/raw/main/tokenizer_config.json"
     try:
-        req = urllib.request.Request(url, headers = {"User-Agent": "unsloth-studio"})
+        req = urllib.request.Request(url, headers = {"User-Agent": "tunelabs-studio"})
         with urllib.request.urlopen(req, timeout = 10) as resp:
             data = json.loads(resp.read().decode())
         tokenizer_class = data.get("tokenizer_class", "")
@@ -361,7 +361,7 @@ def _load_config_json(model_name: str, hf_token: str | None = None) -> dict | No
     import urllib.request
 
     url = f"https://huggingface.co/{model_name}/raw/main/config.json"
-    headers = {"User-Agent": "unsloth-studio"}
+    headers = {"User-Agent": "tunelabs-studio"}
     if hf_token:
         headers["Authorization"] = f"Bearer {hf_token}"
     try:
@@ -571,8 +571,8 @@ def _get_in_memory_version() -> str | None:
 _PURGE_PREFIXES = (
     "transformers",
     "huggingface_hub",
-    "unsloth",
-    "unsloth_zoo",
+    "tunelabs",
+    "tunelabs_zoo",
     "peft",
     "trl",
     "accelerate",

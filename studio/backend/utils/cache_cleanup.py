@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-"""Clean up the Unsloth compiled cache directory.
+"""Clean up the TuneLabs compiled cache directory.
 
-unsloth_compiled_cache (created by unsloth_zoo/compiler.py during
+tunelabs_compiled_cache (created by tunelabs_zoo/compiler.py during
 FastModel.from_pretrained) holds model-type-specific compiled files. Clear it
 selectively between model loads, preserving model-agnostic components (Trainers)
 that spawned subprocesses need.
@@ -17,14 +17,14 @@ from typing import List, Optional
 
 logger = get_logger(__name__)
 
-# Possible locations where unsloth_compiled_cache may appear
+# Possible locations where tunelabs_compiled_cache may appear
 _BACKEND_DIR = Path(__file__).resolve().parent.parent  # studio/backend
 _PROJECT_ROOT = _BACKEND_DIR.parent.parent  # repo root
 
 _CACHE_DIRS = [
-    _BACKEND_DIR / "unsloth_compiled_cache",
-    _PROJECT_ROOT / "unsloth_compiled_cache",
-    _PROJECT_ROOT / "studio" / "tmp" / "unsloth_compiled_cache",
+    _BACKEND_DIR / "tunelabs_compiled_cache",
+    _PROJECT_ROOT / "tunelabs_compiled_cache",
+    _PROJECT_ROOT / "studio" / "tmp" / "tunelabs_compiled_cache",
 ]
 
 
@@ -37,7 +37,7 @@ def register_compiled_cache_on_path() -> None:
     """Add all existing compiled-cache directories to sys.path and PYTHONPATH.
 
     Ensures spawned workers (on 'spawn'-start platforms, i.e. Windows and macOS)
-    can import dynamically compiled modules such as UnslothSFTTrainer.
+    can import dynamically compiled modules such as TuneLabsSFTTrainer.
     """
     import os
     import sys
@@ -57,13 +57,13 @@ def register_compiled_cache_on_path() -> None:
     os.environ["PYTHONPATH"] = os.pathsep.join(pypath_entries)
 
 
-def clear_unsloth_compiled_cache(preserve_patterns: Optional[List[str]] = None) -> None:
+def clear_tunelabs_compiled_cache(preserve_patterns: Optional[List[str]] = None) -> None:
     """
     Remove compiled files from the cache directory (idempotent).
 
     Args:
         preserve_patterns: glob patterns for files to keep
-                           (e.g., ["Unsloth*Trainer.py"]). If None or empty,
+                           (e.g., ["TuneLabs*Trainer.py"]). If None or empty,
                            the entire cache directory is deleted (legacy behavior).
     """
     for cache_dir in _CACHE_DIRS:
@@ -72,7 +72,7 @@ def clear_unsloth_compiled_cache(preserve_patterns: Optional[List[str]] = None) 
 
         if preserve_patterns:
             logger.info(
-                f"Cleaning unsloth compiled cache (preserving {preserve_patterns}): " f"{cache_dir}"
+                f"Cleaning tunelabs compiled cache (preserving {preserve_patterns}): " f"{cache_dir}"
             )
 
             for item in cache_dir.iterdir():
@@ -89,5 +89,5 @@ def clear_unsloth_compiled_cache(preserve_patterns: Optional[List[str]] = None) 
                     shutil.rmtree(item, ignore_errors = True)
         else:
             # Legacy: remove the entire directory
-            logger.info(f"Removing unsloth compiled cache: {cache_dir}")
+            logger.info(f"Removing tunelabs compiled cache: {cache_dir}")
             shutil.rmtree(cache_dir, ignore_errors = True)

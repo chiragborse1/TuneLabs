@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-"""Tests for UNSLOTH_PYTORCH_MIRROR env var in install_python_stack.py."""
+"""Tests for TUNELABS_PYTORCH_MIRROR env var in install_python_stack.py."""
 
 from __future__ import annotations
 
@@ -24,9 +24,9 @@ def _reload_whl_base(monkeypatch, mirror_value = None):
     sys.modules.pop("install_python_stack", None)
 
     if mirror_value is None:
-        monkeypatch.delenv("UNSLOTH_PYTORCH_MIRROR", raising = False)
+        monkeypatch.delenv("TUNELABS_PYTORCH_MIRROR", raising = False)
     else:
-        monkeypatch.setenv("UNSLOTH_PYTORCH_MIRROR", mirror_value)
+        monkeypatch.setenv("TUNELABS_PYTORCH_MIRROR", mirror_value)
 
     # Add the script's directory to sys.path for import.
     script_dir = str(_INSTALL_SCRIPT.parent)
@@ -38,7 +38,7 @@ def _reload_whl_base(monkeypatch, mirror_value = None):
 
 
 class TestPyTorchMirrorEnvVar:
-    """UNSLOTH_PYTORCH_MIRROR controls _PYTORCH_WHL_BASE in install_python_stack."""
+    """TUNELABS_PYTORCH_MIRROR controls _PYTORCH_WHL_BASE in install_python_stack."""
 
     def test_unset_uses_official_url(self, monkeypatch):
         assert _reload_whl_base(monkeypatch) == OFFICIAL_URL

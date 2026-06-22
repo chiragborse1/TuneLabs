@@ -30,7 +30,7 @@ requires_cuda = pytest.mark.skipif(
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-LLAMA_PY = REPO_ROOT / "unsloth" / "models" / "llama.py"
+LLAMA_PY = REPO_ROOT / "tunelabs" / "models" / "llama.py"
 
 CLASS_NAME = "LlamaRotaryEmbedding"
 
@@ -47,7 +47,7 @@ HEAD_DIM = 128
 MAX_POS = 131072
 
 
-# --- Layer 1: AST structural tripwire (stdlib only, no unsloth import) ---
+# --- Layer 1: AST structural tripwire (stdlib only, no tunelabs import) ---
 
 
 def _load_class_init():
@@ -133,8 +133,8 @@ def _make_config(rope_scaling):
     )
 
 
-def _unsloth_rotary(config):
-    from unsloth.models import llama as llama_mod
+def _tunelabs_rotary(config):
+    from tunelabs.models import llama as llama_mod
     return llama_mod.LlamaRotaryEmbedding(config = config)
 
 
@@ -151,7 +151,7 @@ def _vanilla_inv_freq():
 
 
 def _compute_helper(config, rope_scaling):
-    from unsloth.models.llama import _compute_config_rope_inv_freq
+    from tunelabs.models.llama import _compute_config_rope_inv_freq
     return _compute_config_rope_inv_freq(config, rope_scaling)
 
 
@@ -205,7 +205,7 @@ def _cos_at_position(rot, position):
 @requires_cuda
 def test_constructor_applies_llama3_scaling():
     config = _make_config(LLAMA3_ROPE_SCALING)
-    rot = _unsloth_rotary(config)
+    rot = _tunelabs_rotary(config)
     got = rot.inv_freq.float().cpu()
     expected = _reference_inv_freq(config, "llama3")
     assert torch.allclose(
@@ -215,7 +215,7 @@ def test_constructor_applies_llama3_scaling():
 
 @requires_cuda
 def test_constructor_unscaled_config_uses_vanilla_inv_freq():
-    rot = _unsloth_rotary(_make_config(None))
+    rot = _tunelabs_rotary(_make_config(None))
     got = rot.inv_freq.float().cpu()
     vanilla = _vanilla_inv_freq()
     assert torch.allclose(
@@ -225,8 +225,8 @@ def test_constructor_unscaled_config_uses_vanilla_inv_freq():
 
 @requires_cuda
 def test_cos_cache_differs_between_scaled_and_unscaled_at_long_position():
-    scaled = _unsloth_rotary(_make_config(LLAMA3_ROPE_SCALING))
-    unscaled = _unsloth_rotary(_make_config(None))
+    scaled = _tunelabs_rotary(_make_config(LLAMA3_ROPE_SCALING))
+    unscaled = _tunelabs_rotary(_make_config(None))
 
     pos = 10000
     cos_scaled = _cos_at_position(scaled, pos)
@@ -241,7 +241,7 @@ def test_cos_cache_differs_between_scaled_and_unscaled_at_long_position():
 
 @requires_cuda
 def test_extended_cache_keeps_scaling_after_growth():
-    scaled = _unsloth_rotary(_make_config(LLAMA3_ROPE_SCALING))
+    scaled = _tunelabs_rotary(_make_config(LLAMA3_ROPE_SCALING))
     # Grow past the initial cache size (mirrors long-context decode).
     dummy = torch.zeros(1, dtype = torch.float32)
     scaled.extend_rope_embedding(dummy, seq_len = 40960)
@@ -260,7 +260,7 @@ def test_object_style_rope_scaling_does_not_crash():
     # Object-style rope_scaling must be normalized, not .get()'d directly.
     from dataclasses import dataclass
 
-    from unsloth.models.llama import _compute_config_rope_inv_freq
+    from tunelabs.models.llama import _compute_config_rope_inv_freq
 
     @dataclass
     class FakeRopeScalingConfig:
@@ -285,7 +285,7 @@ def test_object_style_rope_scaling_on_config_delegates_correctly():
     # 'linear' has no inline fallback; only the normalized-config retry passes this.
     from dataclasses import dataclass
 
-    from unsloth.models.llama import _compute_config_rope_inv_freq
+    from tunelabs.models.llama import _compute_config_rope_inv_freq
 
     @dataclass
     class FakeLinearRopeScalingConfig:

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 export type FormatFilterModelFormat =
   | "gguf"
@@ -42,14 +42,14 @@ export function detectResultFormat(result: {
   return "safetensors";
 }
 
-// Inference-only quant formats Unsloth cannot fine-tune. Matched on the repo
+// Inference-only quant formats TuneLabs cannot fine-tune. Matched on the repo
 // name since the search listing often omits the quant config.
 const NON_FINETUNABLE_NAME =
   /(?:^|[-_/.])(?:fp8|nvfp4|mxfp4|w4a16|w8a8|w8a16|int4|int8|gptq|awq|mobile|litert|tflite)(?:[-_/.]|$)/i;
-// Quant methods Unsloth can fine-tune: full precision (none) or bitsandbytes.
+// Quant methods TuneLabs can fine-tune: full precision (none) or bitsandbytes.
 const FINETUNABLE_QUANT = new Set(["bitsandbytes", "bnb", "bnb_4bit"]);
 
-export function isUnslothFinetunable(result: {
+export function isTuneLabsFinetunable(result: {
   id: string;
   quantMethod?: string;
 }): boolean {

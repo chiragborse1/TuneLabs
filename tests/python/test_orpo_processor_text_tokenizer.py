@@ -6,7 +6,7 @@ import re
 
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-RL_PATH = os.path.join(REPO_ROOT, "unsloth", "models", "rl_replacements.py")
+RL_PATH = os.path.join(REPO_ROOT, "tunelabs", "models", "rl_replacements.py")
 
 
 def _load_orpo_rewriter(name = "orpo_trainer_text_tokenizer"):

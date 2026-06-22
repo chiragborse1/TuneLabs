@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-"""Cross-platform Node.js prebuilt installer for Unsloth Studio.
+"""Cross-platform Node.js prebuilt installer for TuneLabs Studio.
 
 Downloads an official Node.js archive from nodejs.org into an isolated
-``<UNSLOTH_HOME>/node`` and never touches the system Node/npm. Pinning Node 24+
+``<TUNELABS_HOME>/node`` and never touches the system Node/npm. Pinning Node 24+
 LTS clears the Studio frontend build floor (Vite 8: Node ^20.19 || >=22.12,
 npm >= 11) with the npm it bundles.
 
@@ -62,7 +62,7 @@ HTTP_FETCH_ATTEMPTS = 4
 HTTP_FETCH_BASE_DELAY_SECONDS = 0.75
 INSTALL_LOCK_TIMEOUT_SECONDS = 300
 INSTALL_STAGING_ROOT_NAME = ".staging"
-METADATA_FILENAME = "UNSLOTH_NODE_PREBUILT_INFO.json"
+METADATA_FILENAME = "TUNELABS_NODE_PREBUILT_INFO.json"
 METADATA_SCHEMA_VERSION = 1
 
 # PowerShell renders stderr as NativeCommandError noise; main() flips logs to stdout.
@@ -205,7 +205,7 @@ def select_node_version(index: list[dict], *, channel: str, min_major: int) -> s
 # ── HTTP (retry/backoff) ──
 def _auth_headers() -> dict[str, str]:
     # A User-Agent keeps some proxies/CDNs happy; nodejs.org needs no auth.
-    return {"User-Agent": "unsloth-studio-node-prebuilt"}
+    return {"User-Agent": "tunelabs-studio-node-prebuilt"}
 
 
 def is_retryable_url_error(exc: Exception) -> bool:
@@ -397,7 +397,7 @@ def extract_archive(archive_path: Path, destination: Path) -> None:
         raise PrebuiltFallback(f"unsupported archive format: {archive_path.name}")
 
 
-# ── Install lock (concurrent setup runs share one UNSLOTH_HOME) ──
+# ── Install lock (concurrent setup runs share one TUNELABS_HOME) ──
 def install_lock_path(install_dir: Path) -> Path:
     return install_dir.parent / f".{install_dir.name}.install.lock"
 
@@ -727,13 +727,13 @@ def main(argv: list[str] | None = None) -> int:
     global _LOG_TO_STDOUT
     _LOG_TO_STDOUT = True
 
-    parser = argparse.ArgumentParser(description = "Install an isolated Node.js for Unsloth Studio")
+    parser = argparse.ArgumentParser(description = "Install an isolated Node.js for TuneLabs Studio")
     parser.add_argument(
-        "--install-dir", required = True, help = "isolated Node directory, e.g. <UNSLOTH_HOME>/node"
+        "--install-dir", required = True, help = "isolated Node directory, e.g. <TUNELABS_HOME>/node"
     )
     parser.add_argument(
         "--node-version",
-        default = os.environ.get("UNSLOTH_NODE_VERSION", "lts"),
+        default = os.environ.get("TUNELABS_NODE_VERSION", "lts"),
         help = "'lts' (default), 'latest', or an explicit version like 24.4.1",
     )
     parser.add_argument("--min-major", type = int, default = NODE_MIN_LTS_MAJOR)

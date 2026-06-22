@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { Button } from "@/components/ui/button";
 import { type DeviceType, usePlatformStore } from "@/config/env";
@@ -14,9 +14,9 @@ import { type ReactElement, useEffect, useRef, useState } from "react";
 // macOS, Linux and WSL update via the POSIX installer; only native Windows
 // (PowerShell) needs the irm one-liner. Any non-windows device_type (incl. wsl)
 // resolves to the curl command below.
-const STUDIO_INSTALL_UNIX_CMD = "curl -fsSL https://unsloth.ai/install.sh | sh";
-const STUDIO_INSTALL_WINDOWS_CMD = "irm https://unsloth.ai/install.ps1 | iex";
-const RELEASE_NOTES_URL = "https://unsloth.ai/docs/new/changelog";
+const STUDIO_INSTALL_UNIX_CMD = "curl -fsSL https://tunelabs.ai/install.sh | sh";
+const STUDIO_INSTALL_WINDOWS_CMD = "irm https://tunelabs.ai/install.ps1 | iex";
+const RELEASE_NOTES_URL = "https://tunelabs.ai/docs/new/changelog";
 const EASE_OUT_QUART: [number, number, number, number] = [0.165, 0.84, 0.44, 1];
 
 function installCommandForDevice(deviceType: DeviceType): string {
@@ -116,7 +116,7 @@ export function WebUpdateBanner({
               />
               <div className="min-w-0">
                 <p className="font-heading text-base font-medium text-foreground">
-                  New Unsloth version
+                  New TuneLabs version
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {status.currentVersion} &rarr;{" "}

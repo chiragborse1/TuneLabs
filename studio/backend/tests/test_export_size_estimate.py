@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Tests for GET /api/models/export-size (the Export page size estimate).
 
@@ -39,7 +39,7 @@ class TestExportSizeEndpoint(unittest.TestCase):
     def setUp(self):
         self.models_route._EXPORT_SIZE_CACHE.clear()
 
-    def _call(self, model: str = "unsloth/Qwen3.6-35B-A3B"):
+    def _call(self, model: str = "tunelabs/Qwen3.6-35B-A3B"):
         with (
             patch.object(self.models_route, "is_local_path", return_value = False),
             patch.object(self.models_route, "resolve_cached_repo_id_case", side_effect = lambda m: m),
@@ -59,7 +59,7 @@ class TestExportSizeEndpoint(unittest.TestCase):
         self.assertEqual(resp.fp16_bytes, _QWEN35_FP16_BYTES)
         self.assertEqual(resp.total_params, _QWEN35_PARAMS)
         self.assertEqual(resp.source, "safetensors")
-        self.assertEqual(resp.model, "unsloth/Qwen3.6-35B-A3B")
+        self.assertEqual(resp.model, "tunelabs/Qwen3.6-35B-A3B")
 
     def test_moe_via_config_fallback(self):
         # MoE sized via the sizer's config path -> source "config".
@@ -133,7 +133,7 @@ class TestExportSizeEndpoint(unittest.TestCase):
         ):
             asyncio.run(
                 self.models_route.get_export_size(
-                    model = "unsloth/Private",
+                    model = "tunelabs/Private",
                     hf_token = "secret-token",
                     current_subject = "test-user",
                 )
@@ -171,7 +171,7 @@ class TestExportSizeEndpoint(unittest.TestCase):
         ):
             resp = asyncio.run(
                 self.models_route.get_export_size(
-                    model = "/root/.unsloth/studio/outputs/run",
+                    model = "/root/.tunelabs/studio/outputs/run",
                     hf_token = None,
                     current_subject = "test-user",
                 )
@@ -182,7 +182,7 @@ class TestExportSizeEndpoint(unittest.TestCase):
     def test_local_adapter_base_escaping_roots_is_rejected(self):
         # A local adapter under a root whose resolved base points outside the
         # roots (e.g. "/") must not be sized: the resolved base is re-validated.
-        adapter = "/root/.unsloth/studio/outputs/adapter"
+        adapter = "/root/.tunelabs/studio/outputs/adapter"
         with (
             patch.object(self.models_route, "is_local_path", return_value = True),
             patch.object(

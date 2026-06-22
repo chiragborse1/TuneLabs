@@ -14,7 +14,7 @@
     "model_configs": [
       {
         "alias": "model_1",
-        "model": "unsloth/gemma-4-E2B-it-GGUF",
+        "model": "tunelabs/gemma-4-E2B-it-GGUF",
         "provider": "Local Model",
         "inference_parameters": {
           "temperature": 0.4,
@@ -26,8 +26,8 @@
       "source": {
         "seed_type": "github_repo",
         "repos": [
-          "unslothai/unsloth",
-          "unslothai/unsloth-zoo"
+          "tunelabsai/tunelabs",
+          "tunelabsai/tunelabs-zoo"
         ],
         "item_types": [
           "issues",
@@ -57,8 +57,8 @@
         "name": "Assistant",
         "drop": false,
         "model_alias": "model_1",
-        "prompt": "You are generating one training row for an Unsloth GitHub co-author model. Given the real GitHub thread and a synthesized user request, produce a grounded structured response.\n\nSource thread:\n- Repo: {{ repo }}\n- Type: {{ item_type }}\n- Title: {{ title }}\n- URL: {{ url }}\n- State: {{ state }}\n- Labels: {{ labels }}\n- Body: {{ body }}\n- First comments: {{ comments }}\n\nUser request:\n{{ User }}\n\nRules:\n- `response`: 100-250 words of Markdown grounded in the thread. If the thread is a closed / resolved issue, follow the `issue_fix_plan` shape: brief diagnosis, numbered fix steps, and a short repro. If the thread is a PR, follow the `explain_pr` shape: what changed, why, and which files or symbols were touched. If the thread is open / unresolved, answer honestly and ask for the missing info.\n- Cite the source URL at least once inline as `[source: {{ url }}]`.\n- Name at least one concrete symbol (function, class, flag, env var, or file path) from the thread when available.\n- Include a short ```bash or ```python code block ONLY if the thread itself contains that code or command.\n- Never recommend `rm -rf`, force push, or other destructive commands without an explicit warning.\n- No em-dashes, no emojis, no AI-disclaimer phrases. Only cite URLs / paths that appear in the thread.\n- `followups`: 0-4 follow-up questions when the thread is missing info (versions, GPU, traceback). Empty list if the response is complete.\n- `cites`: URLs / file paths actually used. Always include `{{ url }}`.\n- `task`: one of `explain_pr`, `issue_fix_plan`, `issue_solution`, `discussion_qa`. Pick the closest match.\n- `confidence`: `high` / `medium` / `low`. Use `low` when ambiguous or out of scope.",
-        "system_prompt": "You write grounded GitHub co-author responses for Unsloth. Faithful to the thread, no invented facts, no em-dashes, no emojis, no AI-disclaimer phrases.",
+        "prompt": "You are generating one training row for an TuneLabs GitHub co-author model. Given the real GitHub thread and a synthesized user request, produce a grounded structured response.\n\nSource thread:\n- Repo: {{ repo }}\n- Type: {{ item_type }}\n- Title: {{ title }}\n- URL: {{ url }}\n- State: {{ state }}\n- Labels: {{ labels }}\n- Body: {{ body }}\n- First comments: {{ comments }}\n\nUser request:\n{{ User }}\n\nRules:\n- `response`: 100-250 words of Markdown grounded in the thread. If the thread is a closed / resolved issue, follow the `issue_fix_plan` shape: brief diagnosis, numbered fix steps, and a short repro. If the thread is a PR, follow the `explain_pr` shape: what changed, why, and which files or symbols were touched. If the thread is open / unresolved, answer honestly and ask for the missing info.\n- Cite the source URL at least once inline as `[source: {{ url }}]`.\n- Name at least one concrete symbol (function, class, flag, env var, or file path) from the thread when available.\n- Include a short ```bash or ```python code block ONLY if the thread itself contains that code or command.\n- Never recommend `rm -rf`, force push, or other destructive commands without an explicit warning.\n- No em-dashes, no emojis, no AI-disclaimer phrases. Only cite URLs / paths that appear in the thread.\n- `followups`: 0-4 follow-up questions when the thread is missing info (versions, GPU, traceback). Empty list if the response is complete.\n- `cites`: URLs / file paths actually used. Always include `{{ url }}`.\n- `task`: one of `explain_pr`, `issue_fix_plan`, `issue_solution`, `discussion_qa`. Pick the closest match.\n- `confidence`: `high` / `medium` / `low`. Use `low` when ambiguous or out of scope.",
+        "system_prompt": "You write grounded GitHub co-author responses for TuneLabs. Faithful to the thread, no invented facts, no em-dashes, no emojis, no AI-disclaimer phrases.",
         "with_trace": "none",
         "extract_reasoning_content": false,
         "output_format": {
@@ -129,7 +129,7 @@
         "width": 400,
         "node_type": "markdown_note",
         "name": "note_1",
-        "markdown": "### GitHub Crawler\nReal GitHub issues and PRs turned into `{User, Assistant}` training pairs. Mirrors two of the eleven canonical enrichment tasks in the `github_data_gatherer` dataset: `pr_requests_20` / `issue_requests_20` for the input side, and `explain_pr` / `issue_fix_plan` / `issue_solution` for the output side.\n\n**Click `Run` below for 10 sample rows.** Defaults point at `unslothai/unsloth` + `unslothai/unsloth-zoo`, use the server's `GH_TOKEN` / `GITHUB_TOKEN` env var, and run the bundled local model. Paste a PAT only when you need private repos.\n\n**Configure source data**\n- Paste `owner/name` values or GitHub URLs; the editor normalizes and dedupes them.\n- Keep the seed `limit` around 100 for previews. Increase toward 5000 per item type for larger backfills.\n- Comments and large repos can make Check or Run take minutes; watch logs for GitHub page and rate-limit messages.\n\n**Upgrade to production**\n- Swap `unsloth/gemma-4-E2B-it-GGUF` for a stronger model (`gpt-5.4-mini` with `reasoning_effort=medium` is what the reference dataset uses).\n- Replace the demo prompts with the task-specific prompts from the reference dataset (see Note 3).\n- Raise `max_parallel_requests` to 4 once the inference server can handle it.",
+        "markdown": "### GitHub Crawler\nReal GitHub issues and PRs turned into `{User, Assistant}` training pairs. Mirrors two of the eleven canonical enrichment tasks in the `github_data_gatherer` dataset: `pr_requests_20` / `issue_requests_20` for the input side, and `explain_pr` / `issue_fix_plan` / `issue_solution` for the output side.\n\n**Click `Run` below for 10 sample rows.** Defaults point at `tunelabsai/tunelabs` + `tunelabsai/tunelabs-zoo`, use the server's `GH_TOKEN` / `GITHUB_TOKEN` env var, and run the bundled local model. Paste a PAT only when you need private repos.\n\n**Configure source data**\n- Paste `owner/name` values or GitHub URLs; the editor normalizes and dedupes them.\n- Keep the seed `limit` around 100 for previews. Increase toward 5000 per item type for larger backfills.\n- Comments and large repos can make Check or Run take minutes; watch logs for GitHub page and rate-limit messages.\n\n**Upgrade to production**\n- Swap `tunelabs/gemma-4-E2B-it-GGUF` for a stronger model (`gpt-5.4-mini` with `reasoning_effort=medium` is what the reference dataset uses).\n- Replace the demo prompts with the task-specific prompts from the reference dataset (see Note 3).\n- Raise `max_parallel_requests` to 4 once the inference server can handle it.",
         "note_color": "#E0F2FE",
         "note_opacity": "35"
       },

@@ -9,14 +9,14 @@ import logging
 
 import pytest
 
-from unsloth.models._utils import (
+from tunelabs.models._utils import (
     _all_missing_keys_are_position_ids,
     _RaiseUninitialized,
 )
 
 _TEMPLATE = (
     "Some weights of DeepseekOCRForCausalLM were not initialized from the model "
-    "checkpoint at unsloth/DeepSeek-OCR and are newly initialized: {keys}\n"
+    "checkpoint at tunelabs/DeepSeek-OCR and are newly initialized: {keys}\n"
     "You should probably TRAIN this model on a down-stream task."
 )
 

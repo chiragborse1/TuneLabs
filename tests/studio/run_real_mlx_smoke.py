@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 """End-to-end MLX smoke test on real Apple Silicon (multi-process driver).
 
 `train` overfits gemma-3-270m-it on one row for 30 steps and saves
 lora/merged_16bit/gguf; `reload` reopens each format in a fresh process.
-GGUF + LoRA reload fixes land in unslothai/unsloth-zoo#627. Metal's
+GGUF + LoRA reload fixes land in tunelabsai/tunelabs-zoo#627. Metal's
 reduction-order nondeterminism makes loss assertions bounds, not exact.
 Apple-Silicon only; invoked from .github/workflows/mlx-ci.yml.
 """
@@ -27,10 +27,10 @@ import numpy as np
 
 
 SEED = 3407
-TRAIN_TEXT = "<<HELLO!!>> My name is Unsloth!"
+TRAIN_TEXT = "<<HELLO!!>> My name is TuneLabs!"
 PROMPT = "<<HELLO!!>> My name is "
-EXPECT_IN_OUTPUT = "Unsloth"
-MODEL_NAME = "unsloth/gemma-3-270m-it"
+EXPECT_IN_OUTPUT = "TuneLabs"
+MODEL_NAME = "tunelabs/gemma-3-270m-it"
 
 
 # ---------------------------------------------------------------------------
@@ -182,8 +182,8 @@ def cmd_train(args) -> int:
     workdir.mkdir(parents = True, exist_ok = True)
 
     import mlx.core as mx
-    from unsloth_zoo.mlx.loader import FastMLXModel
-    from unsloth_zoo.mlx.trainer import MLXTrainer, MLXTrainingConfig
+    from tunelabs_zoo.mlx.loader import FastMLXModel
+    from tunelabs_zoo.mlx.trainer import MLXTrainer, MLXTrainingConfig
 
     hf_token = os.environ.get("HF_TOKEN") or None
 
@@ -365,11 +365,11 @@ def cmd_train(args) -> int:
         f"teacher-forced completion loss {completion_loss:.4f} >= 0.5: "
         f"the LoRA did not memorise {EXPECT_IN_OUTPUT + '!'!r} after "
         f"{PROMPT!r} (post_train_loss={post_loss:.4f}). Trainer regression "
-        "suspected -- check unsloth_zoo MLX trainer gradient clipping / "
+        "suspected -- check tunelabs_zoo MLX trainer gradient clipping / "
         "optimizer defaults vs torch.optim.AdamW."
     )
 
-    # unsloth-zoo#627 fixed from_pretrained(lora_dir) so the cold-start
+    # tunelabs-zoo#627 fixed from_pretrained(lora_dir) so the cold-start
     # reload below works on the saved adapter dir directly.
     lora_dir = workdir / "lora"
     with Phase("save_lora", metrics):
@@ -395,7 +395,7 @@ def cmd_train(args) -> int:
 
     # Save GGUF (best-effort). For some models (e.g. gemma-3-270m-it)
     # llama.cpp's convert_hf_to_gguf asserts on the tokenizer vocab -- an
-    # llama.cpp limitation, not an unsloth_zoo bug. Soft-skip with a recorded
+    # llama.cpp limitation, not an tunelabs_zoo bug. Soft-skip with a recorded
     # reason so the LoRA + merged_16bit assertions still gate the PR.
     gguf_dir = workdir / "gguf"
     metrics["gguf_supported"] = False
@@ -420,7 +420,7 @@ def cmd_train(args) -> int:
                     f"llama.cpp convert_hf_to_gguf asserted on tokenizer "
                     f"vocab for {MODEL_NAME} (max(vocab IDs) >= "
                     f"vocab_size). Downstream llama.cpp limitation, not "
-                    f"unsloth_zoo. Underlying error: {err_text}"
+                    f"tunelabs_zoo. Underlying error: {err_text}"
                 )
             else:
                 metrics["gguf_skip_reason"] = err_text
@@ -455,7 +455,7 @@ def cmd_reload(args) -> int:
         return _reload_gguf(save_dir, metrics)
 
     import mlx.core as mx
-    from unsloth_zoo.mlx.loader import FastMLXModel
+    from tunelabs_zoo.mlx.loader import FastMLXModel
     from mlx_lm import generate
 
     hf_token = os.environ.get("HF_TOKEN") or None

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { Button } from "@/components/ui/button";
 import {
@@ -46,41 +46,41 @@ import { StudioVersionSection } from "../components/studio-version-section";
 
 // Keys cleared by "Reset all local preferences".
 // NEVER include auth/session keys here — clearing them would log the user out
-// or force re-onboarding. Explicitly excluded: unsloth_auth_token,
-// unsloth_auth_refresh_token, unsloth_auth_must_change_password,
-// unsloth_onboarding_done.
+// or force re-onboarding. Explicitly excluded: tunelabs_auth_token,
+// tunelabs_auth_refresh_token, tunelabs_auth_must_change_password,
+// tunelabs_onboarding_done.
 const PREFS_KEYS: string[] = [
   // Appearance
   "theme",
   LOCALE_STORAGE_KEY,
   // UI state
   "sidebar_pinned",
-  "unsloth_sidebar_navigate_open",
-  "unsloth_settings_active_tab",
+  "tunelabs_sidebar_navigate_open",
+  "tunelabs_settings_active_tab",
   // Chat runtime prefs
-  "unsloth_chat_auto_title",
-  "unsloth_hf_token",
-  "unsloth_auto_heal_tool_calls",
-  "unsloth_max_tool_calls_per_message",
-  "unsloth_tool_call_timeout",
-  "unsloth_chat_inference_params",
-  "unsloth_chat_collapsible_state",
-  "unsloth_chat_preferences",
+  "tunelabs_chat_auto_title",
+  "tunelabs_hf_token",
+  "tunelabs_auto_heal_tool_calls",
+  "tunelabs_max_tool_calls_per_message",
+  "tunelabs_tool_call_timeout",
+  "tunelabs_chat_inference_params",
+  "tunelabs_chat_collapsible_state",
+  "tunelabs_chat_preferences",
   // Chat presets
-  "unsloth_chat_custom_presets",
-  "unsloth_chat_active_preset",
-  "unsloth_chat_system_prompts",
-  "unsloth_chat_system_prompts_migrated",
+  "tunelabs_chat_custom_presets",
+  "tunelabs_chat_active_preset",
+  "tunelabs_chat_system_prompts",
+  "tunelabs_chat_system_prompts_migrated",
   // Training UI prefs
-  "unsloth_training_config_v1",
-  "unsloth_prev_max_steps",
-  "unsloth_prev_save_steps",
+  "tunelabs_training_config_v1",
+  "tunelabs_prev_max_steps",
+  "tunelabs_prev_save_steps",
   // Profile personalization
-  "unsloth_user_profile",
+  "tunelabs_user_profile",
   // Guided tour flags
   "tour:studio:v1",
   // Update notifications
-  "unsloth_show_llama_update_banner",
+  "tunelabs_show_llama_update_banner",
 ];
 
 // Set by resetAllPrefs so the unmount-commit effect skips writing back the

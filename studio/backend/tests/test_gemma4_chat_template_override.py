@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-"""Auto-override of the chat template for ``unsloth/gemma-4-*-GGUF``.
+"""Auto-override of the chat template for ``tunelabs/gemma-4-*-GGUF``.
 
 Studio ships a bundled ``gemma-4.jinja`` (PR #118 based, ``preserve_thinking``
 defaulted off) and applies it to gemma-4 GGUF loads via the existing
@@ -31,10 +31,10 @@ _ct_spec = importlib.util.spec_from_file_location("_gemma4_ct_test", _CT_PATH)
 chat_templates = importlib.util.module_from_spec(_ct_spec)
 _ct_spec.loader.exec_module(chat_templates)
 
-is_unsloth_gemma4_gguf = chat_templates.is_unsloth_gemma4_gguf
+is_tunelabs_gemma4_gguf = chat_templates.is_tunelabs_gemma4_gguf
 resolve_effective_chat_template_override = chat_templates.resolve_effective_chat_template_override
 load_bundled_chat_template = chat_templates.load_bundled_chat_template
-is_unsloth_gemma4_edge_gguf = chat_templates.is_unsloth_gemma4_edge_gguf
+is_tunelabs_gemma4_edge_gguf = chat_templates.is_tunelabs_gemma4_edge_gguf
 
 BUNDLED = load_bundled_chat_template("gemma-4.jinja")  # 12b / 26B-A4B / 31B
 EDGE = load_bundled_chat_template("gemma-4-edge.jinja")  # E2B / E4B
@@ -96,24 +96,24 @@ def _detect_reasoning_flags():
 @pytest.mark.parametrize(
     "model_id,expected",
     [
-        ("unsloth/gemma-4-E2B-it-GGUF", True),
-        ("unsloth/gemma-4-E4B-it-GGUF", True),
-        ("unsloth/gemma-4-31B-it-GGUF", True),
-        ("unsloth/gemma-4-26B-A4B-it-GGUF", True),
-        ("UNSLOTH/GEMMA-4-E2B-IT-GGUF", True),  # case-insensitive
-        ("gemma-4-E2B-it-GGUF", True),  # owner-less shorthand -> unsloth/
-        ("gemma-4-31B-it-GGUF", True),  # owner-less shorthand -> unsloth/
-        ("unsloth/gemma-4-E2B-it", False),  # bf16, not GGUF
-        ("unsloth/gemma-3-4b-it-GGUF", False),  # gemma 3
-        ("google/gemma-4-31B-it-GGUF", False),  # not unsloth
-        ("unsloth/Qwen3.5-9B-MTP-GGUF", False),
+        ("tunelabs/gemma-4-E2B-it-GGUF", True),
+        ("tunelabs/gemma-4-E4B-it-GGUF", True),
+        ("tunelabs/gemma-4-31B-it-GGUF", True),
+        ("tunelabs/gemma-4-26B-A4B-it-GGUF", True),
+        ("TUNELABS/GEMMA-4-E2B-IT-GGUF", True),  # case-insensitive
+        ("gemma-4-E2B-it-GGUF", True),  # owner-less shorthand -> tunelabs/
+        ("gemma-4-31B-it-GGUF", True),  # owner-less shorthand -> tunelabs/
+        ("tunelabs/gemma-4-E2B-it", False),  # bf16, not GGUF
+        ("tunelabs/gemma-3-4b-it-GGUF", False),  # gemma 3
+        ("google/gemma-4-31B-it-GGUF", False),  # not tunelabs
+        ("tunelabs/Qwen3.5-9B-MTP-GGUF", False),
         ("/home/user/models/gemma-4-E2B.Q4_K_M.gguf", False),  # local path
         ("", False),
         (None, False),
     ],
 )
-def test_is_unsloth_gemma4_gguf(model_id, expected):
-    assert is_unsloth_gemma4_gguf(model_id) is expected
+def test_is_tunelabs_gemma4_gguf(model_id, expected):
+    assert is_tunelabs_gemma4_gguf(model_id) is expected
 
 
 # ── Resolver precedence ──────────────────────────────────────────────
@@ -122,28 +122,28 @@ def test_is_unsloth_gemma4_gguf(model_id, expected):
 @pytest.mark.parametrize(
     "model_id,expected_edge",
     [
-        ("unsloth/gemma-4-E2B-it-GGUF", True),
-        ("unsloth/gemma-4-E4B-it-GGUF", True),
-        ("UNSLOTH/GEMMA-4-E4B-IT-GGUF", True),
-        ("unsloth/gemma-4-12b-it-GGUF", False),
-        ("unsloth/gemma-4-26B-A4B-it-GGUF", False),
-        ("unsloth/gemma-4-31B-it-GGUF", False),
-        ("unsloth/gemma-3-4b-it-GGUF", False),
+        ("tunelabs/gemma-4-E2B-it-GGUF", True),
+        ("tunelabs/gemma-4-E4B-it-GGUF", True),
+        ("TUNELABS/GEMMA-4-E4B-IT-GGUF", True),
+        ("tunelabs/gemma-4-12b-it-GGUF", False),
+        ("tunelabs/gemma-4-26B-A4B-it-GGUF", False),
+        ("tunelabs/gemma-4-31B-it-GGUF", False),
+        ("tunelabs/gemma-3-4b-it-GGUF", False),
     ],
 )
-def test_is_unsloth_gemma4_edge_gguf(model_id, expected_edge):
-    assert is_unsloth_gemma4_edge_gguf(model_id) is expected_edge
+def test_is_tunelabs_gemma4_edge_gguf(model_id, expected_edge):
+    assert is_tunelabs_gemma4_edge_gguf(model_id) is expected_edge
 
 
 def test_resolver_returns_edge_template_for_e2b_e4b():
-    for mid in ("unsloth/gemma-4-E2B-it-GGUF", "unsloth/gemma-4-E4B-it-GGUF"):
+    for mid in ("tunelabs/gemma-4-E2B-it-GGUF", "tunelabs/gemma-4-E4B-it-GGUF"):
         out = resolve_effective_chat_template_override(model_identifier = mid, user_override = None)
         assert out == EDGE
         assert out != BUNDLED
 
 
 def test_resolver_handles_owner_less_shorthand():
-    # ModelConfig.from_identifier prefixes unsloth/ for bare ids; the resolver
+    # ModelConfig.from_identifier prefixes tunelabs/ for bare ids; the resolver
     # runs before that, so it must apply the same normalization.
     assert (
         resolve_effective_chat_template_override(
@@ -161,9 +161,9 @@ def test_resolver_handles_owner_less_shorthand():
 
 def test_resolver_returns_standard_template_for_larger_models():
     for mid in (
-        "unsloth/gemma-4-12b-it-GGUF",
-        "unsloth/gemma-4-26B-A4B-it-GGUF",
-        "unsloth/gemma-4-31B-it-GGUF",
+        "tunelabs/gemma-4-12b-it-GGUF",
+        "tunelabs/gemma-4-26B-A4B-it-GGUF",
+        "tunelabs/gemma-4-31B-it-GGUF",
     ):
         out = resolve_effective_chat_template_override(model_identifier = mid, user_override = None)
         assert out == BUNDLED
@@ -171,14 +171,14 @@ def test_resolver_returns_standard_template_for_larger_models():
 
 def test_resolver_user_override_wins():
     out = resolve_effective_chat_template_override(
-        model_identifier = "unsloth/gemma-4-E2B-it-GGUF", user_override = "MY TEMPLATE"
+        model_identifier = "tunelabs/gemma-4-E2B-it-GGUF", user_override = "MY TEMPLATE"
     )
     assert out == "MY TEMPLATE"
 
 
 def test_resolver_blank_override_falls_back_to_bundled():
     out = resolve_effective_chat_template_override(
-        model_identifier = "unsloth/gemma-4-31B-it-GGUF", user_override = "   "
+        model_identifier = "tunelabs/gemma-4-31B-it-GGUF", user_override = "   "
     )
     assert out == BUNDLED
 
@@ -186,7 +186,7 @@ def test_resolver_blank_override_falls_back_to_bundled():
 def test_resolver_none_for_non_gemma():
     assert (
         resolve_effective_chat_template_override(
-            model_identifier = "unsloth/Llama-3.2-1B-Instruct-GGUF", user_override = None
+            model_identifier = "tunelabs/Llama-3.2-1B-Instruct-GGUF", user_override = None
         )
         is None
     )
@@ -214,7 +214,7 @@ def test_bundled_templates_are_ascii(name):
 @pytest.mark.parametrize("tpl", [BUNDLED, EDGE])
 def test_detect_reasoning_flags_on_bundled_template(tpl):
     detect_reasoning_flags = _detect_reasoning_flags()
-    flags = detect_reasoning_flags(tpl, "unsloth/gemma-4-E2B-it-GGUF")
+    flags = detect_reasoning_flags(tpl, "tunelabs/gemma-4-E2B-it-GGUF")
     assert flags["supports_reasoning"] is True
     assert flags["reasoning_style"] == "enable_thinking"
     assert flags["reasoning_always_on"] is False
@@ -313,7 +313,7 @@ def test_already_in_target_state_consistent_with_bundled_override():
     backend = LlamaCppBackend()
     backend._process = _FakeProcess()
     backend._healthy = True
-    backend._model_identifier = "unsloth/gemma-4-E2B-it-GGUF"
+    backend._model_identifier = "tunelabs/gemma-4-E2B-it-GGUF"
     backend._hf_variant = "Q4_K_M"
     backend._requested_n_ctx = 8192
     backend._cache_type_kv = None
@@ -325,7 +325,7 @@ def test_already_in_target_state_consistent_with_bundled_override():
     backend._gguf_path = None
 
     common = dict(
-        model_identifier = "unsloth/gemma-4-E2B-it-GGUF",
+        model_identifier = "tunelabs/gemma-4-E2B-it-GGUF",
         hf_variant = "Q4_K_M",
         n_ctx = 8192,
         cache_type_kv = None,

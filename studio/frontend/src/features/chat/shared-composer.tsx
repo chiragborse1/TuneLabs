@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
 import {
@@ -1211,7 +1211,7 @@ export function SharedComposer({
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent
           collisionPadding={16}
-          className="unsloth-plus-menu w-[208px]"
+          className="tunelabs-plus-menu w-[208px]"
         >
           {recentPrompts.map((p) => (
             <DropdownMenuItem
@@ -1250,7 +1250,7 @@ export function SharedComposer({
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent
           collisionPadding={16}
-          className="unsloth-plus-menu w-[208px]"
+          className="tunelabs-plus-menu w-[208px]"
         >
           {[
             { label: "Raw JSONL", fn: exportConversationRawJsonl },
@@ -1295,7 +1295,7 @@ export function SharedComposer({
           <HugeiconsIcon icon={Folder01Icon} strokeWidth={2} />
           Projects
         </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent className="unsloth-plus-menu w-[232px]">
+        <DropdownMenuSubContent className="tunelabs-plus-menu w-[232px]">
           <DropdownMenuItem onSelect={() => setNewProjectOpen(true)}>
             <HugeiconsIcon icon={FolderAddIcon} strokeWidth={2} />
             New project
@@ -1493,7 +1493,7 @@ export function SharedComposer({
               <button
                 type="button"
                 aria-label="Tools and attachments"
-                className="unsloth-composer-plus"
+                className="tunelabs-composer-plus"
               >
                 <PlusIcon className="size-[22px] stroke-[1.75px]" />
               </button>
@@ -1503,7 +1503,7 @@ export function SharedComposer({
               align="start"
               sideOffset={0}
               avoidCollisions={true}
-              className="unsloth-plus-menu w-[244px]"
+              className="tunelabs-plus-menu w-[244px]"
               onCloseAutoFocus={(event) => event.preventDefault()}
             >
               <DropdownMenuItem onSelect={() => fileInputRef.current?.click()}>
@@ -1601,7 +1601,7 @@ export function SharedComposer({
                     <MoreHorizontalIcon className="size-4" />
                     More
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className="unsloth-plus-menu w-[248px]">
+                  <DropdownMenuSubContent className="tunelabs-plus-menu w-[248px]">
                     {overflowPlusItems.map((id) => (
                       <Fragment key={id}>{plusMenuNodes[id]}</Fragment>
                     ))}
@@ -1773,7 +1773,7 @@ export function SharedComposer({
                   <button
                     type="button"
                     disabled={reasoningDisabled}
-                    className="unsloth-thinking-pill"
+                    className="tunelabs-thinking-pill"
                     data-active={thinkingActiveLook ? "true" : "false"}
                     aria-label={thinkEffortAriaLabel({
                       modelLoaded,
@@ -1798,7 +1798,7 @@ export function SharedComposer({
                 <DropdownMenuContent
                   side="top"
                   align="end"
-                  className="unsloth-plus-menu min-w-44"
+                  className="tunelabs-plus-menu min-w-44"
                 >
                   {isEffort ? (
                     <>
@@ -1815,7 +1815,7 @@ export function SharedComposer({
                     icon={Tick02Icon}
                     strokeWidth={2}
                             className={cn(
-                              "unsloth-tick size-4",
+                              "tunelabs-tick size-4",
                               effectiveReasoningVisualEnabled && "opacity-0",
                             )}
                           />
@@ -1846,7 +1846,7 @@ export function SharedComposer({
                     icon={Tick02Icon}
                     strokeWidth={2}
                               className={cn(
-                                "unsloth-tick size-4",
+                                "tunelabs-tick size-4",
                                 !(
                                   effectiveReasoningVisualEnabled &&
                                   reasoningEffort === level
@@ -1879,7 +1879,7 @@ export function SharedComposer({
                     icon={Tick02Icon}
                     strokeWidth={2}
                           className={cn(
-                            "unsloth-tick size-4",
+                            "tunelabs-tick size-4",
                             !effectiveReasoningEnabled && "opacity-0",
                           )}
                         />
@@ -1905,7 +1905,7 @@ export function SharedComposer({
                     icon={Tick02Icon}
                     strokeWidth={2}
                         className={cn(
-                          "unsloth-tick size-4",
+                          "tunelabs-tick size-4",
                           !preserveThinking && "opacity-0",
                         )}
                       />
@@ -1935,7 +1935,7 @@ export function SharedComposer({
                     setToolsEnabled(false, { persist: false });
                   }
                 }}
-                className="unsloth-thinking-pill"
+                className="tunelabs-thinking-pill"
                 data-active={thinkingActiveLook ? "true" : "false"}
                 aria-label={thinkToggleAriaLabel({
                   reasoningLockedOn,

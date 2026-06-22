@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { authFetch } from "@/features/auth";
 import { useEffect, useState } from "react";
@@ -23,7 +23,7 @@ export interface HardwareInfo {
     cuda: string | null;
     rocm: string | null;
     transformers: string | null;
-    unsloth: string | null;
+    tunelabs: string | null;
     llamaCpp: string | null;
 }
 
@@ -36,7 +36,7 @@ const DEFAULT: HardwareInfo = {
     cuda: null,
     rocm: null,
     transformers: null,
-    unsloth: null,
+    tunelabs: null,
     llamaCpp: null,
 };
 
@@ -85,7 +85,7 @@ async function fetchOnce(): Promise<HardwareInfo> {
                 cuda: data?.versions?.cuda ?? null,
                 rocm: data?.versions?.rocm ?? null,
                 transformers: data?.versions?.transformers ?? null,
-                unsloth: data?.versions?.unsloth ?? null,
+                tunelabs: data?.versions?.tunelabs ?? null,
                 llamaCpp: data?.llama_cpp ?? null,
             };
             if (generation === cacheGeneration) {

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Boundary validator for user-supplied llama-server pass-through args.
 
@@ -104,7 +104,7 @@ def validate_extra_args(args: Optional[Iterable[str]]) -> list[str]:
         flag = _flag_name(token)
         if flag is not None and flag in _DENYLIST:
             raise ValueError(
-                f"llama-server flag '{flag}' is managed by Unsloth Studio "
+                f"llama-server flag '{flag}' is managed by TuneLabs Studio "
                 f"and cannot be passed as an extra arg"
             )
         out.append(token)

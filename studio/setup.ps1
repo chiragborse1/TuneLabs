@@ -1,11 +1,11 @@
 #Requires -Version 5.1
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 <#
 .SYNOPSIS
-    Full environment setup for Unsloth Studio on Windows (bundled version).
+    Full environment setup for TuneLabs Studio on Windows (bundled version).
 .DESCRIPTION
-    Uses an isolated, Unsloth-managed Node.js for the frontend build when the
+    Uses an isolated, TuneLabs-managed Node.js for the frontend build when the
     system Node/npm do not meet requirements (never modifies the system Node).
     When running from pip install: skips frontend build (already bundled). When
     running from git repo: full setup including frontend build.
@@ -14,8 +14,8 @@
     Default output is minimal (step/substep), aligned with studio/setup.sh.
 
     FULL / LEGACY LOGGING (defensible audit trail, detailed multi-line output):
-      unsloth studio setup --verbose
-      Or:  $env:UNSLOTH_VERBOSE='1'; powershell -File .\studio\setup.ps1
+      tunelabs studio setup --verbose
+      Or:  $env:TUNELABS_VERBOSE='1'; powershell -File .\studio\setup.ps1
       Or:  .\setup.ps1 --verbose
 #>
 
@@ -37,18 +37,18 @@ $DefaultLlamaSource = "https://github.com/ggml-org/llama.cpp"
 $DefaultLlamaTag = "latest"
 $DefaultLlamaForceCompileRef = "master"
 
-# Verbose can be enabled either by CLI flag or by UNSLOTH_VERBOSE=1.
-$script:UnslothVerbose = ($env:UNSLOTH_VERBOSE -eq '1')
+# Verbose can be enabled either by CLI flag or by TUNELABS_VERBOSE=1.
+$script:TuneLabsVerbose = ($env:TUNELABS_VERBOSE -eq '1')
 foreach ($a in $args) {
     if ($a -eq '--verbose' -or $a -eq '-v') {
-        $script:UnslothVerbose = $true
+        $script:TuneLabsVerbose = $true
         break
     }
 }
 # Propagate to child processes (e.g. install_python_stack.py) so they
 # also respect verbose mode. Process-scoped -- does not persist.
-if ($script:UnslothVerbose) {
-    $env:UNSLOTH_VERBOSE = '1'
+if ($script:TuneLabsVerbose) {
+    $env:TUNELABS_VERBOSE = '1'
 }
 $script:LlamaCppDegraded = $false
 # CUDA toolkit state, published by Resolve-CudaToolkit. Only the Phase 4 source
@@ -138,10 +138,10 @@ function Add-ToUserPath {
                 $matchIndices.Count -eq 1 -and $matchIndices[0] -eq 0) {
                 return $false
             }
-            # One-time backup under HKCU\Software\Unsloth\PathBackup
+            # One-time backup under HKCU\Software\TuneLabs\PathBackup
             if ($rawPath) {
                 try {
-                    $backupKey = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey('Software\Unsloth')
+                    $backupKey = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey('Software\TuneLabs')
                     try {
                         $existingBackup = $backupKey.GetValue('PathBackup', $null)
                         if (-not $existingBackup) {
@@ -171,7 +171,7 @@ function Add-ToUserPath {
             # Broadcast WM_SETTINGCHANGE via dummy env-var roundtrip.
             # [NullString]::Value avoids PS 7.5+/.NET 9 $null-to-"" coercion.
             try {
-                $d = "UnslothPathRefresh_$([guid]::NewGuid().ToString('N').Substring(0,8))"
+                $d = "TuneLabsPathRefresh_$([guid]::NewGuid().ToString('N').Substring(0,8))"
                 [Environment]::SetEnvironmentVariable($d, '1', 'User')
                 [Environment]::SetEnvironmentVariable($d, [NullString]::Value, 'User')
             } catch { }
@@ -186,7 +186,7 @@ function Add-ToUserPath {
 }
 
 # PowerShell 5.1 compatibility helper: avoid relying on New-TemporaryFile.
-function New-UnslothTemporaryFile {
+function New-TuneLabsTemporaryFile {
     $tempPath = [System.IO.Path]::GetTempFileName()
     return Get-Item -LiteralPath $tempPath
 }
@@ -194,7 +194,7 @@ function New-UnslothTemporaryFile {
 function Get-InstalledLlamaPrebuiltRelease {
     param([string]$InstallDir)
 
-    $metadataPath = Join-Path $InstallDir "UNSLOTH_PREBUILT_INFO.json"
+    $metadataPath = Join-Path $InstallDir "TUNELABS_PREBUILT_INFO.json"
     if (-not (Test-Path $metadataPath)) {
         return $null
     }
@@ -735,7 +735,7 @@ function Write-SetupVerboseDetail {
         [Parameter(Mandatory = $true)][string]$Message,
         [string]$Color = "Gray"
     )
-    if (-not $script:UnslothVerbose) { return }
+    if (-not $script:TuneLabsVerbose) { return }
     if ($script:StudioVtOk -and -not $env:NO_COLOR) {
         $ansi = switch ($Color) {
             'Green' { (Get-StudioAnsi Ok) }
@@ -768,7 +768,7 @@ function Invoke-SetupCommand {
     try {
         # Reset to avoid stale values from prior native commands.
         $global:LASTEXITCODE = 0
-        if ($script:UnslothVerbose -and -not $AlwaysQuiet) {
+        if ($script:TuneLabsVerbose -and -not $AlwaysQuiet) {
             # Merge stderr into stdout so progress/warning output stays visible
             # without flipping $? on successful native commands (PS 5.1 treats
             # stderr records as errors that set $? = $false even on exit code 0).
@@ -808,7 +808,7 @@ function Write-LlamaFailureLog {
 # a pipe (CI `tee`, Python subprocess.PIPE, CREATE_NO_WINDOW grandchild).
 # Write-Host on PS 5.1 routes through $Host.UI / the Information
 # stream, neither of which propagates reliably across the
-# install.ps1 -> unsloth.exe -> python -> powershell.exe ->
+# install.ps1 -> tunelabs.exe -> python -> powershell.exe ->
 # setup.ps1 process chain. [Console]::Out always lands on the OS
 # stdout file handle. Gated on IsOutputRedirected so the
 # interactive-console path keeps the colorized Write-Host output
@@ -882,14 +882,14 @@ function substep {
 # ─────────────────────────────────────────────
 Write-Host ""
 if ($script:StudioVtOk -and -not $env:NO_COLOR) {
-    Write-Host ("  " + (Get-StudioAnsi Title) + [char]::ConvertFromUtf32(0x1F9A5) + " Unsloth Studio Setup" + (Get-StudioAnsi Reset))
+    Write-Host ("  " + (Get-StudioAnsi Title) + [char]::ConvertFromUtf32(0x1F9A5) + " TuneLabs Studio Setup" + (Get-StudioAnsi Reset))
     Write-Host ("  {0}{1}{2}" -f (Get-StudioAnsi Dim), $Rule, (Get-StudioAnsi Reset))
 } else {
-    Write-Host ("  " + [char]::ConvertFromUtf32(0x1F9A5) + " Unsloth Studio Setup") -ForegroundColor Green
+    Write-Host ("  " + [char]::ConvertFromUtf32(0x1F9A5) + " TuneLabs Studio Setup") -ForegroundColor Green
     Write-Host "  $Rule" -ForegroundColor DarkGray
 }
 
-# Back up User PATH under HKCU\Software\Unsloth before any modifications.
+# Back up User PATH under HKCU\Software\TuneLabs before any modifications.
 try {
     $envKey = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $false)
     if ($envKey) {
@@ -899,7 +899,7 @@ try {
             $envKey.Close()
         }
         if ($rawPath) {
-            $backupKey = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey('Software\Unsloth')
+            $backupKey = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey('Software\TuneLabs')
             try {
                 $existingBackup = $backupKey.GetValue('PathBackup', $null)
                 if (-not $existingBackup) {
@@ -1110,11 +1110,11 @@ if (-not $HasNvidiaSmi) {
     # asInvoker; even 'amd-smi version' hangs). So only probe when a HIP SDK is present
     # (hipinfo found -> un-elevated) or the user opts in; else fall through to WMI name
     # inference (enough to pick ROCm wheels + the ROCm llama.cpp prebuilt).
-    # An explicit opt-out (UNSLOTH_ENABLE_AMD_SMI=0/false/no/off) wins over the HIP-SDK
+    # An explicit opt-out (TUNELABS_ENABLE_AMD_SMI=0/false/no/off) wins over the HIP-SDK
     # heuristic: a HIP SDK binary with a broken runtime can still pop the prompt, so
     # $HipSdkInstalled must NOT silently re-enable it.
-    $amdSmiOptOut = $env:UNSLOTH_ENABLE_AMD_SMI -match '^(?i)(0|false|no|off)$'
-    $amdSmiAllowed = (-not $amdSmiOptOut) -and ($HipSdkInstalled -or ($env:UNSLOTH_ENABLE_AMD_SMI -match '^(?i)(1|true|yes|on)$'))
+    $amdSmiOptOut = $env:TUNELABS_ENABLE_AMD_SMI -match '^(?i)(0|false|no|off)$'
+    $amdSmiAllowed = (-not $amdSmiOptOut) -and ($HipSdkInstalled -or ($env:TUNELABS_ENABLE_AMD_SMI -match '^(?i)(1|true|yes|on)$'))
     if (-not $HasROCm -and $amdSmiAllowed) {
         $amdSmiExe = Get-Command "amd-smi" -ErrorAction SilentlyContinue
         if ($amdSmiExe) {
@@ -1188,11 +1188,11 @@ if (-not $HasNvidiaSmi) {
     # instead of CPU. (PyTorch ROCm wheels still require a HIP SDK -- gated on $HasROCm
     # below -- so this only affects llama.cpp / inference.)
     if (-not $script:ROCmGfxArch) {
-        # 1. Manual override: set UNSLOTH_ROCM_GFX_ARCH=gfx1151 before running.
-        if ($env:UNSLOTH_ROCM_GFX_ARCH) {
-            $script:ROCmGfxArch = $env:UNSLOTH_ROCM_GFX_ARCH.Trim().ToLower()
+        # 1. Manual override: set TUNELABS_ROCM_GFX_ARCH=gfx1151 before running.
+        if ($env:TUNELABS_ROCM_GFX_ARCH) {
+            $script:ROCmGfxArch = $env:TUNELABS_ROCM_GFX_ARCH.Trim().ToLower()
             $ROCmGpuLabel = "AMD ROCm ($script:ROCmGfxArch)"
-            substep "gfx arch from UNSLOTH_ROCM_GFX_ARCH env override: $script:ROCmGfxArch" "Cyan"
+            substep "gfx arch from TUNELABS_ROCM_GFX_ARCH env override: $script:ROCmGfxArch" "Cyan"
         }
         # 2. Best-effort name → arch lookup (amd-smi / WMI). Most-specific first,
         #    first match wins. Covers only arches the ROCm prebuilts support
@@ -1215,7 +1215,7 @@ if (-not $HasNvidiaSmi) {
                     $script:ROCmGfxArch = $row.A
                     $ROCmGpuLabel = "AMD ROCm ($script:ROCmGfxArch)"
                     substep "gfx arch inferred from GPU name: $script:ROCmGfxArch" "Cyan"
-                    substep "Tip: set UNSLOTH_ROCM_GFX_ARCH=$script:ROCmGfxArch to skip inference next time" "Cyan"
+                    substep "Tip: set TUNELABS_ROCM_GFX_ARCH=$script:ROCmGfxArch to skip inference next time" "Cyan"
                     break
                 }
             }
@@ -1292,7 +1292,7 @@ if ($HasNvidiaSmi) {
     step "gpu" "AMD GPU detected -- arch unknown" "Yellow"
     substep "Detected: $ROCmGpuLabel" "Yellow"
     substep "Could not determine the GPU arch (gfx...). Install the HIP SDK or set" "Yellow"
-    substep "UNSLOTH_ROCM_GFX_ARCH to enable GPU ROCm PyTorch:" "Yellow"
+    substep "TUNELABS_ROCM_GFX_ARCH to enable GPU ROCm PyTorch:" "Yellow"
     substep "https://rocm.docs.amd.com/en/latest/deploy/windows/index.html" "Yellow"
     Write-Host ""
 } else {
@@ -1733,7 +1733,7 @@ $NodeSource = $null
 if (-not $IsPipInstall) {
     # Put Node beside the Studio root. OXC can still need npm when the
     # frontend build is skipped.
-    if (-not [string]::IsNullOrWhiteSpace($env:UNSLOTH_STUDIO_HOME)) { $NodeOverride = $env:UNSLOTH_STUDIO_HOME.Trim() }
+    if (-not [string]::IsNullOrWhiteSpace($env:TUNELABS_STUDIO_HOME)) { $NodeOverride = $env:TUNELABS_STUDIO_HOME.Trim() }
     elseif (-not [string]::IsNullOrWhiteSpace($env:STUDIO_HOME)) { $NodeOverride = $env:STUDIO_HOME.Trim() }
     if ($NodeOverride) {
         if ($NodeOverride -eq "~") {
@@ -1742,23 +1742,23 @@ if (-not $IsPipInstall) {
             $NodeOverride = (Join-Path $env:USERPROFILE $NodeOverride.Substring(1).TrimStart('/', '\'))
         }
         if (-not (Test-Path -LiteralPath $NodeOverride -PathType Container)) {
-            Write-Host "ERROR: UNSLOTH_STUDIO_HOME/STUDIO_HOME=$NodeOverride does not exist." -ForegroundColor Red
-            Write-Host "       Run install.ps1 to create the install root before 'unsloth studio update'." -ForegroundColor Red
+            Write-Host "ERROR: TUNELABS_STUDIO_HOME/STUDIO_HOME=$NodeOverride does not exist." -ForegroundColor Red
+            Write-Host "       Run install.ps1 to create the install root before 'tunelabs studio update'." -ForegroundColor Red
             exit 1
         }
         $NodeParent = (Resolve-Path -LiteralPath $NodeOverride).Path
         # An override pointing at the legacy default maps to the legacy sibling
-        # ~/.unsloth/node (what the runtime resolver and setup.sh use), not <root>/node.
-        $_legacyStudio = Join-Path $env:USERPROFILE ".unsloth\studio"
+        # ~/.tunelabs/node (what the runtime resolver and setup.sh use), not <root>/node.
+        $_legacyStudio = Join-Path $env:USERPROFILE ".tunelabs\studio"
         if (Test-Path -LiteralPath $_legacyStudio -PathType Container) {
             $_legacyStudio = (Resolve-Path -LiteralPath $_legacyStudio).Path
         }
         if ($NodeParent -eq $_legacyStudio) {
-            $NodeParent = Join-Path $env:USERPROFILE ".unsloth"
+            $NodeParent = Join-Path $env:USERPROFILE ".tunelabs"
             $NodeOverride = $null
         }
     } else {
-        $NodeParent = Join-Path $env:USERPROFILE ".unsloth"
+        $NodeParent = Join-Path $env:USERPROFILE ".tunelabs"
     }
     $NodeDir = Join-Path $NodeParent "node"
 
@@ -1769,7 +1769,7 @@ if (-not $IsPipInstall) {
     # empty version => Get-NodeDecision returns "bundled".
     $SysNodeVersion = try { if (Get-Command node -ErrorAction SilentlyContinue) { (node -v 2>$null) } else { "" } } catch { "" }
     $SysNpmVersion = try { if (Get-Command npm -ErrorAction SilentlyContinue) { (npm -v 2>$null) } else { "" } } catch { "" }
-    $NodeSource = Get-NodeDecision -NodeVersion "$SysNodeVersion" -NpmVersion "$SysNpmVersion" -SkipInstall "$($env:UNSLOTH_SKIP_NODE_INSTALL)"
+    $NodeSource = Get-NodeDecision -NodeVersion "$SysNodeVersion" -NpmVersion "$SysNpmVersion" -SkipInstall "$($env:TUNELABS_SKIP_NODE_INSTALL)"
 }
 
 if ($IsPipInstall) {
@@ -1784,7 +1784,7 @@ if ($IsPipInstall) {
     } elseif ($NodeSource -eq "bundled") {
         substep "Node='$SysNodeVersion' npm='$SysNpmVersion' unsuitable; will use an isolated Node (system left untouched)."
     } else {
-        substep "Node='$SysNodeVersion' npm='$SysNpmVersion' unsuitable and UNSLOTH_SKIP_NODE_INSTALL set; frontend build will be skipped." "Yellow"
+        substep "Node='$SysNodeVersion' npm='$SysNpmVersion' unsuitable and TUNELABS_SKIP_NODE_INSTALL set; frontend build will be skipped." "Yellow"
     }
 }
 
@@ -1803,27 +1803,27 @@ function Test-IsConda {
 }
 
 # 1g. Python (>= 3.11 and < 3.14). Prefer the interpreter install.ps1 already
-# resolved and built the venv with (UNSLOTH_SETUP_PYTHON), or the existing
+# resolved and built the venv with (TUNELABS_SETUP_PYTHON), or the existing
 # venv python, before re-probing a system where a 3.14 or a WindowsApps stub
 # ahead on PATH would trip the gate. setup.ps1 only updates packages in that
 # venv, so the handoff is safe to reuse once validated.
 function Resolve-ReusedSetupPython {
-    if (-not [string]::IsNullOrWhiteSpace($env:UNSLOTH_SETUP_PYTHON) -and
-        (Test-Path -LiteralPath $env:UNSLOTH_SETUP_PYTHON)) {
-        return $env:UNSLOTH_SETUP_PYTHON
+    if (-not [string]::IsNullOrWhiteSpace($env:TUNELABS_SETUP_PYTHON) -and
+        (Test-Path -LiteralPath $env:TUNELABS_SETUP_PYTHON)) {
+        return $env:TUNELABS_SETUP_PYTHON
     }
-    # Standalone `unsloth studio setup/update` (install.ps1 did not run): derive
+    # Standalone `tunelabs studio setup/update` (install.ps1 did not run): derive
     # the venv python from the studio root, mirroring the resolver below.
-    $root = if (-not [string]::IsNullOrWhiteSpace($env:UNSLOTH_STUDIO_HOME)) { $env:UNSLOTH_STUDIO_HOME.Trim() }
+    $root = if (-not [string]::IsNullOrWhiteSpace($env:TUNELABS_STUDIO_HOME)) { $env:TUNELABS_STUDIO_HOME.Trim() }
             elseif (-not [string]::IsNullOrWhiteSpace($env:STUDIO_HOME)) { $env:STUDIO_HOME.Trim() }
-            else { Join-Path $env:USERPROFILE ".unsloth\studio" }
+            else { Join-Path $env:USERPROFILE ".tunelabs\studio" }
     if ($root -eq "~") {
         # Join-Path with an empty child throws on Windows PowerShell 5.1.
         $root = $env:USERPROFILE
     } elseif ($root -like "~/*" -or $root -like "~\*") {
         $root = Join-Path $env:USERPROFILE $root.Substring(1).TrimStart('/', '\')
     }
-    $venvPy = Join-Path $root "unsloth_studio\Scripts\python.exe"
+    $venvPy = Join-Path $root "tunelabs_studio\Scripts\python.exe"
     if (Test-Path -LiteralPath $venvPy) { return $venvPy }
     return $null
 }
@@ -1944,7 +1944,7 @@ if ($PythonOk) {
 # Add user-scheme Python Scripts dir to PATH (nt_user only, no venv fallback).
 $ScriptsDir = python -c "import os, sysconfig; p = sysconfig.get_path('scripts', 'nt_user'); print(p if os.path.exists(p) else '')"
 if ($LASTEXITCODE -eq 0 -and $ScriptsDir -and (Test-Path $ScriptsDir)) {
-    # Append (not Prepend) -- this dir has other pip scripts; shim handles unsloth.
+    # Append (not Prepend) -- this dir has other pip scripts; shim handles tunelabs.
     if (Add-ToUserPath -Directory $ScriptsDir) {
         # Also add to current process so it's available immediately
         $ProcessPathEntries = $env:PATH.Split(';')
@@ -2009,17 +2009,17 @@ if ($NeedNodeForSetup) {
         }
         $NeedFrontendBuild = $false
         substep "found Node='$SysNodeVersion' npm='$SysNpmVersion'; Studio needs Node >=20.19/22.12/23 and npm >= 11" "Yellow"
-        substep "install a suitable Node + npm, or unset UNSLOTH_SKIP_NODE_INSTALL to let Unsloth manage an isolated Node" "Yellow"
+        substep "install a suitable Node + npm, or unset TUNELABS_SKIP_NODE_INSTALL to let TuneLabs manage an isolated Node" "Yellow"
     } elseif ($NodeSource -eq "bundled") {
         New-Item -ItemType Directory -Force -Path $NodeParent -ErrorAction SilentlyContinue | Out-Null
         # Minimal ownership guard for a custom-home dir (the full Studio-owned
         # helpers are defined later); never os.replace over a user-owned dir.
         if ($NodeOverride -and (Test-Path -LiteralPath $NodeDir -PathType Container)) {
-            $nodeOwnedMarker = Join-Path $NodeDir ".unsloth-studio-owned"
-            $nodeMeta = Join-Path $NodeDir "UNSLOTH_NODE_PREBUILT_INFO.json"
+            $nodeOwnedMarker = Join-Path $NodeDir ".tunelabs-studio-owned"
+            $nodeMeta = Join-Path $NodeDir "TUNELABS_NODE_PREBUILT_INFO.json"
             if (-not (Test-Path -LiteralPath $nodeOwnedMarker) -and -not (Test-Path -LiteralPath $nodeMeta)) {
                 Write-Host "[ERROR] $NodeDir already exists and is not a Studio-owned Node install." -ForegroundColor Red
-                Write-Host "        Move it aside or choose an empty UNSLOTH_STUDIO_HOME before re-running." -ForegroundColor Yellow
+                Write-Host "        Move it aside or choose an empty TUNELABS_STUDIO_HOME before re-running." -ForegroundColor Yellow
                 exit 1
             }
         }
@@ -2040,7 +2040,7 @@ if ($NeedNodeForSetup) {
             exit 1
         }
         if ($NodeOverride -and (Test-Path -LiteralPath $NodeDir -PathType Container)) {
-            New-Item -ItemType File -Force -Path (Join-Path $NodeDir ".unsloth-studio-owned") -ErrorAction SilentlyContinue | Out-Null
+            New-Item -ItemType File -Force -Path (Join-Path $NodeDir ".tunelabs-studio-owned") -ErrorAction SilentlyContinue | Out-Null
         }
         # Windows Node zip ships node.exe + npm.cmd at the root; prepend it (this
         # process only) so node/npm/bun resolve here for the build.
@@ -2220,7 +2220,7 @@ substep "setting up Python environment..."
 $PythonCmd = $null
 
 # 0. Reuse the interpreter install.ps1 already resolved and built the venv with
-#    (UNSLOTH_SETUP_PYTHON, or the existing venv python) before probing the
+#    (TUNELABS_SETUP_PYTHON, or the existing venv python) before probing the
 #    system -- it is already validated as supported and non-conda.
 if ($ReusedSetupPython) {
     try {
@@ -2297,14 +2297,14 @@ if (-not $PythonCmd) {
 substep "Python found: $PythonCmd"
 
 # The venv must already exist (created by install.ps1); this script only
-# updates packages. UNSLOTH_STUDIO_HOME (or STUDIO_HOME alias) overrides the
-# root. UNSLOTH_STUDIO_HOME wins when both are set. Whitespace-only values
+# updates packages. TUNELABS_STUDIO_HOME (or STUDIO_HOME alias) overrides the
+# root. TUNELABS_STUDIO_HOME wins when both are set. Whitespace-only values
 # are treated as unset to match Python .strip() semantics.
 $_studioOverrideVar = $null
 $_studioOverride = $null
-if (-not [string]::IsNullOrWhiteSpace($env:UNSLOTH_STUDIO_HOME)) {
-    $_studioOverrideVar = "UNSLOTH_STUDIO_HOME"
-    $_studioOverride = $env:UNSLOTH_STUDIO_HOME.Trim()
+if (-not [string]::IsNullOrWhiteSpace($env:TUNELABS_STUDIO_HOME)) {
+    $_studioOverrideVar = "TUNELABS_STUDIO_HOME"
+    $_studioOverride = $env:TUNELABS_STUDIO_HOME.Trim()
 } elseif (-not [string]::IsNullOrWhiteSpace($env:STUDIO_HOME)) {
     $_studioOverrideVar = "STUDIO_HOME"
     $_studioOverride = $env:STUDIO_HOME.Trim()
@@ -2318,7 +2318,7 @@ if ($_studioOverride) {
         # why: mirror setup.sh:417 and install.ps1:130 -- fail fast when the
         # custom root is read-only instead of erroring later while creating
         # sidecar venvs / installing packages.
-        $_setupWriteProbe = Join-Path $StudioHome (".unsloth-write-probe-" + [guid]::NewGuid())
+        $_setupWriteProbe = Join-Path $StudioHome (".tunelabs-write-probe-" + [guid]::NewGuid())
         try {
             [System.IO.File]::WriteAllText($_setupWriteProbe, "")
             Remove-Item -LiteralPath $_setupWriteProbe -Force -ErrorAction SilentlyContinue
@@ -2328,20 +2328,20 @@ if ($_studioOverride) {
         }
     } else {
         Write-Host "ERROR: $_studioOverrideVar=$_studioOverride does not exist." -ForegroundColor Red
-        Write-Host "       Run install.ps1 to create the install root before 'unsloth studio update'." -ForegroundColor Red
+        Write-Host "       Run install.ps1 to create the install root before 'tunelabs studio update'." -ForegroundColor Red
         exit 1
     }
 } else {
-    $StudioHome = Join-Path $env:USERPROFILE ".unsloth\studio"
+    $StudioHome = Join-Path $env:USERPROFILE ".tunelabs\studio"
 }
-$VenvDir = Join-Path $StudioHome "unsloth_studio"
+$VenvDir = Join-Path $StudioHome "tunelabs_studio"
 
 # why: in env-override mode $StudioHome is user-chosen; require the
 # ownership marker before Remove-Item so unrelated dirs survive. Gated on
 # the canonical comparison so an override pointing at the legacy default
 # still behaves like a default install.
-$StudioOwnedMarker = ".unsloth-studio-owned"
-$LegacyStudioHome = Join-Path $env:USERPROFILE ".unsloth\studio"
+$StudioOwnedMarker = ".tunelabs-studio-owned"
+$LegacyStudioHome = Join-Path $env:USERPROFILE ".tunelabs\studio"
 $_studioHomeCanon = $StudioHome
 if (Test-Path -LiteralPath $_studioHomeCanon -PathType Container) {
     $_studioHomeCanon = (Resolve-Path -LiteralPath $_studioHomeCanon).Path
@@ -2351,12 +2351,12 @@ if (Test-Path -LiteralPath $LegacyStudioHome -PathType Container) {
 }
 $StudioHomeIsCustom = ($_studioHomeCanon -ne $LegacyStudioHome)
 # Directory-local evidence that Studio created $Path, used to adopt a custom-home
-# llama.cpp predating the .unsloth-studio-owned marker (see setup.sh). Only the
-# prebuilt UNSLOTH_PREBUILT_INFO.json counts; source builds are indistinguishable
+# llama.cpp predating the .tunelabs-studio-owned marker (see setup.sh). Only the
+# prebuilt TUNELABS_PREBUILT_INFO.json counts; source builds are indistinguishable
 # from a user clone on Windows and stay under the strict guard.
 function Test-StudioOwnedAdoptable {
     param([Parameter(Mandatory = $true)][string]$Path)
-    if (Test-Path -LiteralPath (Join-Path $Path "UNSLOTH_PREBUILT_INFO.json") -PathType Leaf) { return $true }
+    if (Test-Path -LiteralPath (Join-Path $Path "TUNELABS_PREBUILT_INFO.json") -PathType Leaf) { return $true }
     return $false
 }
 function Assert-StudioOwnedOrAbsent {
@@ -2371,7 +2371,7 @@ function Assert-StudioOwnedOrAbsent {
             return
         }
         Write-Host "[ERROR] $Path already exists and is not marked as a Studio-owned $Label." -ForegroundColor Red
-        Write-Host "        Move it aside or choose an empty UNSLOTH_STUDIO_HOME before re-running." -ForegroundColor Yellow
+        Write-Host "        Move it aside or choose an empty TUNELABS_STUDIO_HOME before re-running." -ForegroundColor Yellow
         exit 1
     }
 }
@@ -2385,12 +2385,12 @@ function Mark-StudioOwned {
 
 # Stale-venv detection: if the venv exists but its torch flavor no longer
 # matches the current machine, repair according to invocation context.
-# - install.ps1 sets UNSLOTH_INSTALL_ROLLBACK_MANAGED=1 so setup can delegate
+# - install.ps1 sets TUNELABS_INSTALL_ROLLBACK_MANAGED=1 so setup can delegate
 #   to the installer-level rollback that restores the previous environment.
-# - direct `unsloth studio update` keeps the pre-existing self-repair behavior.
+# - direct `tunelabs studio update` keeps the pre-existing self-repair behavior.
 # In no-torch mode, a missing torch package is expected.
-$NoTorchMode = $env:UNSLOTH_NO_TORCH -match '^(?i:true|1|yes)$'
-$InstallerManagedSetup = $env:UNSLOTH_INSTALL_ROLLBACK_MANAGED -match '^(?i:true|1|yes)$'
+$NoTorchMode = $env:TUNELABS_NO_TORCH -match '^(?i:true|1|yes)$'
+$InstallerManagedSetup = $env:TUNELABS_INSTALL_ROLLBACK_MANAGED -match '^(?i:true|1|yes)$'
 if ((Test-Path -LiteralPath $VenvDir -PathType Container) -and -not $NoTorchMode) {
     $VenvPyExe = Join-Path $VenvDir "Scripts\python.exe"
     $installedTorchTag = $null
@@ -2446,16 +2446,16 @@ if ((Test-Path -LiteralPath $VenvDir -PathType Container) -and -not $NoTorchMode
         }
         substep "Stale venv detected ($reason) -- rebuilding..." "Yellow"
         # why: mirror install.ps1 env-mode guard so an update against a custom
-        # UNSLOTH_STUDIO_HOME never wipes an unrelated unsloth_studio venv;
+        # TUNELABS_STUDIO_HOME never wipes an unrelated tunelabs_studio venv;
         # -PathType Leaf rejects a directory masquerading as the sentinel.
         if (
             $StudioHomeIsCustom -and
             -not (Test-Path -LiteralPath (Join-Path $VenvDir $StudioOwnedMarker) -PathType Leaf) -and
             -not (Test-Path -LiteralPath (Join-Path $StudioHome "share\studio.conf") -PathType Leaf) -and
-            -not (Test-Path -LiteralPath (Join-Path $StudioHome "bin\unsloth.exe") -PathType Leaf)
+            -not (Test-Path -LiteralPath (Join-Path $StudioHome "bin\tunelabs.exe") -PathType Leaf)
         ) {
-            Write-Host "[ERROR] $VenvDir already exists but does not look like an Unsloth Studio install." -ForegroundColor Red
-            Write-Host "        Move it aside or choose an empty UNSLOTH_STUDIO_HOME before re-running." -ForegroundColor Yellow
+            Write-Host "[ERROR] $VenvDir already exists but does not look like an TuneLabs Studio install." -ForegroundColor Red
+            Write-Host "        Move it aside or choose an empty TUNELABS_STUDIO_HOME before re-running." -ForegroundColor Yellow
             exit 1
         }
         try {
@@ -2471,7 +2471,7 @@ if ((Test-Path -LiteralPath $VenvDir -PathType Container) -and -not $NoTorchMode
 if (-not (Test-Path -LiteralPath $VenvDir)) {
     Write-Host "[ERROR] Virtual environment not found at $VenvDir" -ForegroundColor Red
     Write-Host "        Run install.ps1 first to create the environment:" -ForegroundColor Yellow
-    Write-Host "        irm https://unsloth.ai/install.ps1 | iex" -ForegroundColor Yellow
+    Write-Host "        irm https://tunelabs.ai/install.ps1 | iex" -ForegroundColor Yellow
     exit 1
 } else {
     substep "reusing existing virtual environment at $VenvDir"
@@ -2524,7 +2524,7 @@ function Fast-Install {
 # ── Check if Python deps need updating ──
 # Compare installed package version against PyPI latest.
 # Skip all Python dependency work if versions match (fast update path).
-$_PkgName = if ($env:STUDIO_PACKAGE_NAME) { $env:STUDIO_PACKAGE_NAME } else { "unsloth" }
+$_PkgName = if ($env:STUDIO_PACKAGE_NAME) { $env:STUDIO_PACKAGE_NAME } else { "tunelabs" }
 $SkipPythonDeps = $false
 
 if ($env:SKIP_STUDIO_BASE -ne "1" -and $env:STUDIO_LOCAL_INSTALL -ne "1") {
@@ -2576,12 +2576,12 @@ if ($env:SKIP_STUDIO_BASE -ne "1" -and $env:STUDIO_LOCAL_INSTALL -ne "1") {
 #     # the fresh .venv. Install it so run_install() can find its modules
 #     # and bundled requirements files.
 #     Write-Host "   Installing package into venv..." -ForegroundColor Cyan
-#     pip install unsloth 2>&1 | Out-Null
+#     pip install tunelabs 2>&1 | Out-Null
 # }
 
 if (-not $SkipPythonDeps) {
 
-if ($script:UnslothVerbose) {
+if ($script:TuneLabsVerbose) {
     Fast-Install --upgrade pip
 } else {
     Fast-Install --upgrade pip | Out-Null
@@ -2624,7 +2624,7 @@ $ROCmIndexUrl = $null
 # Gating on $HasROCm alone left Strix Halo / Radeon 8060S on CPU torch; a failed
 # ROCm install still falls back to CPU below, so this is safe.
 if (($HasROCm -or $ROCmGfxArch) -and $CuTag -eq "cpu") {
-    $amdIndexBase = if ($env:UNSLOTH_ROCM_WINDOWS_MIRROR) { $env:UNSLOTH_ROCM_WINDOWS_MIRROR.TrimEnd('/') } else { "https://repo.amd.com/rocm/whl" }
+    $amdIndexBase = if ($env:TUNELABS_ROCM_WINDOWS_MIRROR) { $env:TUNELABS_ROCM_WINDOWS_MIRROR.TrimEnd('/') } else { "https://repo.amd.com/rocm/whl" }
     $archFamilyMap = @{
         "gfx1201" = "gfx120X-all"; "gfx1200" = "gfx120X-all"  # RDNA 4
         "gfx1151" = "gfx1151";     "gfx1150" = "gfx1150"      # RDNA 3.5 (Strix Halo/Point)
@@ -2673,14 +2673,14 @@ if (($HasROCm -or $ROCmGfxArch) -and $CuTag -eq "cpu") {
     }
 }
 
-$PyTorchWhlBase = if ($env:UNSLOTH_PYTORCH_MIRROR) { $env:UNSLOTH_PYTORCH_MIRROR.TrimEnd('/') } else { "https://download.pytorch.org/whl" }
+$PyTorchWhlBase = if ($env:TUNELABS_PYTORCH_MIRROR) { $env:TUNELABS_PYTORCH_MIRROR.TrimEnd('/') } else { "https://download.pytorch.org/whl" }
 
 if ($ROCmIndexUrl) {
     substep "installing PyTorch (AMD ROCm, $ROCmGfxArch)..."
     if ($ROCmTorchSpec -ne "torch") {
         substep "  enforcing $ROCmTorchSpec $ROCmVisionSpec $ROCmAudioSpec (known _grouped_mm bug in older wheels)" "Cyan"
     }
-    if ($script:UnslothVerbose) {
+    if ($script:TuneLabsVerbose) {
         Fast-Install $ROCmTorchSpec $ROCmVisionSpec $ROCmAudioSpec --force-reinstall --index-url $ROCmIndexUrl
         $torchInstallExit = $LASTEXITCODE
         $output = ""
@@ -2694,13 +2694,13 @@ if ($ROCmIndexUrl) {
         $ROCmIndexUrl = $null
     } else {
         # Tell install_python_stack.py to skip probe + suppress manual-install warning.
-        $env:UNSLOTH_ROCM_TORCH_INSTALLED = "1"
+        $env:TUNELABS_ROCM_TORCH_INSTALLED = "1"
     }
 }
 
 if (-not $ROCmIndexUrl -and $CuTag -eq "cpu") {
     substep "installing PyTorch (CPU-only)..."
-    if ($script:UnslothVerbose) {
+    if ($script:TuneLabsVerbose) {
         Fast-Install torch torchvision torchaudio --index-url "$PyTorchWhlBase/cpu"
         $torchInstallExit = $LASTEXITCODE
         $output = ""
@@ -2716,7 +2716,7 @@ if (-not $ROCmIndexUrl -and $CuTag -eq "cpu") {
 } elseif (-not $ROCmIndexUrl) {
     substep "installing PyTorch with CUDA support ($CuTag)..."
     substep "(This download is ~2.8 GB -- may take a few minutes)"
-    if ($script:UnslothVerbose) {
+    if ($script:TuneLabsVerbose) {
         Fast-Install torch torchvision torchaudio --index-url "$PyTorchWhlBase/$CuTag"
         $torchInstallExit = $LASTEXITCODE
         $output = ""
@@ -2732,7 +2732,7 @@ if (-not $ROCmIndexUrl -and $CuTag -eq "cpu") {
 
     # Install Triton for Windows (enables torch.compile -- without it training can hang)
     substep "installing Triton for Windows..."
-    if ($script:UnslothVerbose) {
+    if ($script:TuneLabsVerbose) {
         Fast-Install "triton-windows<3.7"
         $tritonInstallExit = $LASTEXITCODE
         $output = ""
@@ -2748,18 +2748,18 @@ if (-not $ROCmIndexUrl -and $CuTag -eq "cpu") {
     }
 }
 
-# Rename running unsloth.exe so pip can replace it (Windows refuses to delete a mapped .exe).
+# Rename running tunelabs.exe so pip can replace it (Windows refuses to delete a mapped .exe).
 $VenvScriptsDir = Join-Path $VenvDir "Scripts"
-$RunningUnslothExe = Join-Path $VenvScriptsDir "unsloth.exe"
-if (Test-Path -LiteralPath $RunningUnslothExe -PathType Leaf) {
-    $StaleUnslothExe = "$RunningUnslothExe.deleteme"
-    if (Test-Path -LiteralPath $StaleUnslothExe) {
-        Remove-Item -LiteralPath $StaleUnslothExe -Force -ErrorAction SilentlyContinue
+$RunningTuneLabsExe = Join-Path $VenvScriptsDir "tunelabs.exe"
+if (Test-Path -LiteralPath $RunningTuneLabsExe -PathType Leaf) {
+    $StaleTuneLabsExe = "$RunningTuneLabsExe.deleteme"
+    if (Test-Path -LiteralPath $StaleTuneLabsExe) {
+        Remove-Item -LiteralPath $StaleTuneLabsExe -Force -ErrorAction SilentlyContinue
     }
     try {
-        Rename-Item -LiteralPath $RunningUnslothExe -NewName "unsloth.exe.deleteme" -Force -ErrorAction Stop
+        Rename-Item -LiteralPath $RunningTuneLabsExe -NewName "tunelabs.exe.deleteme" -Force -ErrorAction Stop
     } catch {
-        substep "could not rename unsloth.exe ($($_.Exception.Message)); pip may fail with WinError 32" "Yellow"
+        substep "could not rename tunelabs.exe ($($_.Exception.Message)); pip may fail with WinError 32" "Yellow"
     }
 }
 
@@ -2772,25 +2772,25 @@ $ErrorActionPreference = $prevEAP
 if ($stackExit -ne 0) {
     Write-Host "[FAILED] Python dependency installation failed (exit code $stackExit)" -ForegroundColor Red
     Write-Host "   Re-run the installer or check the error above for details." -ForegroundColor Red
-    # Restore the pre-rename unsloth.exe so the user keeps a working CLI.
+    # Restore the pre-rename tunelabs.exe so the user keeps a working CLI.
     # Treat a zero-byte exe as "pip half-wrote a broken binary" -- prefer the
     # stale-but-working copy in .deleteme.
-    if (Test-Path -LiteralPath "$RunningUnslothExe.deleteme") {
-        $needRestore = -not (Test-Path -LiteralPath $RunningUnslothExe)
+    if (Test-Path -LiteralPath "$RunningTuneLabsExe.deleteme") {
+        $needRestore = -not (Test-Path -LiteralPath $RunningTuneLabsExe)
         if (-not $needRestore) {
             try {
-                $needRestore = (Get-Item -LiteralPath $RunningUnslothExe -ErrorAction Stop).Length -eq 0
+                $needRestore = (Get-Item -LiteralPath $RunningTuneLabsExe -ErrorAction Stop).Length -eq 0
             } catch { $needRestore = $true }
         }
         if ($needRestore) {
             try {
-                if (Test-Path -LiteralPath $RunningUnslothExe) {
-                    Remove-Item -LiteralPath $RunningUnslothExe -Force -ErrorAction SilentlyContinue
+                if (Test-Path -LiteralPath $RunningTuneLabsExe) {
+                    Remove-Item -LiteralPath $RunningTuneLabsExe -Force -ErrorAction SilentlyContinue
                 }
-                Rename-Item -LiteralPath "$RunningUnslothExe.deleteme" -NewName "unsloth.exe" -Force -ErrorAction Stop
-                substep "restored unsloth.exe after failed install"
+                Rename-Item -LiteralPath "$RunningTuneLabsExe.deleteme" -NewName "tunelabs.exe" -Force -ErrorAction Stop
+                substep "restored tunelabs.exe after failed install"
             } catch {
-                substep "could not restore unsloth.exe ($($_.Exception.Message))" "Yellow"
+                substep "could not restore tunelabs.exe ($($_.Exception.Message))" "Yellow"
             }
         }
     }
@@ -2860,7 +2860,7 @@ if (Test-Path -LiteralPath $VenvT5_530Dir) { Remove-Item -LiteralPath $VenvT5_53
 [System.IO.Directory]::CreateDirectory($VenvT5_530Dir) | Out-Null
 Mark-StudioOwned -Path $VenvT5_530Dir
 foreach ($pkg in @("transformers==5.3.0", "huggingface_hub==1.8.0", "hf_xet==1.4.2")) {
-    if ($script:UnslothVerbose) {
+    if ($script:TuneLabsVerbose) {
         Fast-Install --target $VenvT5_530Dir --no-deps $pkg
         $t5PkgExit = $LASTEXITCODE
         $output = ""
@@ -2875,7 +2875,7 @@ foreach ($pkg in @("transformers==5.3.0", "huggingface_hub==1.8.0", "hf_xet==1.4
         exit 1
     }
 }
-if ($script:UnslothVerbose) {
+if ($script:TuneLabsVerbose) {
     Fast-Install --target $VenvT5_530Dir tiktoken
     $tiktokenInstallExit = $LASTEXITCODE
     $output = ""
@@ -2895,7 +2895,7 @@ if (Test-Path -LiteralPath $VenvT5_550Dir) { Remove-Item -LiteralPath $VenvT5_55
 [System.IO.Directory]::CreateDirectory($VenvT5_550Dir) | Out-Null
 Mark-StudioOwned -Path $VenvT5_550Dir
 foreach ($pkg in @("transformers==5.5.0", "huggingface_hub==1.8.0", "hf_xet==1.4.2")) {
-    if ($script:UnslothVerbose) {
+    if ($script:TuneLabsVerbose) {
         Fast-Install --target $VenvT5_550Dir --no-deps $pkg
         $t5PkgExit = $LASTEXITCODE
         $output = ""
@@ -2910,7 +2910,7 @@ foreach ($pkg in @("transformers==5.5.0", "huggingface_hub==1.8.0", "hf_xet==1.4
         exit 1
     }
 }
-if ($script:UnslothVerbose) {
+if ($script:TuneLabsVerbose) {
     Fast-Install --target $VenvT5_550Dir tiktoken
     $tiktokenInstallExit = $LASTEXITCODE
     $output = ""
@@ -2930,7 +2930,7 @@ if (Test-Path -LiteralPath $VenvT5_510Dir) { Remove-Item -LiteralPath $VenvT5_51
 [System.IO.Directory]::CreateDirectory($VenvT5_510Dir) | Out-Null
 Mark-StudioOwned -Path $VenvT5_510Dir
 foreach ($pkg in @("transformers==5.10.2", "huggingface_hub==1.8.0", "hf_xet==1.4.2")) {
-    if ($script:UnslothVerbose) {
+    if ($script:TuneLabsVerbose) {
         Fast-Install --target $VenvT5_510Dir --no-deps $pkg
         $t5PkgExit = $LASTEXITCODE
         $output = ""
@@ -2945,7 +2945,7 @@ foreach ($pkg in @("transformers==5.10.2", "huggingface_hub==1.8.0", "hf_xet==1.
         exit 1
     }
 }
-if ($script:UnslothVerbose) {
+if ($script:TuneLabsVerbose) {
     Fast-Install --target $VenvT5_510Dir tiktoken
     $tiktokenInstallExit = $LASTEXITCODE
     $output = ""
@@ -2968,24 +2968,24 @@ step "transformers" "5.10.2 pre-installed"
 # legacy default. Reuses $StudioHomeIsCustom from the canonical comparison
 # computed above so the llama.cpp nest matches ownership-guard semantics.
 if ($StudioHomeIsCustom) {
-    $UnslothHome = $StudioHome
+    $TuneLabsHome = $StudioHome
 } else {
-    $UnslothHome = Join-Path $env:USERPROFILE ".unsloth"
+    $TuneLabsHome = Join-Path $env:USERPROFILE ".tunelabs"
 }
-if (-not (Test-Path -LiteralPath $UnslothHome)) { [System.IO.Directory]::CreateDirectory($UnslothHome) | Out-Null }
-$LlamaCppDir = Join-Path $UnslothHome "llama.cpp"
+if (-not (Test-Path -LiteralPath $TuneLabsHome)) { [System.IO.Directory]::CreateDirectory($TuneLabsHome) | Out-Null }
+$LlamaCppDir = Join-Path $TuneLabsHome "llama.cpp"
 $NeedLlamaSourceBuild = $false
 $SkipPrebuiltInstall = $false
-$RequestedLlamaTag = if ($env:UNSLOTH_LLAMA_TAG) { $env:UNSLOTH_LLAMA_TAG } else { $DefaultLlamaTag }
+$RequestedLlamaTag = if ($env:TUNELABS_LLAMA_TAG) { $env:TUNELABS_LLAMA_TAG } else { $DefaultLlamaTag }
 # GPU Windows (CUDA / ROCm) installs the fork's app-* prebuilts; CPU-only stays
 # on ggml-org (the fork ships no windows-cpu bundle). Mirrors setup.sh's routing.
 # A resolved gfx arch counts as a GPU host even when $HasROCm is false (Adrenalin
 # driver only, no HIP runtime): the fork's per-gfx bundle ships its own runtime,
 # so route there instead of ggml-org / a CPU build.
-$HelperReleaseRepo = if ($HasNvidiaSmi -or $HasROCm -or $script:ROCmGfxArch) { "unslothai/llama.cpp" } else { "ggml-org/llama.cpp" }
-$LlamaPr = if ($env:UNSLOTH_LLAMA_PR) { $env:UNSLOTH_LLAMA_PR.Trim() } else { "" }
+$HelperReleaseRepo = if ($HasNvidiaSmi -or $HasROCm -or $script:ROCmGfxArch) { "tunelabsai/llama.cpp" } else { "ggml-org/llama.cpp" }
+$LlamaPr = if ($env:TUNELABS_LLAMA_PR) { $env:TUNELABS_LLAMA_PR.Trim() } else { "" }
 
-$LlamaPrForce = if ($env:UNSLOTH_LLAMA_PR_FORCE) { $env:UNSLOTH_LLAMA_PR_FORCE.Trim() } else { $DefaultLlamaPrForce }
+$LlamaPrForce = if ($env:TUNELABS_LLAMA_PR_FORCE) { $env:TUNELABS_LLAMA_PR_FORCE.Trim() } else { $DefaultLlamaPrForce }
 $LlamaSource = $DefaultLlamaSource
 if ($LlamaSource.EndsWith('.git')) { $LlamaSource = $LlamaSource.Substring(0, $LlamaSource.Length - 4) }
 $ResolvedSourceUrl = $LlamaSource
@@ -2993,7 +2993,7 @@ $ResolvedSourceRef = $RequestedLlamaTag
 $ResolvedSourceRefKind = "tag"
 $ResolvedLlamaTag = $RequestedLlamaTag
 
-if ($env:UNSLOTH_LLAMA_FORCE_COMPILE -eq "1") {
+if ($env:TUNELABS_LLAMA_FORCE_COMPILE -eq "1") {
     $NeedLlamaSourceBuild = $true
     $SkipPrebuiltInstall = $true
 }
@@ -3057,10 +3057,10 @@ if (-not $LlamaPr -and $LlamaPrForce -and $LlamaPrForce -match '^\d+$' -and [int
 
 if ($LlamaPr) {
     if ($LlamaPr -notmatch '^\d+$' -or [int]$LlamaPr -le 0) {
-        Write-Host "[ERROR] UNSLOTH_LLAMA_PR=$LlamaPr is not a valid PR number" -ForegroundColor Red
+        Write-Host "[ERROR] TUNELABS_LLAMA_PR=$LlamaPr is not a valid PR number" -ForegroundColor Red
         exit 1
     }
-    step "llama.cpp" "UNSLOTH_LLAMA_PR=$LlamaPr -- will build from PR head" "Yellow"
+    step "llama.cpp" "TUNELABS_LLAMA_PR=$LlamaPr -- will build from PR head" "Yellow"
     $ResolvedLlamaTag = "pr-$LlamaPr"
     $ResolvedSourceUrl = $LlamaSource
     $ResolvedSourceRef = "pr-$LlamaPr"
@@ -3069,9 +3069,9 @@ if ($LlamaPr) {
     $SkipPrebuiltInstall = $true
 }
 
-if ($env:UNSLOTH_LLAMA_FORCE_COMPILE -eq "1") {
+if ($env:TUNELABS_LLAMA_FORCE_COMPILE -eq "1") {
     Write-Host ""
-    substep "UNSLOTH_LLAMA_FORCE_COMPILE=1 -- skipping prebuilt llama.cpp install" "Yellow"
+    substep "TUNELABS_LLAMA_FORCE_COMPILE=1 -- skipping prebuilt llama.cpp install" "Yellow"
     $NeedLlamaSourceBuild = $true
 } elseif ($SkipPrebuiltInstall) {
     Write-Host ""
@@ -3083,7 +3083,7 @@ if ($env:UNSLOTH_LLAMA_FORCE_COMPILE -eq "1") {
         # If the existing install is the wrong kind (e.g. windows-cpu on a ROCm
         # machine that should have windows-rocm), remove it so the installer is
         # forced to download the correct variant rather than skipping on tag match.
-        $existingMetaPath = Join-Path $LlamaCppDir "UNSLOTH_PREBUILT_INFO.json"
+        $existingMetaPath = Join-Path $LlamaCppDir "TUNELABS_PREBUILT_INFO.json"
         if (Test-Path $existingMetaPath) {
             try {
                 $existingMeta = Get-Content $existingMetaPath -Raw | ConvertFrom-Json
@@ -3109,7 +3109,7 @@ if ($env:UNSLOTH_LLAMA_FORCE_COMPILE -eq "1") {
     }
     substep "installing prebuilt llama.cpp bundle (preferred path)..."
     # why: install_llama_prebuilt.py uses os.replace(), which would displace
-    # an unrelated $env:UNSLOTH_STUDIO_HOME\llama.cpp before the source-build
+    # an unrelated $env:TUNELABS_STUDIO_HOME\llama.cpp before the source-build
     # ownership check below ever runs.
     if ($StudioHomeIsCustom) {
         Assert-StudioOwnedOrAbsent -Path $LlamaCppDir -Label "llama.cpp install"
@@ -3131,8 +3131,8 @@ if ($env:UNSLOTH_LLAMA_FORCE_COMPILE -eq "1") {
         if ($script:ROCmGfxArch) {
             $prebuiltArgs += @("--rocm-gfx", $script:ROCmGfxArch)
         }
-        if ($env:UNSLOTH_LLAMA_RELEASE_TAG) {
-            $prebuiltArgs += @("--published-release-tag", $env:UNSLOTH_LLAMA_RELEASE_TAG)
+        if ($env:TUNELABS_LLAMA_RELEASE_TAG) {
+            $prebuiltArgs += @("--published-release-tag", $env:TUNELABS_LLAMA_RELEASE_TAG)
         }
         $prevEAPPrebuilt = $ErrorActionPreference
         $ErrorActionPreference = "Continue"
@@ -3144,9 +3144,9 @@ if ($env:UNSLOTH_LLAMA_FORCE_COMPILE -eq "1") {
             $restoreNativeErrorPreference = $true
         }
         try {
-            if ($script:UnslothVerbose) {
+            if ($script:TuneLabsVerbose) {
                 # Show live output in verbose mode while still capturing for error log
-                $prebuiltLog = Join-Path $env:TEMP "unsloth-prebuilt-$PID.log"
+                $prebuiltLog = Join-Path $env:TEMP "tunelabs-prebuilt-$PID.log"
                 & python @prebuiltArgs 2>&1 | Tee-Object -FilePath $prebuiltLog | Out-Host
                 $prebuiltExit = $LASTEXITCODE
                 $prebuiltOutput = if (Test-Path $prebuiltLog) { Get-Content $prebuiltLog -Raw } else { "" }
@@ -3246,9 +3246,9 @@ if ($NeedLlamaSourceBuild) {
 # ==========================================================================
 #  PHASE 4: Build llama.cpp with CUDA for GGUF inference + export
 # ==========================================================================
-# Builds at ~/.unsloth/llama.cpp — a single shared location under the user's
+# Builds at ~/.tunelabs/llama.cpp — a single shared location under the user's
 # home directory. This is used by both the inference server and the GGUF
-# export pipeline (unsloth-zoo).
+# export pipeline (tunelabs-zoo).
 # We build:
 #   - llama-server:   for GGUF model inference (with HTTPS if OpenSSL available)
 #   - llama-quantize: for GGUF export quantization
@@ -3373,7 +3373,7 @@ if (-not $NeedLlamaSourceBuild) {
         substep "       llama.cpp prebuilt could not be installed -- falling back to a CPU build." "Yellow"
         substep "       The prebuilt is the AMD GPU path (no HIP SDK required). To restore GPU" "Yellow"
         substep "       acceleration: re-run the installer (check your network / proxy), or set" "Yellow"
-        substep "       UNSLOTH_LLAMA_RELEASE_TAG to a tag with a gfx prebuilt for your GPU." "Yellow"
+        substep "       TUNELABS_LLAMA_RELEASE_TAG to a tag with a gfx prebuilt for your GPU." "Yellow"
         substep "building llama.cpp (CPU-only fallback)..." "Yellow"
     } else {
         substep "building llama.cpp (CPU-only, no NVIDIA GPU detected)..."
@@ -3413,10 +3413,10 @@ if (-not $NeedLlamaSourceBuild) {
 
     if (-not $LlamaPr) {
         $ResolvedSourceUrl = $LlamaSource
-        if ($env:UNSLOTH_LLAMA_FORCE_COMPILE -eq "1") {
+        if ($env:TUNELABS_LLAMA_FORCE_COMPILE -eq "1") {
             if ($RequestedLlamaTag -eq "latest") {
-                $ResolvedSourceRef = if ($env:UNSLOTH_LLAMA_FORCE_COMPILE_REF) {
-                    $env:UNSLOTH_LLAMA_FORCE_COMPILE_REF
+                $ResolvedSourceRef = if ($env:TUNELABS_LLAMA_FORCE_COMPILE_REF) {
+                    $env:TUNELABS_LLAMA_FORCE_COMPILE_REF
                 } else {
                     $DefaultLlamaForceCompileRef
                 }
@@ -3484,7 +3484,7 @@ if (-not $NeedLlamaSourceBuild) {
             if ($gitFetchExit -ne 0) {
                 substep "git fetch failed -- using existing source" "Yellow"
             } else {
-                $gitCheckoutExit = Invoke-SetupCommand -AlwaysQuiet { git -C $LlamaCppDir checkout -B unsloth-llama-build FETCH_HEAD }
+                $gitCheckoutExit = Invoke-SetupCommand -AlwaysQuiet { git -C $LlamaCppDir checkout -B tunelabs-llama-build FETCH_HEAD }
                 if ($gitCheckoutExit -ne 0) {
                     $BuildOk = $false
                     $FailedStep = "git checkout"
@@ -3497,7 +3497,7 @@ if (-not $NeedLlamaSourceBuild) {
             if ($gitFetchExit -ne 0) {
                 substep "git fetch failed -- using existing source" "Yellow"
             } else {
-                $gitCheckoutExit = Invoke-SetupCommand -AlwaysQuiet { git -C $LlamaCppDir checkout -B unsloth-llama-build FETCH_HEAD }
+                $gitCheckoutExit = Invoke-SetupCommand -AlwaysQuiet { git -C $LlamaCppDir checkout -B tunelabs-llama-build FETCH_HEAD }
                 if ($gitCheckoutExit -ne 0) {
                     $BuildOk = $false
                     $FailedStep = "git checkout"
@@ -3510,7 +3510,7 @@ if (-not $NeedLlamaSourceBuild) {
             if ($gitFetchExit -ne 0) {
                 substep "git fetch failed -- using existing source" "Yellow"
             } else {
-                $gitCheckoutExit = Invoke-SetupCommand -AlwaysQuiet { git -C $LlamaCppDir checkout -B unsloth-llama-build FETCH_HEAD }
+                $gitCheckoutExit = Invoke-SetupCommand -AlwaysQuiet { git -C $LlamaCppDir checkout -B tunelabs-llama-build FETCH_HEAD }
                 if ($gitCheckoutExit -ne 0) {
                     $BuildOk = $false
                     $FailedStep = "git checkout"
@@ -3523,7 +3523,7 @@ if (-not $NeedLlamaSourceBuild) {
             if ($gitFetchExit -ne 0) {
                 substep "git fetch failed -- using existing source" "Yellow"
             } else {
-                $gitCheckoutExit = Invoke-SetupCommand -AlwaysQuiet { git -C $LlamaCppDir checkout -B unsloth-llama-build FETCH_HEAD }
+                $gitCheckoutExit = Invoke-SetupCommand -AlwaysQuiet { git -C $LlamaCppDir checkout -B tunelabs-llama-build FETCH_HEAD }
                 if ($gitCheckoutExit -ne 0) {
                     $BuildOk = $false
                     $FailedStep = "git checkout"
@@ -3582,7 +3582,7 @@ if (-not $NeedLlamaSourceBuild) {
                 }
             }
             if ($BuildOk) {
-                $checkoutExit = Invoke-SetupCommand -AlwaysQuiet { git -C $buildTmp checkout -B unsloth-llama-build FETCH_HEAD }
+                $checkoutExit = Invoke-SetupCommand -AlwaysQuiet { git -C $buildTmp checkout -B tunelabs-llama-build FETCH_HEAD }
                 if ($checkoutExit -ne 0) {
                     $BuildOk = $false
                     $FailedStep = "git checkout source PR ref"
@@ -3605,7 +3605,7 @@ if (-not $NeedLlamaSourceBuild) {
                 }
             }
             if ($BuildOk) {
-                $checkoutExit = Invoke-SetupCommand -AlwaysQuiet { git -C $buildTmp checkout -B unsloth-llama-build FETCH_HEAD }
+                $checkoutExit = Invoke-SetupCommand -AlwaysQuiet { git -C $buildTmp checkout -B tunelabs-llama-build FETCH_HEAD }
                 if ($checkoutExit -ne 0) {
                     $BuildOk = $false
                     $FailedStep = "git checkout source commit"
@@ -3804,7 +3804,7 @@ if (-not $NeedLlamaSourceBuild) {
 # ─────────────────────────────────────────────
 # Footer
 # ─────────────────────────────────────────────
-$DoneLabel = if ($env:SKIP_STUDIO_BASE -eq "1") { "Unsloth Studio Setup Complete" } else { "Unsloth Studio Updated" }
+$DoneLabel = if ($env:SKIP_STUDIO_BASE -eq "1") { "TuneLabs Studio Setup Complete" } else { "TuneLabs Studio Updated" }
 if ($script:StudioVtOk -and -not $env:NO_COLOR) {
     Write-Host ("  {0}{1}{2}" -f (Get-StudioAnsi Dim), $Rule, (Get-StudioAnsi Reset))
     if ($script:LlamaCppDegraded) {
@@ -3822,12 +3822,12 @@ if ($script:StudioVtOk -and -not $env:NO_COLOR) {
     }
     Write-Host "  $Rule" -ForegroundColor DarkGray
 }
-step "launch" "unsloth studio -H 0.0.0.0 -p 8888"
+step "launch" "tunelabs studio -H 0.0.0.0 -p 8888"
 Write-Host ""
 
 # Match studio/setup.sh: exit non-zero for degraded llama.cpp when called
 # from install.ps1 (SKIP_STUDIO_BASE=1) so the installer can detect the
-# failure. Direct 'unsloth studio update' does not set SKIP_STUDIO_BASE,
+# failure. Direct 'tunelabs studio update' does not set SKIP_STUDIO_BASE,
 # so it keeps degraded installs successful.
 if ($script:LlamaCppDegraded -and $env:SKIP_STUDIO_BASE -eq "1") {
     exit 1

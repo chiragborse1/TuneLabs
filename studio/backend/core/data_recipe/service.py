@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 from __future__ import annotations
 
@@ -111,7 +111,7 @@ def _apply_data_designer_image_context_patch() -> None:
     except ImportError:
         return
 
-    if getattr(ImageContext, "_unsloth_image_context_patch_applied", False):
+    if getattr(ImageContext, "_tunelabs_image_context_patch_applied", False):
         _IMAGE_CONTEXT_PATCHED = True
         return
 
@@ -122,7 +122,7 @@ def _apply_data_designer_image_context_patch() -> None:
         return original_auto_resolve(self, normalized, base_path)
 
     ImageContext._auto_resolve_context_value = _patched_auto_resolve
-    setattr(ImageContext, "_unsloth_image_context_patch_applied", True)
+    setattr(ImageContext, "_tunelabs_image_context_patch_applied", True)
     _IMAGE_CONTEXT_PATCHED = True
 
 

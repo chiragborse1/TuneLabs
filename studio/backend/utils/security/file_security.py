@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Malware / unsafe-file gate for model loads.
 
@@ -213,7 +213,7 @@ def security_load_subdirs(model_name: str, hf_token: Optional[str] = None) -> tu
 def _load_scan_target(model_name: str, load_subdirs: tuple) -> tuple:
     """Map a load alias to the ``(repo_id, load_subdirs)`` the load actually fetches. The
     Spark-TTS / BiCodec alias ``<parent>/LLM`` is downloaded by the trainer as
-    ``unsloth/<parent>`` and loaded from ``LLM/``, so scan that repo with ``LLM`` as a
+    ``tunelabs/<parent>`` and loaded from ``LLM/``, so scan that repo with ``LLM`` as a
     load root (the literal alias 404s and fails open). Everything else is unchanged.
     """
     try:
@@ -224,13 +224,13 @@ def _load_scan_target(model_name: str, load_subdirs: tuple) -> tuple:
         return model_name, load_subdirs
     name = (model_name or "").strip().strip("/")
     # Rewrite ONLY a registry-known bicodec alias, never any repo ending in "/LLM"
-    # (e.g. "evil/LLM" would scan unsloth/evil and fail open on the real repo).
+    # (e.g. "evil/LLM" would scan tunelabs/evil and fail open on the real repo).
     if name.endswith("/LLM") and name.count("/") == 1:
         try:
             from utils.models.model_config import load_model_defaults
             if (load_model_defaults(name) or {}).get("audio_type") == "bicodec":
                 parent = name[: -len("/LLM")]
-                return f"unsloth/{parent}", tuple(dict.fromkeys((*load_subdirs, "LLM")))
+                return f"tunelabs/{parent}", tuple(dict.fromkeys((*load_subdirs, "LLM")))
         except Exception:
             pass
     return model_name, load_subdirs
@@ -282,7 +282,7 @@ def evaluate_file_security(
     is root-level there and blocks, and an index inside it is honored when scoping shards.
     """
     # Scan the repo the load actually fetches, not the literal alias (which 404s and
-    # fails open): the Spark-TTS "<parent>/LLM" alias is really unsloth/<parent> from LLM/.
+    # fails open): the Spark-TTS "<parent>/LLM" alias is really tunelabs/<parent> from LLM/.
     model_name, load_subdirs = _load_scan_target(model_name, tuple(load_subdirs))
 
     # Local paths (including a local .gguf) have no Hub scan. A remote ref is scanned

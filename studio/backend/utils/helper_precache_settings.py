@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Persisted opt-in controls for Helper LLM startup pre-cache."""
 
@@ -26,7 +26,7 @@ def _coerce_bool(value: Any) -> bool | None:
 
 def helper_model_disabled_by_env() -> bool:
     """Return True when existing broad helper-disable env var is active."""
-    return os.environ.get("UNSLOTH_HELPER_MODEL_DISABLE", "").strip() in {"1", "true"}
+    return os.environ.get("TUNELABS_HELPER_MODEL_DISABLE", "").strip() in {"1", "true"}
 
 
 def get_helper_precache_enabled() -> bool:

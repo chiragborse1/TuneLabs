@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Regression tests for run_lifespan_shutdown: a dead default executor (the
 abrupt-shutdown teardown race) must not abort the remaining cleanup. The helper
@@ -118,7 +118,7 @@ def test_run_lifespan_shutdown_does_not_retry_body_runtime_error():
 
 def test_run_lifespan_shutdown_preserves_contextvars():
     """terminate runs in a copy of the caller's context (parity with asyncio.to_thread)."""
-    cv = contextvars.ContextVar("unsloth_test_cv")
+    cv = contextvars.ContextVar("tunelabs_test_cv")
     cv.set("bound-value")
     seen = []
     clear_box, clear = _counter()

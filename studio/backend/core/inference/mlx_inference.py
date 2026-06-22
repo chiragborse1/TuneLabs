@@ -136,11 +136,11 @@ class MLXInferenceBackend:
         )
 
         try:
-            from unsloth_zoo.mlx.loader import FastMLXModel
+            from tunelabs_zoo.mlx.loader import FastMLXModel
         except ImportError as e:
             raise ImportError(
-                "Unsloth: MLX inference requires unsloth-zoo with the MLX modules "
-                "(unsloth_zoo.mlx.loader). Reinstall via install.sh on Apple Silicon."
+                "TuneLabs: MLX inference requires tunelabs-zoo with the MLX modules "
+                "(tunelabs_zoo.mlx.loader). Reinstall via install.sh on Apple Silicon."
             ) from e
 
         model, tokenizer_or_processor = FastMLXModel.from_pretrained(

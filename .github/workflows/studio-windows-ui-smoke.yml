@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 # Windows counterpart to studio-ui-smoke.yml / studio-mac-ui-smoke.yml.
 # Same Playwright + Chromium end-to-end chat UI flow + extra UI flow,
@@ -14,8 +14,8 @@ on:
   pull_request:
     paths:
       - 'studio/**'
-      - 'unsloth/**'
-      - 'unsloth_cli/**'
+      - 'tunelabs/**'
+      - 'tunelabs_cli/**'
       - 'install.ps1'
       - 'pyproject.toml'
       - 'tests/studio/**'
@@ -44,7 +44,7 @@ jobs:
       run:
         shell: bash
     env:
-      GGUF_REPO: unsloth/gemma-3-270m-it-GGUF
+      GGUF_REPO: tunelabs/gemma-3-270m-it-GGUF
       GGUF_VARIANT: UD-Q4_K_XL
       GGUF_FILE: gemma-3-270m-it-UD-Q4_K_XL.gguf
       STUDIO_PORT: '18896'
@@ -123,7 +123,7 @@ jobs:
           # rebuild" and Studio boots with an empty dist directory.
           # Add-MpPreference accepts paths that do not yet exist.
           foreach ($p in @(
-            "$env:USERPROFILE\.unsloth",
+            "$env:USERPROFILE\.tunelabs",
             "$env:USERPROFILE\AppData\Local\uv",
             "$env:GITHUB_WORKSPACE\studio\frontend\node_modules",
             "$env:GITHUB_WORKSPACE\studio\frontend\dist"
@@ -142,7 +142,7 @@ jobs:
         # Kaspersky-flagged file), not merely stops generating it.
         shell: pwsh
         run: |
-          $appDir = Join-Path $env:LOCALAPPDATA 'Unsloth Studio'
+          $appDir = Join-Path $env:LOCALAPPDATA 'TuneLabs Studio'
           New-Item -ItemType Directory -Force -Path $appDir | Out-Null
           Set-Content -LiteralPath (Join-Path $appDir 'launch-studio.vbs') -Value 'WScript.Echo "legacy"' -Encoding Unicode
           Write-Host "seeded legacy launch-studio.vbs at $appDir"
@@ -150,7 +150,7 @@ jobs:
       - name: Install Studio (--local, --no-torch)
         # install.ps1 is the supported Windows installer. install.sh
         # has no Windows branch (apt-get / brew calls). The PS1
-        # script's `Install-UnslothStudio @args` line at the bottom
+        # script's `Install-TuneLabsStudio @args` line at the bottom
         # forwards `--local --no-torch` correctly.
         shell: pwsh
         env:
@@ -176,12 +176,12 @@ jobs:
           # does NOT come back through this parent step's stdout
           # pipeline (no matter how aggressively we redirect: *>&1,
           # tee, etc.). Verify the install via the filesystem
-          # instead. setup.ps1 writes UNSLOTH_PREBUILT_INFO.json
+          # instead. setup.ps1 writes TUNELABS_PREBUILT_INFO.json
           # next to the install dir on success, and lays the
           # binaries under build/bin/Release/ on Windows.
-          STUDIO_HOME=~/.unsloth/studio
-          LLAMA_DIR=~/.unsloth/llama.cpp
-          INFO="$LLAMA_DIR/UNSLOTH_PREBUILT_INFO.json"
+          STUDIO_HOME=~/.tunelabs/studio
+          LLAMA_DIR=~/.tunelabs/llama.cpp
+          INFO="$LLAMA_DIR/TUNELABS_PREBUILT_INFO.json"
           BIN="$LLAMA_DIR/build/bin/Release/llama-server.exe"
           # Source-build fallback grep stays as a fast bail-out.
           if grep -q "falling back to source build" logs/install.log; then
@@ -190,7 +190,7 @@ jobs:
             exit 1
           fi
           if [ ! -f "$INFO" ]; then
-            echo "::error::no UNSLOTH_PREBUILT_INFO.json at $INFO; setup.ps1 didn't install the prebuilt."
+            echo "::error::no TUNELABS_PREBUILT_INFO.json at $INFO; setup.ps1 didn't install the prebuilt."
             ls -la "$LLAMA_DIR" || true
             exit 1
           fi
@@ -205,23 +205,23 @@ jobs:
 
       - name: Assert Studio launcher chain (no VBS, hidden PowerShell shortcut)
         # The shortcut launch path is otherwise untested here (the steps below
-        # boot `unsloth studio` directly). Guard against re-introducing the VBS
+        # boot `tunelabs studio` directly). Guard against re-introducing the VBS
         # that tripped Kaspersky HEUR:Trojan.VBS.Agent.gen and against the .lnk
         # pointing anywhere other than hidden PowerShell over launch-studio.ps1.
         shell: pwsh
         run: |
-          $appDir = Join-Path $env:LOCALAPPDATA 'Unsloth Studio'
+          $appDir = Join-Path $env:LOCALAPPDATA 'TuneLabs Studio'
           if (Test-Path -LiteralPath (Join-Path $appDir 'launch-studio.vbs')) {
             throw "regression: launch-studio.vbs exists (the Kaspersky VBS-FP shape)"
           }
           if (-not (Test-Path -LiteralPath (Join-Path $appDir 'launch-studio.ps1'))) {
             throw "missing launch-studio.ps1 in $appDir"
           }
-          $lnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Unsloth Studio.lnk'
+          $lnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'TuneLabs Studio.lnk'
           if (-not (Test-Path -LiteralPath $lnk)) {
-            $lnk = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Unsloth Studio.lnk'
+            $lnk = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\TuneLabs Studio.lnk'
           }
-          if (-not (Test-Path -LiteralPath $lnk)) { throw "no Unsloth Studio.lnk on Desktop or Start Menu" }
+          if (-not (Test-Path -LiteralPath $lnk)) { throw "no TuneLabs Studio.lnk on Desktop or Start Menu" }
           $sc = (New-Object -ComObject WScript.Shell).CreateShortcut($lnk)
           Write-Host "shortcut target: $($sc.TargetPath)"
           Write-Host "shortcut args:   $($sc.Arguments)"
@@ -240,9 +240,9 @@ jobs:
         # there is no conflict, and we tear this server down before they boot.
         shell: pwsh
         run: |
-          $lnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Unsloth Studio.lnk'
+          $lnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'TuneLabs Studio.lnk'
           if (-not (Test-Path -LiteralPath $lnk)) {
-            $lnk = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Unsloth Studio.lnk'
+            $lnk = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\TuneLabs Studio.lnk'
           }
           $sc = (New-Object -ComObject WScript.Shell).CreateShortcut($lnk)
           Write-Host "launching: $($sc.TargetPath) $($sc.Arguments)"
@@ -252,7 +252,7 @@ jobs:
             foreach ($port in 8888..8908) {
               try {
                 $r = Invoke-RestMethod -Uri "http://127.0.0.1:$port/api/health" -TimeoutSec 1
-                if ($r.status -eq 'healthy' -and $r.service -eq 'Unsloth UI Backend') { $foundPort = $port; break }
+                if ($r.status -eq 'healthy' -and $r.service -eq 'TuneLabs UI Backend') { $foundPort = $port; break }
               } catch {}
             }
             if ($foundPort) { break }
@@ -267,17 +267,17 @@ jobs:
           Write-Host "Studio healthy on port $foundPort (launched via the shortcut)"
 
       - name: Add Studio shim to GITHUB_PATH
-        # install.ps1 puts unsloth.exe at $StudioHome\bin\unsloth.exe
+        # install.ps1 puts tunelabs.exe at $StudioHome\bin\tunelabs.exe
         # and adds that dir to the User PATH via the Windows registry.
         # Registry-level PATH updates don't propagate to a running
-        # Git Bash session, so the next step's `unsloth ...` invocation
+        # Git Bash session, so the next step's `tunelabs ...` invocation
         # would hit "command not found". Re-export the shim dir to
         # GITHUB_PATH so every subsequent step in this job sees it.
         run: |
-          SHIM_DIR=~/.unsloth/studio/bin
-          if [ ! -f "$SHIM_DIR/unsloth.exe" ]; then
-            echo "::error::unsloth.exe shim not found at $SHIM_DIR"
-            ls -la ~/.unsloth/studio/ || true
+          SHIM_DIR=~/.tunelabs/studio/bin
+          if [ ! -f "$SHIM_DIR/tunelabs.exe" ]; then
+            echo "::error::tunelabs.exe shim not found at $SHIM_DIR"
+            ls -la ~/.tunelabs/studio/ || true
             exit 1
           fi
           # GITHUB_PATH wants Windows-style paths; convert via cygpath.
@@ -294,9 +294,9 @@ jobs:
 
       - name: Reset auth + boot Studio
         run: |
-          unsloth studio reset-password
+          tunelabs studio reset-password
           mkdir -p logs
-          UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p "$STUDIO_PORT" \
+          TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p "$STUDIO_PORT" \
             > logs/studio.log 2>&1 &
           echo "STUDIO_PID=$!" >> "$GITHUB_ENV"
 
@@ -312,7 +312,7 @@ jobs:
 
       - name: Pass bootstrap password to the Playwright step
         run: |
-          OLD=$(cat ~/.unsloth/studio/auth/.bootstrap_password)
+          OLD=$(cat ~/.tunelabs/studio/auth/.bootstrap_password)
           NEW="CIUi-$(python -c 'import secrets; print(secrets.token_urlsafe(16))')"
           NEW2="CIUi-$(python -c 'import secrets; print(secrets.token_urlsafe(16))')"
           echo "::add-mask::$OLD"
@@ -345,9 +345,9 @@ jobs:
 
       - name: Reset auth + boot Studio for extra UI tests (port 18897)
         run: |
-          unsloth studio reset-password
+          tunelabs studio reset-password
           mkdir -p logs
-          UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p 18897 \
+          TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p 18897 \
             > logs/studio_extra.log 2>&1 &
           echo "STUDIO_EXTRA_PID=$!" >> "$GITHUB_ENV"
 
@@ -363,7 +363,7 @@ jobs:
 
       - name: Pass bootstrap pw for extra UI test
         run: |
-          OLD=$(cat ~/.unsloth/studio/auth/.bootstrap_password)
+          OLD=$(cat ~/.tunelabs/studio/auth/.bootstrap_password)
           NEW="CIUiExtra-$(python -c 'import secrets; print(secrets.token_urlsafe(16))')"
           echo "::add-mask::$OLD"
           echo "::add-mask::$NEW"

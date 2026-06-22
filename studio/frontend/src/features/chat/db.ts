@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import Dexie, { type EntityTable, liveQuery } from "dexie";
 import { useEffect, useRef, useState } from "react";
@@ -7,7 +7,7 @@ import type { MessageRecord, ThreadRecord } from "./types";
 
 // Legacy browser-only chat storage. Replaced by studio.db (see
 // chat-history-storage.ts), kept read-only for the one-shot import path.
-export const DEXIE_DB_NAME = "unsloth-chat";
+export const DEXIE_DB_NAME = "tunelabs-chat";
 
 const db = new Dexie(DEXIE_DB_NAME) as Dexie & {
   threads: EntityTable<ThreadRecord, "id">;

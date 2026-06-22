@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import type { BackendModelConfig } from "../api/models-api";
 import type { TrainingConfigState } from "../types/config";
@@ -71,9 +71,9 @@ function toStringArray(value: unknown): string[] | undefined {
 function toGradientCheckpointing(
   value: unknown,
 ): TrainingConfigState["gradientCheckpointing"] | undefined {
-  if (value === "none" || value === "true" || value === "unsloth" || value === "mlx") {
-    // On Mac, map "unsloth" → "mlx" since Unsloth GC is GPU-only
-    if (usePlatformStore.getState().deviceType === "mac" && value === "unsloth") {
+  if (value === "none" || value === "true" || value === "tunelabs" || value === "mlx") {
+    // On Mac, map "tunelabs" → "mlx" since TuneLabs GC is GPU-only
+    if (usePlatformStore.getState().deviceType === "mac" && value === "tunelabs") {
       return "mlx";
     }
     return value;

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 from __future__ import annotations
 
@@ -12,8 +12,8 @@ _DATA_DESIGNER_FOOTER = (
     '<sub style="white-space: nowrap;">Made with ❤️ using 🎨 '
     '<a href="https://github.com/NVIDIA-NeMo/DataDesigner">NeMo Data Designer</a></sub>'
 )
-_UNSLOTH_STUDIO_FOOTER = (
-    '<sub style="white-space: nowrap;">Made with ❤️ using 🦥 ' "Unsloth Studio</sub>"
+_TUNELABS_STUDIO_FOOTER = (
+    '<sub style="white-space: nowrap;">Made with ❤️ using 🦥 ' "TuneLabs Studio</sub>"
 )
 
 
@@ -94,7 +94,7 @@ def publish_recipe_dataset(
             description = description,
             tags = None,
         )
-        card.text = card.text.replace(_DATA_DESIGNER_FOOTER, _UNSLOTH_STUDIO_FOOTER)
+        card.text = card.text.replace(_DATA_DESIGNER_FOOTER, _TUNELABS_STUDIO_FOOTER)
         # Data Designer drops the explicit token, so push the card ourselves to keep auth request-local.
         card.push_to_hub(repo_id, token = hf_token, repo_type = "dataset")
 

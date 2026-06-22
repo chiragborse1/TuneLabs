@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 /**
  * Tombstones mask deleted threads in the Dexie read fallback. Each carries a
@@ -12,7 +12,7 @@ interface Tombstone {
   deletedAt: number;
 }
 
-const TOMBSTONES_KEY = "unsloth_chat_deleted_thread_ids";
+const TOMBSTONES_KEY = "tunelabs_chat_deleted_thread_ids";
 const TOMBSTONE_MAX_AGE_MS = 90 * 24 * 60 * 60 * 1000; // 90 days
 const TOMBSTONE_MAX_COUNT = 5000;
 

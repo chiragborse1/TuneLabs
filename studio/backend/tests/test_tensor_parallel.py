@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Backend contract for the Tensor Parallelism toggle.
 
@@ -701,7 +701,7 @@ def test_split_mode_tensor_arch_failure_message():
         "llama_model_create: LLAMA_SPLIT_MODE_TENSOR not implemented for "
         "architecture 'deepseek2'",
         None,
-        "unsloth/DeepSeek-V3-GGUF",
+        "tunelabs/DeepSeek-V3-GGUF",
     )
     assert "Tensor parallelism is not supported" in msg
 

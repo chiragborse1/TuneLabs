@@ -715,8 +715,8 @@ class TestEnsureRocmTorch:
     @patch.object(stack_mod, "_has_rocm_gpu", return_value = True)
     @patch.object(stack_mod, "_has_usable_nvidia_gpu", return_value = True)
     def test_torch_backend_cuda_env_skips_entirely(self, mock_nvidia, mock_gpu, mock_pip):
-        """UNSLOTH_TORCH_BACKEND=cuda must short-circuit before any GPU probe."""
-        with patch.dict(os.environ, {"UNSLOTH_TORCH_BACKEND": "cuda"}):
+        """TUNELABS_TORCH_BACKEND=cuda must short-circuit before any GPU probe."""
+        with patch.dict(os.environ, {"TUNELABS_TORCH_BACKEND": "cuda"}):
             with patch.object(stack_mod, "_TORCH_BACKEND", "cuda"):
                 _ensure_rocm_torch()
         mock_pip.assert_not_called()
@@ -725,8 +725,8 @@ class TestEnsureRocmTorch:
     @patch.object(stack_mod, "_has_rocm_gpu", return_value = True)
     @patch.object(stack_mod, "_has_usable_nvidia_gpu", return_value = True)
     def test_torch_backend_cpu_env_skips_entirely(self, mock_nvidia, mock_gpu, mock_pip):
-        """UNSLOTH_TORCH_BACKEND=cpu must short-circuit before any GPU probe."""
-        with patch.dict(os.environ, {"UNSLOTH_TORCH_BACKEND": "cpu"}):
+        """TUNELABS_TORCH_BACKEND=cpu must short-circuit before any GPU probe."""
+        with patch.dict(os.environ, {"TUNELABS_TORCH_BACKEND": "cpu"}):
             with patch.object(stack_mod, "_TORCH_BACKEND", "cpu"):
                 _ensure_rocm_torch()
         mock_pip.assert_not_called()
@@ -976,15 +976,15 @@ class TestTokenizerErrorMessage:
 
     def test_no_old_amd_message(self):
         """Old 'We do not support AMD' message should be gone."""
-        tu_path = PACKAGE_ROOT / "unsloth" / "tokenizer_utils.py"
+        tu_path = PACKAGE_ROOT / "tunelabs" / "tokenizer_utils.py"
         source = tu_path.read_text(encoding = "utf-8")
         assert "We do not support AMD" not in source
 
     def test_new_message_has_docs_link(self):
-        """New message should point to Unsloth AMD docs."""
-        tu_path = PACKAGE_ROOT / "unsloth" / "tokenizer_utils.py"
+        """New message should point to TuneLabs AMD docs."""
+        tu_path = PACKAGE_ROOT / "tunelabs" / "tokenizer_utils.py"
         source = tu_path.read_text(encoding = "utf-8")
-        assert "docs.unsloth.ai" in source or "No GPU detected" in source
+        assert "docs.tunelabs.ai" in source or "No GPU detected" in source
 
 
 # TEST: install.sh -- structural checks
@@ -1114,21 +1114,21 @@ class TestInstallShStructure:
         rocm_pos = func_body.find("amd-smi")
         assert darwin_pos < rocm_pos, "macOS check should come before ROCm detection"
 
-    def test_unsloth_torch_backend_exported_after_get_torch_index_url(self):
-        """install.sh exports UNSLOTH_TORCH_BACKEND after TORCH_INDEX_URL (lets the stack skip GPU re-detection)."""
+    def test_tunelabs_torch_backend_exported_after_get_torch_index_url(self):
+        """install.sh exports TUNELABS_TORCH_BACKEND after TORCH_INDEX_URL (lets the stack skip GPU re-detection)."""
         sh_path = PACKAGE_ROOT / "install.sh"
         source = sh_path.read_text(encoding = "utf-8")
         torch_url_pos = source.find("TORCH_INDEX_URL=$(get_torch_index_url)")
-        backend_pos = source.find("UNSLOTH_TORCH_BACKEND")
-        assert backend_pos > 0, "UNSLOTH_TORCH_BACKEND must be set in install.sh"
+        backend_pos = source.find("TUNELABS_TORCH_BACKEND")
+        assert backend_pos > 0, "TUNELABS_TORCH_BACKEND must be set in install.sh"
         assert (
             backend_pos > torch_url_pos
-        ), "UNSLOTH_TORCH_BACKEND must be set AFTER TORCH_INDEX_URL is resolved"
+        ), "TUNELABS_TORCH_BACKEND must be set AFTER TORCH_INDEX_URL is resolved"
         assert '"cuda"' in source[backend_pos : backend_pos + 500]
         assert '"rocm"' in source[backend_pos : backend_pos + 500]
         assert '"cpu"' in source[backend_pos : backend_pos + 500]
         # Must be exported so subprocesses see it.
-        assert "export UNSLOTH_TORCH_BACKEND" in source
+        assert "export TUNELABS_TORCH_BACKEND" in source
 
     def test_kfd_sysfs_amd_vendor_check_in_has_amd_rocm_gpu(self):
         """_has_amd_rocm_gpu sysfs fallback must require AMD vendor_id 4098 (nvidia-open registers KFD nodes too)."""
@@ -1380,7 +1380,7 @@ class TestAmdGpuMonitoring:
 
         # amd-smi is gated off on Windows w/o a HIP SDK; opt in so the mock is
         # allowed on every platform.
-        monkeypatch.setenv("UNSLOTH_ENABLE_AMD_SMI", "1")
+        monkeypatch.setenv("TUNELABS_ENABLE_AMD_SMI", "1")
 
         mock_json = json.dumps(
             [
@@ -1423,7 +1423,7 @@ class TestAmdGpuMonitoring:
 
         # Opt in so the call reaches subprocess.run (testing OSError handling).
         with (
-            patch.dict(os.environ, {"UNSLOTH_ENABLE_AMD_SMI": "1"}),
+            patch.dict(os.environ, {"TUNELABS_ENABLE_AMD_SMI": "1"}),
             patch.object(subprocess, "run", side_effect = OSError("amd-smi not found")),
         ):
             result = amd_mod.get_primary_gpu_utilization()
@@ -1447,7 +1447,7 @@ class TestAmdGpuMonitoring:
 
         # Opt in so the call reaches subprocess.run (testing timeout handling).
         with (
-            patch.dict(os.environ, {"UNSLOTH_ENABLE_AMD_SMI": "1"}),
+            patch.dict(os.environ, {"TUNELABS_ENABLE_AMD_SMI": "1"}),
             patch.object(
                 subprocess,
                 "run",
@@ -1562,10 +1562,10 @@ class TestWindowsRocmWarning:
     def test_windows_amd_warning_has_docs_link(self):
         """Warning should include AMD docs link."""
         source = _STACK_PATH.read_text(encoding = "utf-8")
-        assert "docs.unsloth.ai/get-started/install-and-update/amd" in source
+        assert "docs.tunelabs.ai/get-started/install-and-update/amd" in source
 
 
-# TEST: unsloth/kernels/utils.py -- is_rdna() expansion
+# TEST: tunelabs/kernels/utils.py -- is_rdna() expansion
 
 
 class TestIsRdnaExpansion:
@@ -1573,7 +1573,7 @@ class TestIsRdnaExpansion:
 
     def test_is_rdna_source_has_rdna2(self):
         """is_rdna() should include RDNA2 architectures."""
-        utils_path = PACKAGE_ROOT / "unsloth" / "kernels" / "utils.py"
+        utils_path = PACKAGE_ROOT / "tunelabs" / "kernels" / "utils.py"
         source = utils_path.read_text(encoding = "utf-8")
         func_start = source.find("def is_rdna()")
         func_body = source[func_start : source.find("\ndef ", func_start + 1)]
@@ -1587,7 +1587,7 @@ class TestIsRdnaExpansion:
 
     def test_is_rdna_source_has_rdna3(self):
         """is_rdna() should include RDNA3 architectures."""
-        utils_path = PACKAGE_ROOT / "unsloth" / "kernels" / "utils.py"
+        utils_path = PACKAGE_ROOT / "tunelabs" / "kernels" / "utils.py"
         source = utils_path.read_text(encoding = "utf-8")
         func_start = source.find("def is_rdna()")
         func_body = source[func_start : source.find("\ndef ", func_start + 1)]
@@ -1598,7 +1598,7 @@ class TestIsRdnaExpansion:
 
     def test_is_rdna_source_has_rdna35(self):
         """is_rdna() should include RDNA3.5 architectures."""
-        utils_path = PACKAGE_ROOT / "unsloth" / "kernels" / "utils.py"
+        utils_path = PACKAGE_ROOT / "tunelabs" / "kernels" / "utils.py"
         source = utils_path.read_text(encoding = "utf-8")
         func_start = source.find("def is_rdna()")
         func_body = source[func_start : source.find("\ndef ", func_start + 1)]
@@ -1608,7 +1608,7 @@ class TestIsRdnaExpansion:
 
     def test_is_rdna_source_has_rdna4(self):
         """is_rdna() should include RDNA4 architectures."""
-        utils_path = PACKAGE_ROOT / "unsloth" / "kernels" / "utils.py"
+        utils_path = PACKAGE_ROOT / "tunelabs" / "kernels" / "utils.py"
         source = utils_path.read_text(encoding = "utf-8")
         func_start = source.find("def is_rdna()")
         func_body = source[func_start : source.find("\ndef ", func_start + 1)]
@@ -1617,7 +1617,7 @@ class TestIsRdnaExpansion:
 
     def test_is_cdna_not_changed(self):
         """is_cdna() should remain unchanged (no RDNA architectures added)."""
-        utils_path = PACKAGE_ROOT / "unsloth" / "kernels" / "utils.py"
+        utils_path = PACKAGE_ROOT / "tunelabs" / "kernels" / "utils.py"
         source = utils_path.read_text(encoding = "utf-8")
         func_start = source.find("def is_cdna()")
         func_body = source[func_start : source.find("\ndef ", func_start + 1)]
@@ -1679,7 +1679,7 @@ class TestWindowsRocmIndexUrl:
         assert "repo.amd.com" in url
 
     def test_mirror_env_var_overrides_base(self, monkeypatch):
-        monkeypatch.setenv("UNSLOTH_ROCM_WINDOWS_MIRROR", "https://my-mirror.example.com/rocm/whl")
+        monkeypatch.setenv("TUNELABS_ROCM_WINDOWS_MIRROR", "https://my-mirror.example.com/rocm/whl")
         # Reload module-level constant by calling helper directly
         url = stack_mod._windows_rocm_index_url("gfx1200")
         # The env var is read at module load time for _ROCM_WINDOWS_INDEX_BASE,
@@ -1810,8 +1810,8 @@ class TestGfxArchNameFallback:
             for _v in (
                 "HIP_PATH",
                 "ROCM_PATH",
-                "UNSLOTH_ROCM_GFX_ARCH",
-                "UNSLOTH_ENABLE_AMD_SMI",
+                "TUNELABS_ROCM_GFX_ARCH",
+                "TUNELABS_ENABLE_AMD_SMI",
             ):
                 os.environ.pop(_v, None)
             with patch("shutil.which", return_value = None):
@@ -1831,7 +1831,7 @@ class TestGfxArchNameFallback:
             raise FileNotFoundError(cmd[0])
 
         with patch.dict(os.environ, {}, clear = False):
-            for _v in ("HIP_PATH", "ROCM_PATH", "UNSLOTH_ROCM_GFX_ARCH"):
+            for _v in ("HIP_PATH", "ROCM_PATH", "TUNELABS_ROCM_GFX_ARCH"):
                 os.environ.pop(_v, None)
             with patch("shutil.which", return_value = None):
                 with patch("os.path.isfile", return_value = False):
@@ -1882,7 +1882,7 @@ class TestInstallBnbWindowsRocm:
         assert "bitsandbytes" in call_args
         assert "win_amd64" in call_args
         # Force plain pip (uv mangles the bitsandbytes wheel) -- see
-        # https://unsloth.ai/docs/get-started/install/amd/amd-hackathon
+        # https://tunelabs.ai/docs/get-started/install/amd/amd-hackathon
         assert mock_pip.call_args.kwargs.get("force_pip") is True
 
     def test_forces_plain_pip_not_uv(self):
@@ -2031,7 +2031,7 @@ class TestInstallBnbWindowsRocm:
                 (
                     "import os; "
                     "print(os.environ.get('BNB_ROCM_VERSION', ''), "
-                    "os.environ.get('UNSLOTH_BNB_ROCM_VERSION_SOURCE', ''))"
+                    "os.environ.get('TUNELABS_BNB_ROCM_VERSION_SOURCE', ''))"
                 ),
             ],
             env = probe_env,
@@ -2049,10 +2049,10 @@ class TestInstallBnbWindowsRocm:
         sitecustomize = site_packages / "sitecustomize.py"
         sitecustomize.write_text(
             "EXISTING = True\n"
-            "# BEGIN Unsloth BNB_ROCM_VERSION\n"
-            "import os as _unsloth_os\n"
-            "_unsloth_os.environ.setdefault('BNB_ROCM_VERSION', '72')\n"
-            "# END Unsloth BNB_ROCM_VERSION\n",
+            "# BEGIN TuneLabs BNB_ROCM_VERSION\n"
+            "import os as _tunelabs_os\n"
+            "_tunelabs_os.environ.setdefault('BNB_ROCM_VERSION', '72')\n"
+            "# END TuneLabs BNB_ROCM_VERSION\n",
             encoding = "utf-8",
         )
 
@@ -2060,7 +2060,7 @@ class TestInstallBnbWindowsRocm:
             assert stack_mod._persist_bnb_rocm_version("713") is True
 
         source = sitecustomize.read_text(encoding = "utf-8")
-        assert source.count("# BEGIN Unsloth BNB_ROCM_VERSION") == 1
+        assert source.count("# BEGIN TuneLabs BNB_ROCM_VERSION") == 1
         assert "EXISTING = True" in source
         assert "'713'" in source
         assert "'72'" not in source
@@ -2082,9 +2082,9 @@ class TestInstallBnbWindowsRocm:
         sitecustomize = site_packages / "sitecustomize.py"
         sitecustomize.write_text(
             "EXISTING = True\n"
-            "# BEGIN Unsloth BNB_ROCM_VERSION\n"
-            "import os as _unsloth_os\n"
-            "_unsloth_os.environ.setdefault('BNB_ROCM_VERSION', '72')\n",
+            "# BEGIN TuneLabs BNB_ROCM_VERSION\n"
+            "import os as _tunelabs_os\n"
+            "_tunelabs_os.environ.setdefault('BNB_ROCM_VERSION', '72')\n",
             encoding = "utf-8",
         )
 
@@ -2092,8 +2092,8 @@ class TestInstallBnbWindowsRocm:
             assert stack_mod._persist_bnb_rocm_version("713") is True
 
         source = sitecustomize.read_text(encoding = "utf-8")
-        assert source.count("# BEGIN Unsloth BNB_ROCM_VERSION") == 1
-        assert source.count("# END Unsloth BNB_ROCM_VERSION") == 1
+        assert source.count("# BEGIN TuneLabs BNB_ROCM_VERSION") == 1
+        assert source.count("# END TuneLabs BNB_ROCM_VERSION") == 1
         assert "EXISTING = True" in source
         assert "'713'" in source
         assert "'72'" not in source
@@ -2104,10 +2104,10 @@ class TestInstallBnbWindowsRocm:
         site_packages.mkdir()
         sitecustomize = site_packages / "sitecustomize.py"
         block = (
-            "# BEGIN Unsloth BNB_ROCM_VERSION\n"
-            "import os as _unsloth_os\n"
-            "_unsloth_os.environ.setdefault('BNB_ROCM_VERSION', '72')\n"
-            "# END Unsloth BNB_ROCM_VERSION\n"
+            "# BEGIN TuneLabs BNB_ROCM_VERSION\n"
+            "import os as _tunelabs_os\n"
+            "_tunelabs_os.environ.setdefault('BNB_ROCM_VERSION', '72')\n"
+            "# END TuneLabs BNB_ROCM_VERSION\n"
         )
         sitecustomize.write_text(block + "USER_MID = 1\n" + block, encoding = "utf-8")
 
@@ -2115,8 +2115,8 @@ class TestInstallBnbWindowsRocm:
             assert stack_mod._persist_bnb_rocm_version("713") is True
 
         source = sitecustomize.read_text(encoding = "utf-8")
-        assert source.count("# BEGIN Unsloth BNB_ROCM_VERSION") == 1
-        assert source.count("# END Unsloth BNB_ROCM_VERSION") == 1
+        assert source.count("# BEGIN TuneLabs BNB_ROCM_VERSION") == 1
+        assert source.count("# END TuneLabs BNB_ROCM_VERSION") == 1
         assert "USER_MID = 1" in source
         assert "'713'" in source
         assert "'72'" not in source
@@ -2129,7 +2129,7 @@ class TestInstallBnbWindowsRocm:
         with patch.object(stack_mod.sysconfig, "get_path", return_value = str(site_packages)):
             assert stack_mod._persist_bnb_rocm_version("72") is True
 
-        leftovers = [p.name for p in site_packages.iterdir() if "unsloth-tmp" in p.name]
+        leftovers = [p.name for p in site_packages.iterdir() if "tunelabs-tmp" in p.name]
         assert leftovers == []
         assert (site_packages / "sitecustomize.py").exists()
 
@@ -2142,13 +2142,13 @@ class TestRuntimeBnbRocmSourceGuards:
 
     def test_main_gate_redetects_persisted_default(self):
         source = self._MAIN_PATH.read_text(encoding = "utf-8")
-        assert 'os.environ.get("UNSLOTH_BNB_ROCM_VERSION_SOURCE") == "sitecustomize"' in source
-        assert 'os.environ["UNSLOTH_BNB_ROCM_VERSION_SOURCE"] = "detected"' in source
+        assert 'os.environ.get("TUNELABS_BNB_ROCM_VERSION_SOURCE") == "sitecustomize"' in source
+        assert 'os.environ["TUNELABS_BNB_ROCM_VERSION_SOURCE"] = "detected"' in source
 
     def test_worker_gate_redetects_persisted_default(self):
         source = self._TRAINING_WORKER_PATH.read_text(encoding = "utf-8")
-        assert 'os.environ.get("UNSLOTH_BNB_ROCM_VERSION_SOURCE") == "sitecustomize"' in source
-        assert 'os.environ["UNSLOTH_BNB_ROCM_VERSION_SOURCE"] = "detected"' in source
+        assert 'os.environ.get("TUNELABS_BNB_ROCM_VERSION_SOURCE") == "sitecustomize"' in source
+        assert 'os.environ["TUNELABS_BNB_ROCM_VERSION_SOURCE"] = "detected"' in source
 
     def test_fallback_prefers_seeded_value_over_hardcoded_72(self):
         """A failed redetect must not downgrade a persisted suffix to '72'."""
@@ -2223,11 +2223,11 @@ class TestDetectBnbRocmDllVer:
             assert stack_mod._detect_bnb_rocm_dll_ver() == "713"
 
 
-# TEST: install_python_stack.py -- UNSLOTH_ROCM_TORCH_INSTALLED early-return path
+# TEST: install_python_stack.py -- TUNELABS_ROCM_TORCH_INSTALLED early-return path
 
 
 class TestRocmTorchInstalledEnvVar:
-    """Verify UNSLOTH_ROCM_TORCH_INSTALLED=1 skips main install but still installs BNB."""
+    """Verify TUNELABS_ROCM_TORCH_INSTALLED=1 skips main install but still installs BNB."""
 
     @staticmethod
     def _ok_torch_probe(*a, **kw):
@@ -2239,9 +2239,9 @@ class TestRocmTorchInstalledEnvVar:
     @patch.object(stack_mod, "_install_bnb_windows_rocm")
     @patch.object(stack_mod, "pip_install")
     def test_env_var_skips_main_pip_install(self, mock_pip, mock_bnb):
-        """UNSLOTH_ROCM_TORCH_INSTALLED=1 should not trigger torch pip_install."""
+        """TUNELABS_ROCM_TORCH_INSTALLED=1 should not trigger torch pip_install."""
         with (
-            patch.dict(os.environ, {"UNSLOTH_ROCM_TORCH_INSTALLED": "1"}),
+            patch.dict(os.environ, {"TUNELABS_ROCM_TORCH_INSTALLED": "1"}),
             patch.object(stack_mod.subprocess, "run", side_effect = self._ok_torch_probe),
         ):
             stack_mod._ensure_rocm_torch()
@@ -2250,9 +2250,9 @@ class TestRocmTorchInstalledEnvVar:
     @patch.object(stack_mod, "_install_bnb_windows_rocm")
     @patch.object(stack_mod, "pip_install")
     def test_env_var_calls_bnb_install(self, mock_pip, mock_bnb):
-        """UNSLOTH_ROCM_TORCH_INSTALLED=1 should still call _install_bnb_windows_rocm."""
+        """TUNELABS_ROCM_TORCH_INSTALLED=1 should still call _install_bnb_windows_rocm."""
         with (
-            patch.dict(os.environ, {"UNSLOTH_ROCM_TORCH_INSTALLED": "1"}),
+            patch.dict(os.environ, {"TUNELABS_ROCM_TORCH_INSTALLED": "1"}),
             patch.object(stack_mod.subprocess, "run", side_effect = self._ok_torch_probe),
         ):
             stack_mod._ensure_rocm_torch()
@@ -2261,10 +2261,10 @@ class TestRocmTorchInstalledEnvVar:
     @patch.object(stack_mod, "_install_bnb_windows_rocm")
     @patch.object(stack_mod, "pip_install")
     def test_env_var_sets_rocm_windows_flag(self, mock_pip, mock_bnb):
-        """UNSLOTH_ROCM_TORCH_INSTALLED=1 should set _rocm_windows_torch_installed."""
+        """TUNELABS_ROCM_TORCH_INSTALLED=1 should set _rocm_windows_torch_installed."""
         stack_mod._rocm_windows_torch_installed = False
         with (
-            patch.dict(os.environ, {"UNSLOTH_ROCM_TORCH_INSTALLED": "1"}),
+            patch.dict(os.environ, {"TUNELABS_ROCM_TORCH_INSTALLED": "1"}),
             patch.object(stack_mod.subprocess, "run", side_effect = self._ok_torch_probe),
         ):
             stack_mod._ensure_rocm_torch()
@@ -2282,7 +2282,7 @@ class TestRocmTorchInstalledEnvVar:
             return rv
 
         with (
-            patch.dict(os.environ, {"UNSLOTH_ROCM_TORCH_INSTALLED": "1"}),
+            patch.dict(os.environ, {"TUNELABS_ROCM_TORCH_INSTALLED": "1"}),
             patch.object(stack_mod.subprocess, "run", side_effect = _bad_probe),
             patch.object(stack_mod, "IS_WINDOWS", False),
             patch.object(stack_mod, "IS_MACOS", True),
@@ -2482,14 +2482,14 @@ class TestStrixHaloGfxArchDetection:
         assert "static --asic" in source
 
     def test_env_var_override_in_setup(self):
-        """setup.ps1 must honour UNSLOTH_ROCM_GFX_ARCH as a manual arch override."""
+        """setup.ps1 must honour TUNELABS_ROCM_GFX_ARCH as a manual arch override."""
         source = _SETUP_PS1_PATH.read_text(encoding = "utf-8")
-        assert "UNSLOTH_ROCM_GFX_ARCH" in source
+        assert "TUNELABS_ROCM_GFX_ARCH" in source
 
     def test_env_var_override_in_install(self):
-        """install.ps1 must honour UNSLOTH_ROCM_GFX_ARCH as a manual arch override."""
+        """install.ps1 must honour TUNELABS_ROCM_GFX_ARCH as a manual arch override."""
         source = _INSTALL_PS1_PATH.read_text(encoding = "utf-8")
-        assert "UNSLOTH_ROCM_GFX_ARCH" in source
+        assert "TUNELABS_ROCM_GFX_ARCH" in source
 
     def test_name_arch_table_covers_strix_halo_in_setup(self):
         """setup.ps1 name→arch table must map 890M / Strix Halo to gfx1151."""
@@ -2772,9 +2772,9 @@ class TestStrixRocm71Override:
         assert "TORCH_CONSTRAINT" in source and "2.11" in source
 
     def test_amd_rocm_mirror_env_var_respected(self):
-        """install.sh must honour UNSLOTH_AMD_ROCM_MIRROR for air-gapped installs."""
+        """install.sh must honour TUNELABS_AMD_ROCM_MIRROR for air-gapped installs."""
         source = _INSTALL_SH_PATH.read_text(encoding = "utf-8")
-        assert "UNSLOTH_AMD_ROCM_MIRROR" in source
+        assert "TUNELABS_AMD_ROCM_MIRROR" in source
 
     def test_tauri_family_recognises_amd_arch_url(self):
         """_tauri_torch_index_family must return a rocm* family for AMD arch-specific URLs."""
@@ -3071,7 +3071,7 @@ class TestRocmGfxForwarding:
         source = _PREBUILT_PATH.read_text(encoding = "utf-8")
         assert '"--rocm-gfx"' in source
         # Defaults to the env override for standalone runs.
-        assert 'os.environ.get("UNSLOTH_ROCM_GFX_ARCH")' in source
+        assert 'os.environ.get("TUNELABS_ROCM_GFX_ARCH")' in source
 
     def test_setup_sh_forwards_rocm_gfx(self):
         source = _SETUP_SH_PATH.read_text(encoding = "utf-8")
@@ -3130,7 +3130,7 @@ class TestRocmGfxForwarding:
             "_HOST_MACHINE": host_machine,
             "_setup_nvidia_usable": "true" if nvidia_usable else "false",
             "_setup_gfx": setup_gfx,
-            "UNSLOTH_ROCM_GFX_ARCH": rocm_gfx_arch_env,
+            "TUNELABS_ROCM_GFX_ARCH": rocm_gfx_arch_env,
         }
         result = subprocess.run(
             [bash, "-c", 'eval "$ROUTING_BLOCK"; printf "%s" "$_HELPER_RELEASE_REPO"'],
@@ -3145,14 +3145,14 @@ class TestRocmGfxForwarding:
     def test_setup_sh_inferred_gfx_resolves_to_fork(self):
         # Only a name-inferred gfx arch -> route to the fork's per-gfx prebuilt
         # (not ggml-org). x64 and arm64 share the fork branch.
-        assert self._resolve_setup_sh_repo("x86_64", False, "gfx1100") == "unslothai/llama.cpp"
-        assert self._resolve_setup_sh_repo("aarch64", False, "gfx1100") == "unslothai/llama.cpp"
+        assert self._resolve_setup_sh_repo("x86_64", False, "gfx1100") == "tunelabsai/llama.cpp"
+        assert self._resolve_setup_sh_repo("aarch64", False, "gfx1100") == "tunelabsai/llama.cpp"
 
     def test_setup_sh_env_forwarded_gfx_resolves_to_fork(self):
-        # No probe fired but UNSLOTH_ROCM_GFX_ARCH is set: adopt the env arch
+        # No probe fired but TUNELABS_ROCM_GFX_ARCH is set: adopt the env arch
         # and route to the fork, same as name-inference.
         repo = self._resolve_setup_sh_repo("x86_64", False, "", rocm_gfx_arch_env = "gfx1100")
-        assert repo == "unslothai/llama.cpp"
+        assert repo == "tunelabsai/llama.cpp"
 
     def test_setup_sh_cpu_host_still_resolves_to_ggml(self):
         # A real CPU host (no GPU, no inferred gfx, no env override) must keep routing to ggml-org.
@@ -3194,7 +3194,7 @@ class TestRocmGfxForwarding:
 
     def test_setup_ps1_inferred_gfx_resolves_to_fork(self):
         # Adrenalin-only host: $HasROCm false but gfx inferred -> fork's windows-rocm bundle.
-        assert self._resolve_setup_ps1_repo(False, False, "gfx1100") == "unslothai/llama.cpp"
+        assert self._resolve_setup_ps1_repo(False, False, "gfx1100") == "tunelabsai/llama.cpp"
 
     def test_setup_ps1_cpu_host_still_resolves_to_ggml(self):
         # No NVIDIA, no ROCm, no inferred gfx -> CPU host stays on ggml-org.
@@ -3363,7 +3363,7 @@ class TestInstallShDropinPersistence:
         body_start = source.find("_persist_rocm_wsl_dropin()")
         body = source[body_start : body_start + 1200]
         assert "librocdxg.so" in body
-        assert "profile.d/unsloth-rocm-wsl.sh" in body
+        assert "profile.d/tunelabs-rocm-wsl.sh" in body
 
 
 class TestLlamaCppRuntimeWslOrdering:

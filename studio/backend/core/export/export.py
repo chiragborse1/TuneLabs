@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Export backend - exports models in various formats."""
 
@@ -12,7 +12,7 @@ import os
 import shutil
 from pathlib import Path
 from typing import Optional, Tuple, List
-from unsloth import FastLanguageModel, FastVisionModel, _IS_MLX
+from tunelabs import FastLanguageModel, FastVisionModel, _IS_MLX
 from huggingface_hub import HfApi, ModelCard
 from utils.hardware import clear_gpu_cache
 
@@ -55,14 +55,14 @@ def _apply_wsl_sudo_patch():
         return
 
     try:
-        import unsloth_zoo.llama_cpp as llama_cpp_module
+        import tunelabs_zoo.llama_cpp as llama_cpp_module
 
         def _wsl_do_we_need_sudo(system_type = "debian"):
             logger.info("WSL detected — skipping sudo check (build deps pre-installed by setup.sh)")
             return False
 
         llama_cpp_module.do_we_need_sudo = _wsl_do_we_need_sudo
-        logger.info("Applied WSL sudo patch to unsloth_zoo.llama_cpp.do_we_need_sudo")
+        logger.info("Applied WSL sudo patch to tunelabs_zoo.llama_cpp.do_we_need_sudo")
     except Exception as e:
         logger.warning(f"Could not apply WSL sudo patch: {e}")
 
@@ -73,7 +73,7 @@ base_model: {base_model}
 tags:
 - text-generation-inference
 - transformers
-- unsloth
+- tunelabs
 - {model_type}
 - {extra}
 license: apache-2.0
@@ -87,9 +87,9 @@ language:
 - **License:** apache-2.0
 - **Finetuned from model :** {base_model}
 
-This {model_type} model was trained 2x faster with [Unsloth](https://github.com/unslothai/unsloth) and Huggingface's TRL library.
+This {model_type} model was trained 2x faster with [TuneLabs](https://github.com/tunelabsai/tunelabs) and Huggingface's TRL library.
 
-[<img src="https://raw.githubusercontent.com/unslothai/unsloth/main/images/unsloth%20made%20with%20love.png" width="200"/>](https://github.com/unslothai/unsloth)
+[<img src="https://raw.githubusercontent.com/tunelabsai/tunelabs/main/images/tunelabs%20made%20with%20love.png" width="200"/>](https://github.com/tunelabsai/tunelabs)
 """
 
 
@@ -181,7 +181,7 @@ class ExportBackend:
             self.is_vision = not self._audio_type and is_vision_model(model_id, hf_token = token)
 
             if self._audio_type == "csm":
-                from unsloth import FastModel
+                from tunelabs import FastModel
                 from transformers import CsmForConditionalGeneration
 
                 logger.info("Loading as CSM audio model...")
@@ -196,7 +196,7 @@ class ExportBackend:
                 )
 
             elif self._audio_type == "whisper":
-                from unsloth import FastModel
+                from tunelabs import FastModel
                 from transformers import WhisperForConditionalGeneration
 
                 logger.info("Loading as Whisper audio model...")
@@ -221,7 +221,7 @@ class ExportBackend:
                 )
 
             elif self._audio_type == "bicodec":
-                from unsloth import FastModel
+                from tunelabs import FastModel
                 logger.info("Loading as BiCodec (Spark-TTS) audio model...")
                 model, tokenizer = FastModel.from_pretrained(
                     model_name = checkpoint_path,
@@ -233,7 +233,7 @@ class ExportBackend:
                 )
 
             elif self._audio_type == "dac":
-                from unsloth import FastModel
+                from tunelabs import FastModel
                 logger.info("Loading as DAC (OuteTTS) audio model...")
                 model, tokenizer = FastModel.from_pretrained(
                     model_name = checkpoint_path,
@@ -530,10 +530,10 @@ class ExportBackend:
                         base_model = base_model,
                         model_type = self.current_model.config.model_type,
                         method = "",
-                        extra = "unsloth",
+                        extra = "tunelabs",
                     )
                     card = ModelCard(content)
-                    card.push_to_hub(repo_id, token = hf_token, commit_message = "Unsloth Model Card")
+                    card.push_to_hub(repo_id, token = hf_token, commit_message = "TuneLabs Model Card")
 
                     if save_directory:
                         hf_api.upload_folder(
@@ -585,32 +585,32 @@ class ExportBackend:
         output_path: Optional[str] = None
         model_tmp_to_cleanup: Optional[str] = None
         try:
-            # unsloth expects lowercase quant method
+            # tunelabs expects lowercase quant method
             quant_method = quantization_method.lower()
 
             # Pin convert_hf_to_gguf.py to setup.sh's tagged llama.cpp ref so it
             # can't drift past the pinned llama-quantize binary's gguf API.
             global _LLAMA_CPP_SCRIPTS_WARNING_EMITTED
             try:
-                from unsloth_zoo.llama_cpp import (
+                from tunelabs_zoo.llama_cpp import (
                     LLAMA_CPP_DEFAULT_DIR,
                     _resolve_local_convert_script,  # noqa: F401
                 )
-                os.environ.setdefault("UNSLOTH_LLAMA_CPP_SCRIPTS_DIR", LLAMA_CPP_DEFAULT_DIR)
+                os.environ.setdefault("TUNELABS_LLAMA_CPP_SCRIPTS_DIR", LLAMA_CPP_DEFAULT_DIR)
             except ImportError:
                 if not _LLAMA_CPP_SCRIPTS_WARNING_EMITTED:
                     logger.warning(
-                        "Unsloth: installed unsloth_zoo does not honor "
-                        "UNSLOTH_LLAMA_CPP_SCRIPTS_DIR; convert_hf_to_gguf.py will "
+                        "TuneLabs: installed tunelabs_zoo does not honor "
+                        "TUNELABS_LLAMA_CPP_SCRIPTS_DIR; convert_hf_to_gguf.py will "
                         "still be downloaded from llama.cpp master and may drift "
-                        "past the pinned llama-quantize binary. Upgrade unsloth_zoo "
+                        "past the pinned llama-quantize binary. Upgrade tunelabs_zoo "
                         "to activate the local script pin."
                     )
                     _LLAMA_CPP_SCRIPTS_WARNING_EMITTED = True
 
             if save_directory:
                 save_directory = str(resolve_export_write_dir(save_directory))
-                # Keep unsloth relative-path internals anchored to the repo cwd.
+                # Keep tunelabs relative-path internals anchored to the repo cwd.
                 abs_save_dir = os.path.abspath(save_directory)
                 logger.info(f"Saving GGUF model locally to: {abs_save_dir}")
 

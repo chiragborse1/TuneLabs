@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -31,6 +31,6 @@ export const useUserProfileStore = create<UserProfileState>()(
       setAvatarDataUrl: (avatarDataUrl) => set({ avatarDataUrl }),
       setAvatarShape: (avatarShape) => set({ avatarShape }),
     }),
-    { name: "unsloth_user_profile" },
+    { name: "tunelabs_user_profile" },
   ),
 );

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """AMD GPU monitoring via amd-smi.
 
@@ -52,11 +52,11 @@ def _amd_smi_allowed() -> bool:
     On Windows without a working HIP runtime, amd-smi elevates a child at
     runtime -- popping a UAC/DiskPart prompt that RunAsInvoker can't suppress
     (its manifest is asInvoker). So only call it on Windows with a HIP SDK
-    present or UNSLOTH_ENABLE_AMD_SMI=1. Linux amd-smi never elevates.
+    present or TUNELABS_ENABLE_AMD_SMI=1. Linux amd-smi never elevates.
     """
     if platform.system() != "Windows":
         return True
-    flag = os.environ.get("UNSLOTH_ENABLE_AMD_SMI", "").strip().lower()
+    flag = os.environ.get("TUNELABS_ENABLE_AMD_SMI", "").strip().lower()
     if flag in ("1", "true", "yes", "on"):
         return True
     if flag in ("0", "false", "no", "off"):
@@ -73,12 +73,12 @@ def _run_amd_smi(*args: str, timeout: int = _AMD_SMI_DEFAULT_TIMEOUT) -> Optiona
         # Permanently skip amd-smi on Windows w/o a HIP SDK: every call would
         # pop a UAC/DiskPart prompt (see _amd_smi_allowed). VRAM polling is then
         # unavailable, but that beats the prompt. Opt back in with
-        # UNSLOTH_ENABLE_AMD_SMI=1.
+        # TUNELABS_ENABLE_AMD_SMI=1.
         if not _amd_smi_disabled:
             logger.info(
                 "amd-smi disabled on Windows (no HIP SDK detected) to avoid a "
                 "UAC/DiskPart elevation prompt; GPU VRAM polling unavailable. "
-                "Set UNSLOTH_ENABLE_AMD_SMI=1 to force amd-smi."
+                "Set TUNELABS_ENABLE_AMD_SMI=1 to force amd-smi."
             )
             _amd_smi_disabled = True
         return None

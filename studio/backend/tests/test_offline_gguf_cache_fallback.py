@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Regression tests for the offline GGUF cache fallback path (#5505).
 
@@ -297,28 +297,28 @@ def _siblings(items: dict[str, int]):
 class TestIterHfCacheSnapshots:
     def test_returns_empty_when_cache_dir_missing(self, monkeypatch):
         monkeypatch.setattr(hf_constants, "HF_HUB_CACHE", "/no/such/dir")
-        assert list(_iter_hf_cache_snapshots("unsloth/foo")) == []
+        assert list(_iter_hf_cache_snapshots("tunelabs/foo")) == []
 
     def test_returns_empty_when_repo_not_cached(self, hf_cache):
-        assert list(_iter_hf_cache_snapshots("unsloth/not-here")) == []
+        assert list(_iter_hf_cache_snapshots("tunelabs/not-here")) == []
 
     def test_returns_empty_when_snapshots_dir_missing(self, hf_cache):
         # Repo dir exists but no snapshots/ inside.
-        (hf_cache / "models--unsloth--bare").mkdir()
-        assert list(_iter_hf_cache_snapshots("unsloth/bare")) == []
+        (hf_cache / "models--tunelabs--bare").mkdir()
+        assert list(_iter_hf_cache_snapshots("tunelabs/bare")) == []
 
     def test_yields_newest_first(self, hf_cache):
-        old = _build_cache(hf_cache, "unsloth/multi", {"x.gguf": 1}, snapshot_sha = "a" * 40)
-        new = _build_cache(hf_cache, "unsloth/multi", {"y.gguf": 1}, snapshot_sha = "b" * 40)
+        old = _build_cache(hf_cache, "tunelabs/multi", {"x.gguf": 1}, snapshot_sha = "a" * 40)
+        new = _build_cache(hf_cache, "tunelabs/multi", {"y.gguf": 1}, snapshot_sha = "b" * 40)
         os.utime(old, (1000, 1000))
         os.utime(new, (2000, 2000))
-        out = list(_iter_hf_cache_snapshots("unsloth/multi"))
+        out = list(_iter_hf_cache_snapshots("tunelabs/multi"))
         assert [p.name for p in out] == ["b" * 40, "a" * 40]
 
     def test_repo_id_match_is_case_insensitive(self, hf_cache):
-        _build_cache(hf_cache, "unsloth/Foo-GGUF", {"Foo-Q4_K_M.gguf": 1})
+        _build_cache(hf_cache, "tunelabs/Foo-GGUF", {"Foo-Q4_K_M.gguf": 1})
         # Lookup with different org/name casing still resolves
-        out = list(_iter_hf_cache_snapshots("UNSLOTH/foo-gguf"))
+        out = list(_iter_hf_cache_snapshots("TUNELABS/foo-gguf"))
         assert len(out) == 1
 
 
@@ -331,43 +331,43 @@ class TestListGgufVariantsFromCache:
     def test_returns_variants_when_cached(self, hf_cache):
         _build_cache(
             hf_cache,
-            "unsloth/Qwen3.5-4B-GGUF",
+            "tunelabs/Qwen3.5-4B-GGUF",
             {
                 "Qwen3.5-4B-UD-Q4_K_XL.gguf": 100,
                 "Qwen3.5-4B-Q2_K.gguf": 50,
             },
         )
-        out = _list_gguf_variants_from_hf_cache("unsloth/Qwen3.5-4B-GGUF")
+        out = _list_gguf_variants_from_hf_cache("tunelabs/Qwen3.5-4B-GGUF")
         assert out is not None
         variants, has_vision = out
         assert sorted(v.quant for v in variants) == ["Q2_K", "UD-Q4_K_XL"]
         assert has_vision is False
 
     def test_returns_none_when_not_cached(self, hf_cache):
-        assert _list_gguf_variants_from_hf_cache("unsloth/absent") is None
+        assert _list_gguf_variants_from_hf_cache("tunelabs/absent") is None
 
 
 class TestListGgufVariantsOffline:
     def test_offline_env_short_circuits_api(self, hf_cache, clean_offline_env, monkeypatch):
-        _build_cache(hf_cache, "unsloth/a", {"a-UD-Q4_K_XL.gguf": 1})
+        _build_cache(hf_cache, "tunelabs/a", {"a-UD-Q4_K_XL.gguf": 1})
         monkeypatch.setenv("HF_HUB_OFFLINE", "1")
 
         def boom(*a, **k):
             raise AssertionError("API must not be called when offline env set")
 
         with patch("huggingface_hub.model_info", boom):
-            variants, _has = list_gguf_variants("unsloth/a")
+            variants, _has = list_gguf_variants("tunelabs/a")
         assert len(variants) == 1
         assert variants[0].quant == "UD-Q4_K_XL"
 
     def test_api_exception_falls_back_to_cache(self, hf_cache, clean_offline_env):
-        _build_cache(hf_cache, "unsloth/a", {"a-Q4_K_M.gguf": 1})
+        _build_cache(hf_cache, "tunelabs/a", {"a-Q4_K_M.gguf": 1})
 
         def boom(*a, **k):
             raise OSError("network down")
 
         with patch("huggingface_hub.model_info", boom):
-            variants, _has = list_gguf_variants("unsloth/a")
+            variants, _has = list_gguf_variants("tunelabs/a")
         assert len(variants) == 1
         assert variants[0].quant == "Q4_K_M"
 
@@ -377,7 +377,7 @@ class TestListGgufVariantsOffline:
 
         with patch("huggingface_hub.model_info", boom):
             with pytest.raises(OSError, match = "network down"):
-                list_gguf_variants("unsloth/never-cached")
+                list_gguf_variants("tunelabs/never-cached")
 
     def test_online_path_unaffected(self, hf_cache, clean_offline_env):
         # When the API succeeds, cache is not consulted.
@@ -387,7 +387,7 @@ class TestListGgufVariantsOffline:
             return api_payload
 
         with patch("huggingface_hub.model_info", hf_info):
-            variants, _has = list_gguf_variants("unsloth/a")
+            variants, _has = list_gguf_variants("tunelabs/a")
         assert sorted(v.quant for v in variants) == ["Q2_K", "UD-Q4_K_XL"]
 
 
@@ -400,20 +400,20 @@ class TestDetectGgufFromCache:
     def test_picks_best_quant(self, hf_cache):
         _build_cache(
             hf_cache,
-            "unsloth/a",
+            "tunelabs/a",
             {"a-Q2_K.gguf": 1, "a-UD-Q4_K_XL.gguf": 1},
         )
-        assert _detect_gguf_from_hf_cache("unsloth/a") == "a-UD-Q4_K_XL.gguf"
+        assert _detect_gguf_from_hf_cache("tunelabs/a") == "a-UD-Q4_K_XL.gguf"
 
     def test_subdir_only_quant_resolves(self, hf_cache):
         """Regression: ``BF16/foo.gguf`` (quant only in directory). The pre-fix
         cache scan matched on basename and missed this layout."""
         _build_cache(
             hf_cache,
-            "unsloth/gpt-oss-20b-BF16",
+            "tunelabs/gpt-oss-20b-BF16",
             {"BF16/foo.gguf": 1},
         )
-        out = _detect_gguf_from_hf_cache("unsloth/gpt-oss-20b-BF16")
+        out = _detect_gguf_from_hf_cache("tunelabs/gpt-oss-20b-BF16")
         assert (
             out == "BF16/foo.gguf"
         ), f"subdir-only layout must resolve to relative path, got {out}"
@@ -421,37 +421,37 @@ class TestDetectGgufFromCache:
     def test_subdir_quant_keeps_be_model_name_token(self, hf_cache):
         _build_cache(
             hf_cache,
-            "unsloth/a",
+            "tunelabs/a",
             {"Q4_K_M/foo-be.gguf": 1},
         )
-        assert _detect_gguf_from_hf_cache("unsloth/a") == "Q4_K_M/foo-be.gguf"
+        assert _detect_gguf_from_hf_cache("tunelabs/a") == "Q4_K_M/foo-be.gguf"
 
     def test_big_endian_only_cache_is_not_detected(self, hf_cache):
         _build_cache(
             hf_cache,
-            "unsloth/a",
+            "tunelabs/a",
             {"model-Q4_K_M-be.gguf": 1},
         )
-        assert _detect_gguf_from_hf_cache("unsloth/a") is None
+        assert _detect_gguf_from_hf_cache("tunelabs/a") is None
 
     def test_returns_none_when_no_gguf(self, hf_cache):
-        _build_cache(hf_cache, "unsloth/a", {"README.md": 10})
-        assert _detect_gguf_from_hf_cache("unsloth/a") is None
+        _build_cache(hf_cache, "tunelabs/a", {"README.md": 10})
+        assert _detect_gguf_from_hf_cache("tunelabs/a") is None
 
 
 class TestDetectGgufModelRemoteOffline:
     def test_offline_env_short_circuits_retries(self, hf_cache, clean_offline_env, monkeypatch):
-        _build_cache(hf_cache, "unsloth/a", {"a-Q4_K_M.gguf": 1})
+        _build_cache(hf_cache, "tunelabs/a", {"a-Q4_K_M.gguf": 1})
         monkeypatch.setenv("HF_HUB_OFFLINE", "1")
 
         def boom(*a, **k):
             raise AssertionError("API must not be called when offline env set")
 
         with patch("huggingface_hub.model_info", boom):
-            assert detect_gguf_model_remote("unsloth/a") == "a-Q4_K_M.gguf"
+            assert detect_gguf_model_remote("tunelabs/a") == "a-Q4_K_M.gguf"
 
     def test_api_3x_failure_then_cache(self, hf_cache, clean_offline_env):
-        _build_cache(hf_cache, "unsloth/a", {"a-Q4_K_M.gguf": 1})
+        _build_cache(hf_cache, "tunelabs/a", {"a-Q4_K_M.gguf": 1})
 
         def boom(*a, **k):
             raise OSError("hub down")
@@ -461,7 +461,7 @@ class TestDetectGgufModelRemoteOffline:
             patch("huggingface_hub.model_info", boom),
             patch("time.sleep", lambda *_: None),
         ):
-            out = detect_gguf_model_remote("unsloth/a")
+            out = detect_gguf_model_remote("tunelabs/a")
         assert out == "a-Q4_K_M.gguf"
 
     def test_remote_big_endian_only_repo_is_not_detected(self, clean_offline_env, monkeypatch):
@@ -473,11 +473,11 @@ class TestDetectGgufModelRemoteOffline:
             lambda *_args, **_kwargs: _types.SimpleNamespace(siblings = siblings),
         )
 
-        assert detect_gguf_model_remote("unsloth/a") is None
+        assert detect_gguf_model_remote("tunelabs/a") is None
 
     def test_repository_not_found_does_not_consult_cache(self, hf_cache, clean_offline_env):
         # Cache has a file but the API says the repo is gone.
-        _build_cache(hf_cache, "unsloth/a", {"a-Q4_K_M.gguf": 1})
+        _build_cache(hf_cache, "tunelabs/a", {"a-Q4_K_M.gguf": 1})
 
         class RepositoryNotFoundError(Exception):
             pass
@@ -486,7 +486,7 @@ class TestDetectGgufModelRemoteOffline:
             raise RepositoryNotFoundError("404")
 
         with patch("huggingface_hub.model_info", gone):
-            out = detect_gguf_model_remote("unsloth/a")
+            out = detect_gguf_model_remote("tunelabs/a")
         # Early-return semantics preserved: 404 wins over a stale cache.
         assert out is None
 
@@ -627,7 +627,7 @@ class TestDownloadMmprojOfflineCacheFallback:
     def test_cache_lookup_returns_cached_mmproj_when_list_repo_files_fails(self, hf_cache):
         _build_cache(
             hf_cache,
-            "unsloth/vision-GGUF",
+            "tunelabs/vision-GGUF",
             {
                 "vision-Q4_K_M.gguf": 1,
                 "mmproj-vision-F16.gguf": 1,
@@ -655,7 +655,7 @@ class TestDownloadMmprojOfflineCacheFallback:
             ),
         ):
             out = backend._download_mmproj(
-                hf_repo = "unsloth/vision-GGUF",
+                hf_repo = "tunelabs/vision-GGUF",
                 hf_token = None,
             )
         assert out is not None, "mmproj must resolve from cache when offline"
@@ -664,7 +664,7 @@ class TestDownloadMmprojOfflineCacheFallback:
     def test_prefers_f16_variant_when_multiple_mmproj_in_cache(self, hf_cache):
         _build_cache(
             hf_cache,
-            "unsloth/vision-GGUF",
+            "tunelabs/vision-GGUF",
             {
                 "mmproj-vision-BF16.gguf": 1,
                 "mmproj-vision-F16.gguf": 1,
@@ -694,7 +694,7 @@ class TestDownloadMmprojOfflineCacheFallback:
             ),
         ):
             backend._download_mmproj(
-                hf_repo = "unsloth/vision-GGUF",
+                hf_repo = "tunelabs/vision-GGUF",
                 hf_token = None,
             )
         assert captured.get("filename") == "mmproj-vision-F16.gguf"
@@ -702,7 +702,7 @@ class TestDownloadMmprojOfflineCacheFallback:
     def test_no_mmproj_in_cache_returns_none(self, hf_cache):
         _build_cache(
             hf_cache,
-            "unsloth/text-only-GGUF",
+            "tunelabs/text-only-GGUF",
             {"text-Q4_K_M.gguf": 1},
         )
         backend = LlamaCppBackend()
@@ -712,7 +712,7 @@ class TestDownloadMmprojOfflineCacheFallback:
 
         with patch("huggingface_hub.list_repo_files", boom_list):
             out = backend._download_mmproj(
-                hf_repo = "unsloth/text-only-GGUF",
+                hf_repo = "tunelabs/text-only-GGUF",
                 hf_token = None,
             )
         assert out is None

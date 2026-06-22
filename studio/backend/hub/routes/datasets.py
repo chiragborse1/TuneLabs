@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Endpoints mounted at /api/hub/datasets/*."""
 
@@ -68,7 +68,7 @@ async def delete_cached_dataset(
 
 @router.get("/download-progress", response_model = DownloadProgressResponse)
 async def get_dataset_download_progress(
-    repo_id: str = Query(..., description = "HuggingFace dataset repo ID, e.g. 'unsloth/LaTeX_OCR'"),
+    repo_id: str = Query(..., description = "HuggingFace dataset repo ID, e.g. 'tunelabs/LaTeX_OCR'"),
     expected_bytes: int = Query(0, description = "Expected total download size in bytes"),
     hf_token: Optional[str] = Depends(get_hf_token),
     current_subject: str = Depends(get_current_subject),

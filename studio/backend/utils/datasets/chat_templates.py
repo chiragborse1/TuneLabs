@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Chat template utilities for dataset processing.
 
@@ -28,7 +28,7 @@ DEFAULT_ALPACA_TEMPLATE = """Below is an instruction that describes a task, pair
 
 def _is_mlx_runtime() -> bool:
     try:
-        from unsloth_zoo.mlx import is_mlx_available
+        from tunelabs_zoo.mlx import is_mlx_available
     except ImportError:
         return False
     return is_mlx_available()
@@ -44,7 +44,7 @@ def _chat_template_kwargs() -> dict:
 
 
 def get_tokenizer_chat_template(tokenizer, model_name):
-    """Apply a chat template to the tokenizer, using Unsloth's
+    """Apply a chat template to the tokenizer, using TuneLabs's
     get_chat_template when the model class name is in the mapper.
 
     Args:
@@ -55,7 +55,7 @@ def get_tokenizer_chat_template(tokenizer, model_name):
         tokenizer with the chat template applied
     """
     try:
-        from unsloth.chat_templates import get_chat_template
+        from tunelabs.chat_templates import get_chat_template
     except ImportError:
         return tokenizer
 
@@ -65,7 +65,7 @@ def get_tokenizer_chat_template(tokenizer, model_name):
 
     if model_name_lower in MODEL_TO_TEMPLATE_MAPPER:
         matched_template = MODEL_TO_TEMPLATE_MAPPER[model_name_lower]
-        logger.info(f"📝 Applying Unsloth chat template: {matched_template}")
+        logger.info(f"📝 Applying TuneLabs chat template: {matched_template}")
         try:
             tokenizer = get_chat_template(
                 tokenizer,
@@ -73,7 +73,7 @@ def get_tokenizer_chat_template(tokenizer, model_name):
                 **_chat_template_kwargs(),
             )
         except Exception as e:
-            logger.info(f"⚠️ Failed to apply Unsloth template '{matched_template}': {e}")
+            logger.info(f"⚠️ Failed to apply TuneLabs template '{matched_template}': {e}")
             logger.info(f"   Falling back to tokenizer's default chat template")
     else:
         has_chat_template = (
@@ -81,7 +81,7 @@ def get_tokenizer_chat_template(tokenizer, model_name):
             and tokenizer.chat_template is not None
         )
         if has_chat_template:
-            logger.info(f"📝 Using tokenizer's own chat template (no Unsloth template match)")
+            logger.info(f"📝 Using tokenizer's own chat template (no TuneLabs template match)")
         else:
             # Base model with no chat template: apply default ChatML.
             logger.info(f"📝 No chat template found — applying default ChatML template (base model)")
@@ -258,7 +258,7 @@ def apply_chat_template_to_dataset(
         # Set alpaca chat template (if unset) so it's saved for inference.
         if not (hasattr(tokenizer, 'chat_template') and tokenizer.chat_template):
             try:
-                from unsloth.chat_templates import get_chat_template
+                from tunelabs.chat_templates import get_chat_template
                 tokenizer = get_chat_template(
                     tokenizer,
                     chat_template = "alpaca",
@@ -333,7 +333,7 @@ def apply_chat_template_to_dataset(
         if not is_standardized:
             warnings.append("Dataset may not be fully standardized")
 
-        # Apply Unsloth chat template if the model matches.
+        # Apply TuneLabs chat template if the model matches.
         if model_name:
             tokenizer = get_tokenizer_chat_template(tokenizer, model_name)
 

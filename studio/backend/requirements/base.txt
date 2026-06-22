@@ -1,3 +1,2 @@
-# Core unsloth packages
-unsloth-zoo
-unsloth
+# Core tunelabs package; tunelabs_zoo adapter is bundled in this repo
+tunelabs

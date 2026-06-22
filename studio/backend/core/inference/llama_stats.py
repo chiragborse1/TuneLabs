@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Translate llama-server's Prometheus /metrics into a periodic, vLLM-style
 engine-stats log line (generation/prompt throughput, requests in flight).
@@ -106,11 +106,11 @@ class LlamaServerStatsLogger:
 
 
 def maybe_start_stats_logger(base_url, logger):
-    """Start a stats logger unless UNSLOTH_STUDIO_ENGINE_STATS disables it."""
-    if (os.environ.get("UNSLOTH_STUDIO_ENGINE_STATS", "1") or "").strip().lower() in _OFF:
+    """Start a stats logger unless TUNELABS_STUDIO_ENGINE_STATS disables it."""
+    if (os.environ.get("TUNELABS_STUDIO_ENGINE_STATS", "1") or "").strip().lower() in _OFF:
         return None
     try:
-        interval = float(os.environ.get("UNSLOTH_STUDIO_ENGINE_STATS_INTERVAL_S", "10"))
+        interval = float(os.environ.get("TUNELABS_STUDIO_ENGINE_STATS_INTERVAL_S", "10"))
     except ValueError:
         interval = 10.0
     sl = LlamaServerStatsLogger(base_url, logger, interval)

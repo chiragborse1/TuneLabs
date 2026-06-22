@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 """Regression: _patch_trl_rl_trainers (the ring-fencing wrapper in
-unsloth/models/rl.py) must never raise."""
+tunelabs/models/rl.py) must never raise."""
 
 from __future__ import annotations
 
@@ -14,12 +14,12 @@ pytest.importorskip("trl")
 
 def _import_helpers():
     try:
-        from unsloth.models.rl import (
+        from tunelabs.models.rl import (
             _patch_trl_rl_trainers,
             _patch_trl_rl_trainers_impl,
         )
     except ImportError as e:
-        pytest.skip(f"unsloth.models.rl helpers not importable: {e}")
+        pytest.skip(f"tunelabs.models.rl helpers not importable: {e}")
     return _patch_trl_rl_trainers, _patch_trl_rl_trainers_impl
 
 
@@ -41,7 +41,7 @@ def test_impl_is_separately_exposed():
 
 
 def test_wrapper_delegates_to_impl(monkeypatch):
-    from unsloth.models import rl as _rl
+    from tunelabs.models import rl as _rl
 
     sentinel = object()
     calls = []
@@ -56,7 +56,7 @@ def test_wrapper_delegates_to_impl(monkeypatch):
 
 
 def test_wrapper_swallows_impl_exception(monkeypatch):
-    from unsloth.models import rl as _rl
+    from tunelabs.models import rl as _rl
 
     def _boom(_trainer_file):
         raise RuntimeError("simulated TRL 1.x rename failure")
@@ -66,7 +66,7 @@ def test_wrapper_swallows_impl_exception(monkeypatch):
 
 
 def test_grpo_config_sibling_module_import_is_patched(tmp_path):
-    import unsloth  # noqa: F401
+    import tunelabs  # noqa: F401
     from trl import GRPOConfig as top_config
     from trl.trainer import GRPOConfig as trainer_config
     from trl.trainer.grpo_config import GRPOConfig as config_module_config
@@ -77,5 +77,5 @@ def test_grpo_config_sibling_module_import_is_patched(tmp_path):
     assert top_config is config_module_config
 
     args = config_module_config(output_dir = str(tmp_path))
-    assert hasattr(args, "unsloth_grpo_mini_batch")
-    assert args.unsloth_grpo_mini_batch is None
+    assert hasattr(args, "tunelabs_grpo_mini_batch")
+    assert args.tunelabs_grpo_mini_batch is None

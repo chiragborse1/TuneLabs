@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -46,7 +46,7 @@ export function SplashScreen({
           }}
         >
           <h1 className="text-2xl font-semibold tracking-tight">
-            Unsloth Studio
+            TuneLabs Studio
           </h1>
           <p className="text-sm text-muted-foreground">Train and run LLMs locally</p>
         </motion.div>

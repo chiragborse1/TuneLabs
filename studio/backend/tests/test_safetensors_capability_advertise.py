@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Capability advertisement contract: classifier honesty, worker->orchestrator
 IPC hop, route-layer end-to-end. Pure helpers + fakes; no torch/transformers."""
@@ -59,7 +59,7 @@ PLAIN_TEMPLATE = """
 def test_detect_reasoning_flags_qwen3_supports_tools_and_reasoning():
     from core.inference.llama_cpp import detect_reasoning_flags
 
-    flags = detect_reasoning_flags(QWEN3_TEMPLATE, "unsloth/Qwen3-0.6B")
+    flags = detect_reasoning_flags(QWEN3_TEMPLATE, "tunelabs/Qwen3-0.6B")
     assert flags["supports_tools"] is True
     assert flags["supports_reasoning"] is True
     assert flags["reasoning_style"] == "enable_thinking"
@@ -92,7 +92,7 @@ def test_detect_safetensors_features_passes_template_through_to_classifier():
     """Route wrapper forwards a real template to the inner classifier."""
     from routes.inference import _detect_safetensors_features
 
-    backend = SimpleNamespace(active_model_name = "unsloth/Qwen3-0.6B")
+    backend = SimpleNamespace(active_model_name = "tunelabs/Qwen3-0.6B")
     flags = _detect_safetensors_features(backend, QWEN3_TEMPLATE)
     assert flags["supports_tools"] is True
     assert flags["supports_reasoning"] is True
@@ -101,7 +101,7 @@ def test_detect_safetensors_features_passes_template_through_to_classifier():
 def test_detect_safetensors_features_none_template_returns_all_false():
     from routes.inference import _detect_safetensors_features
 
-    backend = SimpleNamespace(active_model_name = "unsloth/Qwen3-0.6B")
+    backend = SimpleNamespace(active_model_name = "tunelabs/Qwen3-0.6B")
     flags = _detect_safetensors_features(backend, None)
     assert flags == {
         "supports_reasoning": False,
@@ -118,7 +118,7 @@ def test_detect_safetensors_features_gptoss_disables_tools():
     from routes.inference import _detect_safetensors_features
 
     backend = MagicMock()
-    backend.active_model_name = "unsloth/gpt-oss-20b"
+    backend.active_model_name = "tunelabs/gpt-oss-20b"
     backend._is_gpt_oss_model.return_value = True
 
     flags = _detect_safetensors_features(backend, QWEN3_TEMPLATE)
@@ -166,7 +166,7 @@ def test_detect_safetensors_features_llama3_template_suppresses_tools():
     """Llama-3 emits <|python_tag|>; safetensors loop cannot parse it."""
     from routes.inference import _detect_safetensors_features
 
-    backend = SimpleNamespace(active_model_name = "unsloth/Llama-3.2-3B-Instruct")
+    backend = SimpleNamespace(active_model_name = "tunelabs/Llama-3.2-3B-Instruct")
     flags = _detect_safetensors_features(backend, LLAMA3_TEMPLATE)
     assert flags["supports_tools"] is False
 
@@ -175,7 +175,7 @@ def test_detect_safetensors_features_mistral_template_suppresses_tools():
     """Mistral emits [TOOL_CALLS]; safetensors loop cannot parse it."""
     from routes.inference import _detect_safetensors_features
 
-    backend = SimpleNamespace(active_model_name = "unsloth/mistral-7b-instruct-v0.3")
+    backend = SimpleNamespace(active_model_name = "tunelabs/mistral-7b-instruct-v0.3")
     flags = _detect_safetensors_features(backend, MISTRAL_TEMPLATE)
     assert flags["supports_tools"] is False
 
@@ -184,7 +184,7 @@ def test_detect_safetensors_features_qwen_tool_call_keeps_tools_on():
     """Sanity check: gate only suppresses non-Qwen formats."""
     from routes.inference import _detect_safetensors_features
 
-    backend = SimpleNamespace(active_model_name = "unsloth/Qwen3-0.6B")
+    backend = SimpleNamespace(active_model_name = "tunelabs/Qwen3-0.6B")
     flags = _detect_safetensors_features(backend, QWEN3_TEMPLATE)
     assert flags["supports_tools"] is True
 
@@ -229,10 +229,10 @@ QWEN35_TOOL_INSTRUCTION = (
 
 
 def test_detect_safetensors_features_qwen35_keeps_tools_on():
-    """unsloth/Qwen3.5-0.8B family must surface tools+reasoning on."""
+    """tunelabs/Qwen3.5-0.8B family must surface tools+reasoning on."""
     from routes.inference import _detect_safetensors_features
 
-    backend = SimpleNamespace(active_model_name = "unsloth/Qwen3.5-0.8B")
+    backend = SimpleNamespace(active_model_name = "tunelabs/Qwen3.5-0.8B")
     flags = _detect_safetensors_features(backend, QWEN35_TOOL_INSTRUCTION)
     assert flags["supports_tools"] is True
     assert flags["supports_reasoning"] is True
@@ -252,7 +252,7 @@ def test_orchestrator_mirrors_chat_template_info_into_models_dict():
     orch.loading_models = set()
 
     model_info = {
-        "identifier": "unsloth/Qwen3-0.6B",
+        "identifier": "tunelabs/Qwen3-0.6B",
         "display_name": "Qwen3-0.6B",
         "is_vision": False,
         "is_lora": False,
@@ -303,10 +303,10 @@ def test_orchestrator_missing_chat_template_info_falls_back_to_all_false():
 
     orch = InferenceOrchestrator.__new__(InferenceOrchestrator)
     orch.models = {}
-    orch.active_model_name = "unsloth/Qwen3-0.6B"
+    orch.active_model_name = "tunelabs/Qwen3-0.6B"
 
     model_info = {
-        "identifier": "unsloth/Qwen3-0.6B",
+        "identifier": "tunelabs/Qwen3-0.6B",
         "is_vision": False,
         "is_lora": False,
         # NB: no chat_template_info key
@@ -347,9 +347,9 @@ def test_worker_load_reply_payload_includes_chat_template_info():
                 }
             }
 
-    backend = _StubBackend("unsloth/Qwen3-0.6B", QWEN3_TEMPLATE)
+    backend = _StubBackend("tunelabs/Qwen3-0.6B", QWEN3_TEMPLATE)
     mc = SimpleNamespace(
-        identifier = "unsloth/Qwen3-0.6B",
+        identifier = "tunelabs/Qwen3-0.6B",
         display_name = "Qwen3-0.6B",
         is_vision = False,
         is_lora = False,
@@ -420,9 +420,9 @@ def test_route_layer_emits_supports_tools_true_for_qwen3_safetensors():
     from routes.inference import _detect_safetensors_features
 
     backend = SimpleNamespace(
-        active_model_name = "unsloth/Qwen3-0.6B",
+        active_model_name = "tunelabs/Qwen3-0.6B",
         models = {
-            "unsloth/Qwen3-0.6B": {
+            "tunelabs/Qwen3-0.6B": {
                 "is_vision": False,
                 "chat_template_info": {
                     "has_template": True,

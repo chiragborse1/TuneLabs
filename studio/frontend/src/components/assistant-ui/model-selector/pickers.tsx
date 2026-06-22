@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
@@ -690,12 +690,12 @@ let _lmStudioCache: LocalModelInfo[] = [];
 let _customFolderCache: LocalModelInfo[] = [];
 let _scanFoldersCache: ScanFolderInfo[] = [];
 
-/** Sort LM Studio models with unsloth publisher first. */
+/** Sort LM Studio models with tunelabs publisher first. */
 function sortLmStudio(models: LocalModelInfo[]): LocalModelInfo[] {
   return [...models].sort((a, b) => {
-    const aUnsloth = (a.model_id ?? "").startsWith("unsloth/") ? 0 : 1;
-    const bUnsloth = (b.model_id ?? "").startsWith("unsloth/") ? 0 : 1;
-    if (aUnsloth !== bUnsloth) return aUnsloth - bUnsloth;
+    const aTuneLabs = (a.model_id ?? "").startsWith("tunelabs/") ? 0 : 1;
+    const bTuneLabs = (b.model_id ?? "").startsWith("tunelabs/") ? 0 : 1;
+    if (aTuneLabs !== bTuneLabs) return aTuneLabs - bTuneLabs;
     return (a.model_id ?? a.display_name).localeCompare(
       b.model_id ?? b.display_name,
     );
@@ -1916,11 +1916,11 @@ export function LoraModelPicker({
         .sort((a, b) => {
           const baseCmp = a.baseModel.localeCompare(b.baseModel);
           if (baseCmp !== 0) return baseCmp;
-          // Prioritize unsloth publisher within LM Studio group
+          // Prioritize tunelabs publisher within LM Studio group
           if (a.baseModel === "LM Studio" && b.baseModel === "LM Studio") {
-            const aUnsloth = a.name.startsWith("unsloth/") ? 0 : 1;
-            const bUnsloth = b.name.startsWith("unsloth/") ? 0 : 1;
-            if (aUnsloth !== bUnsloth) return aUnsloth - bUnsloth;
+            const aTuneLabs = a.name.startsWith("tunelabs/") ? 0 : 1;
+            const bTuneLabs = b.name.startsWith("tunelabs/") ? 0 : 1;
+            if (aTuneLabs !== bTuneLabs) return aTuneLabs - bTuneLabs;
           }
           const aTime = a.updatedAt ?? -1;
           const bTime = b.updatedAt ?? -1;

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -373,7 +373,7 @@ export function DatasetStep() {
                 Auto will try to identify and convert your dataset to a
                 supported format.{" "}
                 <a
-                  href="https://unsloth.ai/docs/get-started/fine-tuning-llms-guide/datasets-guide"
+                  href="https://tunelabs.ai/docs/get-started/fine-tuning-llms-guide/datasets-guide"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary underline"

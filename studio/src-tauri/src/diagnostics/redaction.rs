@@ -145,7 +145,7 @@ fn native_path_lease_re() -> &'static Regex {
 fn windows_studio_re() -> &'static Regex {
     static RE: OnceLock<Regex> = OnceLock::new();
     RE.get_or_init(|| {
-        Regex::new(r"(?i)\b[A-Z]:[\\/]Users[\\/][^\\/\r\n\s]+[\\/]\.unsloth[\\/]studio").unwrap()
+        Regex::new(r"(?i)\b[A-Z]:[\\/]Users[\\/][^\\/\r\n\s]+[\\/]\.tunelabs[\\/]studio").unwrap()
     })
 }
 
@@ -156,7 +156,7 @@ fn windows_home_re() -> &'static Regex {
 
 fn unix_studio_re() -> &'static Regex {
     static RE: OnceLock<Regex> = OnceLock::new();
-    RE.get_or_init(|| Regex::new(r"(?i)(?:/Users|/home)/[A-Za-z0-9._-]+/\.unsloth/studio").unwrap())
+    RE.get_or_init(|| Regex::new(r"(?i)(?:/Users|/home)/[A-Za-z0-9._-]+/\.tunelabs/studio").unwrap())
 }
 
 fn unix_home_re() -> &'static Regex {
@@ -184,8 +184,8 @@ mod tests {
             "native_path_lease=abc.DEF_123\n",
             "url=https://user:pass@example.com/path\n",
             "email=alex@example.com\n",
-            "path=/Users/alex/.unsloth/studio/logs/install.log\n",
-            "win=C:\\Users\\Alex\\.unsloth\\studio\\logs\\install.log\n",
+            "path=/Users/alex/.tunelabs/studio/logs/install.log\n",
+            "win=C:\\Users\\Alex\\.tunelabs\\studio\\logs\\install.log\n",
             "-----BEGIN PRIVATE KEY-----\nabc\n-----END PRIVATE KEY-----\n"
         );
         let mut report = RedactionReport::default();

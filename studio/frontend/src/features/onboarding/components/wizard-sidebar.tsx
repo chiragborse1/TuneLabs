@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -19,11 +19,11 @@ export function WizardSidebar({ returnTo }: { returnTo: string }) {
       <div className="flex items-center gap-3 py-1 md:py-2">
         <img
           src={`${import.meta.env.BASE_URL}sticker.png`}
-          alt="Unsloth"
+          alt="TuneLabs"
           className="size-12"
         />
         <div className="flex flex-col">
-          <span className="font-semibold text-lg leading-tight">Unsloth</span>
+          <span className="font-semibold text-lg leading-tight">TuneLabs</span>
           <span className="text-xs text-muted-foreground">Studio</span>
         </div>
       </div>

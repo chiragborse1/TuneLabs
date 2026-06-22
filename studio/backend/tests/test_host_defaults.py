@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-"""Tests that Unsloth Studio defaults to 127.0.0.1 (loopback) not 0.0.0.0.
+"""Tests that TuneLabs Studio defaults to 127.0.0.1 (loopback) not 0.0.0.0.
 
 Uses AST parsing to inspect source-level defaults without requiring the
 full studio venv (run.py has heavy dependencies like structlog/uvicorn).

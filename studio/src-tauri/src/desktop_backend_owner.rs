@@ -12,8 +12,8 @@ static TEST_EXPECTED_STUDIO_ROOT_ID: std::sync::Mutex<Option<String>> = std::syn
 static TEST_METADATA: std::sync::Mutex<Option<DesktopBackendMetadata>> =
     std::sync::Mutex::new(None);
 
-pub(crate) const OWNER_TOKEN_ENV: &str = "UNSLOTH_STUDIO_DESKTOP_OWNER_TOKEN";
-pub(crate) const OWNER_KIND_ENV: &str = "UNSLOTH_STUDIO_DESKTOP_OWNER_KIND";
+pub(crate) const OWNER_TOKEN_ENV: &str = "TUNELABS_STUDIO_DESKTOP_OWNER_TOKEN";
+pub(crate) const OWNER_KIND_ENV: &str = "TUNELABS_STUDIO_DESKTOP_OWNER_KIND";
 pub(crate) const OWNER_KIND_TAURI: &str = "tauri";
 
 const METADATA_SCHEMA_VERSION: u8 = 1;
@@ -145,14 +145,14 @@ pub(crate) fn parse_studio_root_id(value: &str) -> Option<String> {
 }
 
 pub(crate) fn managed_studio_root_id_path(home: &Path) -> PathBuf {
-    home.join(".unsloth")
+    home.join(".tunelabs")
         .join("studio")
         .join("share")
         .join("studio_install_id")
 }
 
 fn managed_run_dir(home: &Path) -> PathBuf {
-    home.join(".unsloth").join("studio").join("run")
+    home.join(".tunelabs").join("studio").join("run")
 }
 
 fn metadata_path_for_home(home: &Path) -> PathBuf {
@@ -160,7 +160,7 @@ fn metadata_path_for_home(home: &Path) -> PathBuf {
 }
 
 fn auth_secret_path_for_home(home: &Path) -> PathBuf {
-    home.join(".unsloth")
+    home.join(".tunelabs")
         .join("studio")
         .join("auth")
         .join(".desktop_secret")
@@ -490,7 +490,7 @@ pub(crate) fn test_owner_state(root_id: &str, token: &str, port: u16) -> Backend
     };
     BackendOwnerState {
         path: std::env::temp_dir().join(format!(
-            "unsloth-test-owner-state-{}-{}.json",
+            "tunelabs-test-owner-state-{}-{}.json",
             std::process::id(),
             now_ms()
         )),
@@ -500,7 +500,7 @@ pub(crate) fn test_owner_state(root_id: &str, token: &str, port: u16) -> Backend
 
 fn health_verifies_metadata(health: &HealthResponse, metadata: &DesktopBackendMetadata) -> bool {
     let healthy = health.status.as_deref() == Some("healthy")
-        && health.service.as_deref() == Some("Unsloth UI Backend");
+        && health.service.as_deref() == Some("TuneLabs UI Backend");
     let Some(owner) = health.desktop_owner.as_ref() else {
         return false;
     };
@@ -922,7 +922,7 @@ mod tests {
 
     fn temp_metadata_path(test_name: &str) -> PathBuf {
         let dir = std::env::temp_dir().join(format!(
-            "unsloth-owner-{test_name}-{}-{}",
+            "tunelabs-owner-{test_name}-{}-{}",
             std::process::id(),
             now_ms()
         ));
@@ -971,7 +971,7 @@ mod tests {
         let metadata = metadata(1, Some(8888));
         let health = HealthResponse {
             status: Some("healthy".to_string()),
-            service: Some("Unsloth UI Backend".to_string()),
+            service: Some("TuneLabs UI Backend".to_string()),
             version: Some("2026.5.2".to_string()),
             desktop_protocol_version: Some(1),
             desktop_manageability_version: Some(1),

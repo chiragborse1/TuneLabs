@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { useEffect, useState } from "react";
 
 // Persisted recent Hub search terms, newest first. Uses the localStorage +
 // same-tab CHANGE_EVENT + cross-tab `storage` pattern so consumers stay in sync.
-const STORAGE_KEY = "unsloth.hub.recentSearches";
-const CHANGE_EVENT = "unsloth:hub-recent-searches-change";
+const STORAGE_KEY = "tunelabs.hub.recentSearches";
+const CHANGE_EVENT = "tunelabs:hub-recent-searches-change";
 
 export const MAX_RECENT_SEARCHES = 8;
 // Single characters are usually noise (a half-typed query), so skip them.

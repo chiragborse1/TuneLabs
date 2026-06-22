@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Smoke test (#5190 env-override path): N parallel install.sh runs with
-distinct UNSLOTH_STUDIO_HOME values must produce N isolated installs whose
+distinct TUNELABS_STUDIO_HOME values must produce N isolated installs whose
 backends run side by side. Checks install-time layout/isolation + clean HOME,
 then runtime /api/health, distinct studio_root_id, and per-venv PIDs.
 
@@ -58,7 +58,7 @@ def _run_one_install(
     log_path.parent.mkdir(parents = True, exist_ok = True)
     env = os.environ.copy()
     env["HOME"] = str(fake_home)
-    env["UNSLOTH_STUDIO_HOME"] = str(studio_home)
+    env["TUNELABS_STUDIO_HOME"] = str(studio_home)
     env["UV_CACHE_DIR"] = str(uv_cache)
     env["NO_COLOR"] = "1"
     with log_path.open("w") as fh:
@@ -79,15 +79,15 @@ def _launch_backend(
     log_path.parent.mkdir(parents = True, exist_ok = True)
     env = os.environ.copy()
     env["HOME"] = str(fake_home)
-    # Pin UNSLOTH_STUDIO_HOME and clear the alias so the child can't inherit a
+    # Pin TUNELABS_STUDIO_HOME and clear the alias so the child can't inherit a
     # Studio root from the caller's shell and resolve to the wrong install.
-    env["UNSLOTH_STUDIO_HOME"] = str(studio_home)
+    env["TUNELABS_STUDIO_HOME"] = str(studio_home)
     env.pop("STUDIO_HOME", None)
     # Popen dups stdout into the child, so closing the parent's handle here is safe.
     with log_path.open("w") as fh:
         return subprocess.Popen(
             [
-                str(studio_home / "bin" / "unsloth"),
+                str(studio_home / "bin" / "tunelabs"),
                 "studio",
                 "-H",
                 "127.0.0.1",
@@ -131,14 +131,14 @@ def _http_status(
 
 
 def _check_install_layout(label: str, studio_home: Path) -> dict:
-    for d in ("bin", "share", "llama.cpp", "unsloth_studio"):
+    for d in ("bin", "share", "llama.cpp", "tunelabs_studio"):
         if not (studio_home / d).is_dir():
             raise TestFailure(f"[{label}] missing {studio_home / d}")
 
-    shim = studio_home / "bin" / "unsloth"
+    shim = studio_home / "bin" / "tunelabs"
     if not shim.is_symlink():
         raise TestFailure(f"[{label}] {shim} is not a symlink")
-    expected_target = (studio_home / "unsloth_studio" / "bin" / "unsloth").resolve()
+    expected_target = (studio_home / "tunelabs_studio" / "bin" / "tunelabs").resolve()
     if shim.resolve() != expected_target:
         raise TestFailure(
             f"[{label}] shim resolves to {shim.resolve()}, expected {expected_target}"
@@ -153,9 +153,9 @@ def _check_install_layout(label: str, studio_home: Path) -> dict:
 
     conf = (studio_home / "share" / "studio.conf").read_text()
     must_contain = [
-        f"UNSLOTH_EXE='{studio_home}/unsloth_studio/bin/unsloth'",
-        f"export UNSLOTH_STUDIO_HOME='{studio_home}'",
-        f"export UNSLOTH_LLAMA_CPP_PATH='{studio_home}/llama.cpp'",
+        f"TUNELABS_EXE='{studio_home}/tunelabs_studio/bin/tunelabs'",
+        f"export TUNELABS_STUDIO_HOME='{studio_home}'",
+        f"export TUNELABS_LLAMA_CPP_PATH='{studio_home}/llama.cpp'",
     ]
     for needle in must_contain:
         if needle not in conf:
@@ -178,10 +178,10 @@ def _check_fake_home_clean(fake_home: Path) -> None:
         ".bashrc",
         ".zshrc",
         ".profile",
-        ".unsloth",
-        Path(".local") / "share" / "applications" / "unsloth-studio.desktop",
-        Path("Desktop") / "unsloth-studio.desktop",
-        Path("Applications") / "Unsloth Studio.app",
+        ".tunelabs",
+        Path(".local") / "share" / "applications" / "tunelabs-studio.desktop",
+        Path("Desktop") / "tunelabs-studio.desktop",
+        Path("Applications") / "TuneLabs Studio.app",
     ]
     leaked = [str(p) for p in forbidden if (fake_home / p).exists()]
     if leaked:
@@ -206,9 +206,9 @@ def run(n_installs: int, keep: bool) -> int:
 
     repo = PACKAGE_ROOT
     if not (repo / "install.sh").is_file():
-        raise TestFailure(f"install.sh not found at {repo}; run from a clone of unslothai/unsloth")
+        raise TestFailure(f"install.sh not found at {repo}; run from a clone of tunelabsai/tunelabs")
 
-    test_root = Path(tempfile.mkdtemp(prefix = "unsloth_studio_clash_"))
+    test_root = Path(tempfile.mkdtemp(prefix = "tunelabs_studio_clash_"))
     _log(f"test root: {test_root}")
     _log(f"repo: {repo}")
 
@@ -305,7 +305,7 @@ def run(n_installs: int, keep: bool) -> int:
 
             exe = _backend_pid_python(proc.pid)
             if exe is not None:
-                expected_python = (studio_home / "unsloth_studio" / "bin" / "python").resolve()
+                expected_python = (studio_home / "tunelabs_studio" / "bin" / "python").resolve()
                 if exe != expected_python:
                     raise TestFailure(
                         f"[{label}] PID {proc.pid} exe={exe}, expected {expected_python}"

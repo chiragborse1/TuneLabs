@@ -1,5 +1,5 @@
-# Unsloth - 2x faster, 60% less VRAM LLM training and finetuning
-# Copyright 2023-present Daniel Han-Chen, Michael Han-Chen & the Unsloth team. All rights reserved.
+# TuneLabs - 2x faster, 60% less VRAM LLM training and finetuning
+# Copyright 2023-present Daniel Han-Chen, Michael Han-Chen & the TuneLabs team. All rights reserved.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -11,10 +11,10 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
 
-"""Drift detectors for unsloth's OWN public surface (top symbols/classmethods the
-unslothai/notebooks tree calls), so a rename or dropped kwarg fires DRIFT DETECTED here.
+"""Drift detectors for tunelabs's OWN public surface (top symbols/classmethods the
+tunelabsai/notebooks tree calls), so a rename or dropped kwarg fires DRIFT DETECTED here.
 
-Call-site counts measured against unslothai/notebooks @ main:
+Call-site counts measured against tunelabsai/notebooks @ main:
   FastLanguageModel.from_pretrained   506
   FastLanguageModel.for_inference     370
   FastLanguageModel.get_peft_model    304
@@ -59,19 +59,19 @@ def _accepts(callable_obj, kwargs: set[str]) -> tuple[bool, set[str]]:
 
 
 def test_fast_language_model_class_present():
-    unsloth = pytest.importorskip("unsloth")
-    if not hasattr(unsloth, "FastLanguageModel"):
+    tunelabs = pytest.importorskip("tunelabs")
+    if not hasattr(tunelabs, "FastLanguageModel"):
         pytest.fail(
-            "DRIFT DETECTED: unsloth.FastLanguageModel is missing; every "
+            "DRIFT DETECTED: tunelabs.FastLanguageModel is missing; every "
             "LoRA notebook fails at the first import cell."
         )
 
 
 def test_fast_language_model_from_pretrained_kwargs():
     """from_pretrained must accept the canonical kwargs the notebooks pass."""
-    unsloth = pytest.importorskip("unsloth")
+    tunelabs = pytest.importorskip("tunelabs")
     required = {"model_name", "max_seq_length", "dtype", "load_in_4bit"}
-    ok, missing = _accepts(unsloth.FastLanguageModel.from_pretrained, required)
+    ok, missing = _accepts(tunelabs.FastLanguageModel.from_pretrained, required)
     if not ok:
         pytest.fail(
             f"DRIFT DETECTED: FastLanguageModel.from_pretrained dropped "
@@ -81,7 +81,7 @@ def test_fast_language_model_from_pretrained_kwargs():
 
 
 def test_fast_language_model_get_peft_model_kwargs():
-    unsloth = pytest.importorskip("unsloth")
+    tunelabs = pytest.importorskip("tunelabs")
     required = {
         "r",
         "lora_alpha",
@@ -91,7 +91,7 @@ def test_fast_language_model_get_peft_model_kwargs():
         "use_gradient_checkpointing",
         "random_state",
     }
-    ok, missing = _accepts(unsloth.FastLanguageModel.get_peft_model, required)
+    ok, missing = _accepts(tunelabs.FastLanguageModel.get_peft_model, required)
     if not ok:
         pytest.fail(
             f"DRIFT DETECTED: FastLanguageModel.get_peft_model dropped "
@@ -100,8 +100,8 @@ def test_fast_language_model_get_peft_model_kwargs():
 
 
 def test_fast_language_model_for_inference_callable():
-    unsloth = pytest.importorskip("unsloth")
-    if not callable(getattr(unsloth.FastLanguageModel, "for_inference", None)):
+    tunelabs = pytest.importorskip("tunelabs")
+    if not callable(getattr(tunelabs.FastLanguageModel, "for_inference", None)):
         pytest.fail(
             "DRIFT DETECTED: FastLanguageModel.for_inference is missing; "
             "370 inference-cell call sites would crash."
@@ -112,13 +112,13 @@ def test_fast_language_model_for_inference_callable():
 
 
 def test_fast_vision_model_class_and_methods():
-    unsloth = pytest.importorskip("unsloth")
-    if not hasattr(unsloth, "FastVisionModel"):
+    tunelabs = pytest.importorskip("tunelabs")
+    if not hasattr(tunelabs, "FastVisionModel"):
         pytest.fail(
-            "DRIFT DETECTED: unsloth.FastVisionModel is missing; every "
+            "DRIFT DETECTED: tunelabs.FastVisionModel is missing; every "
             "vision fine-tuning notebook fails at import."
         )
-    cls = unsloth.FastVisionModel
+    cls = tunelabs.FastVisionModel
     missing = [
         m
         for m in ("from_pretrained", "get_peft_model", "for_inference", "for_training")
@@ -130,14 +130,14 @@ def test_fast_vision_model_class_and_methods():
 
 def test_fast_vision_model_get_peft_model_vision_kwargs():
     """Vision-specific kwargs the notebooks pass on the vision LoRA path."""
-    unsloth = pytest.importorskip("unsloth")
+    tunelabs = pytest.importorskip("tunelabs")
     required = {
         "finetune_vision_layers",
         "finetune_language_layers",
         "finetune_attention_modules",
         "finetune_mlp_modules",
     }
-    ok, missing = _accepts(unsloth.FastVisionModel.get_peft_model, required)
+    ok, missing = _accepts(tunelabs.FastVisionModel.get_peft_model, required)
     if not ok:
         pytest.fail(
             f"DRIFT DETECTED: FastVisionModel.get_peft_model dropped "
@@ -149,25 +149,25 @@ def test_fast_vision_model_get_peft_model_vision_kwargs():
 
 
 def test_fast_model_class_and_methods():
-    unsloth = pytest.importorskip("unsloth")
-    if not hasattr(unsloth, "FastModel"):
+    tunelabs = pytest.importorskip("tunelabs")
+    if not hasattr(tunelabs, "FastModel"):
         pytest.fail(
-            "DRIFT DETECTED: unsloth.FastModel is missing; the modern "
+            "DRIFT DETECTED: tunelabs.FastModel is missing; the modern "
             "unified entry point used by 100+ notebooks would crash."
         )
     missing = [
         m
         for m in ("from_pretrained", "get_peft_model")
-        if not callable(getattr(unsloth.FastModel, m, None))
+        if not callable(getattr(tunelabs.FastModel, m, None))
     ]
     if missing:
         pytest.fail(f"DRIFT DETECTED: FastModel is missing methods {missing}.")
 
 
 def test_fast_model_from_pretrained_kwargs():
-    unsloth = pytest.importorskip("unsloth")
+    tunelabs = pytest.importorskip("tunelabs")
     required = {"model_name", "max_seq_length", "dtype", "load_in_4bit"}
-    ok, missing = _accepts(unsloth.FastModel.from_pretrained, required)
+    ok, missing = _accepts(tunelabs.FastModel.from_pretrained, required)
     if not ok:
         pytest.fail(
             f"DRIFT DETECTED: FastModel.from_pretrained dropped kwargs "
@@ -180,12 +180,12 @@ def test_fast_model_from_pretrained_kwargs():
 
 def test_is_bf16_supported_or_alias_callable():
     """is_bf16_supported or the legacy is_bfloat16_supported alias must remain importable."""
-    unsloth = pytest.importorskip("unsloth")
-    has_new = callable(getattr(unsloth, "is_bf16_supported", None))
-    has_old = callable(getattr(unsloth, "is_bfloat16_supported", None))
+    tunelabs = pytest.importorskip("tunelabs")
+    has_new = callable(getattr(tunelabs, "is_bf16_supported", None))
+    has_old = callable(getattr(tunelabs, "is_bfloat16_supported", None))
     if not (has_new or has_old):
         pytest.fail(
-            "DRIFT DETECTED: neither unsloth.is_bf16_supported nor "
-            "unsloth.is_bfloat16_supported is callable; dtype probing "
+            "DRIFT DETECTED: neither tunelabs.is_bf16_supported nor "
+            "tunelabs.is_bfloat16_supported is callable; dtype probing "
             "in 50+ notebooks fails."
         )

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """llama-server inference backend for GGUF models.
 
@@ -77,7 +77,7 @@ class LlamaServerNotFoundError(RuntimeError):
 # Shared so the from_identifier preflight and the load-time raise stay in sync.
 LLAMA_SERVER_NOT_FOUND_DETAIL = (
     "This is a GGUF model, but the llama.cpp runtime (llama-server) is not "
-    "installed. Run `unsloth studio setup` to download the prebuilt runtime, "
+    "installed. Run `tunelabs studio setup` to download the prebuilt runtime, "
     "then try again. (Advanced: set LLAMA_SERVER_PATH to an existing binary.)"
 )
 
@@ -326,8 +326,8 @@ def _hf_offline_if_dns_dead():
 
 
 def _swa_cache_path() -> Path:
-    home = os.environ.get("UNSLOTH_STUDIO_HOME") or os.environ.get("STUDIO_HOME")
-    base = Path(home) if home else Path.home() / ".unsloth" / "studio"
+    home = os.environ.get("TUNELABS_STUDIO_HOME") or os.environ.get("STUDIO_HOME")
+    base = Path(home) if home else Path.home() / ".tunelabs" / "studio"
     return base / "swa_cache.json"
 
 
@@ -469,7 +469,7 @@ def _resolve_swa_pattern(
     if not arch or not n_layers:
         return None
     if allow_network is None:
-        allow_network = os.environ.get("UNSLOTH_STUDIO_OFFLINE", "0") not in (
+        allow_network = os.environ.get("TUNELABS_STUDIO_OFFLINE", "0") not in (
             "1",
             "true",
             "True",
@@ -873,9 +873,9 @@ def _mla_mtp_auto_enabled() -> bool:
     context and recomputes the sparse-attention indexer every draft step, so it runs
     ~2x slower than no speculation (GLM-5.2 bench: 27 vs 45 tok/s, flat across draft
     depth and 96-100% acceptance) -- the opposite of the vLLM/SGLang speedup on the
-    same model. Set UNSLOTH_MLA_MTP_ENABLED=1 to let Auto promote MLA MTP again once
+    same model. Set TUNELABS_MLA_MTP_ENABLED=1 to let Auto promote MLA MTP again once
     that path is optimized upstream. Forced mtp / mtp+ngram ignore this gate."""
-    return os.environ.get("UNSLOTH_MLA_MTP_ENABLED", "0").strip().lower() in (
+    return os.environ.get("TUNELABS_MLA_MTP_ENABLED", "0").strip().lower() in (
         "1",
         "true",
         "yes",
@@ -1655,7 +1655,7 @@ class LlamaCppBackend:
     @staticmethod
     def _resolved_studio_root_and_is_legacy() -> "tuple[Optional[Path], bool]":
         """Resolve the Studio install root and classify it as the legacy
-        ~/.unsloth/studio root vs. a custom (env/venv-inferred) root.
+        ~/.tunelabs/studio root vs. a custom (env/venv-inferred) root.
 
         Returns (resolved_root, is_legacy). On any import/resolution failure the
         root is treated as legacy and resolved_root is None -- callers must read
@@ -1667,7 +1667,7 @@ class LlamaCppBackend:
             from utils.paths.storage_roots import studio_root as _sr  # noqa: WPS433
 
             resolved = _sr()
-            legacy_studio = Path.home() / ".unsloth" / "studio"
+            legacy_studio = Path.home() / ".tunelabs" / "studio"
             try:
                 is_legacy = resolved.resolve() == legacy_studio.resolve()
             except (OSError, ValueError):
@@ -1683,10 +1683,10 @@ class LlamaCppBackend:
 
         Search order:
         1.  LLAMA_SERVER_PATH environment variable (direct path to binary)
-        1b. UNSLOTH_LLAMA_CPP_PATH env var (custom llama.cpp install dir)
-        2.  ~/.unsloth/llama.cpp/llama-server        (make build, root dir)
-        3.  ~/.unsloth/llama.cpp/build/bin/llama-server  (cmake build, Linux)
-        4.  ~/.unsloth/llama.cpp/build/bin/Release/llama-server.exe  (cmake build, Windows)
+        1b. TUNELABS_LLAMA_CPP_PATH env var (custom llama.cpp install dir)
+        2.  ~/.tunelabs/llama.cpp/llama-server        (make build, root dir)
+        3.  ~/.tunelabs/llama.cpp/build/bin/llama-server  (cmake build, Linux)
+        4.  ~/.tunelabs/llama.cpp/build/bin/Release/llama-server.exe  (cmake build, Windows)
         5.  ./llama.cpp/llama-server                 (legacy: make build, root dir)
         6.  ./llama.cpp/build/bin/llama-server        (legacy: cmake in-tree build)
         7.  llama-server on PATH                     (system install)
@@ -1750,8 +1750,8 @@ class LlamaCppBackend:
             if hit:
                 return hit
 
-        # 1b. UNSLOTH_LLAMA_CPP_PATH: custom llama.cpp install dir
-        custom_llama_cpp = os.environ.get("UNSLOTH_LLAMA_CPP_PATH")
+        # 1b. TUNELABS_LLAMA_CPP_PATH: custom llama.cpp install dir
+        custom_llama_cpp = os.environ.get("TUNELABS_LLAMA_CPP_PATH")
         if custom_llama_cpp:
             hit, locked = _scan_pinned(_layout_candidates(Path(custom_llama_cpp)))
             if locked is not None:
@@ -1760,19 +1760,19 @@ class LlamaCppBackend:
                 return hit
 
         # 2-4. Match installer layout: env-mode -> $STUDIO_HOME/llama.cpp;
-        # default/HOME-redirect -> ~/.unsloth/llama.cpp (sibling of studio).
-        legacy_llama = Path.home() / ".unsloth" / "llama.cpp"
+        # default/HOME-redirect -> ~/.tunelabs/llama.cpp (sibling of studio).
+        legacy_llama = Path.home() / ".tunelabs" / "llama.cpp"
         _resolved_sr, _is_legacy = LlamaCppBackend._resolved_studio_root_and_is_legacy()
         if _is_legacy:
             search_roots = [legacy_llama]
         else:
             # _kill_orphaned_servers excludes the legacy root in custom mode;
             # discovery must match so we never spawn a server we then refuse to
-            # clean up. UNSLOTH_LLAMA_CPP_PATH (handled earlier) is the explicit
+            # clean up. TUNELABS_LLAMA_CPP_PATH (handled earlier) is the explicit
             # way to share a build across roots.
             search_roots = [_resolved_sr / "llama.cpp"]
-        for unsloth_home in search_roots:
-            hit, locked = _scan_pinned(_layout_candidates(unsloth_home))
+        for tunelabs_home in search_roots:
+            hit, locked = _scan_pinned(_layout_candidates(tunelabs_home))
             if locked is not None:
                 return _unavailable(locked)
             if hit:
@@ -1799,7 +1799,7 @@ class LlamaCppBackend:
 
     # ── llama-server capability probe ─────────────────────────────
 
-    # Cached on (path, mtime); `unsloth studio update` bumps mtime.
+    # Cached on (path, mtime); `tunelabs studio update` bumps mtime.
     _capability_cache: dict[tuple[str, int], dict[str, object]] = {}
 
     @classmethod
@@ -2139,12 +2139,12 @@ class LlamaCppBackend:
     def _apply_datacenter_env(env: dict, gpu_indices = None) -> bool:
         """Inject DC llama.cpp tuning into env in place via setdefault (user
         values win); return whether the box qualified. Opt out with
-        UNSLOTH_DISABLE_DC_TUNING=1; only datacenter NVIDIA parts qualify
+        TUNELABS_DISABLE_DC_TUNING=1; only datacenter NVIDIA parts qualify
         (consumer/ROCm/CPU/error are a no-op). Sets GGML_CUDA_FORCE_CUBLAS_COMPUTE_32F
         for any qualifying GPU (FP32 accum: ~0% cost on B200, real cost on GeForce),
         plus GGML_CUDA_P2P + CUDA_SCALE_LAUNCH_QUEUES=4x for multi-GPU (+33-51% pp
         tensor-split, +8-16% pipeline split on B200)."""
-        if os.environ.get("UNSLOTH_DISABLE_DC_TUNING") == "1":
+        if os.environ.get("TUNELABS_DISABLE_DC_TUNING") == "1":
             return False
         if not LlamaCppBackend._is_datacenter_gpu(gpu_indices):
             return False
@@ -3412,8 +3412,8 @@ class LlamaCppBackend:
         """Resolve how to launch the DiffusionGemma runner: (shim argv prefix,
         visual-server binary, optional extra PYTHONPATH dir for the file override).
 
-        Shim: UNSLOTH_DG_SHIM (a .py file) first, else the installed
-        unsloth_zoo.diffusion_studio.shim. Binary: DG_VISUAL_BIN first, else
+        Shim: TUNELABS_DG_SHIM (a .py file) first, else the installed
+        tunelabs_zoo.diffusion_studio.shim. Binary: DG_VISUAL_BIN first, else
         alongside llama-server. Returns None if neither can be found.
         """
         import importlib.util
@@ -3440,21 +3440,21 @@ class LlamaCppBackend:
             return None
 
         # Shim: a file override (its dir goes on PYTHONPATH), else the zoo package via -m.
-        shim_file = os.environ.get("UNSLOTH_DG_SHIM")
+        shim_file = os.environ.get("TUNELABS_DG_SHIM")
         if shim_file and Path(shim_file).is_file():
             return ([sys.executable, shim_file], visual_bin, str(Path(shim_file).parent))
 
-        # Find the installed shim without importing the heavy unsloth_zoo package
+        # Find the installed shim without importing the heavy tunelabs_zoo package
         # (find_spec on the top-level package does not run its __init__).
         try:
-            spec = importlib.util.find_spec("unsloth_zoo")
+            spec = importlib.util.find_spec("tunelabs_zoo")
         except Exception:
             spec = None
         if spec is not None and spec.submodule_search_locations:
             pkg_dir = Path(list(spec.submodule_search_locations)[0])
             if (pkg_dir / "diffusion_studio" / "shim.py").is_file():
                 return (
-                    [sys.executable, "-m", "unsloth_zoo.diffusion_studio.shim"],
+                    [sys.executable, "-m", "tunelabs_zoo.diffusion_studio.shim"],
                     visual_bin,
                     None,
                 )
@@ -3479,8 +3479,8 @@ class LlamaCppBackend:
         assets = self._find_diffusion_assets()
         if assets is None:
             raise RuntimeError(
-                "DiffusionGemma runner not found. Install unsloth_zoo (which ships "
-                "unsloth_zoo.diffusion_studio.shim) or set UNSLOTH_DG_SHIM to a shim "
+                "DiffusionGemma runner not found. Install tunelabs_zoo (which ships "
+                "tunelabs_zoo.diffusion_studio.shim) or set TUNELABS_DG_SHIM to a shim "
                 "file, and provide the visual-server binary via DG_VISUAL_BIN or next "
                 "to llama-server in the install tree."
             )
@@ -3508,10 +3508,10 @@ class LlamaCppBackend:
         ]
 
         env = child_env_without_native_path_secret()
-        # `python -m unsloth_zoo.diffusion_studio.shim` imports unsloth_zoo, which
-        # refuses to load unless UNSLOTH_IS_PRESENT is set (normally by `import
-        # unsloth`). The shim never imports unsloth, so set it here as unsloth does.
-        env["UNSLOTH_IS_PRESENT"] = "1"
+        # `python -m tunelabs_zoo.diffusion_studio.shim` imports tunelabs_zoo, which
+        # refuses to load unless TUNELABS_IS_PRESENT is set (normally by `import
+        # tunelabs`). The shim never imports tunelabs, so set it here as tunelabs does.
+        env["TUNELABS_IS_PRESENT"] = "1"
         env["DG_VISUAL_BIN"] = visual_bin
         env["DG_GPU"] = gpu
         # The file-override shim imports its sibling visual_engine; put its dir on PYTHONPATH.
@@ -3905,7 +3905,7 @@ class LlamaCppBackend:
         """Download the separate MTP drafter (speculative head) from a GGUF repo.
 
         Targets the repo-root ``mtp-*.gguf`` companion -- the Q8_0 drafter
-        unsloth mirrors there for llama.cpp ``-hf`` auto-discovery (smallest,
+        tunelabs mirrors there for llama.cpp ``-hf`` auto-discovery (smallest,
         recommended for speculation). Repos that bake the MTP head into the
         main GGUF (e.g. Qwen) ship no such sibling and this returns None. The
         higher-precision copies under ``MTP/`` are for explicit selection and
@@ -3981,9 +3981,9 @@ class LlamaCppBackend:
     # GGUF ``general.architecture`` values for diffusion / image models.
     # llama.cpp has no such architectures, so loading one as a chat model dies
     # with "unknown model architecture: '<arch>'". These match the patched
-    # stable-diffusion.cpp / ComfyUI-GGUF enums. Unsloth publishes FLUX and
+    # stable-diffusion.cpp / ComfyUI-GGUF enums. TuneLabs publishes FLUX and
     # Qwen-Image GGUFs under
-    # https://huggingface.co/collections/unsloth/unsloth-diffusion-ggufs.
+    # https://huggingface.co/collections/tunelabs/tunelabs-diffusion-ggufs.
     # Matched exactly (not a substring) so a chat arch containing "wan"/"sd1"
     # (e.g. "taiwan") isn't misrouted to Images.
     _DIFFUSION_ARCHES = frozenset(
@@ -5533,7 +5533,7 @@ class LlamaCppBackend:
                         encoding = "utf-8",
                         suffix = ".jinja",
                         delete = False,
-                        prefix = "unsloth_chat_template_",
+                        prefix = "tunelabs_chat_template_",
                     )
                     self._chat_template_file.write(chat_template_override)
                     self._chat_template_file.close()
@@ -5574,7 +5574,7 @@ class LlamaCppBackend:
                 # Option C: --api-key for direct client access when enabled
                 import secrets as _secrets
 
-                if os.getenv("UNSLOTH_DIRECT_STREAM", "0") == "1":
+                if os.getenv("TUNELABS_DIRECT_STREAM", "0") == "1":
                     self._api_key = _secrets.token_urlsafe(32)
                     cmd.extend(["--api-key", self._api_key])
                     logger.info("llama-server started with --api-key for direct streaming")
@@ -5660,7 +5660,7 @@ class LlamaCppBackend:
                     logger.info("AMD unified-memory APU: set GGML_CUDA_ENABLE_UNIFIED_MEMORY=1")
 
                 # DC NVIDIA GPUs: FP32 accum (+ P2P / launch queues for multi-GPU).
-                # See _apply_datacenter_env; opt out with UNSLOTH_DISABLE_DC_TUNING=1.
+                # See _apply_datacenter_env; opt out with TUNELABS_DISABLE_DC_TUNING=1.
                 if self._apply_datacenter_env(env, gpu_indices):
                     multi_gpu = self._effective_gpu_count(gpu_indices) > 1
                     logger.info(
@@ -5920,7 +5920,7 @@ class LlamaCppBackend:
                     ):
                         _retry_reason = (
                             "the prebuilt may predate it; retrying without "
-                            "speculative decoding -- run `unsloth studio "
+                            "speculative decoding -- run `tunelabs studio "
                             "update` for MTP"
                         )
                         self._spec_fallback_reason = (
@@ -5979,7 +5979,7 @@ class LlamaCppBackend:
                             "llama-server could not load this model's vision "
                             "projector (--mmproj). The installed llama.cpp build is "
                             "likely too old for it. Loading text-only for this "
-                            "session; run 'unsloth studio update' to enable vision."
+                            "session; run 'tunelabs studio update' to enable vision."
                         )
                         cmd = self._strip_mmproj_args(_last_spawn_cmd)
                         self._is_vision = False
@@ -6038,7 +6038,7 @@ class LlamaCppBackend:
                         "failed to load -- on Windows, cudart64_X.dll / "
                         "cublas64_X.dll could not be resolved. Reinstall the "
                         "Studio llama.cpp prebuilt or install a matching CUDA "
-                        "toolkit (issue unslothai/unsloth#5106).",
+                        "toolkit (issue tunelabsai/tunelabs#5106).",
                     )
 
                 logger.info(
@@ -6108,7 +6108,7 @@ class LlamaCppBackend:
         Refs: https://github.com/ggml-org/llama.cpp/blob/master/docs/speculative.md
               https://github.com/ggml-org/llama.cpp/pull/19164
               https://github.com/ggml-org/llama.cpp/pull/18471
-              MTP guide: unsloth.ai/docs/models/qwen3.6#mtp-guide
+              MTP guide: tunelabs.ai/docs/models/qwen3.6#mtp-guide
 
         Sub-3B dense MTP regresses vs spec-off when the head is baked into the
         main GGUF (Qwen): the draft head's per-token cost exceeds the
@@ -6164,7 +6164,7 @@ class LlamaCppBackend:
         # Embedded MTP head on an MLA model (GLM-5.2/DeepSeek/Kimi, detected by
         # kv_lora_rank): llama.cpp's MLA/DSA MTP path is ~2x slower than no spec,
         # so Auto drops it (override via the Settings dropdown / forced mtp, or
-        # UNSLOTH_MLA_MTP_ENABLED=1). Separate drafters (Gemma, mtp_draft_path) and
+        # TUNELABS_MLA_MTP_ENABLED=1). Separate drafters (Gemma, mtp_draft_path) and
         # non-MLA embedded heads (Qwen, no kv_lora_rank) are unaffected.
         _auto_mla_embedded_mtp = (
             bool(self._nextn_predict_layers)
@@ -6200,7 +6200,7 @@ class LlamaCppBackend:
                 logger.warning(
                     "Requested MTP speculative decoding but "
                     "llama-server lacks --spec-type mtp/draft-mtp; "
-                    "run `unsloth studio update`. Loading without "
+                    "run `tunelabs studio update`. Loading without "
                     "speculative decoding."
                 )
                 # Override an inherited LLAMA_ARG_SPEC_TYPE=draft-mtp (CLI wins
@@ -6255,7 +6255,7 @@ class LlamaCppBackend:
             """Drafterless Gemma: use ngram-mod (or spec-default) and record why."""
             logger.warning(
                 "Model %s is MTP-capable but no drafter or head was found; "
-                "falling back. Check network or run `unsloth studio update`.",
+                "falling back. Check network or run `tunelabs studio update`.",
                 model_identifier,
             )
             if self.probe_server_capabilities(binary).get("supports_ngram_mod"):
@@ -6326,7 +6326,7 @@ class LlamaCppBackend:
             # MLA embedded-MTP (GLM-5.2 et al.): the MTP path regresses vs spec-off
             # on llama.cpp today, so Auto drops it and falls back to ngram-mod (or
             # spec-off if unsupported), mirroring the sub-3B branch. Forced mtp /
-            # mtp+ngram (handled above) still engage; UNSLOTH_MLA_MTP_ENABLED=1
+            # mtp+ngram (handled above) still engage; TUNELABS_MLA_MTP_ENABLED=1
             # re-enables this promotion once upstream optimizes the path.
             self._spec_fallback_reason = "mla_mtp_disabled"
             _mla_caps = self.probe_server_capabilities(binary)
@@ -6335,14 +6335,14 @@ class LlamaCppBackend:
                     "Auto: MLA embedded-MTP model detected; llama.cpp's MLA/DSA "
                     "MTP path is slower than no speculation, so using ngram-mod "
                     "instead. Override via the Studio Speculative Decoding "
-                    "dropdown or UNSLOTH_MLA_MTP_ENABLED=1."
+                    "dropdown or TUNELABS_MLA_MTP_ENABLED=1."
                 )
                 _emit_ngram_mod()
             else:
                 logger.info(
                     "Auto: MLA embedded-MTP model detected; disabling speculative "
                     "decoding (this llama-server does not advertise ngram-mod). "
-                    "Override via the dropdown or UNSLOTH_MLA_MTP_ENABLED=1."
+                    "Override via the dropdown or TUNELABS_MLA_MTP_ENABLED=1."
                 )
                 # spec-off: emit nothing, mirroring the sub-3B no-ngram path.
         elif is_mtp_model and not _mtp_too_small:
@@ -6630,7 +6630,7 @@ class LlamaCppBackend:
     @staticmethod
     def _server_pidfile_path() -> Optional[Path]:
         """Pidfile recording the live llama-server PID, under the active studio root
-        (per-root, so concurrent Studios with distinct UNSLOTH_STUDIO_HOME stay
+        (per-root, so concurrent Studios with distinct TUNELABS_STUDIO_HOME stay
         isolated, mirroring the reaper's custom-root isolation)."""
         try:
             from utils.paths.storage_roots import studio_root  # noqa: WPS433
@@ -6856,7 +6856,7 @@ class LlamaCppBackend:
             # Primary install dir (default mode only). Env-mode skips this so a
             # custom-root Studio can't kill a default-install Studio's server.
             if not _is_custom_root:
-                install_roots.append(Path.home() / ".unsloth" / "llama.cpp")
+                install_roots.append(Path.home() / ".tunelabs" / "llama.cpp")
 
             # Legacy in-tree build dirs (older setup.sh)
             project_root = Path(__file__).resolve().parents[4]
@@ -6865,8 +6865,8 @@ class LlamaCppBackend:
             # Legacy: extracted binary
             install_roots.append(project_root / "bin")
 
-            # UNSLOTH_LLAMA_CPP_PATH env var (custom install dir)
-            custom_dir = os.environ.get("UNSLOTH_LLAMA_CPP_PATH")
+            # TUNELABS_LLAMA_CPP_PATH env var (custom install dir)
+            custom_dir = os.environ.get("TUNELABS_LLAMA_CPP_PATH")
             if custom_dir:
                 install_roots.append(Path(custom_dir))
 
@@ -8861,7 +8861,7 @@ class LlamaCppBackend:
             from huggingface_hub import snapshot_download
             import os
 
-            repo_path = snapshot_download("unsloth/Spark-TTS-0.5B", local_dir = "Spark-TTS-0.5B")
+            repo_path = snapshot_download("tunelabs/Spark-TTS-0.5B", local_dir = "Spark-TTS-0.5B")
             model_repo_path = os.path.abspath(repo_path)
 
         LlamaCppBackend._codec_mgr.load_codec(audio_type, device, model_repo_path = model_repo_path)

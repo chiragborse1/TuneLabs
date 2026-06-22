@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 # Three end-to-end smoke jobs that boot a freshly-installed Studio and
 # exercise the surfaces real users hit through the OpenAI / Anthropic
@@ -22,8 +22,8 @@ on:
   pull_request:
     paths:
       - 'studio/**'
-      - 'unsloth/**'
-      - 'unsloth_cli/**'
+      - 'tunelabs/**'
+      - 'tunelabs_cli/**'
       - 'install.ps1'
       - 'pyproject.toml'
       - 'tests/studio_setup_ps1/**'
@@ -51,7 +51,7 @@ jobs:
       run:
         shell: bash
     env:
-      GGUF_REPO: unsloth/gemma-3-270m-it-GGUF
+      GGUF_REPO: tunelabs/gemma-3-270m-it-GGUF
       GGUF_VARIANT: UD-Q4_K_XL
       GGUF_FILE: gemma-3-270m-it-UD-Q4_K_XL.gguf
       STUDIO_PORT: '18888'
@@ -150,7 +150,7 @@ jobs:
           # rebuild" and Studio boots with an empty dist directory.
           # Add-MpPreference accepts paths that do not yet exist.
           foreach ($p in @(
-            "$env:USERPROFILE\.unsloth",
+            "$env:USERPROFILE\.tunelabs",
             "$env:USERPROFILE\AppData\Local\uv",
             "$env:GITHUB_WORKSPACE\studio\frontend\node_modules",
             "$env:GITHUB_WORKSPACE\studio\frontend\dist"
@@ -179,8 +179,8 @@ jobs:
       - name: Assert install.ps1 used the Windows llama.cpp prebuilt
         run: |
           # Filesystem check; setup.ps1's stream output isn't captured.
-          LLAMA_DIR=~/.unsloth/llama.cpp
-          INFO="$LLAMA_DIR/UNSLOTH_PREBUILT_INFO.json"
+          LLAMA_DIR=~/.tunelabs/llama.cpp
+          INFO="$LLAMA_DIR/TUNELABS_PREBUILT_INFO.json"
           BIN="$LLAMA_DIR/build/bin/Release/llama-server.exe"
           if grep -q "falling back to source build" logs/install.log; then
             echo "::error::install.ps1 fell back to source-build llama.cpp on Windows."
@@ -188,7 +188,7 @@ jobs:
             exit 1
           fi
           if [ ! -f "$INFO" ]; then
-            echo "::error::no UNSLOTH_PREBUILT_INFO.json at $INFO."
+            echo "::error::no TUNELABS_PREBUILT_INFO.json at $INFO."
             ls -la "$LLAMA_DIR" || true
             exit 1
           fi
@@ -202,10 +202,10 @@ jobs:
 
       - name: Add Studio shim to GITHUB_PATH
         run: |
-          SHIM_DIR=~/.unsloth/studio/bin
-          if [ ! -f "$SHIM_DIR/unsloth.exe" ]; then
-            echo "::error::unsloth.exe shim not found at $SHIM_DIR"
-            ls -la ~/.unsloth/studio/ || true
+          SHIM_DIR=~/.tunelabs/studio/bin
+          if [ ! -f "$SHIM_DIR/tunelabs.exe" ]; then
+            echo "::error::tunelabs.exe shim not found at $SHIM_DIR"
+            ls -la ~/.tunelabs/studio/ || true
             exit 1
           fi
           cygpath -w "$SHIM_DIR" >> "$GITHUB_PATH"
@@ -215,9 +215,9 @@ jobs:
 
       - name: Reset auth + boot Studio (API-only)
         run: |
-          unsloth studio reset-password
+          tunelabs studio reset-password
           mkdir -p logs
-          UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p "$STUDIO_PORT" \
+          TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p "$STUDIO_PORT" \
             > logs/studio.log 2>&1 &
           echo "STUDIO_PID=$!" >> "$GITHUB_ENV"
 
@@ -236,13 +236,13 @@ jobs:
 
       - name: Password rotation (old must fail, new must work)
         run: |
-          OLD=$(cat ~/.unsloth/studio/auth/.bootstrap_password)
+          OLD=$(cat ~/.tunelabs/studio/auth/.bootstrap_password)
           NEW="CIRotated-$(python -c 'import secrets; print(secrets.token_urlsafe(12))')"
           echo "::add-mask::$OLD"
           echo "::add-mask::$NEW"
           OLD_TOKEN=$(curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/login" \
             -H 'content-type: application/json' \
-            -d "{\"username\":\"unsloth\",\"password\":\"$OLD\"}" | jq -r .access_token)
+            -d "{\"username\":\"tunelabs\",\"password\":\"$OLD\"}" | jq -r .access_token)
           [ -n "$OLD_TOKEN" ] && [ "$OLD_TOKEN" != "null" ] || { echo "bootstrap login failed"; exit 1; }
           curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/change-password" \
             -H "Authorization: Bearer $OLD_TOKEN" -H 'content-type: application/json' \
@@ -250,14 +250,14 @@ jobs:
           OLD_STATUS=$(curl -s -o /dev/null -w '%{http_code}' \
             -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/login" \
             -H 'content-type: application/json' \
-            -d "{\"username\":\"unsloth\",\"password\":\"$OLD\"}")
+            -d "{\"username\":\"tunelabs\",\"password\":\"$OLD\"}")
           if [ "$OLD_STATUS" != "401" ]; then
             echo "::error::Login with old password returned $OLD_STATUS, expected 401"
             exit 1
           fi
           NEW_TOKEN=$(curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/login" \
             -H 'content-type: application/json' \
-            -d "{\"username\":\"unsloth\",\"password\":\"$NEW\"}" | jq -r .access_token)
+            -d "{\"username\":\"tunelabs\",\"password\":\"$NEW\"}" | jq -r .access_token)
           [ -n "$NEW_TOKEN" ] && [ "$NEW_TOKEN" != "null" ] || { echo "new login failed"; exit 1; }
           echo "TOKEN=$NEW_TOKEN" >> "$GITHUB_ENV"
           echo "password rotation OK (old=401, new=200)"
@@ -385,13 +385,13 @@ jobs:
         continue-on-error: true
         shell: bash
         # Copy llama-server's own stdout/stderr (teed by Studio under
-        # ~/.unsloth/studio/logs/llama-server/) into the workspace so
+        # ~/.tunelabs/studio/logs/llama-server/) into the workspace so
         # upload-artifact can pick it up. Crucial for diagnosing a
         # subprocess crash where Studio's traceback only shows the
         # symptom (httpx ReadError) but not the cause.
         run: |
           mkdir -p logs/llama-server
-          cp -v ~/.unsloth/studio/logs/llama-server/*.log logs/llama-server/ 2>/dev/null || \
+          cp -v ~/.tunelabs/studio/logs/llama-server/*.log logs/llama-server/ 2>/dev/null || \
             echo "no llama-server logs to collect"
 
       - name: Upload logs
@@ -428,7 +428,7 @@ jobs:
       # only, pass an absolute path to Studio's /api/inference/load.
       # The OpenAI/Anth and JSON+images jobs still cover the
       # gguf_variant resolution path.
-      GGUF_REPO: unsloth/Qwen3.5-2B-GGUF
+      GGUF_REPO: tunelabs/Qwen3.5-2B-GGUF
       GGUF_FILE: Qwen3.5-2B-UD-Q4_K_XL.gguf
       STUDIO_PORT: '18898'
       # Force UTF-8 for stdio (Windows defaults to cp1252; hf
@@ -495,7 +495,7 @@ jobs:
           # rebuild" and Studio boots with an empty dist directory.
           # Add-MpPreference accepts paths that do not yet exist.
           foreach ($p in @(
-            "$env:USERPROFILE\.unsloth",
+            "$env:USERPROFILE\.tunelabs",
             "$env:USERPROFILE\AppData\Local\uv",
             "$env:GITHUB_WORKSPACE\studio\frontend\node_modules",
             "$env:GITHUB_WORKSPACE\studio\frontend\dist"
@@ -524,8 +524,8 @@ jobs:
       - name: Assert install.ps1 used the Windows llama.cpp prebuilt
         run: |
           # Filesystem check; setup.ps1's stream output isn't captured.
-          LLAMA_DIR=~/.unsloth/llama.cpp
-          INFO="$LLAMA_DIR/UNSLOTH_PREBUILT_INFO.json"
+          LLAMA_DIR=~/.tunelabs/llama.cpp
+          INFO="$LLAMA_DIR/TUNELABS_PREBUILT_INFO.json"
           BIN="$LLAMA_DIR/build/bin/Release/llama-server.exe"
           if grep -q "falling back to source build" logs/install.log; then
             echo "::error::install.ps1 fell back to source-build llama.cpp on Windows."
@@ -533,7 +533,7 @@ jobs:
             exit 1
           fi
           if [ ! -f "$INFO" ]; then
-            echo "::error::no UNSLOTH_PREBUILT_INFO.json at $INFO."
+            echo "::error::no TUNELABS_PREBUILT_INFO.json at $INFO."
             ls -la "$LLAMA_DIR" || true
             exit 1
           fi
@@ -547,19 +547,19 @@ jobs:
 
       - name: Add Studio shim to GITHUB_PATH
         run: |
-          SHIM_DIR=~/.unsloth/studio/bin
-          if [ ! -f "$SHIM_DIR/unsloth.exe" ]; then
-            echo "::error::unsloth.exe shim not found at $SHIM_DIR"
-            ls -la ~/.unsloth/studio/ || true
+          SHIM_DIR=~/.tunelabs/studio/bin
+          if [ ! -f "$SHIM_DIR/tunelabs.exe" ]; then
+            echo "::error::tunelabs.exe shim not found at $SHIM_DIR"
+            ls -la ~/.tunelabs/studio/ || true
             exit 1
           fi
           cygpath -w "$SHIM_DIR" >> "$GITHUB_PATH"
 
       - name: Reset auth + boot Studio (API-only, default tool policy)
         run: |
-          unsloth studio reset-password
+          tunelabs studio reset-password
           mkdir -p logs
-          UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p "$STUDIO_PORT" \
+          TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p "$STUDIO_PORT" \
             > logs/studio.log 2>&1 &
           echo "STUDIO_PID=$!" >> "$GITHUB_ENV"
 
@@ -572,22 +572,22 @@ jobs:
             sleep 1
           done
           jq -e '.status == "healthy"' /tmp/health.json
-          OLD=$(cat ~/.unsloth/studio/auth/.bootstrap_password)
+          OLD=$(cat ~/.tunelabs/studio/auth/.bootstrap_password)
           NEW="CITool-$(python -c 'import secrets; print(secrets.token_urlsafe(12))')"
           echo "::add-mask::$OLD"
           echo "::add-mask::$NEW"
           OLD_TOKEN=$(curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/login" \
             -H 'content-type: application/json' \
-            -d "{\"username\":\"unsloth\",\"password\":\"$OLD\"}" | jq -r .access_token)
+            -d "{\"username\":\"tunelabs\",\"password\":\"$OLD\"}" | jq -r .access_token)
           curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/change-password" \
             -H "Authorization: Bearer $OLD_TOKEN" -H 'content-type: application/json' \
             -d "{\"current_password\":\"$OLD\",\"new_password\":\"$NEW\"}" > /dev/null
           TOKEN=$(curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/login" \
             -H 'content-type: application/json' \
-            -d "{\"username\":\"unsloth\",\"password\":\"$NEW\"}" | jq -r .access_token)
+            -d "{\"username\":\"tunelabs\",\"password\":\"$NEW\"}" | jq -r .access_token)
           echo "API_KEY=$TOKEN" >> "$GITHUB_ENV"
           # GITHUB_WORKSPACE on windows-latest is a Windows path with
-          # backslashes ("D:\a\unsloth\unsloth"). Bash handles it as a
+          # backslashes ("D:\a\tunelabs\tunelabs"). Bash handles it as a
           # raw string, but we cannot embed `\a` etc. in JSON without
           # JSON-string-escaping every backslash. Replace `\` with `/`
           # via bash parameter expansion -- pathlib.Path on Windows
@@ -761,7 +761,7 @@ jobs:
           # the SSE stream opens and yields any data.
           try:
               content = post_sse("/v1/chat/completions", {
-                  "messages":      [{"role": "user", "content": "Search the web for 'unsloth ai github' and summarise."}],
+                  "messages":      [{"role": "user", "content": "Search the web for 'tunelabs ai github' and summarise."}],
                   "enable_tools":  True,
                   "enabled_tools": ["web_search"],
                   "session_id":    "ci-tool-calling-web",
@@ -819,13 +819,13 @@ jobs:
         continue-on-error: true
         shell: bash
         # Copy llama-server's own stdout/stderr (teed by Studio under
-        # ~/.unsloth/studio/logs/llama-server/) into the workspace so
+        # ~/.tunelabs/studio/logs/llama-server/) into the workspace so
         # upload-artifact can pick it up. Crucial for diagnosing a
         # subprocess crash where Studio's traceback only shows the
         # symptom (httpx ReadError) but not the cause.
         run: |
           mkdir -p logs/llama-server
-          cp -v ~/.unsloth/studio/logs/llama-server/*.log logs/llama-server/ 2>/dev/null || \
+          cp -v ~/.tunelabs/studio/logs/llama-server/*.log logs/llama-server/ 2>/dev/null || \
             echo "no llama-server logs to collect"
 
       - name: Upload logs
@@ -852,7 +852,7 @@ jobs:
       run:
         shell: bash
     env:
-      GGUF_REPO: unsloth/Qwen3-VL-2B-Instruct-GGUF
+      GGUF_REPO: tunelabs/Qwen3-VL-2B-Instruct-GGUF
       GGUF_VARIANT: UD-IQ2_XXS
       GGUF_FILE: Qwen3-VL-2B-Instruct-UD-IQ2_XXS.gguf
       MMPROJ_FILE: mmproj-F16.gguf
@@ -927,7 +927,7 @@ jobs:
           # rebuild" and Studio boots with an empty dist directory.
           # Add-MpPreference accepts paths that do not yet exist.
           foreach ($p in @(
-            "$env:USERPROFILE\.unsloth",
+            "$env:USERPROFILE\.tunelabs",
             "$env:USERPROFILE\AppData\Local\uv",
             "$env:GITHUB_WORKSPACE\studio\frontend\node_modules",
             "$env:GITHUB_WORKSPACE\studio\frontend\dist"
@@ -956,8 +956,8 @@ jobs:
       - name: Assert install.ps1 used the Windows llama.cpp prebuilt
         run: |
           # Filesystem check; setup.ps1's stream output isn't captured.
-          LLAMA_DIR=~/.unsloth/llama.cpp
-          INFO="$LLAMA_DIR/UNSLOTH_PREBUILT_INFO.json"
+          LLAMA_DIR=~/.tunelabs/llama.cpp
+          INFO="$LLAMA_DIR/TUNELABS_PREBUILT_INFO.json"
           BIN="$LLAMA_DIR/build/bin/Release/llama-server.exe"
           if grep -q "falling back to source build" logs/install.log; then
             echo "::error::install.ps1 fell back to source-build llama.cpp on Windows."
@@ -965,7 +965,7 @@ jobs:
             exit 1
           fi
           if [ ! -f "$INFO" ]; then
-            echo "::error::no UNSLOTH_PREBUILT_INFO.json at $INFO."
+            echo "::error::no TUNELABS_PREBUILT_INFO.json at $INFO."
             ls -la "$LLAMA_DIR" || true
             exit 1
           fi
@@ -979,10 +979,10 @@ jobs:
 
       - name: Add Studio shim to GITHUB_PATH
         run: |
-          SHIM_DIR=~/.unsloth/studio/bin
-          if [ ! -f "$SHIM_DIR/unsloth.exe" ]; then
-            echo "::error::unsloth.exe shim not found at $SHIM_DIR"
-            ls -la ~/.unsloth/studio/ || true
+          SHIM_DIR=~/.tunelabs/studio/bin
+          if [ ! -f "$SHIM_DIR/tunelabs.exe" ]; then
+            echo "::error::tunelabs.exe shim not found at $SHIM_DIR"
+            ls -la ~/.tunelabs/studio/ || true
             exit 1
           fi
           cygpath -w "$SHIM_DIR" >> "$GITHUB_PATH"
@@ -992,9 +992,9 @@ jobs:
 
       - name: Reset auth + boot Studio (API-only)
         run: |
-          unsloth studio reset-password
+          tunelabs studio reset-password
           mkdir -p logs
-          UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p "$STUDIO_PORT" \
+          TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p "$STUDIO_PORT" \
             > logs/studio.log 2>&1 &
           echo "STUDIO_PID=$!" >> "$GITHUB_ENV"
 
@@ -1007,19 +1007,19 @@ jobs:
             sleep 1
           done
           jq -e '.status == "healthy"' /tmp/health.json
-          OLD=$(cat ~/.unsloth/studio/auth/.bootstrap_password)
+          OLD=$(cat ~/.tunelabs/studio/auth/.bootstrap_password)
           NEW="CIJson-$(python -c 'import secrets; print(secrets.token_urlsafe(12))')"
           echo "::add-mask::$OLD"
           echo "::add-mask::$NEW"
           OLD_TOKEN=$(curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/login" \
             -H 'content-type: application/json' \
-            -d "{\"username\":\"unsloth\",\"password\":\"$OLD\"}" | jq -r .access_token)
+            -d "{\"username\":\"tunelabs\",\"password\":\"$OLD\"}" | jq -r .access_token)
           curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/change-password" \
             -H "Authorization: Bearer $OLD_TOKEN" -H 'content-type: application/json' \
             -d "{\"current_password\":\"$OLD\",\"new_password\":\"$NEW\"}" > /dev/null
           TOKEN=$(curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/login" \
             -H 'content-type: application/json' \
-            -d "{\"username\":\"unsloth\",\"password\":\"$NEW\"}" | jq -r .access_token)
+            -d "{\"username\":\"tunelabs\",\"password\":\"$NEW\"}" | jq -r .access_token)
           echo "API_KEY=$TOKEN" >> "$GITHUB_ENV"
           # Retry: same rationale as the OpenAI/Anthropic and Tool calling jobs.
           LOAD_OK=0
@@ -1224,13 +1224,13 @@ jobs:
         continue-on-error: true
         shell: bash
         # Copy llama-server's own stdout/stderr (teed by Studio under
-        # ~/.unsloth/studio/logs/llama-server/) into the workspace so
+        # ~/.tunelabs/studio/logs/llama-server/) into the workspace so
         # upload-artifact can pick it up. Crucial for diagnosing a
         # subprocess crash where Studio's traceback only shows the
         # symptom (httpx ReadError) but not the cause.
         run: |
           mkdir -p logs/llama-server
-          cp -v ~/.unsloth/studio/logs/llama-server/*.log logs/llama-server/ 2>/dev/null || \
+          cp -v ~/.tunelabs/studio/logs/llama-server/*.log logs/llama-server/ 2>/dev/null || \
             echo "no llama-server logs to collect"
 
       - name: Upload logs
@@ -1255,7 +1255,7 @@ jobs:
       run:
         shell: bash
     env:
-      GGUF_REPO: unsloth/gemma-3-270m-it-GGUF
+      GGUF_REPO: tunelabs/gemma-3-270m-it-GGUF
       GGUF_VARIANT: UD-Q4_K_XL
       GGUF_FILE: gemma-3-270m-it-UD-Q4_K_XL.gguf
       STUDIO_PORT: '18820'
@@ -1307,7 +1307,7 @@ jobs:
           $ProgressPreference = 'SilentlyContinue'
           npm install -g 'npm@^11' 2>&1 | Out-Host
           foreach ($p in @(
-            "$env:USERPROFILE\.unsloth",
+            "$env:USERPROFILE\.tunelabs",
             "$env:USERPROFILE\AppData\Local\uv",
             "$env:GITHUB_WORKSPACE\studio\frontend\node_modules",
             "$env:GITHUB_WORKSPACE\studio\frontend\dist"
@@ -1372,8 +1372,8 @@ jobs:
 
       - name: Assert prebuilt used AND no build tools were installed
         run: |
-          LLAMA_DIR=~/.unsloth/llama.cpp
-          INFO="$LLAMA_DIR/UNSLOTH_PREBUILT_INFO.json"
+          LLAMA_DIR=~/.tunelabs/llama.cpp
+          INFO="$LLAMA_DIR/TUNELABS_PREBUILT_INFO.json"
           BIN="$LLAMA_DIR/build/bin/Release/llama-server.exe"
           fail=0
           if grep -q "falling back to source build" logs/install.log; then
@@ -1385,7 +1385,7 @@ jobs:
               echo "::error::unexpected build-tool install on the prebuilt path: '$pat'"; fail=1
             fi
           done
-          [ -f "$INFO" ] || { echo "::error::no UNSLOTH_PREBUILT_INFO.json"; ls -la "$LLAMA_DIR" || true; fail=1; }
+          [ -f "$INFO" ] || { echo "::error::no TUNELABS_PREBUILT_INFO.json"; ls -la "$LLAMA_DIR" || true; fail=1; }
           [ -f "$BIN" ]  || { echo "::error::no llama-server.exe"; ls -la "$LLAMA_DIR/build/bin" || true; fail=1; }
           if [ "$fail" != "0" ]; then grep -iE "cmake|visual studio|prebuilt|source build" logs/install.log | tail -60; exit 1; fi
           echo "Prebuilt installed with no build tools:"
@@ -1393,15 +1393,15 @@ jobs:
 
       - name: Add Studio shim to GITHUB_PATH
         run: |
-          SHIM_DIR=~/.unsloth/studio/bin
-          [ -f "$SHIM_DIR/unsloth.exe" ] || { echo "::error::unsloth.exe shim not found"; ls -la ~/.unsloth/studio/ || true; exit 1; }
+          SHIM_DIR=~/.tunelabs/studio/bin
+          [ -f "$SHIM_DIR/tunelabs.exe" ] || { echo "::error::tunelabs.exe shim not found"; ls -la ~/.tunelabs/studio/ || true; exit 1; }
           cygpath -w "$SHIM_DIR" >> "$GITHUB_PATH"
 
       - name: Reset auth + boot Studio (API-only)
         run: |
-          unsloth studio reset-password
+          tunelabs studio reset-password
           mkdir -p logs
-          UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p "$STUDIO_PORT" \
+          TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p "$STUDIO_PORT" \
             > logs/studio.log 2>&1 &
           echo "STUDIO_PID=$!" >> "$GITHUB_ENV"
 
@@ -1414,19 +1414,19 @@ jobs:
             sleep 1
           done
           jq -e '.status == "healthy"' /tmp/health.json || { tail -200 logs/studio.log; exit 1; }
-          OLD=$(cat ~/.unsloth/studio/auth/.bootstrap_password)
+          OLD=$(cat ~/.tunelabs/studio/auth/.bootstrap_password)
           NEW="CINoVS-$(python -c 'import secrets; print(secrets.token_urlsafe(12))')"
           echo "::add-mask::$OLD"
           echo "::add-mask::$NEW"
           OLD_TOKEN=$(curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/login" \
             -H 'content-type: application/json' \
-            -d "{\"username\":\"unsloth\",\"password\":\"$OLD\"}" | jq -r .access_token)
+            -d "{\"username\":\"tunelabs\",\"password\":\"$OLD\"}" | jq -r .access_token)
           curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/change-password" \
             -H "Authorization: Bearer $OLD_TOKEN" -H 'content-type: application/json' \
             -d "{\"current_password\":\"$OLD\",\"new_password\":\"$NEW\"}" > /dev/null
           TOKEN=$(curl -fs -X POST "http://127.0.0.1:${STUDIO_PORT}/api/auth/login" \
             -H 'content-type: application/json' \
-            -d "{\"username\":\"unsloth\",\"password\":\"$NEW\"}" | jq -r .access_token)
+            -d "{\"username\":\"tunelabs\",\"password\":\"$NEW\"}" | jq -r .access_token)
           echo "API_KEY=$TOKEN" >> "$GITHUB_ENV"
           LOAD_OK=0
           for attempt in 1 2 3; do
@@ -1476,7 +1476,7 @@ jobs:
         continue-on-error: true
         run: |
           mkdir -p logs/llama-server
-          cp -v ~/.unsloth/studio/logs/llama-server/*.log logs/llama-server/ 2>/dev/null || echo "no llama-server logs"
+          cp -v ~/.tunelabs/studio/logs/llama-server/*.log logs/llama-server/ 2>/dev/null || echo "no llama-server logs"
 
       - name: Upload logs
         if: always()
@@ -1520,23 +1520,23 @@ jobs:
             if (Test-Path -LiteralPath $d) { Rename-Item -LiteralPath $d -NewName ((Split-Path $d -Leaf) + '.vsoff'); Write-Host "Hid VS: $d" }
           }
 
-      - name: Windows CUDA and ROCm prebuilts exist in unslothai/llama.cpp (what GPU users download, no VS)
+      - name: Windows CUDA and ROCm prebuilts exist in tunelabsai/llama.cpp (what GPU users download, no VS)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           curl -fsSL -H "Authorization: Bearer $GH_TOKEN" \
-            "https://api.github.com/repos/unslothai/llama.cpp/releases/latest" > /tmp/rel.json
+            "https://api.github.com/repos/tunelabsai/llama.cpp/releases/latest" > /tmp/rel.json
           echo "release: $(jq -r .tag_name /tmp/rel.json)"
           ASSETS=$(jq -r '.assets[].name' /tmp/rel.json)
           echo "$ASSETS" | grep -iE 'windows-x64-cuda[0-9]' || {
-            echo "::error::no Windows x64 CUDA prebuilt asset found in unslothai/llama.cpp latest release"
+            echo "::error::no Windows x64 CUDA prebuilt asset found in tunelabsai/llama.cpp latest release"
             echo "$ASSETS"; exit 1; }
           # AMD parity: hosted runners have no AMD GPU, so the resolver step below
           # can't exercise the ROCm path (it resolves to CPU). Pin the per-gfx
           # Windows ROCm bundles here so a release that drops them fails loudly --
           # the AMD no-VS guarantee otherwise rides only on shared resolver code.
           echo "$ASSETS" | grep -iE 'windows-x64-rocm-gfx' || {
-            echo "::error::no Windows x64 ROCm (per-gfx) prebuilt asset found in unslothai/llama.cpp latest release"
+            echo "::error::no Windows x64 ROCm (per-gfx) prebuilt asset found in tunelabsai/llama.cpp latest release"
             echo "$ASSETS"; exit 1; }
           echo "Windows CUDA and ROCm prebuilts are available -- GPU users get them without compiling."
 
@@ -1703,7 +1703,7 @@ jobs:
           # Dot-source the guard + the logging closure it reaches
           # (step/substep -> Write-StudioStdoutMirror / Get-StudioAnsi).
           $script:StudioVtOk = $false
-          $script:UnslothVerbose = $false
+          $script:TuneLabsVerbose = $false
           foreach ($fn in @('Get-StudioAnsi', 'Write-StudioStdoutMirror', 'step', 'substep',
                             'Invoke-SetupCommand', 'Refresh-Environment',
                             'Test-VCRedistInstalled', 'Ensure-VCRedist')) {

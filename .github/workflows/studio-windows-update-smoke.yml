@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 # Windows counterpart to studio-update-smoke.yml /
 # studio-mac-update-smoke.yml. Verifies that on the FREE
@@ -8,9 +8,9 @@
 #   1. install.ps1 --local --no-torch installs Studio AND auto-fetches
 #      the prebuilt llama.cpp Windows binary (llama-bNNNN-bin-win-cpu-
 #      x64 from ggml-org/llama.cpp). Hitting the source-build fallback
-#      is treated as an Unsloth bug -- Studio must always pick the
+#      is treated as an TuneLabs bug -- Studio must always pick the
 #      prebuilt on Windows.
-#   2. unsloth studio update --local is idempotent. Two consecutive
+#   2. tunelabs studio update --local is idempotent. Two consecutive
 #      runs both report "prebuilt up to date and validated", no
 #      source-build fallback. The CLI's _find_setup_script picks
 #      setup.ps1 on Windows automatically.
@@ -29,7 +29,7 @@ on:
       - 'studio/install_python_stack.py'
       - 'studio/install_llama_prebuilt.py'
       - 'studio/backend/requirements/**'
-      - 'unsloth_cli/commands/studio.py'
+      - 'tunelabs_cli/commands/studio.py'
       - 'pyproject.toml'
       - '.github/workflows/studio-windows-update-smoke.yml'
   push:
@@ -116,7 +116,7 @@ jobs:
           # exclusion is registered and applies when the path
           # materialises.
           foreach ($p in @(
-            "$env:USERPROFILE\.unsloth",
+            "$env:USERPROFILE\.tunelabs",
             "$env:USERPROFILE\AppData\Local\uv",
             "$env:GITHUB_WORKSPACE\studio\frontend\node_modules",
             "$env:GITHUB_WORKSPACE\studio\frontend\dist"
@@ -146,8 +146,8 @@ jobs:
         run: |
           # Filesystem-based check (setup.ps1's stream output isn't
           # captured back through the parent pipeline).
-          LLAMA_DIR=~/.unsloth/llama.cpp
-          INFO="$LLAMA_DIR/UNSLOTH_PREBUILT_INFO.json"
+          LLAMA_DIR=~/.tunelabs/llama.cpp
+          INFO="$LLAMA_DIR/TUNELABS_PREBUILT_INFO.json"
           BIN="$LLAMA_DIR/build/bin/Release/llama-server.exe"
           if grep -q "falling back to source build" logs/install.log; then
             echo "::error::install.ps1 fell back to source-build llama.cpp on Windows."
@@ -155,7 +155,7 @@ jobs:
             exit 1
           fi
           if [ ! -f "$INFO" ]; then
-            echo "::error::no UNSLOTH_PREBUILT_INFO.json at $INFO."
+            echo "::error::no TUNELABS_PREBUILT_INFO.json at $INFO."
             ls -la "$LLAMA_DIR" || true
             exit 1
           fi
@@ -169,10 +169,10 @@ jobs:
 
       - name: Add Studio shim to GITHUB_PATH
         run: |
-          SHIM_DIR=~/.unsloth/studio/bin
-          if [ ! -f "$SHIM_DIR/unsloth.exe" ]; then
-            echo "::error::unsloth.exe shim not found at $SHIM_DIR"
-            ls -la ~/.unsloth/studio/ || true
+          SHIM_DIR=~/.tunelabs/studio/bin
+          if [ ! -f "$SHIM_DIR/tunelabs.exe" ]; then
+            echo "::error::tunelabs.exe shim not found at $SHIM_DIR"
+            ls -la ~/.tunelabs/studio/ || true
             exit 1
           fi
           cygpath -w "$SHIM_DIR" >> "$GITHUB_PATH"
@@ -183,7 +183,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           set -o pipefail
-          unsloth studio update --local 2>&1 | tee logs/update.log
+          tunelabs studio update --local 2>&1 | tee logs/update.log
           if grep -q "falling back to source build" logs/update.log; then
             echo "::error::studio update fell back to source-build llama.cpp on Windows."
             grep -E "llama-prebuilt|llama.cpp" logs/update.log | tail -60
@@ -202,7 +202,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           set -o pipefail
-          unsloth studio update --local 2>&1 | tee logs/update2.log
+          tunelabs studio update --local 2>&1 | tee logs/update2.log
           grep -q "falling back to source build" logs/update2.log && {
               echo "::error::second update fell back to source build on Windows"
               tail -60 logs/update2.log; exit 1; } || true
@@ -212,7 +212,7 @@ jobs:
       - name: Boot Studio briefly to confirm the install is still usable
         run: |
           mkdir -p logs
-          UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p 18891 \
+          TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p 18891 \
             > logs/studio.log 2>&1 &
           PID=$!
           HEALTHY=""
@@ -246,7 +246,7 @@ jobs:
 
       - name: Uninstall and verify clean
         # Round-trip through scripts/uninstall.ps1 against the default
-        # install tree at %USERPROFILE%\.unsloth\studio. Catches
+        # install tree at %USERPROFILE%\.tunelabs\studio. Catches
         # regressions where install.ps1 starts writing under a new key
         # (registry, Start Menu, %APPDATA%) and scripts/uninstall.ps1 has
         # not been updated to match. Skips gracefully if
@@ -263,9 +263,9 @@ jobs:
           pwsh -NoProfile -File "$PWD\scripts\uninstall.ps1" *>&1 | Tee-Object -FilePath logs/uninstall.log
           $leak = 0
           foreach ($p in @(
-            "$env:USERPROFILE\.unsloth\studio",
-            "$env:USERPROFILE\.unsloth\studio\unsloth_studio",
-            "$env:USERPROFILE\.unsloth\studio\bin\unsloth.exe"
+            "$env:USERPROFILE\.tunelabs\studio",
+            "$env:USERPROFILE\.tunelabs\studio\tunelabs_studio",
+            "$env:USERPROFILE\.tunelabs\studio\bin\tunelabs.exe"
           )) {
             if (Test-Path -LiteralPath $p) {
               Write-Host "::error::leak: $p"

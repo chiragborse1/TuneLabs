@@ -356,20 +356,20 @@ pub(crate) fn force_kill_process_tree(
     info!("{} process tree force stopped", label);
 }
 
-/// Returns the path to the unsloth binary inside the managed venv, if it exists.
-/// Checks the new layout (~/.unsloth/studio/unsloth_studio/) first,
-/// then falls back to the old layout (~/.unsloth/studio/.venv/) for compat.
-fn find_unsloth_binary_in_studio_dir(studio: &std::path::Path) -> Option<std::path::PathBuf> {
+/// Returns the path to the tunelabs binary inside the managed venv, if it exists.
+/// Checks the new layout (~/.tunelabs/studio/tunelabs_studio/) first,
+/// then falls back to the old layout (~/.tunelabs/studio/.venv/) for compat.
+fn find_tunelabs_binary_in_studio_dir(studio: &std::path::Path) -> Option<std::path::PathBuf> {
     // New layout (upstream scripts >= March 2026)
-    let new_base = studio.join("unsloth_studio");
+    let new_base = studio.join("tunelabs_studio");
     // Old layout (bundled scripts, older upstream)
     let old_base = studio.join(".venv");
 
     for base in [new_base, old_base] {
         #[cfg(unix)]
-        let bin = base.join("bin").join("unsloth");
+        let bin = base.join("bin").join("tunelabs");
         #[cfg(windows)]
-        let bin = base.join("Scripts").join("unsloth.exe");
+        let bin = base.join("Scripts").join("tunelabs.exe");
 
         if bin.exists() {
             return Some(bin);
@@ -379,11 +379,11 @@ fn find_unsloth_binary_in_studio_dir(studio: &std::path::Path) -> Option<std::pa
     None
 }
 
-pub fn find_unsloth_binary() -> Option<std::path::PathBuf> {
+pub fn find_tunelabs_binary() -> Option<std::path::PathBuf> {
     let home = dirs::home_dir()?;
-    let studio = home.join(".unsloth").join("studio");
+    let studio = home.join(".tunelabs").join("studio");
 
-    find_unsloth_binary_in_studio_dir(&studio)
+    find_tunelabs_binary_in_studio_dir(&studio)
 }
 
 #[cfg(test)]
@@ -402,7 +402,7 @@ mod tests {
             .unwrap()
             .as_nanos();
         let dir = std::env::temp_dir().join(format!(
-            "unsloth-{test_name}-{}-{nanos}",
+            "tunelabs-{test_name}-{}-{nanos}",
             std::process::id()
         ));
         fs::create_dir_all(&dir).unwrap();
@@ -414,13 +414,13 @@ mod tests {
         let temp = temp_studio_dir("layout-preference");
 
         #[cfg(unix)]
-        let new_bin = temp.join("unsloth_studio/bin/unsloth");
+        let new_bin = temp.join("tunelabs_studio/bin/tunelabs");
         #[cfg(unix)]
-        let old_bin = temp.join(".venv/bin/unsloth");
+        let old_bin = temp.join(".venv/bin/tunelabs");
         #[cfg(windows)]
-        let new_bin = temp.join("unsloth_studio/Scripts/unsloth.exe");
+        let new_bin = temp.join("tunelabs_studio/Scripts/tunelabs.exe");
         #[cfg(windows)]
-        let old_bin = temp.join(".venv/Scripts/unsloth.exe");
+        let old_bin = temp.join(".venv/Scripts/tunelabs.exe");
 
         fs::create_dir_all(new_bin.parent().unwrap()).unwrap();
         fs::create_dir_all(old_bin.parent().unwrap()).unwrap();
@@ -428,11 +428,11 @@ mod tests {
         fs::write(&old_bin, "").unwrap();
 
         assert_eq!(
-            find_unsloth_binary_in_studio_dir(&temp),
+            find_tunelabs_binary_in_studio_dir(&temp),
             Some(new_bin.clone())
         );
         fs::remove_file(&new_bin).unwrap();
-        assert_eq!(find_unsloth_binary_in_studio_dir(&temp), Some(old_bin));
+        assert_eq!(find_tunelabs_binary_in_studio_dir(&temp), Some(old_bin));
         fs::remove_dir_all(temp).unwrap();
     }
 
@@ -501,10 +501,10 @@ mod tests {
     }
 }
 
-/// Find the unsloth binary, preferring the dev repo if available.
+/// Find the tunelabs binary, preferring the dev repo if available.
 /// In dev mode (debug builds), checks for a local .venv in the repo first.
-/// Falls back to find_unsloth_binary() which checks ~/.unsloth/studio/unsloth_studio/
-/// (new layout) then ~/.unsloth/studio/.venv/ (old layout).
+/// Falls back to find_tunelabs_binary() which checks ~/.tunelabs/studio/tunelabs_studio/
+/// (new layout) then ~/.tunelabs/studio/.venv/ (old layout).
 pub(crate) fn resolve_backend_binary() -> Result<std::path::PathBuf, String> {
     // In dev mode, check for local repo venv first
     #[cfg(debug_assertions)]
@@ -518,9 +518,9 @@ pub(crate) fn resolve_backend_binary() -> Result<std::path::PathBuf, String> {
 
         if let Some(root) = repo_root {
             #[cfg(unix)]
-            let dev_bin = root.join(".venv/bin/unsloth");
+            let dev_bin = root.join(".venv/bin/tunelabs");
             #[cfg(windows)]
-            let dev_bin = root.join(".venv/Scripts/unsloth.exe");
+            let dev_bin = root.join(".venv/Scripts/tunelabs.exe");
 
             if dev_bin.exists() {
                 info!("Dev mode: using local repo backend at {:?}", dev_bin);
@@ -530,8 +530,8 @@ pub(crate) fn resolve_backend_binary() -> Result<std::path::PathBuf, String> {
         info!("Dev mode: no local .venv found, falling back to installed backend");
     }
 
-    find_unsloth_binary()
-        .ok_or_else(|| "Unsloth binary not found. Please install Unsloth Studio first.".to_string())
+    find_tunelabs_binary()
+        .ok_or_else(|| "TuneLabs binary not found. Please install TuneLabs Studio first.".to_string())
 }
 
 fn backend_args(port: u16) -> Vec<String> {
@@ -607,10 +607,10 @@ pub fn start_backend(
         cmd.env_remove("PYTHONPATH");
     }
 
-    // Tauri uses the legacy root regardless of UNSLOTH_STUDIO_HOME / STUDIO_HOME;
-    // scrub so the spawned Python backend can't diverge. UNSLOTH_LLAMA_CPP_PATH
+    // Tauri uses the legacy root regardless of TUNELABS_STUDIO_HOME / STUDIO_HOME;
+    // scrub so the spawned Python backend can't diverge. TUNELABS_LLAMA_CPP_PATH
     // is a pre-existing user-controlled llama.cpp dir override; keep it.
-    cmd.env_remove("UNSLOTH_STUDIO_HOME");
+    cmd.env_remove("TUNELABS_STUDIO_HOME");
     cmd.env_remove("STUDIO_HOME");
 
     // Reset state, spawn, and store the child while holding the backend mutex.
@@ -785,7 +785,7 @@ async fn generic_backend_health_ok(port: u16) -> bool {
     let service = json
         .get("service")
         .and_then(|v| v.as_str())
-        .map(|s| s == "Unsloth UI Backend")
+        .map(|s| s == "TuneLabs UI Backend")
         .unwrap_or(false);
     healthy && service
 }

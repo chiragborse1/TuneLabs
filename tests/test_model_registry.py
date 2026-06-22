@@ -5,15 +5,15 @@ from dataclasses import dataclass
 import pytest
 from huggingface_hub import ModelInfo as HfModelInfo
 
-from unsloth.registry import register_models, search_models
-from unsloth.registry._deepseek import register_deepseek_models
-from unsloth.registry._gemma import register_gemma_models
-from unsloth.registry._llama import register_llama_models
-from unsloth.registry._mistral import register_mistral_models
-from unsloth.registry._phi import register_phi_models
-from unsloth.registry._qwen import register_qwen_models
-from unsloth.registry.registry import MODEL_REGISTRY, QUANT_TAG_MAP, QuantType
-from unsloth.utils.hf_hub import get_model_info
+from tunelabs.registry import register_models, search_models
+from tunelabs.registry._deepseek import register_deepseek_models
+from tunelabs.registry._gemma import register_gemma_models
+from tunelabs.registry._llama import register_llama_models
+from tunelabs.registry._mistral import register_mistral_models
+from tunelabs.registry._phi import register_phi_models
+from tunelabs.registry._qwen import register_qwen_models
+from tunelabs.registry.registry import MODEL_REGISTRY, QUANT_TAG_MAP, QuantType
+from tunelabs.utils.hf_hub import get_model_info
 
 MODEL_NAMES = [
     "llama",
@@ -72,8 +72,8 @@ def test_all_model_registration():
 
 
 def test_quant_type():
-    # NOTE: for org="unsloth" models, QuantType.NONE aliases QuantType.UNSLOTH
-    dynamic_quant_models = search_models(quant_types = [QuantType.UNSLOTH])
-    assert all(m.quant_type == QuantType.UNSLOTH for m in dynamic_quant_models)
-    quant_tag = QUANT_TAG_MAP[QuantType.UNSLOTH]
+    # NOTE: for org="tunelabs" models, QuantType.NONE aliases QuantType.TUNELABS
+    dynamic_quant_models = search_models(quant_types = [QuantType.TUNELABS])
+    assert all(m.quant_type == QuantType.TUNELABS for m in dynamic_quant_models)
+    quant_tag = QUANT_TAG_MAP[QuantType.TUNELABS]
     assert all(quant_tag in m.model_path for m in dynamic_quant_models)

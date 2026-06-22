@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import asyncio
 import sys
@@ -92,7 +92,7 @@ def test_repo_in_any_hf_cache_matches_case_variant_in_legacy_cache(tmp_path, mon
     for d in (active, legacy, default):
         d.mkdir()
     # Differently-cased entry in the legacy cache only.
-    (legacy / "models--Unsloth--Foo").mkdir()
+    (legacy / "models--TuneLabs--Foo").mkdir()
 
     # No active-cache variant; case resolution is a no-op here.
     monkeypatch.setattr(paths_pkg, "resolve_cached_repo_id_case", lambda name: name)
@@ -100,6 +100,6 @@ def test_repo_in_any_hf_cache_matches_case_variant_in_legacy_cache(tmp_path, mon
     monkeypatch.setattr(paths_pkg, "hf_default_cache_dir", lambda: default)
     monkeypatch.setattr(hf_constants, "HF_HUB_CACHE", str(active))
 
-    assert models_route._repo_in_any_hf_cache("unsloth/foo") is True
+    assert models_route._repo_in_any_hf_cache("tunelabs/foo") is True
     # Absent from every cache -> reported absent.
-    assert models_route._repo_in_any_hf_cache("unsloth/not-cached") is False
+    assert models_route._repo_in_any_hf_cache("tunelabs/not-cached") is False

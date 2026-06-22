@@ -1,4 +1,4 @@
-model: unsloth/Qwen2-VL-2B-Instruct-bnb-4bit
+model: tunelabs/Qwen2-VL-2B-Instruct-bnb-4bit
 
 data:
   dataset: philschmid/amazon-product-descriptions-vlm
@@ -20,7 +20,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: false
-  gradient_checkpointing: "unsloth"
+  gradient_checkpointing: "tunelabs"
 
 lora:
   lora_r: 64
@@ -37,6 +37,6 @@ lora:
 
 logging:
   enable_wandb: false
-  wandb_project: unsloth-training
+  wandb_project: tunelabs-training
   enable_tensorboard: false
   tensorboard_dir: runs

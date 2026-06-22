@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Tests for Studio trained-model discovery used by Chat."""
 
@@ -37,14 +37,14 @@ def test_scan_trained_models_includes_lora_and_full_finetune_outputs(tmp_path: P
     monkeypatch.setattr(_sr, "outputs_root", lambda: tmp_path)
     monkeypatch.setattr(_mc, "outputs_root", lambda: tmp_path)
 
-    lora_dir = tmp_path / "unsloth_SmolLM-135M_1775412608"
+    lora_dir = tmp_path / "tunelabs_SmolLM-135M_1775412608"
     lora_dir.mkdir()
     (lora_dir / "adapter_config.json").write_text(
         json.dumps({"base_model_name_or_path": "HuggingFaceTB/SmolLM-135M"})
     )
     (lora_dir / "adapter_model.safetensors").write_bytes(b"")
 
-    full_dir = tmp_path / "unsloth_SmolLM-135M_full_1775412609"
+    full_dir = tmp_path / "tunelabs_SmolLM-135M_full_1775412609"
     full_dir.mkdir()
     (full_dir / "config.json").write_text(
         json.dumps({"_name_or_path": "HuggingFaceTB/SmolLM-135M"})
@@ -91,7 +91,7 @@ def test_lora_identifier_resolves_remote_adapter_base(tmp_path: Path):
     # Remote adapter: the identifier helper fetches adapter_config.json from the Hub so
     # the gate can scan the base, where the local helper returns None.
     cfg = tmp_path / "adapter_config.json"
-    cfg.write_text(json.dumps({"base_model_name_or_path": "unsloth/Llama-3.2-1B-Instruct"}))
+    cfg.write_text(json.dumps({"base_model_name_or_path": "tunelabs/Llama-3.2-1B-Instruct"}))
 
     def _dl(
         repo,
@@ -105,7 +105,7 @@ def test_lora_identifier_resolves_remote_adapter_base(tmp_path: Path):
     assert get_base_model_from_lora("someone/my-remote-lora") is None  # local-only: misses it
     with patch("huggingface_hub.hf_hub_download", side_effect = _dl):
         base = get_base_model_from_lora_identifier("someone/my-remote-lora")
-    assert base == "unsloth/Llama-3.2-1B-Instruct"
+    assert base == "tunelabs/Llama-3.2-1B-Instruct"
 
 
 def test_lora_identifier_returns_none_for_non_adapter_remote_repo():
@@ -114,14 +114,14 @@ def test_lora_identifier_returns_none_for_non_adapter_remote_repo():
 
     mock = patch("huggingface_hub.hf_hub_download", side_effect = EntryNotFoundError("404"))
     with mock as m:
-        assert get_base_model_from_lora_identifier("unsloth/Llama-3.2-1B-Instruct") is None
+        assert get_base_model_from_lora_identifier("tunelabs/Llama-3.2-1B-Instruct") is None
     assert m.call_count == 1  # 404 is definitive -> no retry
 
 
 def test_lora_identifier_retries_transient_then_resolves(tmp_path: Path):
     # A transient error is retried (not treated as "not a LoRA"); the retry resolves the base.
     cfg = tmp_path / "adapter_config.json"
-    cfg.write_text(json.dumps({"base_model_name_or_path": "unsloth/Llama-3.2-1B-Instruct"}))
+    cfg.write_text(json.dumps({"base_model_name_or_path": "tunelabs/Llama-3.2-1B-Instruct"}))
     calls = {"n": 0}
 
     def _dl(
@@ -136,7 +136,7 @@ def test_lora_identifier_retries_transient_then_resolves(tmp_path: Path):
 
     with patch("huggingface_hub.hf_hub_download", side_effect = _dl):
         base = get_base_model_from_lora_identifier("someone/remote-lora")
-    assert base == "unsloth/Llama-3.2-1B-Instruct"
+    assert base == "tunelabs/Llama-3.2-1B-Instruct"
     assert calls["n"] == 2  # retried once
 
 
@@ -160,7 +160,7 @@ def test_lora_identifier_persistent_transient_returns_none():
 def test_model_config_full_finetune_local_path_is_not_lora(
     _mock_vision, _mock_audio_type, _mock_audio_input, tmp_path: Path
 ):
-    (tmp_path / "config.json").write_text(json.dumps({"_name_or_path": "unsloth/Qwen3-4B"}))
+    (tmp_path / "config.json").write_text(json.dumps({"_name_or_path": "tunelabs/Qwen3-4B"}))
     (tmp_path / "model.safetensors").write_bytes(b"")
 
     config = ModelConfig.from_identifier(str(tmp_path))

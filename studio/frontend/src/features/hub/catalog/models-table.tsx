@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import {
   DropdownMenu,
@@ -12,7 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { classifyUnslothSupport } from "@/features/hub/hooks/use-hub-model-search";
+import { classifyTuneLabsSupport } from "@/features/hub/hooks/use-hub-model-search";
 import {
   formatRelativeLong,
   formatRelativeShort,
@@ -337,9 +337,9 @@ function VerifiedOwner({ owner }: { owner: string }) {
   return (
     <span className="flex min-w-0 items-center gap-1">
       <span className="truncate">{owner}</span>
-      {owner.toLowerCase() === "unsloth" && (
+      {owner.toLowerCase() === "tunelabs" && (
         <span
-          aria-label="Verified Unsloth"
+          aria-label="Verified TuneLabs"
           className="hub-verified-badge size-3.5 shrink-0 text-primary"
         />
       )}
@@ -513,7 +513,7 @@ function useResultRowModel(
     () =>
       isDataset
         ? null
-        : classifyUnslothSupport({
+        : classifyTuneLabsSupport({
             modelId: row.id,
             pipelineTag: row.result.pipelineTag,
             tags: row.result.tags,

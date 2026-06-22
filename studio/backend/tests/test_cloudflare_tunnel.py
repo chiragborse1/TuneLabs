@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Tests for the Cloudflare quick-tunnel helper and run.py wiring.
 
@@ -181,7 +181,7 @@ def test_download_sets_user_agent(monkeypatch, tmp_path):
     monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
     dest = tmp_path / "cloudflared"
     assert ct._download("https://github.com/cloudflare/cloudflared/x", dest) is True
-    assert captured["ua"] == "unsloth-studio"  # GitHub CDN 403s the default UA
+    assert captured["ua"] == "tunelabs-studio"  # GitHub CDN 403s the default UA
     assert dest.read_bytes() == b"payload"
 
 

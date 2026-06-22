@@ -1,4 +1,4 @@
-from unsloth import FastLanguageModel
+from tunelabs import FastLanguageModel
 
 from typing import Dict
 
@@ -34,7 +34,7 @@ class _CountingFakeQuantizer(torch.nn.Module):
 def _get_model(qat_scheme: str, full_finetuning: bool):
     """Return (model, tokenizer) configured for QAT; LoRA model when full_finetuning is False."""
     model, tokenizer = FastLanguageModel.from_pretrained(
-        model_name = "unsloth/Qwen3-1.7B",
+        model_name = "tunelabs/Qwen3-1.7B",
         load_in_4bit = False,
         full_finetuning = full_finetuning,
         qat_scheme = qat_scheme if full_finetuning else None,

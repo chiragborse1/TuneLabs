@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """
 Inference API routes for model loading and text generation.
@@ -64,7 +64,7 @@ def _install_httpcore_asyncgen_silencer() -> None:
     and defers to the default hook otherwise. Idempotent.
     """
     prior_hook = sys.unraisablehook
-    if getattr(prior_hook, "_unsloth_httpcore_silencer", False):
+    if getattr(prior_hook, "_tunelabs_httpcore_silencer", False):
         return
 
     def _hook(unraisable):
@@ -83,7 +83,7 @@ def _install_httpcore_asyncgen_silencer() -> None:
             return
         prior_hook(unraisable)
 
-    _hook._unsloth_httpcore_silencer = True  # type: ignore[attr-defined]
+    _hook._tunelabs_httpcore_silencer = True  # type: ignore[attr-defined]
     sys.unraisablehook = _hook
 
 
@@ -294,12 +294,12 @@ _OVERFLOW_PROMPT_TARGET_FRACTION = 0.75
 
 
 def _overflow_truncation_requested(payload) -> bool:
-    """True when the request (or the UNSLOTH_CONTEXT_OVERFLOW server default,
+    """True when the request (or the TUNELABS_CONTEXT_OVERFLOW server default,
     for clients that cannot send custom fields) opted into truncation."""
     requested = getattr(payload, "context_overflow", None)
     if requested is not None:
         return requested == "truncate_middle"
-    return os.environ.get("UNSLOTH_CONTEXT_OVERFLOW", "").strip().lower() == "truncate_middle"
+    return os.environ.get("TUNELABS_CONTEXT_OVERFLOW", "").strip().lower() == "truncate_middle"
 
 
 def _parse_overflow_counts(err_text: str):
@@ -1060,7 +1060,7 @@ _ARTIFACT_PREVIEW_FRAME_HTML = """<!doctype html>
         installStorageFallbacks();
         window.addEventListener("message", (event) => {
           const data = event.data;
-          if (!data || data.type !== "unsloth:artifact-html" || typeof data.html !== "string") return;
+          if (!data || data.type !== "tunelabs:artifact-html" || typeof data.html !== "string") return;
           render(data.html);
         });
       })();
@@ -1158,7 +1158,7 @@ def _detect_safetensors_features(backend, chat_template: Optional[str]) -> dict:
 def _effective_enable_tools(payload) -> Optional[bool]:
     """Resolve `payload.enable_tools` against the process-level tool policy.
 
-    Returns the policy value when set (CLI hard-override from `unsloth run`),
+    Returns the policy value when set (CLI hard-override from `tunelabs run`),
     else the per-request value.
     """
     from state.tool_policy import get_tool_policy
@@ -2082,7 +2082,7 @@ def _effective_load_in_4bit(config: ModelConfig, requested: bool) -> bool:
     except Exception as e:
         logger.warning(f"Could not read adapter_config.json: {e}")
         return load_in_4bit
-    training_method = adapter_cfg.get("unsloth_training_method")
+    training_method = adapter_cfg.get("tunelabs_training_method")
     if training_method == "lora":
         return False
     if training_method == "qlora":
@@ -2305,7 +2305,7 @@ async def load_model(
     config (temperature, top_p, top_k, min_p) from the model's YAML, falling
     back to default.yaml for missing values.
 
-    GGUF models load via llama-server (llama.cpp) instead of Unsloth.
+    GGUF models load via llama-server (llama.cpp) instead of TuneLabs.
     """
     from core.inference.llama_cpp import LlamaServerNotFoundError
 
@@ -2416,7 +2416,7 @@ async def load_model(
                 backend.active_model_name
                 and backend.active_model_name.lower() == model_identifier.lower()
             ):
-                logger.info(f"Model already loaded (Unsloth): {model_log_label}, skipping reload")
+                logger.info(f"Model already loaded (TuneLabs): {model_log_label}, skipping reload")
                 inference_config = load_inference_config(backend.active_model_name)
                 _model_info = backend.models.get(backend.active_model_name, {})
                 _chat_template = None
@@ -2508,14 +2508,14 @@ async def load_model(
         # ── GGUF path: load via llama-server ──────────────────────
         if config.is_gguf:
             llama_backend = get_llama_cpp_backend()
-            unsloth_backend = get_inference_backend()
+            tunelabs_backend = get_inference_backend()
 
-            # Unload any active Unsloth model to free VRAM
-            if unsloth_backend.active_model_name:
+            # Unload any active TuneLabs model to free VRAM
+            if tunelabs_backend.active_model_name:
                 logger.info(
-                    f"Unloading Unsloth model '{unsloth_backend.active_model_name}' before loading GGUF"
+                    f"Unloading TuneLabs model '{tunelabs_backend.active_model_name}' before loading GGUF"
                 )
-                unsloth_backend.unload_model(unsloth_backend.active_model_name)
+                tunelabs_backend.unload_model(tunelabs_backend.active_model_name)
 
             # Inherit llama_extra_args from the previous load when the request
             # omits the field (the chat-settings Apply path doesn't round-trip
@@ -2724,13 +2724,13 @@ async def load_model(
                 tensor_parallel = llama_backend.tensor_parallel,
             )
 
-        # ── Standard path: load via Unsloth/transformers ──────────
+        # ── Standard path: load via TuneLabs/transformers ──────────
         backend = get_inference_backend()
 
         # Unload any active GGUF model first
         llama_backend = get_llama_cpp_backend()
         if llama_backend.is_loaded:
-            logger.info("Unloading GGUF model before loading Unsloth model")
+            logger.info("Unloading GGUF model before loading TuneLabs model")
             llama_backend.unload_model()
 
         # Shut down any export subprocess to free VRAM
@@ -2857,7 +2857,7 @@ async def load_model(
         logger.warning("GGUF runtime missing while loading '%s': %s", model_log_label, e)
         raise HTTPException(status_code = 400, detail = str(e))
     except Exception as e:
-        # Friendlier message for models Unsloth cannot load.
+        # Friendlier message for models TuneLabs cannot load.
         if native_grant_backed:
             redacted_msg = redact_native_paths(str(e))
             logger.error(
@@ -3111,7 +3111,7 @@ async def validate_model(
 async def unload_model(request: UnloadRequest, current_subject: str = Depends(get_current_subject)):
     """
     Unload a model from memory.
-    Routes to the correct backend (llama-server for GGUF, Unsloth otherwise).
+    Routes to the correct backend (llama-server for GGUF, TuneLabs otherwise).
     """
     try:
         # Check if the GGUF backend has this model loaded or is loading it.
@@ -3125,7 +3125,7 @@ async def unload_model(request: UnloadRequest, current_subject: str = Depends(ge
             logger.info(f"Unloaded GGUF model: {request.model_path}")
             return UnloadResponse(status = "unloaded", model = request.model_path)
 
-        # Otherwise, unload from Unsloth backend
+        # Otherwise, unload from TuneLabs backend
         backend = get_inference_backend()
         backend.unload_model(request.model_path)
         logger.info(f"Unloaded model: {request.model_path}")
@@ -3317,7 +3317,7 @@ async def generate_stream(
 async def get_status(current_subject: str = Depends(get_current_subject)):
     """
     Get current inference backend status.
-    Reports whichever backend (Unsloth or llama-server) is active.
+    Reports whichever backend (TuneLabs or llama-server) is active.
     """
     try:
         llama_backend = get_llama_cpp_backend()
@@ -3407,7 +3407,7 @@ async def get_status(current_subject: str = Depends(get_current_subject)):
                 llama_cpp_latest_tag = _latest_tag,
             )
 
-        # Otherwise, report Unsloth backend status
+        # Otherwise, report TuneLabs backend status
         backend = get_inference_backend()
 
         is_vision = False
@@ -3503,7 +3503,7 @@ async def generate_audio(
     """
     Generate audio (TTS) from the latest user message.
     Returns JSON with base64-encoded WAV audio.
-    Works with both GGUF (llama-server) and Unsloth/transformers backends.
+    Works with both GGUF (llama-server) and TuneLabs/transformers backends.
     """
     import base64
 
@@ -4516,7 +4516,7 @@ async def openai_chat_completions(
 
     Routes to the correct backend automatically:
     - GGUF models → llama-server via LlamaCppBackend
-    - Other models → Unsloth/transformers via InferenceBackend
+    - Other models → TuneLabs/transformers via InferenceBackend
     """
     # OpenAI's newer "developer" role is equivalent to "system". Normalize it
     # before provider routing so external providers (which may not accept the
@@ -4937,7 +4937,7 @@ async def openai_chat_completions(
         created = int(time.time())
 
         # ── Tool-calling path (agentic loop) ──────────────────
-        # `_effective_enable_tools` lets `unsloth run --enable-tools/--disable-tools`
+        # `_effective_enable_tools` lets `tunelabs run --enable-tools/--disable-tools`
         # hard-override the per-request value, else falls back to
         # `payload.enable_tools`. `mcp_enabled=true` also opens the tool loop so
         # MCP-only callers needn't flip a second flag, BUT must still honor a
@@ -5363,7 +5363,7 @@ async def openai_chat_completions(
                     )
                 raise HTTPException(status_code = 500, detail = safe_error_detail(e))
 
-    # ── Standard Unsloth path ─────────────────────────────────
+    # ── Standard TuneLabs path ─────────────────────────────────
 
     # Decode image (from content parts OR legacy field)
     image_b64 = extracted_image_b64 or payload.image_base64
@@ -5956,7 +5956,7 @@ def _openai_model_objects() -> list[dict]:
             entry["native_context_length"] = _native_ctx
         models.append(entry)
 
-    # Check Unsloth backend
+    # Check TuneLabs backend
     backend = get_inference_backend()
     if backend.active_model_name:
         model_info = backend.models.get(backend.active_model_name, {})
@@ -7863,7 +7863,7 @@ async def anthropic_messages(
 
     # ── Tool routing ──────────────────────────────────────────
     # Three paths:
-    # 1. enable_tools=true → server-side execution of built-in tools (Unsloth shorthand)
+    # 1. enable_tools=true → server-side execution of built-in tools (TuneLabs shorthand)
     # 2. tools=[...] only  → client-side pass-through (standard Anthropic behavior)
     # 3. neither           → plain chat
     # The server-side agentic loop doesn't support multimodal input -- matches
@@ -9367,9 +9367,9 @@ async def _openai_passthrough_non_streaming(
     # ```json ... ``` markdown fence that data_designer's structured parser
     # requires but which CORRUPTS output for standard OpenAI clients doing
     # ``json.loads(content)``. It is therefore opt-in: only the internal
-    # data-recipe path sets ``_unsloth_guided_fence``; public response_format
+    # data-recipe path sets ``_tunelabs_guided_fence``; public response_format
     # clients get the raw upstream JSON verbatim.
-    _guided_fence = bool((payload.model_extra or {}).get("_unsloth_guided_fence"))
+    _guided_fence = bool((payload.model_extra or {}).get("_tunelabs_guided_fence"))
     _do_fence = _guided_fence and _extract_response_format(payload) is not None
     _cap_parallel = payload.parallel_tool_calls is False
 
@@ -9405,7 +9405,7 @@ async def _openai_passthrough_non_streaming(
                 msg["tool_calls"] = _tcs[:1]
                 changed = True
 
-        # Guided-decoding fence wrap (opt-in via _unsloth_guided_fence).
+        # Guided-decoding fence wrap (opt-in via _tunelabs_guided_fence).
         if _do_fence:
             content = msg.get("content")
             if not isinstance(content, str):

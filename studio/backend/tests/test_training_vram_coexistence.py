@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """
 Tests for routes/training_vram.py -- the VRAM-aware decision to keep or unload a
@@ -95,32 +95,32 @@ class TestSummarizeResidentChat(_GpuCacheResetMixin, unittest.TestCase):
 
     def test_hf_resident_via_active_model(self):
         with _patch_backends(
-            _fake_inference_backend(active = "unsloth/Qwen3-4B"), _fake_llama_backend(active = False)
+            _fake_inference_backend(active = "tunelabs/Qwen3-4B"), _fake_llama_backend(active = False)
         ):
             out = tv.summarize_resident_chat()
-        self.assertEqual(out["hf"], "unsloth/Qwen3-4B")
+        self.assertEqual(out["hf"], "tunelabs/Qwen3-4B")
         self.assertFalse(out["loading"])
         self.assertTrue(out["any"])
 
     def test_hf_resident_while_still_loading(self):
         # Mid-load: no active model yet but VRAM is held -> flag in-flight.
         with _patch_backends(
-            _fake_inference_backend(active = None, loading = ["unsloth/Qwen3-4B"]),
+            _fake_inference_backend(active = None, loading = ["tunelabs/Qwen3-4B"]),
             _fake_llama_backend(active = False),
         ):
             out = tv.summarize_resident_chat()
-        self.assertEqual(out["hf"], "unsloth/Qwen3-4B")
+        self.assertEqual(out["hf"], "tunelabs/Qwen3-4B")
         self.assertTrue(out["loading"])
         self.assertTrue(out["any"])
 
     def test_replacement_hf_load_is_in_flight(self):
         # Swap: new model loading while old still active -> unsafe to keep.
         with _patch_backends(
-            _fake_inference_backend(active = "unsloth/old", loading = ["unsloth/new"]),
+            _fake_inference_backend(active = "tunelabs/old", loading = ["tunelabs/new"]),
             _fake_llama_backend(active = False),
         ):
             out = tv.summarize_resident_chat()
-        self.assertEqual(out["hf"], "unsloth/old")
+        self.assertEqual(out["hf"], "tunelabs/old")
         self.assertTrue(out["loading"])
 
     def test_cpu_only_gguf_is_not_a_vram_resident(self):
@@ -173,7 +173,7 @@ class TestSummarizeResidentChat(_GpuCacheResetMixin, unittest.TestCase):
 
 
 _BASE_KW = dict(
-    model_name = "unsloth/Qwen3-4B",
+    model_name = "tunelabs/Qwen3-4B",
     hf_token = None,
     training_type = "LoRA/QLoRA",
     load_in_4bit = True,
@@ -181,7 +181,7 @@ _BASE_KW = dict(
     max_seq_length = 2048,
     lora_rank = 16,
     target_modules = None,
-    gradient_checkpointing = "unsloth",
+    gradient_checkpointing = "tunelabs",
     optimizer = "adamw_8bit",
     gpu_ids = None,
 )
@@ -383,13 +383,13 @@ class TestCanKeepExplicit(_GpuCacheResetMixin, unittest.TestCase):
 
 class TestFreeChatModels(_GpuCacheResetMixin, unittest.TestCase):
     def test_unloads_both_backends(self):
-        inf = _fake_inference_backend(active = "unsloth/Qwen3-4B")
+        inf = _fake_inference_backend(active = "tunelabs/Qwen3-4B")
         llama = _fake_llama_backend(active = True, identifier = "gemma.gguf")
         with _patch_backends(inf, llama):
             freed = tv.free_chat_models_for_training(reason = "test")
         inf._shutdown_subprocess.assert_called_once()
         llama.unload_model.assert_called_once()
-        self.assertIn("hf:unsloth/Qwen3-4B", freed)
+        self.assertIn("hf:tunelabs/Qwen3-4B", freed)
         self.assertIn("gguf:gemma.gguf", freed)
         # State cleared so a later resident check is accurate.
         self.assertIsNone(inf.active_model_name)
@@ -415,12 +415,12 @@ class TestFreeChatModels(_GpuCacheResetMixin, unittest.TestCase):
         self.assertEqual(freed, [])
 
     def test_unloads_inflight_hf_load(self):
-        inf = _fake_inference_backend(active = None, loading = ["unsloth/Qwen3-4B"])
+        inf = _fake_inference_backend(active = None, loading = ["tunelabs/Qwen3-4B"])
         llama = _fake_llama_backend(active = False)
         with _patch_backends(inf, llama):
             freed = tv.free_chat_models_for_training(reason = "test")
         inf._shutdown_subprocess.assert_called_once()
-        self.assertEqual(freed, ["hf:unsloth/Qwen3-4B"])
+        self.assertEqual(freed, ["hf:tunelabs/Qwen3-4B"])
 
     def test_nothing_to_free(self):
         inf = _fake_inference_backend()

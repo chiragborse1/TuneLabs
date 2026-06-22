@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Shared model inventory helpers for the Hub service layer."""
 
@@ -522,7 +522,7 @@ def _classify_local_path(
     adapter_config = _read_adapter_config(scan_path) if has_adapter_config else {}
     adapter_base_model = _clean_optional_string(adapter_config.get("base_model_name_or_path"))
     adapter_type = _clean_optional_string(adapter_config.get("peft_type"))
-    training_method = _clean_optional_string(adapter_config.get("unsloth_training_method"))
+    training_method = _clean_optional_string(adapter_config.get("tunelabs_training_method"))
     has_adapter_weights = any(_is_adapter_weight_file(f) for f in files)
     has_safetensors = any(
         f.suffix.lower() == ".safetensors" and not _is_adapter_weight_file(f) for f in files

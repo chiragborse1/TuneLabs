@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import type { ReactElement } from "react";
 import { GithubIcon } from "@hugeicons/core-free-icons";
@@ -45,7 +45,7 @@ function formatGitHubSourceMessage(execution: RecipeExecutionRecord): string {
     return "Collecting repository threads before rows are available.";
   }
   if (source.status === "rate_limited") {
-    return source.message ?? "Waiting for GitHub rate limit. Unsloth will resume automatically.";
+    return source.message ?? "Waiting for GitHub rate limit. TuneLabs will resume automatically.";
   }
   return source.message ?? "Collecting repository threads before rows are available.";
 }

@@ -3,7 +3,7 @@
 # Slices the pure function out of setup.sh and exercises the three outcomes:
 #   system  -- system Node + npm already satisfy Vite 8 (^20.19/22.12/>=23) + npm>=11
 #   bundled -- otherwise install an isolated Node (the Discord-reported npm-only case)
-#   skip    -- UNSLOTH_SKIP_NODE_INSTALL=1 and the system is unsuitable
+#   skip    -- TUNELABS_SKIP_NODE_INSTALL=1 and the system is unsuitable
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"

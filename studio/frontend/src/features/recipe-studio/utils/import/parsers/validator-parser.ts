@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import type { ValidatorConfig } from "../../../types";
 import { readNumberString } from "../helpers";
@@ -7,7 +7,7 @@ import { normalizeValidatorCodeLang } from "../../validators/code-lang";
 import { normalizeOxcCodeShape } from "../../validators/oxc-code-shape";
 import { normalizeOxcValidationMode } from "../../validators/oxc-mode";
 
-const OXC_VALIDATION_FN_MARKER = "unsloth_oxc_validator";
+const OXC_VALIDATION_FN_MARKER = "tunelabs_oxc_validator";
 
 function parseOxcValidationMarker(
   validationFunctionRaw: string,

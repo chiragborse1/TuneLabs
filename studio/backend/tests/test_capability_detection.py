@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Component A tests: capability detection must never execute model repo code.
 
@@ -254,7 +254,7 @@ def test_gpu_estimate_probe_is_code_free():
             side_effect = AssertionError("AutoConfig must not be called"),
         ),
     ):
-        out = hardware._load_config_for_gpu_estimate("unsloth/GLM-4.7-Flash")
+        out = hardware._load_config_for_gpu_estimate("tunelabs/GLM-4.7-Flash")
     assert out.max_position_embeddings == 8192
     assert out.hidden_size == 4096
 

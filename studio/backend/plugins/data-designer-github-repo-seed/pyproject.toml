@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]
@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "data-designer-github-repo-seed"
 version = "0.1.0"
-description = "Unsloth Studio seed plugin that scrapes GitHub issues, PRs, and commits."
+description = "TuneLabs Studio seed plugin that scrapes GitHub issues, PRs, and commits."
 requires-python = ">=3.11"
 dependencies = [
   "data-designer-engine>=0.5.4,<0.6",

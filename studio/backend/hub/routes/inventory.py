@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Endpoints mounted at /api/hub/* for the model inventory."""
 
@@ -100,7 +100,7 @@ def get_models_folder(current_subject: str = Depends(get_current_subject)):
 @router.get("/gguf-variants", response_model = GgufVariantsResponse)
 async def get_gguf_variants(
     repo_id: str = Query(
-        ..., description = "HuggingFace repo ID (e.g. 'unsloth/gemma-3-4b-it-GGUF')"
+        ..., description = "HuggingFace repo ID (e.g. 'tunelabs/gemma-3-4b-it-GGUF')"
     ),
     prefer_local_cache: bool = Query(False),
     offline: bool = Query(False),

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Tests for the trust_remote_code consent gate.
 
@@ -83,13 +83,13 @@ def _with_auto_map(files):
 
 class TestConsentGate:
     def test_disabled_is_a_noop(self):
-        d = evaluate_remote_code_consent("unsloth/X", trust_remote_code = False)
+        d = evaluate_remote_code_consent("tunelabs/X", trust_remote_code = False)
         assert isinstance(d, RemoteCodeDecision)
         assert d.has_remote_code is False and d.blocked is False
 
     def test_no_auto_map_is_noop(self):
         with patch.object(consent, "_config_has_auto_map", return_value = False):
-            d = evaluate_remote_code_consent("unsloth/Plain", trust_remote_code = True)
+            d = evaluate_remote_code_consent("tunelabs/Plain", trust_remote_code = True)
         assert d.has_remote_code is False
         assert d.blocked is False
         assert "no-op" in d.reason
@@ -110,7 +110,7 @@ class TestConsentGate:
     def test_benign_remote_code_allowed(self):
         a, b = _with_auto_map(_BENIGN)
         with a, b:
-            d = evaluate_remote_code_consent("unsloth/Good", trust_remote_code = True)
+            d = evaluate_remote_code_consent("tunelabs/Good", trust_remote_code = True)
         assert d.has_remote_code is True
         assert d.blocked is False
         assert d.fingerprint  # still fingerprinted for pinning
@@ -143,7 +143,7 @@ class TestConsentGate:
         a, b = _with_auto_map(_HIGH)
         with a, b:
             d = evaluate_remote_code_consent(
-                "unsloth/DeepSeek-OCR", trust_remote_code = True, trusted_org = True
+                "tunelabs/DeepSeek-OCR", trust_remote_code = True, trusted_org = True
             )
         assert d.has_remote_code is True
         assert d.blocked is True
@@ -176,7 +176,7 @@ class TestConsentGate:
         a, b = _with_auto_map(_CRITICAL)
         with a, b:
             d = evaluate_remote_code_consent(
-                "unsloth/Compromised", trust_remote_code = True, trusted_org = True
+                "tunelabs/Compromised", trust_remote_code = True, trusted_org = True
             )
         assert d.blocked is True
         assert d.approvable is False
@@ -368,7 +368,7 @@ class TestConsentGate:
                 side_effect = RemoteCodeUnscannable("gated"),
             ),
         ):
-            d = evaluate_remote_code_consent("unsloth/Gated", trust_remote_code = True)
+            d = evaluate_remote_code_consent("tunelabs/Gated", trust_remote_code = True)
         assert d.has_remote_code is True
         assert d.blocked is True
         assert d.approvable is False
@@ -383,7 +383,7 @@ class TestConsentGate:
             patch.object(consent, "repo_remote_code_files", return_value = {}),
         ):
             d = evaluate_remote_code_consent(
-                "unsloth/Llama-3_1-Nemotron-Ultra-253B-v1-GGUF", trust_remote_code = True
+                "tunelabs/Llama-3_1-Nemotron-Ultra-253B-v1-GGUF", trust_remote_code = True
             )
         assert d.blocked is False
         assert d.has_remote_code is False
@@ -642,18 +642,18 @@ class TestStructuredFindingsForDialog:
 # remote code without a prompt; it rejects local-path / spoofed names and fails closed.
 
 
-def _fake_hfapi(resolved_id, author = "unsloth"):
+def _fake_hfapi(resolved_id, author = "tunelabs"):
     api = MagicMock()
     api.return_value.model_info.return_value = SimpleNamespace(id = resolved_id, author = author)
     return api
 
 
 class TestIsTrustedOrgRepo:
-    """Only a genuine unsloth/ or nvidia/ repo is trusted (Hub-verified); everything spoofed/malformed/unreachable fails closed."""
+    """Only a genuine tunelabs/ or nvidia/ repo is trusted (Hub-verified); everything spoofed/malformed/unreachable fails closed."""
 
-    def test_accepts_genuine_unsloth_repo(self):
-        with patch("huggingface_hub.HfApi", _fake_hfapi("unsloth/DeepSeek-OCR")):
-            assert is_trusted_org_repo("unsloth/DeepSeek-OCR") is True
+    def test_accepts_genuine_tunelabs_repo(self):
+        with patch("huggingface_hub.HfApi", _fake_hfapi("tunelabs/DeepSeek-OCR")):
+            assert is_trusted_org_repo("tunelabs/DeepSeek-OCR") is True
 
     def test_accepts_genuine_nvidia_repo(self):
         with patch("huggingface_hub.HfApi", _fake_hfapi("nvidia/Nemotron-H-8B", author = "nvidia")):
@@ -661,35 +661,35 @@ class TestIsTrustedOrgRepo:
 
     def test_local_path_spoofs_rejected(self):
         # Names that look trusted after stripping but are local paths.
-        for n in ["./unsloth/evil", "/tmp/unsloth/x", "~/unsloth/x", ".\\unsloth\\x"]:
+        for n in ["./tunelabs/evil", "/tmp/tunelabs/x", "~/tunelabs/x", ".\\tunelabs\\x"]:
             assert is_trusted_org_repo(n, verify_remote = False) is False, n
 
     def test_rejects_local_path_even_if_is_local_path_says_so(self):
-        # Defensive: a bare "unsloth/x" that resolves as a local dir must fail.
+        # Defensive: a bare "tunelabs/x" that resolves as a local dir must fail.
         with patch("utils.security.trusted_org.is_local_path", return_value = True):
-            assert is_trusted_org_repo("unsloth/x") is False
+            assert is_trusted_org_repo("tunelabs/x") is False
 
     def test_local_dir_shadowing_trusted_name_rejected(self, tmp_path, monkeypatch):
-        # A local dir literally named "unsloth/evil" must be rejected before any Hub call, even with remote verify on.
+        # A local dir literally named "tunelabs/evil" must be rejected before any Hub call, even with remote verify on.
         monkeypatch.chdir(tmp_path)
-        (tmp_path / "unsloth" / "evil").mkdir(parents = True)
+        (tmp_path / "tunelabs" / "evil").mkdir(parents = True)
         clear_cache()
         with patch("huggingface_hub.HfApi") as Api:
-            assert is_trusted_org_repo("unsloth/evil") is False
+            assert is_trusted_org_repo("tunelabs/evil") is False
             Api.assert_not_called()
 
     def test_untrusted_namespaces_rejected(self):
-        for n in ["evil/unsloth-clone", "unsloth-evil/x", "nvidiaa/x", "huggingface/x"]:
+        for n in ["evil/tunelabs-clone", "tunelabs-evil/x", "nvidiaa/x", "huggingface/x"]:
             assert is_trusted_org_repo(n, verify_remote = False) is False, n
 
     def test_malformed_names_rejected(self):
-        for n in ["", "gpt2", "unsloth", "a/b/c", "/x", "unsloth/", "/unsloth", None]:
+        for n in ["", "gpt2", "tunelabs", "a/b/c", "/x", "tunelabs/", "/tunelabs", None]:
             assert is_trusted_org_repo(n, verify_remote = False) is False, repr(n)
 
     def test_rejects_when_resolved_owner_is_not_trusted(self):
-        # Name says unsloth/ but the Hub resolves it elsewhere -> fail closed.
+        # Name says tunelabs/ but the Hub resolves it elsewhere -> fail closed.
         with patch("huggingface_hub.HfApi", _fake_hfapi("someoneelse/x", author = "someoneelse")):
-            assert is_trusted_org_repo("unsloth/x") is False
+            assert is_trusted_org_repo("tunelabs/x") is False
 
     def test_fails_closed_when_hub_raises(self):
         for exc in (ConnectionError("net"), Exception("404"), TimeoutError("t")):
@@ -697,14 +697,14 @@ class TestIsTrustedOrgRepo:
             api = MagicMock()
             api.return_value.model_info.side_effect = exc
             with patch("huggingface_hub.HfApi", api):
-                assert is_trusted_org_repo("unsloth/maybe-real") is False
+                assert is_trusted_org_repo("tunelabs/maybe-real") is False
 
     def test_offline_trusts_shape_without_hub(self, monkeypatch):
         # Offline: trust the namespace shape without ever touching the Hub.
         monkeypatch.setenv("HF_HUB_OFFLINE", "1")
         clear_cache()
         with patch("huggingface_hub.HfApi") as Api:
-            assert is_trusted_org_repo("unsloth/Local-Cached") is True
+            assert is_trusted_org_repo("tunelabs/Local-Cached") is True
             assert is_trusted_org_repo("nvidia/Nemotron-H-x") is True
             assert is_trusted_org_repo("evil/x") is False
             Api.assert_not_called()
@@ -715,11 +715,11 @@ class TestIsTrustedOrgRepo:
         api = MagicMock()
         api.return_value.model_info.side_effect = [
             Exception("401 gated"),  # no token -> fails closed
-            SimpleNamespace(id = "unsloth/Private", author = "unsloth"),  # token -> resolves
+            SimpleNamespace(id = "tunelabs/Private", author = "tunelabs"),  # token -> resolves
         ]
         with patch("huggingface_hub.HfApi", api):
-            assert is_trusted_org_repo("unsloth/Private") is False
-            assert is_trusted_org_repo("unsloth/Private", hf_token = "hf_xyz") is True
+            assert is_trusted_org_repo("tunelabs/Private") is False
+            assert is_trusted_org_repo("tunelabs/Private", hf_token = "hf_xyz") is True
 
 
 class TestNemotronGateUsesTrustCheck:
@@ -746,16 +746,16 @@ class TestNemotronGateUsesTrustCheck:
             low = name.lower()
             return (
                 any(s in low for s in subs)
-                and (low.startswith("unsloth/") or low.startswith("nvidia/"))
+                and (low.startswith("tunelabs/") or low.startswith("nvidia/"))
                 and is_trusted_org_repo(name, verify_remote = False)
             )
 
         with patch.dict(os.environ, {"HF_HUB_OFFLINE": "1"}):
             clear_cache()
-            assert gate("unsloth/Nemotron-H-8B") is True
+            assert gate("tunelabs/Nemotron-H-8B") is True
         clear_cache()
         assert gate("evil/nemotron_h-backdoor") is False  # spoofed namespace
-        assert gate("unsloth/llama-3-8b") is False  # not nemotron
+        assert gate("tunelabs/llama-3-8b") is False  # not nemotron
 
 
 # Raw scanner behaviour + coverage: scan_remote_code_files flags dangerous patterns
@@ -992,7 +992,7 @@ class TestScannerCoversAllExecutableCode:
                 return_value = ["config.json", "tokenizer_config.json", "processing_paddleocr_vl.py"],
             ),
         ):
-            files = repo_remote_code_files("unsloth/PaddleOCR-VL")
+            files = repo_remote_code_files("tunelabs/PaddleOCR-VL")
         assert files != {}, "must not fail closed: present .py are scannable"
         assert "processing_paddleocr_vl.py" in files  # present file scanned
         assert "processing_ppocrvl.py" not in files  # stale ref ignored, never fetched
@@ -1197,7 +1197,7 @@ class TestScannerCoversAllExecutableCode:
                 return_value = ["config.json", "model-00001-of-00097.gguf"],
             ),
         ):
-            files = repo_remote_code_files("unsloth/Some-Model-GGUF")
+            files = repo_remote_code_files("tunelabs/Some-Model-GGUF")
         assert files == {}  # no executable code -> empty (no raise)
 
     def test_tokenizer_only_auto_map_is_gated(self, tmp_path):
@@ -1282,7 +1282,7 @@ class TestScannerCoversAllExecutableCode:
                 return_value = ["config.json", "model-00001-of-00097.gguf"],
             ),
         ):
-            assert consent._config_has_auto_map("unsloth/Some-Model-GGUF") is True
+            assert consent._config_has_auto_map("tunelabs/Some-Model-GGUF") is True
 
     def test_gguf_only_repo_with_python_is_scanned_and_blocked(self, tmp_path):
         # Regression: the GGUF-only short-circuit must not skip auto_map Python for export loaders.

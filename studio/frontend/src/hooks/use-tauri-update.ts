@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { useEffect, useRef, useState } from "react";
 import { isTauri } from "@/lib/api-base";
@@ -55,7 +55,7 @@ export interface RetainedUpdateFailure {
 
 const DEFAULT_UPDATE_POLICY: DesktopUpdatePolicy = {
   mode: "in_app",
-  releasePageBaseUrl: "https://github.com/unslothai/unsloth/releases/tag/",
+  releasePageBaseUrl: "https://github.com/tunelabsai/tunelabs/releases/tag/",
   releaseTagPrefix: "desktop-v",
 };
 

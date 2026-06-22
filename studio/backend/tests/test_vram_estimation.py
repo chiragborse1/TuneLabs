@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 import unittest
 from dataclasses import replace
@@ -399,24 +399,24 @@ class TestActivationBytes(unittest.TestCase):
         act_gc = compute_activation_bytes(LLAMA_8B, 2, 2048, "true")
         self.assertGreater(act_none, act_gc * 10)
 
-    def test_unsloth_gc_smaller_than_standard(self):
+    def test_tunelabs_gc_smaller_than_standard(self):
         act_true = compute_activation_bytes(LLAMA_8B, 2, 2048, "true")
-        act_unsloth = compute_activation_bytes(LLAMA_8B, 2, 2048, "unsloth")
-        self.assertLess(act_unsloth, act_true)
+        act_tunelabs = compute_activation_bytes(LLAMA_8B, 2, 2048, "tunelabs")
+        self.assertLess(act_tunelabs, act_true)
 
     def test_lora_activations_smaller_than_full_ft(self):
-        full_ft = compute_activation_bytes(LLAMA_8B, 2, 2048, "unsloth", is_lora = False)
-        lora = compute_activation_bytes(LLAMA_8B, 2, 2048, "unsloth", is_lora = True)
+        full_ft = compute_activation_bytes(LLAMA_8B, 2, 2048, "tunelabs", is_lora = False)
+        lora = compute_activation_bytes(LLAMA_8B, 2, 2048, "tunelabs", is_lora = True)
         self.assertLess(lora, full_ft)
 
     def test_scales_with_batch_size(self):
-        act_bsz2 = compute_activation_bytes(LLAMA_8B, 2, 2048, "unsloth")
-        act_bsz4 = compute_activation_bytes(LLAMA_8B, 4, 2048, "unsloth")
+        act_bsz2 = compute_activation_bytes(LLAMA_8B, 2, 2048, "tunelabs")
+        act_bsz4 = compute_activation_bytes(LLAMA_8B, 4, 2048, "tunelabs")
         self.assertAlmostEqual(act_bsz4 / act_bsz2, 2.0, delta = 0.1)
 
     def test_scales_with_seq_len(self):
-        act_2k = compute_activation_bytes(LLAMA_8B, 2, 2048, "unsloth")
-        act_4k = compute_activation_bytes(LLAMA_8B, 2, 4096, "unsloth")
+        act_2k = compute_activation_bytes(LLAMA_8B, 2, 2048, "tunelabs")
+        act_4k = compute_activation_bytes(LLAMA_8B, 2, 4096, "tunelabs")
         self.assertAlmostEqual(act_4k / act_2k, 2.0, delta = 0.1)
 
     def test_flash_attention_uses_linear_path(self):
@@ -424,7 +424,7 @@ class TestActivationBytes(unittest.TestCase):
             STRUCTURED_MIXED,
             1,
             4096,
-            "unsloth",
+            "tunelabs",
             is_lora = True,
             attention_implementation = "flash_attention_2",
         )
@@ -432,7 +432,7 @@ class TestActivationBytes(unittest.TestCase):
             STRUCTURED_MIXED,
             1,
             4096,
-            "unsloth",
+            "tunelabs",
             is_lora = True,
         )
         self.assertEqual(flash, default)
@@ -442,7 +442,7 @@ class TestActivationBytes(unittest.TestCase):
             STRUCTURED_MIXED,
             1,
             4096,
-            "unsloth",
+            "tunelabs",
             is_lora = True,
             attention_implementation = "flash_attention_2",
         )
@@ -450,7 +450,7 @@ class TestActivationBytes(unittest.TestCase):
             STRUCTURED_MIXED,
             1,
             4096,
-            "unsloth",
+            "tunelabs",
             is_lora = True,
             attention_implementation = "sdpa",
         )
@@ -465,7 +465,7 @@ class TestActivationBytes(unittest.TestCase):
                     STRUCTURED_MIXED,
                     1,
                     seq_len,
-                    "unsloth",
+                    "tunelabs",
                     is_lora = True,
                     attention_implementation = attention_implementation,
                 )
@@ -580,7 +580,7 @@ class TestEstimateTrainingVram(unittest.TestCase):
             batch_size = 2,
             max_seq_length = 2048,
             lora_rank = 16,
-            gradient_checkpointing = "unsloth",
+            gradient_checkpointing = "tunelabs",
             optimizer = "adamw_8bit",
             load_in_4bit = True,
         )
@@ -594,7 +594,7 @@ class TestEstimateTrainingVram(unittest.TestCase):
             training_method = "full",
             batch_size = 2,
             max_seq_length = 2048,
-            gradient_checkpointing = "unsloth",
+            gradient_checkpointing = "tunelabs",
             optimizer = "adamw_8bit",
             load_in_4bit = False,
         )
@@ -626,7 +626,7 @@ class TestEstimateTrainingVram(unittest.TestCase):
             batch_size = 2,
             max_seq_length = 2048,
             lora_rank = 16,
-            gradient_checkpointing = "unsloth",
+            gradient_checkpointing = "tunelabs",
             optimizer = "adamw_8bit",
             load_in_4bit = True,
         )
@@ -730,7 +730,7 @@ class TestEstimateTrainingVram(unittest.TestCase):
             max_seq_length = 512,
             lora_rank = 16,
             target_modules = ["all-linear"],
-            gradient_checkpointing = "unsloth",
+            gradient_checkpointing = "tunelabs",
             optimizer = "adamw_8bit",
             load_in_4bit = True,
         )
@@ -751,7 +751,7 @@ class TestEstimateTrainingVram(unittest.TestCase):
             training_method = "full",
             batch_size = 1,
             max_seq_length = 512,
-            gradient_checkpointing = "unsloth",
+            gradient_checkpointing = "tunelabs",
             optimizer = "adamw_8bit",
             load_in_4bit = False,
         )
@@ -770,7 +770,7 @@ class TestEstimateTrainingVram(unittest.TestCase):
             max_seq_length = 4096,
             lora_rank = 16,
             target_modules = ["all-linear"],
-            gradient_checkpointing = "unsloth",
+            gradient_checkpointing = "tunelabs",
             optimizer = "adamw_8bit",
             load_in_4bit = True,
             attention_implementation = "eager",
@@ -783,7 +783,7 @@ class TestEstimateTrainingVram(unittest.TestCase):
                 STRUCTURED_MIXED,
                 1,
                 4096,
-                "unsloth",
+                "tunelabs",
                 is_lora = True,
                 attention_implementation = "flash_attention_2",
             ),
@@ -970,14 +970,14 @@ class TestParallelDenseMoE(unittest.TestCase):
                 with_parallel,
                 1,
                 2048,
-                "unsloth",
+                "tunelabs",
                 is_lora = True,
             ),
             compute_activation_bytes(
                 without_parallel,
                 1,
                 2048,
-                "unsloth",
+                "tunelabs",
                 is_lora = True,
             ),
         )
@@ -1079,7 +1079,7 @@ class TestFlexAttentionLinear(unittest.TestCase):
             STRUCTURED_MIXED,
             1,
             4096,
-            "unsloth",
+            "tunelabs",
             is_lora = True,
             attention_implementation = "flash_attention_2",
         )
@@ -1087,7 +1087,7 @@ class TestFlexAttentionLinear(unittest.TestCase):
             STRUCTURED_MIXED,
             1,
             4096,
-            "unsloth",
+            "tunelabs",
             is_lora = True,
             attention_implementation = "flex_attention",
         )
@@ -1161,7 +1161,7 @@ class TestPerLayerInputAccounting(unittest.TestCase):
         self.assertGreaterEqual(delta, expected_quantizable_extra)
 
     def test_all_linear_lora_excludes_per_layer_input_modules(self):
-        # why: Unsloth's get_peft_regex requires a component tag (mlp/attn/...)
+        # why: TuneLabs's get_peft_regex requires a component tag (mlp/attn/...)
         # in module names; PLE names (per_layer_input_gate, per_layer_projection,
         # per_layer_model_projection) lack one, so all-linear does NOT attach
         # LoRA to them.

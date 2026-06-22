@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Static scan of a model's ``auto_map`` remote code, for the consent gate.
 
@@ -248,9 +248,9 @@ def _load_canonical_scanner():
         candidate = parent / "scripts" / "scan_packages.py"
         if candidate.is_file():
             try:
-                spec = importlib.util.spec_from_file_location("unsloth_scan_packages", candidate)
+                spec = importlib.util.spec_from_file_location("tunelabs_scan_packages", candidate)
                 mod = importlib.util.module_from_spec(spec)
-                sys.modules.setdefault("unsloth_scan_packages", mod)
+                sys.modules.setdefault("tunelabs_scan_packages", mod)
                 spec.loader.exec_module(mod)  # type: ignore[union-attr]
                 if hasattr(mod, "check_py_file"):
                     module = mod
@@ -477,7 +477,7 @@ def repo_remote_code_files(model_name: str, hf_token: Optional[str] = None) -> d
         # Broad scan never under-scans; the cost is a benign script can over-block, the
         # safe direction for an RCE gate (HIGH approvable; only CRITICAL hard-blocks). An
         # auto_map target absent from the listing is a STALE ref (an older config naming a
-        # since-removed file, e.g. unsloth/PaddleOCR-VL names processing_ppocrvl.py but
+        # since-removed file, e.g. tunelabs/PaddleOCR-VL names processing_ppocrvl.py but
         # ships processing_paddleocr_vl.py). transformers cannot execute an absent file,
         # so drop the stale ref rather than fail closed; present .py are still fully
         # scanned. This also absorbs a mis-derived dotted name (sub.mod.py vs sub/mod.py):

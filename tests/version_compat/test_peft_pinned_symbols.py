@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team.
-"""Pinned-symbol compat check across PEFT minor versions unsloth + unsloth-zoo
+# Copyright 2026-present the TuneLabs AI Inc. team.
+"""Pinned-symbol compat check across PEFT minor versions tunelabs + tunelabs-zoo
 target. For each tracked tag, fetch source from github.com/huggingface/peft and
-assert every PEFT symbol unsloth touches is present, catching API drift.
-Versioning covers unsloth/pyproject.toml's `peft>=0.18.0,!=0.11.0` window + main.
+assert every PEFT symbol tunelabs touches is present, catching API drift.
+Versioning covers tunelabs/pyproject.toml's `peft>=0.18.0,!=0.11.0` window + main.
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ PEFT_TAGS = [
 
 
 # Top-level re-exports: sentence_transformer.py:1948 does `from peft import
-# LoraConfig, get_peft_model`; unsloth_zoo saving_utils/lora extractors hit PeftModel.
+# LoraConfig, get_peft_model`; tunelabs_zoo saving_utils/lora extractors hit PeftModel.
 
 
 @pytest.mark.parametrize("tag", PEFT_TAGS)
@@ -42,13 +42,13 @@ def test_peft_top_level_exports(tag: str):
     missing = [n for n in needed if n not in src]
     assert not missing, (
         f"{tag}: peft top-level missing {missing}; "
-        f"unsloth.models.sentence_transformer:1948 + unsloth-zoo saving_utils "
+        f"tunelabs.models.sentence_transformer:1948 + tunelabs-zoo saving_utils "
         f"will ImportError"
     )
 
 
 # LoraConfig at the canonical sub-module path: peft.tuners.lora.LoraConfig
-# (or peft.tuners.lora.config.LoraConfig). unsloth-zoo's normaliser inspects
+# (or peft.tuners.lora.config.LoraConfig). tunelabs-zoo's normaliser inspects
 # it via getattr() and dataclass field introspection.
 
 
@@ -86,7 +86,7 @@ def test_get_peft_model_function(tag: str):
     pytest.fail(f"{tag}: def get_peft_model(...) not found in any of {candidates}")
 
 
-# LoraLayer base class: unsloth-zoo's MoE LoRA extractor walks subclasses of
+# LoraLayer base class: tunelabs-zoo's MoE LoRA extractor walks subclasses of
 # peft.tuners.lora.LoraLayer. A rename/move makes the walk silently return 0.
 
 
@@ -103,7 +103,7 @@ def test_peft_lora_layer_class(tag: str):
             return
     pytest.fail(
         f"{tag}: class LoraLayer not in any of {candidates} — "
-        f"unsloth-zoo MoE LoRA extractor relies on isinstance checks "
+        f"tunelabs-zoo MoE LoRA extractor relies on isinstance checks "
         f"against this class"
     )
 
@@ -136,16 +136,16 @@ def test_peft_lora_bnb_integration(tag: str):
             return
     pytest.fail(
         f"{tag}: peft.tuners.lora.bnb missing or no Linear4bit/Linear8bitLt "
-        f"class found; unsloth's 4-bit LoRA path silently degrades to fp16"
+        f"class found; tunelabs's 4-bit LoRA path silently degrades to fp16"
     )
 
 
 # Coverage extension (added 2026-05): symbols from the 8-PR audit
-#   unsloth#5015, #5167, #5036, #4807 + unsloth-zoo#618, #596, #482, #430.
+#   tunelabs#5015, #5167, #5036, #4807 + tunelabs-zoo#618, #596, #482, #430.
 
 
 # 1. peft.tuners.lora.layer.VARIANT_KWARG_KEYS — added in peft 0.18.
-#    unsloth-zoo#430 injects the import into the compiled forward.
+#    tunelabs-zoo#430 injects the import into the compiled forward.
 
 
 @pytest.mark.parametrize("tag", PEFT_TAGS)
@@ -156,12 +156,12 @@ def test_peft_variant_kwarg_keys_const(tag: str):
     if "VARIANT_KWARG_KEYS" not in src:
         pytest.fail(
             f"{tag}: peft.tuners.lora.layer.VARIANT_KWARG_KEYS missing; "
-            f"unsloth_zoo/compiler.py:2645 import injection breaks (unsloth-zoo#430)"
+            f"tunelabs_zoo/compiler.py:2645 import injection breaks (tunelabs-zoo#430)"
         )
 
 
 # 2. peft.tuners.lora.layer.ParamWrapper — peft 0.18 added the class for MoE
-#    3D-parameter LoRA. unsloth-zoo#618 monkey-patches the MoE LoRA extractor.
+#    3D-parameter LoRA. tunelabs-zoo#618 monkey-patches the MoE LoRA extractor.
 
 
 @pytest.mark.parametrize("tag", PEFT_TAGS)
@@ -171,8 +171,8 @@ def test_peft_param_wrapper_class(tag: str):
         pytest.skip(f"{tag}: layer.py missing")
     assert has_def(src, "ParamWrapper", "class"), (
         f"{tag}: peft.tuners.lora.layer.ParamWrapper missing; "
-        f"unsloth_zoo/temporary_patches/qwen3_moe.py:43-130 + "
-        f"moe_utils.py:757 ImportError (unsloth-zoo#618)"
+        f"tunelabs_zoo/temporary_patches/qwen3_moe.py:43-130 + "
+        f"moe_utils.py:757 ImportError (tunelabs-zoo#618)"
     )
     # Member names: informational only; the real bug to catch is full removal.
     for name in ("parameter_name", "forward", "lora_A", "get_base_layer"):
@@ -180,7 +180,7 @@ def test_peft_param_wrapper_class(tag: str):
 
 
 # 3. peft.tuners.lora.LoraConfig.target_parameters — peft 0.19+. Used by
-#    unsloth-zoo's MoE target-parameter extractor.
+#    tunelabs-zoo's MoE target-parameter extractor.
 
 
 @pytest.mark.parametrize("tag", PEFT_TAGS)
@@ -194,11 +194,11 @@ def test_peft_lora_config_target_parameters(tag: str):
         pytest.skip(f"{tag}: target_parameters not yet introduced (peft 0.18)")
     assert has_it, (
         f"{tag}: LoraConfig.target_parameters missing on peft >=0.19; "
-        f"unsloth-zoo MoE target-parameter extraction breaks"
+        f"tunelabs-zoo MoE target-parameter extraction breaks"
     )
 
 
-# 4. peft.tuners.lora.model.LoraModel._create_and_replace — unsloth#4807
+# 4. peft.tuners.lora.model.LoraModel._create_and_replace — tunelabs#4807
 #    monkey-patches this for Gemma4ClippableLinear.
 
 
@@ -210,12 +210,12 @@ def test_peft_lora_model_create_and_replace(tag: str):
     assert has_def(src, "LoraModel", "class"), f"{tag}: class LoraModel missing"
     assert has_def(src, "_create_and_replace", "func"), (
         f"{tag}: LoraModel._create_and_replace missing; "
-        f"unsloth/models/loader.py:1535-1601 monkey-patch breaks (unsloth#4807)"
+        f"tunelabs/models/loader.py:1535-1601 monkey-patch breaks (tunelabs#4807)"
     )
 
 
 # 5. peft.utils.transformers_weight_conversion.build_peft_weight_mapping —
-#    unsloth#5167 wraps it to handle WeightConversion.__init__ kwargs.
+#    tunelabs#5167 wraps it to handle WeightConversion.__init__ kwargs.
 
 
 @pytest.mark.parametrize("tag", PEFT_TAGS)
@@ -232,12 +232,12 @@ def test_peft_transformers_weight_conversion_module(tag: str):
         has_def(src, "build_peft_weight_mapping", "func") or "build_peft_weight_mapping" in src
     ), (
         f"{tag}: build_peft_weight_mapping missing in transformers_weight_conversion; "
-        f"unsloth/import_fixes.py:1375-1456 wrap breaks (unsloth#5167)"
+        f"tunelabs/import_fixes.py:1375-1456 wrap breaks (tunelabs#5167)"
     )
 
 
-# 6. peft.utils.integrations.dequantize_module_weight — used by 3 unsloth/
-#    unsloth-zoo callsites.
+# 6. peft.utils.integrations.dequantize_module_weight — used by 3 tunelabs/
+#    tunelabs-zoo callsites.
 
 
 @pytest.mark.parametrize("tag", PEFT_TAGS)
@@ -251,12 +251,12 @@ def test_peft_integrations_dequantize_module_weight(tag: str):
     _, src = hit
     assert has_def(src, "dequantize_module_weight", "func") or "dequantize_module_weight" in src, (
         f"{tag}: peft.utils.integrations.dequantize_module_weight missing; "
-        f"unsloth-zoo vllm_utils.py:2701, unsloth/_utils.py:1550, "
+        f"tunelabs-zoo vllm_utils.py:2701, tunelabs/_utils.py:1550, "
         f"saving_utils.py:270 ImportError"
     )
 
 
-# 7. peft.PeftType.LORA — used by unsloth-zoo vllm_utils.py:2520-2559.
+# 7. peft.PeftType.LORA — used by tunelabs-zoo vllm_utils.py:2520-2559.
 
 
 @pytest.mark.parametrize("tag", PEFT_TAGS)
@@ -276,7 +276,7 @@ def test_peft_type_lora_enum(tag: str):
             return
     pytest.fail(
         f"{tag}: peft.PeftType (with LORA member) not in any of {candidates}; "
-        f"unsloth-zoo vllm_utils.py:2520 reference breaks"
+        f"tunelabs-zoo vllm_utils.py:2520 reference breaks"
     )
 
 
@@ -299,11 +299,11 @@ def test_peft_modules_to_save_wrapper(tag: str):
             found_in.append(p)
     assert found_in, (
         f"{tag}: ModulesToSaveWrapper not defined in {candidates}; "
-        f"unsloth/training_utils.py:239 + models/llama.py:153 ImportError"
+        f"tunelabs/training_utils.py:239 + models/llama.py:153 ImportError"
     )
 
 
-# 9. peft.PeftModel.from_pretrained signature pin — unsloth#4807.
+# 9. peft.PeftModel.from_pretrained signature pin — tunelabs#4807.
 
 
 @pytest.mark.parametrize("tag", PEFT_TAGS)

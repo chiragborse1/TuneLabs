@@ -1,7 +1,7 @@
 #!/bin/bash
-# End-to-end sandbox tests for Mac Intel compatibility and UNSLOTH_NO_TORCH propagation.
+# End-to-end sandbox tests for Mac Intel compatibility and TUNELABS_NO_TORCH propagation.
 # Tests version_ge, arch detection (existing), plus E2E venv creation, torch skip
-# via a mock uv shim, and UNSLOTH_NO_TORCH env propagation in install.sh.
+# via a mock uv shim, and TUNELABS_NO_TORCH env propagation in install.sh.
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -206,33 +206,33 @@ assert_eq "Darwin -> cpu (even with nvidia-smi)" "https://download.pytorch.org/w
 _result=$(PATH="$_MOCK_UNAME_DIR:$_TOOLS_DIR" bash -c ". '$_FUNC_FILE'; get_torch_index_url" 2>/dev/null)
 assert_eq "Darwin -> cpu (no nvidia-smi)" "https://download.pytorch.org/whl/cpu" "$_result"
 
-# Test: Darwin + UNSLOTH_PYTORCH_MIRROR produces mirror/cpu
-_result=$(UNSLOTH_PYTORCH_MIRROR="https://mirror.example.com/whl" PATH="$_MOCK_UNAME_DIR:$_TOOLS_DIR" bash -c ". '$_FUNC_FILE'; get_torch_index_url" 2>/dev/null)
+# Test: Darwin + TUNELABS_PYTORCH_MIRROR produces mirror/cpu
+_result=$(TUNELABS_PYTORCH_MIRROR="https://mirror.example.com/whl" PATH="$_MOCK_UNAME_DIR:$_TOOLS_DIR" bash -c ". '$_FUNC_FILE'; get_torch_index_url" 2>/dev/null)
 assert_eq "Darwin + mirror env -> mirror/cpu" "https://mirror.example.com/whl/cpu" "$_result"
 
 rm -f "$_FUNC_FILE"
 rm -rf "$_FAKE_SMI_DIR" "$_TOOLS_DIR" "$_MOCK_UNAME_DIR" "$_GPU_DIR"
 
 echo ""
-echo "=== UNSLOTH_NO_TORCH propagation ==="
+echo "=== TUNELABS_NO_TORCH propagation ==="
 
-# Verify UNSLOTH_NO_TORCH is passed to setup.sh in BOTH the --local and non-local branches.
-_local_count=$(grep -c 'UNSLOTH_NO_TORCH=' "$INSTALL_SH" | head -1)
+# Verify TUNELABS_NO_TORCH is passed to setup.sh in BOTH the --local and non-local branches.
+_local_count=$(grep -c 'TUNELABS_NO_TORCH=' "$INSTALL_SH" | head -1)
 if [ "$_local_count" -ge 2 ]; then
-    echo "  PASS: UNSLOTH_NO_TORCH appears in >= 2 setup.sh invocations ($_local_count found)"
+    echo "  PASS: TUNELABS_NO_TORCH appears in >= 2 setup.sh invocations ($_local_count found)"
     PASS=$((PASS + 1))
 else
-    echo "  FAIL: UNSLOTH_NO_TORCH should appear in >= 2 setup.sh invocations (found $_local_count)"
+    echo "  FAIL: TUNELABS_NO_TORCH should appear in >= 2 setup.sh invocations (found $_local_count)"
     FAIL=$((FAIL + 1))
 fi
 
 # Verify the value passed is "$SKIP_TORCH" (the unified variable, not MAC_INTEL)
-_skip_torch_count=$(grep 'UNSLOTH_NO_TORCH="\$SKIP_TORCH"' "$INSTALL_SH" | wc -l)
+_skip_torch_count=$(grep 'TUNELABS_NO_TORCH="\$SKIP_TORCH"' "$INSTALL_SH" | wc -l)
 if [ "$_skip_torch_count" -ge 2 ]; then
-    echo "  PASS: UNSLOTH_NO_TORCH=\"\$SKIP_TORCH\" in both branches ($_skip_torch_count found)"
+    echo "  PASS: TUNELABS_NO_TORCH=\"\$SKIP_TORCH\" in both branches ($_skip_torch_count found)"
     PASS=$((PASS + 1))
 else
-    echo "  FAIL: UNSLOTH_NO_TORCH=\"\$SKIP_TORCH\" should appear in >= 2 branches (found $_skip_torch_count)"
+    echo "  FAIL: TUNELABS_NO_TORCH=\"\$SKIP_TORCH\" should appear in >= 2 branches (found $_skip_torch_count)"
     FAIL=$((FAIL + 1))
 fi
 
@@ -343,13 +343,13 @@ rm -f "$_TORCH_BLOCK"
 rm -rf "$_MOCK_UV_DIR"
 
 echo ""
-echo "=== E2E: UNSLOTH_NO_TORCH env propagation (dynamic test) ==="
+echo "=== E2E: TUNELABS_NO_TORCH env propagation (dynamic test) ==="
 
 # Simulates the setup.sh invocation using SKIP_TORCH
 _ENV_BLOCK=$(mktemp)
 cat > "$_ENV_BLOCK" << 'ENV_EOF'
 # Simulates the setup.sh invocation block from install.sh
-PACKAGE_NAME="unsloth"
+PACKAGE_NAME="tunelabs"
 _REPO_ROOT="/fake/repo"
 SETUP_SH="/fake/setup.sh"
 
@@ -358,30 +358,30 @@ if [ "$STUDIO_LOCAL_INSTALL" = true ]; then
     STUDIO_PACKAGE_NAME="$PACKAGE_NAME" \
     STUDIO_LOCAL_INSTALL=1 \
     STUDIO_LOCAL_REPO="$_REPO_ROOT" \
-    UNSLOTH_NO_TORCH="$SKIP_TORCH" \
-    env | grep "^UNSLOTH_NO_TORCH="
+    TUNELABS_NO_TORCH="$SKIP_TORCH" \
+    env | grep "^TUNELABS_NO_TORCH="
 else
     SKIP_STUDIO_BASE=1 \
     STUDIO_PACKAGE_NAME="$PACKAGE_NAME" \
-    UNSLOTH_NO_TORCH="$SKIP_TORCH" \
-    env | grep "^UNSLOTH_NO_TORCH="
+    TUNELABS_NO_TORCH="$SKIP_TORCH" \
+    env | grep "^TUNELABS_NO_TORCH="
 fi
 ENV_EOF
 
-# Test: SKIP_TORCH=true -> UNSLOTH_NO_TORCH=true in env
+# Test: SKIP_TORCH=true -> TUNELABS_NO_TORCH=true in env
 _env_result=$(SKIP_TORCH=true STUDIO_LOCAL_INSTALL=false bash "$_ENV_BLOCK" 2>&1)
-assert_eq "non-local: UNSLOTH_NO_TORCH=true when SKIP_TORCH=true" "UNSLOTH_NO_TORCH=true" "$_env_result"
+assert_eq "non-local: TUNELABS_NO_TORCH=true when SKIP_TORCH=true" "TUNELABS_NO_TORCH=true" "$_env_result"
 
-# Test: SKIP_TORCH=false -> UNSLOTH_NO_TORCH=false in env
+# Test: SKIP_TORCH=false -> TUNELABS_NO_TORCH=false in env
 _env_result=$(SKIP_TORCH=false STUDIO_LOCAL_INSTALL=false bash "$_ENV_BLOCK" 2>&1)
-assert_eq "non-local: UNSLOTH_NO_TORCH=false when SKIP_TORCH=false" "UNSLOTH_NO_TORCH=false" "$_env_result"
+assert_eq "non-local: TUNELABS_NO_TORCH=false when SKIP_TORCH=false" "TUNELABS_NO_TORCH=false" "$_env_result"
 
 # Test: local install path also propagates
 _env_result=$(SKIP_TORCH=true STUDIO_LOCAL_INSTALL=true bash "$_ENV_BLOCK" 2>&1)
-assert_eq "local: UNSLOTH_NO_TORCH=true when SKIP_TORCH=true" "UNSLOTH_NO_TORCH=true" "$_env_result"
+assert_eq "local: TUNELABS_NO_TORCH=true when SKIP_TORCH=true" "TUNELABS_NO_TORCH=true" "$_env_result"
 
 _env_result=$(SKIP_TORCH=false STUDIO_LOCAL_INSTALL=true bash "$_ENV_BLOCK" 2>&1)
-assert_eq "local: UNSLOTH_NO_TORCH=false when SKIP_TORCH=false" "UNSLOTH_NO_TORCH=false" "$_env_result"
+assert_eq "local: TUNELABS_NO_TORCH=false when SKIP_TORCH=false" "TUNELABS_NO_TORCH=false" "$_env_result"
 
 rm -f "$_ENV_BLOCK"
 
@@ -395,7 +395,7 @@ _USER_PYTHON=""
 _next_is_python=false
 _next_is_package=false
 STUDIO_LOCAL_INSTALL=false
-PACKAGE_NAME="unsloth"
+PACKAGE_NAME="tunelabs"
 for arg in "$@"; do
     if [ "$_next_is_package" = true ]; then PACKAGE_NAME="$arg"; _next_is_package=false; continue; fi
     if [ "$_next_is_python" = true ]; then _USER_PYTHON="$arg"; _next_is_python=false; continue; fi
@@ -484,7 +484,7 @@ cat > "$_FLAG_SNIPPET" << 'SNIPPET'
 _NO_TORCH_FLAG=false
 _next_is_package=false
 STUDIO_LOCAL_INSTALL=false
-PACKAGE_NAME="unsloth"
+PACKAGE_NAME="tunelabs"
 for arg in "$@"; do
     if [ "$_next_is_package" = true ]; then
         PACKAGE_NAME="$arg"

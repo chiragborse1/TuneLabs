@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
@@ -44,9 +44,9 @@ export function OwnerAvatar({
 }: {
   owner: string;
   /**
-   * Repo name (after `owner/`). For an eligible owner (currently "unsloth"),
+   * Repo name (after `owner/`). For an eligible owner (currently "tunelabs"),
    * renders the matched upstream provider's logo instead of the HF profile pic
-   * (e.g. an Unsloth Qwen2.5 re-upload shows the Qwen logo).
+   * (e.g. an TuneLabs Qwen2.5 re-upload shows the Qwen logo).
    */
   repoName?: string;
   size?: AvatarSize;

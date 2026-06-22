@@ -31,9 +31,9 @@ async fn run_cli_probe(bin: &Path, args: &[&str]) -> bool {
         cmd.env_remove("PYTHONPATH");
     }
 
-    // Tauri uses the legacy root regardless of UNSLOTH_STUDIO_HOME / STUDIO_HOME;
+    // Tauri uses the legacy root regardless of TUNELABS_STUDIO_HOME / STUDIO_HOME;
     // probe subprocesses must follow the same isolation as process.rs.
-    cmd.env_remove("UNSLOTH_STUDIO_HOME");
+    cmd.env_remove("TUNELABS_STUDIO_HOME");
     cmd.env_remove("STUDIO_HOME");
 
     #[cfg(windows)]
@@ -69,9 +69,9 @@ async fn probe_cli_capability(bin: &Path) -> Option<DesktopCapability> {
         cmd.env_remove("PYTHONPATH");
     }
 
-    // Tauri uses the legacy root regardless of UNSLOTH_STUDIO_HOME / STUDIO_HOME;
+    // Tauri uses the legacy root regardless of TUNELABS_STUDIO_HOME / STUDIO_HOME;
     // probe subprocesses must follow the same isolation as process.rs.
-    cmd.env_remove("UNSLOTH_STUDIO_HOME");
+    cmd.env_remove("TUNELABS_STUDIO_HOME");
     cmd.env_remove("STUDIO_HOME");
 
     #[cfg(windows)]
@@ -158,7 +158,7 @@ pub(super) async fn probe_managed_bin(bin: PathBuf) -> ManagedProbe {
 }
 
 pub(super) async fn probe_managed_install() -> ManagedProbe {
-    match crate::process::find_unsloth_binary() {
+    match crate::process::find_tunelabs_binary() {
         Some(bin) => probe_managed_bin(bin).await,
         None => ManagedProbe::Missing,
     }

@@ -30,7 +30,7 @@ class HardwareProfile:
     has_mlx: bool  # whether to inject a fake mlx into sys.modules
     mps_available: bool  # torch.backends.mps.is_available() value
 
-    expect_is_mlx: bool  # unsloth._IS_MLX
+    expect_is_mlx: bool  # tunelabs._IS_MLX
     expect_device_type: str  # Studio DeviceType (uppercased name: "CUDA"/"XPU"/"MLX"/"CPU")
     expect_is_rocm: bool  # Studio IS_ROCM
     expect_apple_silicon: bool  # Studio is_apple_silicon()
@@ -154,7 +154,7 @@ def spoof_hardware(monkeypatch):
         import platform
         import torch
 
-        # platform spoof (used by both the unsloth gate and Studio's helpers)
+        # platform spoof (used by both the tunelabs gate and Studio's helpers)
         monkeypatch.setattr(platform, "system", lambda: profile.system)
         monkeypatch.setattr(platform, "machine", lambda: profile.machine)
 
@@ -215,7 +215,7 @@ def spoof_hardware(monkeypatch):
 
             monkeypatch.setattr(_mlx_repair, "mlx_stack_available", lambda: True)
         else:
-            # Drop cached mlx and patch find_spec so the unsloth gate sees mlx as absent.
+            # Drop cached mlx and patch find_spec so the tunelabs gate sees mlx as absent.
             monkeypatch.delitem(sys.modules, "mlx", raising = False)
             monkeypatch.delitem(sys.modules, "mlx.core", raising = False)
             real_find_spec = importlib.util.find_spec
@@ -253,8 +253,8 @@ def spoof_hardware(monkeypatch):
     return _apply
 
 
-def _evaluate_unsloth_is_mlx_gate() -> bool:
-    """Re-evaluate the exact expression from unsloth/__init__.py:20-24."""
+def _evaluate_tunelabs_is_mlx_gate() -> bool:
+    """Re-evaluate the exact expression from tunelabs/__init__.py:20-24."""
     import importlib.util
     import platform
 
@@ -278,10 +278,10 @@ def _import_studio_hardware_module():
 
 
 @pytest.mark.parametrize("profile", PROFILES, ids = PROFILE_IDS)
-def test_unsloth_is_mlx_gate_matches_profile(profile, spoof_hardware):
-    """The _IS_MLX expression in unsloth/__init__.py flips correctly per profile."""
+def test_tunelabs_is_mlx_gate_matches_profile(profile, spoof_hardware):
+    """The _IS_MLX expression in tunelabs/__init__.py flips correctly per profile."""
     spoof_hardware(profile)
-    actual = _evaluate_unsloth_is_mlx_gate()
+    actual = _evaluate_tunelabs_is_mlx_gate()
     assert actual is profile.expect_is_mlx, (
         f"profile {profile.name}: expected _IS_MLX={profile.expect_is_mlx}, "
         f"got {actual}. {profile.extra_notes}"

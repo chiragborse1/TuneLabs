@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { getAuthToken } from "@/features/auth";
 import { projectHasSources } from "@/features/rag/api/rag-api";
@@ -1427,7 +1427,7 @@ async function autoLoadSmallestModel(): Promise<{
     try {
       if (
         !(await canAutoLoad({
-          model_path: "unsloth/Qwen3.5-4B-MTP-GGUF",
+          model_path: "tunelabs/Qwen3.5-4B-MTP-GGUF",
           max_seq_length: 0,
           is_lora: false,
           gguf_variant: "UD-Q4_K_XL",
@@ -1438,7 +1438,7 @@ async function autoLoadSmallestModel(): Promise<{
       }
       loadAttempts += 1;
       const loadResp = await loadModel({
-        model_path: "unsloth/Qwen3.5-4B-MTP-GGUF",
+        model_path: "tunelabs/Qwen3.5-4B-MTP-GGUF",
         hf_token: hfToken,
         max_seq_length: 0,
         load_in_4bit: true,
@@ -1451,7 +1451,7 @@ async function autoLoadSmallestModel(): Promise<{
       saveSpeculativeType(specSettings.speculativeType);
       useChatRuntimeStore
         .getState()
-        .setCheckpoint("unsloth/Qwen3.5-4B-MTP-GGUF", "UD-Q4_K_XL");
+        .setCheckpoint("tunelabs/Qwen3.5-4B-MTP-GGUF", "UD-Q4_K_XL");
       const store = useChatRuntimeStore.getState();
       store.setModelRequiresTrustRemoteCode(
         loadResp.requires_trust_remote_code ?? false,
@@ -1461,13 +1461,13 @@ async function autoLoadSmallestModel(): Promise<{
         maxTokens: loadResp.context_length ?? 131072,
       });
       const defaultModel: ChatModelSummary = {
-        id: "unsloth/Qwen3.5-4B-MTP-GGUF",
+        id: "tunelabs/Qwen3.5-4B-MTP-GGUF",
         name: loadResp.display_name ?? "Qwen3.5-4B-MTP-GGUF",
         isVision: loadResp.is_vision ?? false,
         isLora: false,
         isGguf: true,
       };
-      if (!store.models.some((m) => m.id === "unsloth/Qwen3.5-4B-MTP-GGUF")) {
+      if (!store.models.some((m) => m.id === "tunelabs/Qwen3.5-4B-MTP-GGUF")) {
         store.setModels([...store.models, defaultModel]);
       }
       useChatRuntimeStore.setState({

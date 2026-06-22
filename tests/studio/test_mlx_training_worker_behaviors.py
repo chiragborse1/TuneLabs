@@ -82,9 +82,9 @@ def test_poll_stop_returns_on_broken_pipe():
         raise AssertionError("EOFError/OSError handler not found in worker.py")
 
 
-def test_unsloth_zoo_mlx_imports_have_friendly_error():
+def test_tunelabs_zoo_mlx_imports_have_friendly_error():
     src = WORKER.read_text()
-    assert "from unsloth_zoo.mlx.loader import FastMLXModel" in src
-    assert "from unsloth_zoo.mlx.trainer import" in src
+    assert "from tunelabs_zoo.mlx.loader import FastMLXModel" in src
+    assert "from tunelabs_zoo.mlx.trainer import" in src
     assert "raise ImportError" in src
     assert "install.sh" in src

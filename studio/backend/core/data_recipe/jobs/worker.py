@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ from utils.paths import ensure_dir, recipe_datasets_root
 _ARTIFACT_ROOT = recipe_datasets_root()
 _RE_GITHUB_CURSOR = re.compile(r"\bcursor=[^\s,]+")
 _RE_SECRET_TOKEN = re.compile(
-    r"\b(?:(?:ghp|gho|ghu|ghs|ghr|github_pat)_[A-Za-z0-9_]+|sk-unsloth-[A-Za-z0-9]+)"
+    r"\b(?:(?:ghp|gho|ghu|ghs|ghr|github_pat)_[A-Za-z0-9_]+|sk-tunelabs-[A-Za-z0-9]+)"
 )
 
 
@@ -85,7 +85,7 @@ def run_job_process(*, event_queue, recipe: dict[str, Any], run: dict[str, Any])
         warnings.filterwarnings("ignore")
 
     LogConfig.setup_logging(
-        service_name = "unsloth-studio-data-worker",
+        service_name = "tunelabs-studio-data-worker",
         env = os.getenv("ENVIRONMENT_TYPE", "production"),
     )
 

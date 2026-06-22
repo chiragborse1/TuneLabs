@@ -15,7 +15,7 @@
     }
   },
   "module_spoof": {
-    "torchcodec": "no CPU wheel published; smoke job sys.modules-stubs torchcodec before importing unsloth"
+    "torchcodec": "no CPU wheel published; smoke job sys.modules-stubs torchcodec before importing tunelabs"
   },
   "skip": [
     "nvidia-cublas-cu12",

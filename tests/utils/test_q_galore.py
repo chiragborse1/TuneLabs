@@ -1,4 +1,4 @@
-# Copyright 2023-present Daniel Han-Chen & the Unsloth team. All rights reserved.
+# Copyright 2023-present Daniel Han-Chen & the TuneLabs team. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Tests for Q-GaLore integration (unsloth/optimizers/).
+# Tests for Q-GaLore integration (tunelabs/optimizers/).
 
 import pytest
 import sys
@@ -20,9 +20,9 @@ import os
 import torch
 import torch.nn as nn
 
-# Import optimizers directly to avoid triggering unsloth.__init__ (heavy deps).
+# Import optimizers directly to avoid triggering tunelabs.__init__ (heavy deps).
 _repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-_optimizers_dir = os.path.join(_repo_root, "unsloth", "optimizers")
+_optimizers_dir = os.path.join(_repo_root, "tunelabs", "optimizers")
 if _repo_root not in sys.path:
     sys.path.insert(0, _repo_root)
 
@@ -37,9 +37,9 @@ def _load_module(name, filepath):
     return mod
 
 
-# Projector has no unsloth dependencies; load it first.
+# Projector has no tunelabs dependencies; load it first.
 _projector_mod = _load_module(
-    "unsloth.optimizers.q_galore_projector",
+    "tunelabs.optimizers.q_galore_projector",
     os.path.join(_optimizers_dir, "q_galore_projector.py"),
 )
 GaLoreProjector = _projector_mod.GaLoreProjector
@@ -49,7 +49,7 @@ _quantize_stochastic = _projector_mod._quantize_stochastic
 
 # adamw depends on projector, may skip bitsandbytes.
 _adamw_mod = _load_module(
-    "unsloth.optimizers.q_galore_adamw",
+    "tunelabs.optimizers.q_galore_adamw",
     os.path.join(_optimizers_dir, "q_galore_adamw.py"),
 )
 make_q_galore_param_groups = _adamw_mod.make_q_galore_param_groups
@@ -340,7 +340,7 @@ class TestQGaLoreIntegration:
 
     def test_weight_quant_activates_on_first_step(self):
         """_has_weight_quant returns True even when _q_scales is None (first step)."""
-        _adamw_mod_local = sys.modules["unsloth.optimizers.q_galore_adamw"]
+        _adamw_mod_local = sys.modules["tunelabs.optimizers.q_galore_adamw"]
         QGaLoreAdamW8bit = _adamw_mod_local.QGaLoreAdamW8bit
 
         p = torch.nn.Parameter(torch.randn(16, 16))
@@ -402,7 +402,7 @@ class TestQGaLoreIntegration:
         # Can't instantiate without bitsandbytes; check the signature instead.
         import inspect
 
-        _adamw_mod_local = sys.modules["unsloth.optimizers.q_galore_adamw"]
+        _adamw_mod_local = sys.modules["tunelabs.optimizers.q_galore_adamw"]
         QGaLoreAdamW8bit = _adamw_mod_local.QGaLoreAdamW8bit
 
         sig = inspect.signature(QGaLoreAdamW8bit.__init__)
@@ -412,7 +412,7 @@ class TestQGaLoreIntegration:
 
     def test_weight_decay_uses_saved_data(self):
         """Weight decay should apply standard decoupled AdamW decay on current weights."""
-        _adamw_mod_local = sys.modules["unsloth.optimizers.q_galore_adamw"]
+        _adamw_mod_local = sys.modules["tunelabs.optimizers.q_galore_adamw"]
 
         p = torch.nn.Parameter(torch.ones(4, 4))
         p._saved_data = torch.ones(4, 4) * 2.0  # Pre-update weights
@@ -436,8 +436,8 @@ class TestQGaLoreIntegration:
 
     def test_params_float_after_weight_quant_step(self):
         """After a step with weight_quant=True, parameters must remain floating point."""
-        _adamw_mod_local = sys.modules["unsloth.optimizers.q_galore_adamw"]
-        _projector_mod_local = sys.modules["unsloth.optimizers.q_galore_projector"]
+        _adamw_mod_local = sys.modules["tunelabs.optimizers.q_galore_adamw"]
+        _projector_mod_local = sys.modules["tunelabs.optimizers.q_galore_projector"]
 
         _quantize = _projector_mod_local._quantize
 
@@ -463,8 +463,8 @@ class TestQGaLoreIntegration:
 
     def test_weight_quant_hook_restores_float(self):
         """Forward pre-hook should dequantize INT8 weights before forward pass."""
-        _adamw_mod_local = sys.modules["unsloth.optimizers.q_galore_adamw"]
-        _projector_mod_local = sys.modules["unsloth.optimizers.q_galore_projector"]
+        _adamw_mod_local = sys.modules["tunelabs.optimizers.q_galore_adamw"]
+        _projector_mod_local = sys.modules["tunelabs.optimizers.q_galore_projector"]
         install_hook = _adamw_mod_local.install_weight_quant_hooks
 
         linear = nn.Linear(16, 8, bias = False)

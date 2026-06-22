@@ -4,7 +4,7 @@ import ast
 from pathlib import Path
 
 
-SAVE_PY = Path(__file__).resolve().parents[2] / "unsloth" / "save.py"
+SAVE_PY = Path(__file__).resolve().parents[2] / "tunelabs" / "save.py"
 
 
 def _function_calls(source: str, function_name: str) -> list[ast.Call]:
@@ -62,8 +62,8 @@ def _assert_safe_ggml_calls(calls: list[ast.Call]) -> None:
 def test_ggml_conversion_paths_do_not_use_shell() -> None:
     source = SAVE_PY.read_text(encoding = "utf-8")
     for function_name in (
-        "unsloth_convert_lora_to_ggml_and_push_to_hub",
-        "unsloth_convert_lora_to_ggml_and_save_locally",
+        "tunelabs_convert_lora_to_ggml_and_push_to_hub",
+        "tunelabs_convert_lora_to_ggml_and_save_locally",
     ):
         calls = _function_calls(source, function_name)
         _assert_safe_ggml_calls(calls)

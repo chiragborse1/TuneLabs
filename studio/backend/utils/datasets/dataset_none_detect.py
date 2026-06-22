@@ -8,7 +8,7 @@ Usage:
     stats = scan_dataset(dataset, fmt="chatml")  # explicit format
     print_report(stats, stats["format"])
 
-Dependencies: only `datasets` (already in studio/unsloth) + stdlib.
+Dependencies: only `datasets` (already in studio/tunelabs) + stdlib.
 
 Supported formats (via FORMAT_REGISTRY):
     alpaca     instruction/output            instruction + output must be set

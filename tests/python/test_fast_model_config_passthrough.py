@@ -5,10 +5,10 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-LOADER_PATH = REPO_ROOT / "unsloth" / "models" / "loader.py"
-VISION_PATH = REPO_ROOT / "unsloth" / "models" / "vision.py"
-UTILS_PATH = REPO_ROOT / "unsloth" / "models" / "_utils.py"
-LLAMA_PATH = REPO_ROOT / "unsloth" / "models" / "llama.py"
+LOADER_PATH = REPO_ROOT / "tunelabs" / "models" / "loader.py"
+VISION_PATH = REPO_ROOT / "tunelabs" / "models" / "vision.py"
+UTILS_PATH = REPO_ROOT / "tunelabs" / "models" / "_utils.py"
+LLAMA_PATH = REPO_ROOT / "tunelabs" / "models" / "llama.py"
 
 
 def _source(path):

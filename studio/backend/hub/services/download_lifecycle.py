@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 from __future__ import annotations
 
@@ -69,9 +69,9 @@ def spawn_worker(
     mode = download_registry.TRANSPORT_XET if use_xet else download_registry.TRANSPORT_HTTP
     env = os.environ.copy()
     if protected_blob_hashes:
-        env["UNSLOTH_PROTECTED_BLOB_HASHES"] = ",".join(sorted(protected_blob_hashes))
+        env["TUNELABS_PROTECTED_BLOB_HASHES"] = ",".join(sorted(protected_blob_hashes))
     else:
-        env.pop("UNSLOTH_PROTECTED_BLOB_HASHES", None)
+        env.pop("TUNELABS_PROTECTED_BLOB_HASHES", None)
     env["HF_HUB_DISABLE_PROGRESS_BARS"] = "1"
     env["HF_HUB_DISABLE_TELEMETRY"] = "1"
     env["HF_HUB_DISABLE_XET"] = "0" if use_xet else "1"

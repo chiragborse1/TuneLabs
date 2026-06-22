@@ -1,5 +1,5 @@
 # inference_on_merged.py
-from unsloth import FastLanguageModel
+from tunelabs import FastLanguageModel
 from transformers import TextStreamer
 import torch
 import gc
@@ -52,5 +52,5 @@ torch.cuda.empty_cache()
 gc.collect()
 
 safe_remove_directory("./gpt-oss-finetuned-merged")
-safe_remove_directory("./unsloth_compiled_cache")  # Clean up cache created by this process
+safe_remove_directory("./tunelabs_compiled_cache")  # Clean up cache created by this process
 print("✅ Final cleanup complete. Exiting inference script.")

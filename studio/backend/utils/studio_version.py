@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Network-free Studio release version resolution for display-only UI."""
 
@@ -104,7 +104,7 @@ def _git_branch(repo_root: Path) -> str | None:
 def get_studio_version(repo_root: Path | None = None) -> str:
     """Return the installed Studio release tag for display, or ``dev``.
 
-    Intentionally separate from the PyPI ``unsloth`` package version used by
+    Intentionally separate from the PyPI ``tunelabs`` package version used by
     update checks. Never performs network requests.
     """
     resolved_repo_root = repo_root or _repo_root()

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 from __future__ import annotations
 
@@ -189,11 +189,11 @@ def test_causal_conv1d_fast_path_includes_qwen3_6_variants(monkeypatch):
 
     worker._ensure_causal_conv1d_fast_path(
         event_queue = [],
-        model_name = "unsloth/Qwen3.6-4B",
+        model_name = "tunelabs/Qwen3.6-4B",
     )
     worker._ensure_causal_conv1d_fast_path(
         event_queue = [],
-        model_name = "unsloth/Qwen3_6-4B",
+        model_name = "tunelabs/Qwen3_6-4B",
     )
 
     assert install_mock.call_count == 2
@@ -242,7 +242,7 @@ def test_flash_linear_attention_installs_pinned_pair_for_qwen3_5(monkeypatch):
 
     worker._ensure_flash_linear_attention(
         event_queue = [],
-        model_name = "unsloth/Qwen3.5-2B",
+        model_name = "tunelabs/Qwen3.5-2B",
     )
 
     run_mock.assert_called_once()
@@ -297,12 +297,12 @@ def test_flash_linear_attention_matches_full_qwen3_family(monkeypatch):
     )
 
     for name in (
-        "unsloth/Qwen3.5-2B",
-        "unsloth/Qwen3_5-MoE-A22B",
-        "unsloth/Qwen3.6-4B",
-        "unsloth/Qwen3_6-4B",
-        "unsloth/Qwen3-Next-80B-A3B",
-        "unsloth/Qwen3_Next-80B-A3B",
+        "tunelabs/Qwen3.5-2B",
+        "tunelabs/Qwen3_5-MoE-A22B",
+        "tunelabs/Qwen3.6-4B",
+        "tunelabs/Qwen3_6-4B",
+        "tunelabs/Qwen3-Next-80B-A3B",
+        "tunelabs/Qwen3_Next-80B-A3B",
     ):
         worker._ensure_flash_linear_attention(event_queue = [], model_name = name)
 
@@ -318,7 +318,7 @@ def test_flash_linear_attention_skipped_below_python_3_10(monkeypatch):
 
     worker._ensure_flash_linear_attention(
         event_queue = [],
-        model_name = "unsloth/Qwen3.5-2B",
+        model_name = "tunelabs/Qwen3.5-2B",
     )
 
     run_mock.assert_not_called()
@@ -331,7 +331,7 @@ def test_flash_linear_attention_skipped_via_env(monkeypatch):
 
     worker._ensure_flash_linear_attention(
         event_queue = [],
-        model_name = "unsloth/Qwen3.5-2B",
+        model_name = "tunelabs/Qwen3.5-2B",
     )
 
     run_mock.assert_not_called()
@@ -347,7 +347,7 @@ def test_flash_linear_attention_skipped_below_torch_2_7(monkeypatch):
 
     worker._ensure_flash_linear_attention(
         event_queue = [],
-        model_name = "unsloth/Qwen3.5-2B",
+        model_name = "tunelabs/Qwen3.5-2B",
     )
 
     run_mock.assert_not_called()
@@ -365,7 +365,7 @@ def test_flash_linear_attention_install_includes_einops(monkeypatch):
 
     worker._ensure_flash_linear_attention(
         event_queue = [],
-        model_name = "unsloth/Qwen3.5-2B",
+        model_name = "tunelabs/Qwen3.5-2B",
     )
 
     args = run_mock.call_args[0][0]
@@ -400,7 +400,7 @@ def test_flash_linear_attention_logs_post_install_import_failure(monkeypatch):
 
     worker._ensure_flash_linear_attention(
         event_queue = [],
-        model_name = "unsloth/Qwen3.5-2B",
+        model_name = "tunelabs/Qwen3.5-2B",
     )
 
     assert import_calls["count"] == 2
@@ -418,7 +418,7 @@ def test_tilelang_backend_skipped_on_unsupported_linux_arch(monkeypatch):
 
     worker._ensure_tilelang_backend(
         event_queue = [],
-        model_name = "unsloth/Qwen3.5-2B",
+        model_name = "tunelabs/Qwen3.5-2B",
     )
 
     run_mock.assert_not_called()
@@ -445,7 +445,7 @@ def test_tilelang_backend_pins_only_binary(monkeypatch):
 
     worker._ensure_tilelang_backend(
         event_queue = [],
-        model_name = "unsloth/Qwen3.5-2B",
+        model_name = "tunelabs/Qwen3.5-2B",
     )
 
     args = run_mock.call_args[0][0]
@@ -476,7 +476,7 @@ def test_tilelang_backend_installs_pinned_pair_for_qwen3_5(monkeypatch):
 
     worker._ensure_tilelang_backend(
         event_queue = [],
-        model_name = "unsloth/Qwen3.5-2B",
+        model_name = "tunelabs/Qwen3.5-2B",
     )
 
     run_mock.assert_called_once()
@@ -504,7 +504,7 @@ def test_tilelang_backend_reinstalls_when_tvm_ffi_is_broken(monkeypatch):
 
     worker._ensure_tilelang_backend(
         event_queue = [],
-        model_name = "unsloth/Qwen3.5-2B",
+        model_name = "tunelabs/Qwen3.5-2B",
     )
 
     assert run_mock.call_count == 2
@@ -535,7 +535,7 @@ def test_tilelang_backend_skipped_below_python_3_10(monkeypatch):
 
     worker._ensure_tilelang_backend(
         event_queue = [],
-        model_name = "unsloth/Qwen3.5-2B",
+        model_name = "tunelabs/Qwen3.5-2B",
     )
 
     run_mock.assert_not_called()
@@ -549,7 +549,7 @@ def test_tilelang_backend_skipped_on_windows(monkeypatch):
 
     worker._ensure_tilelang_backend(
         event_queue = [],
-        model_name = "unsloth/Qwen3.5-2B",
+        model_name = "tunelabs/Qwen3.5-2B",
     )
 
     run_mock.assert_not_called()
@@ -571,7 +571,7 @@ def test_tilelang_backend_swallows_install_timeout(monkeypatch):
     # Must not raise.
     worker._ensure_tilelang_backend(
         event_queue = [],
-        model_name = "unsloth/Qwen3.5-2B",
+        model_name = "tunelabs/Qwen3.5-2B",
     )
 
     assert any("timed out" in s.lower() for s in statuses)
@@ -602,7 +602,7 @@ def test_tilelang_backend_skipped_via_env(monkeypatch):
 
     worker._ensure_tilelang_backend(
         event_queue = [],
-        model_name = "unsloth/Qwen3.5-2B",
+        model_name = "tunelabs/Qwen3.5-2B",
     )
 
     run_mock.assert_not_called()
@@ -621,7 +621,7 @@ def test_tilelang_backend_swallows_install_failure(monkeypatch):
     # Should not raise even when pip exits non-zero.
     worker._ensure_tilelang_backend(
         event_queue = [],
-        model_name = "unsloth/Qwen3.5-2B",
+        model_name = "tunelabs/Qwen3.5-2B",
     )
 
     run_mock.assert_called_once()
@@ -694,7 +694,7 @@ def test_hook_installs_when_gate_returns_false(monkeypatch):
     monkeypatch.setattr(worker, "_install_package_wheel_first", conv_install)
     monkeypatch.delenv(worker._FAST_PATH_HOOKS_SKIP_ENV, raising = False)
 
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "tunelabs/Qwen3.5-2B")
 
     from transformers.utils import import_utils as _iu
 
@@ -727,7 +727,7 @@ def test_hook_skips_install_when_gate_already_true(monkeypatch):
     monkeypatch.setattr(worker, "_installed_tvm_ffi_version", lambda: "0.1.9")
     monkeypatch.delenv(worker._FAST_PATH_HOOKS_SKIP_ENV, raising = False)
 
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "tunelabs/Qwen3.5-2B")
 
     from transformers.utils import import_utils as _iu
 
@@ -760,7 +760,7 @@ def test_hook_idempotent_on_repeat_call(monkeypatch):
     monkeypatch.setattr(worker, "_install_package_wheel_first", conv_install)
     monkeypatch.delenv(worker._FAST_PATH_HOOKS_SKIP_ENV, raising = False)
 
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "tunelabs/Qwen3.5-2B")
 
     from transformers.utils import import_utils as _iu
 
@@ -786,7 +786,7 @@ def test_hook_handles_install_failure_gracefully(monkeypatch):
     monkeypatch.setattr(worker, "_install_package_wheel_first", lambda **kw: None)
     monkeypatch.delenv(worker._FAST_PATH_HOOKS_SKIP_ENV, raising = False)
 
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "tunelabs/Qwen3.5-2B")
 
     from transformers.utils import import_utils as _iu
 
@@ -803,7 +803,7 @@ def test_hook_can_be_disabled_via_env(monkeypatch):
     monkeypatch.setattr(worker, "_ensure_flash_linear_attention_unconditional", fla_install)
     monkeypatch.setenv(worker._FAST_PATH_HOOKS_SKIP_ENV, "1")
 
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "tunelabs/Qwen3.5-2B")
 
     from transformers.utils import import_utils as _iu
 
@@ -823,7 +823,7 @@ def test_hook_clears_lru_cache_before_first_check(monkeypatch):
     monkeypatch.setattr(worker, "_install_package_wheel_first", lambda **kw: None)
     monkeypatch.delenv(worker._FAST_PATH_HOOKS_SKIP_ENV, raising = False)
 
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "tunelabs/Qwen3.5-2B")
     from transformers.utils import import_utils as _iu
 
     _iu.is_flash_linear_attention_available()
@@ -855,7 +855,7 @@ def test_hook_rewrites_previously_imported_module_bindings(monkeypatch):
     monkeypatch.setattr(worker, "_install_package_wheel_first", lambda **kw: True)
     monkeypatch.delenv(worker._FAST_PATH_HOOKS_SKIP_ENV, raising = False)
 
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "tunelabs/Qwen3.5-2B")
 
     # The fake module's local binding is rewritten to the wrapper.
     assert fake_mod.is_flash_linear_attention_available is not fla_gate
@@ -879,7 +879,7 @@ def test_hook_skips_when_import_utils_unavailable(monkeypatch):
     monkeypatch.delenv(worker._FAST_PATH_HOOKS_SKIP_ENV, raising = False)
 
     # Should not raise.
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "tunelabs/Qwen3.5-2B")
 
 
 def test_substring_fallback_unchanged_when_hook_skipped(monkeypatch):
@@ -889,7 +889,7 @@ def test_substring_fallback_unchanged_when_hook_skipped(monkeypatch):
     monkeypatch.setattr(worker, "_discover_fla_model_types", lambda: frozenset({"qwen3_5"}))
     monkeypatch.setenv(worker._FAST_PATH_HOOKS_SKIP_ENV, "1")
 
-    worker._ensure_flash_linear_attention(event_queue = [], model_name = "unsloth/Qwen3.5-2B")
+    worker._ensure_flash_linear_attention(event_queue = [], model_name = "tunelabs/Qwen3.5-2B")
     assert install_mock.call_count == 1
 
     worker._ensure_flash_linear_attention(event_queue = [], model_name = "meta-llama/Llama-3.1-8B")
@@ -962,7 +962,7 @@ def test_hook_does_install_tilelang_for_qwen35(monkeypatch):
     monkeypatch.setattr(worker, "_install_package_wheel_first", mock.Mock(return_value = True))
     monkeypatch.delenv(worker._FAST_PATH_HOOKS_SKIP_ENV, raising = False)
 
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "tunelabs/Qwen3.5-2B")
 
     from transformers.utils import import_utils as _iu
 
@@ -983,7 +983,7 @@ def test_tilelang_repair_does_not_touch_torch_cuda_stack(monkeypatch):
     monkeypatch.setattr(worker._sp, "run", run_mock)
     monkeypatch.setattr(worker, "_send_status", lambda *a, **k: None)
 
-    worker._ensure_tilelang_backend(event_queue = [], model_name = "unsloth/Qwen3.5-2B")
+    worker._ensure_tilelang_backend(event_queue = [], model_name = "tunelabs/Qwen3.5-2B")
 
     assert run_mock.call_count == 2
     repair_args = run_mock.call_args_list[0][0][0]
@@ -1018,7 +1018,7 @@ def test_hook_trusts_installer_bool_not_metadata(monkeypatch):
     monkeypatch.setattr(worker, "_install_package_wheel_first", mock.Mock(return_value = True))
     monkeypatch.delenv(worker._FAST_PATH_HOOKS_SKIP_ENV, raising = False)
 
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "tunelabs/Qwen3.5-2B")
 
     from transformers.utils import import_utils as _iu
 
@@ -1074,7 +1074,7 @@ def test_hook_skips_tilelang_when_fla_install_is_skipped(monkeypatch):
     monkeypatch.setattr(worker, "_install_package_wheel_first", mock.Mock(return_value = True))
     monkeypatch.delenv(worker._FAST_PATH_HOOKS_SKIP_ENV, raising = False)
 
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "tunelabs/Qwen3.5-2B")
 
     from transformers.utils import import_utils as _iu
 
@@ -1102,7 +1102,7 @@ def test_hook_runs_tilelang_repair_when_fla_already_true(monkeypatch):
     monkeypatch.setattr(worker, "_installed_tvm_ffi_version", lambda: "0.1.11")
     monkeypatch.delenv(worker._FAST_PATH_HOOKS_SKIP_ENV, raising = False)
 
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "tunelabs/Qwen3.5-2B")
 
     from transformers.utils import import_utils as _iu
 
@@ -1203,7 +1203,7 @@ def test_install_fast_path_hooks_sets_fla_tilelang_zero_on_hip(monkeypatch):
     monkeypatch.setattr(worker, "_ensure_tilelang_backend_unconditional", lambda eq: True)
     monkeypatch.setattr(worker, "_install_package_wheel_first", lambda **kw: True)
 
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "tunelabs/Qwen3.5-2B")
 
     assert _os.environ.get("FLA_TILELANG") == "0"
 
@@ -1221,7 +1221,7 @@ def test_install_fast_path_hooks_respects_user_fla_tilelang_override(monkeypatch
     monkeypatch.setattr(worker, "_ensure_tilelang_backend_unconditional", lambda eq: True)
     monkeypatch.setattr(worker, "_install_package_wheel_first", lambda **kw: True)
 
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "tunelabs/Qwen3.5-2B")
 
     assert _os.environ["FLA_TILELANG"] == "1"
 
@@ -1237,7 +1237,7 @@ def test_install_fast_path_hooks_does_not_set_fla_tilelang_on_cuda(monkeypatch):
     monkeypatch.setattr(worker, "_ensure_tilelang_backend_unconditional", lambda eq: True)
     monkeypatch.setattr(worker, "_install_package_wheel_first", lambda **kw: True)
 
-    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "unsloth/Qwen3.5-2B")
+    worker._install_fast_path_hooks(event_queue = _FakeQueue(), model_name = "tunelabs/Qwen3.5-2B")
 
     assert _os.environ.get("FLA_TILELANG") is None
 
@@ -1362,10 +1362,10 @@ def test_model_wants_tilelang_handles_real_repo_names(monkeypatch):
         lambda: frozenset({"qwen3_5", "qwen3_5_moe", "qwen3_next"}),
     )
     cases = [
-        ("unsloth/Qwen3.5-2B", True),
+        ("tunelabs/Qwen3.5-2B", True),
         ("Qwen/Qwen3.5-MoE-A3B", True),
         ("mlx-community/qwen3-next-80b", True),
-        ("unsloth/qwen3_5_moe_a3b_lora", True),
+        ("tunelabs/qwen3_5_moe_a3b_lora", True),
         ("meta-llama/Llama-3.1-8B", False),
         ("nvidia/Nemotron-H-4B", False),
         ("mistralai/Mistral-7B-v0.3", False),
@@ -1377,7 +1377,7 @@ def test_model_wants_tilelang_handles_real_repo_names(monkeypatch):
 
 def test_model_wants_tilelang_empty_when_transformers_has_no_fla(monkeypatch):
     monkeypatch.setattr(worker, "_discover_fla_model_types", lambda: frozenset())
-    assert worker._model_wants_tilelang("unsloth/Qwen3.5-2B") is False
+    assert worker._model_wants_tilelang("tunelabs/Qwen3.5-2B") is False
     assert worker._model_wants_tilelang("meta-llama/Llama-3.1-8B") is False
 
 

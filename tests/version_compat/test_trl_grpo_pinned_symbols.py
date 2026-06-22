@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team.
-"""Pinned-symbol compat check across all TRL PyPI minors unsloth + unsloth-zoo target.
+# Copyright 2026-present the TuneLabs AI Inc. team.
+"""Pinned-symbol compat check across all TRL PyPI minors tunelabs + tunelabs-zoo target.
 
 Catches RL-surface API drift (DataCollatorForPreference relocation,
 gated openenv/vllm_generation modules, unwrap_model_for_generation
@@ -55,7 +55,7 @@ TRL_TAGS = [
 ]
 
 
-# unsloth/trainer.py + unsloth/models/rl.py rebind these top-level names.
+# tunelabs/trainer.py + tunelabs/models/rl.py rebind these top-level names.
 
 
 @pytest.mark.parametrize("tag", TRL_TAGS)
@@ -66,13 +66,13 @@ def test_trl_top_level_grpo_sft(tag: str):
     for name in ("GRPOTrainer", "GRPOConfig", "SFTTrainer", "SFTConfig"):
         assert name in src, (
             f"{tag}: `from trl import {name}` will fail; "
-            f"unsloth/trainer.py + unsloth/models/rl.py rely on this re-export"
+            f"tunelabs/trainer.py + tunelabs/models/rl.py rely on this re-export"
         )
 
 
-# trl.trainer.grpo_trainer.GRPOTrainer -- canonical class. unsloth's RL
+# trl.trainer.grpo_trainer.GRPOTrainer -- canonical class. tunelabs's RL
 # patcher discovers it via `eval(f"trl.trainer.{trainer_file}.{name}")`
-# in unsloth/models/rl.py:548-594.
+# in tunelabs/models/rl.py:548-594.
 
 
 @pytest.mark.parametrize("tag", TRL_TAGS)
@@ -80,7 +80,7 @@ def test_grpo_trainer_class_canonical_path(tag: str):
     src = fetch_text("huggingface/trl", tag, "trl/trainer/grpo_trainer.py")
     assert src is not None, (
         f"{tag}: trl/trainer/grpo_trainer.py missing — "
-        f"unsloth.models.rl._patch_trl_rl_trainers('grpo_trainer') breaks"
+        f"tunelabs.models.rl._patch_trl_rl_trainers('grpo_trainer') breaks"
     )
     assert has_def(
         src, "GRPOTrainer", "class"
@@ -96,7 +96,7 @@ def test_grpo_config_class_canonical_path(tag: str):
     _, src = hit
     assert has_def(src, "GRPOConfig", "class"), (
         f"{tag}: GRPOConfig class missing in {[p for p, _ in [hit]]}; "
-        f"unsloth's *Config heuristic in models/rl.py:579-618 will fail"
+        f"tunelabs's *Config heuristic in models/rl.py:579-618 will fail"
     )
 
 
@@ -117,12 +117,12 @@ def test_data_collator_for_preference_resolvable(tag: str):
     assert have, (
         f"{tag}: DataCollatorForPreference defined in NEITHER "
         f"trl/trainer/dpo_trainer.py NOR trl/trainer/utils.py — "
-        f"unsloth/models/rl_replacements.py:318 will ImportError on real install"
+        f"tunelabs/models/rl_replacements.py:318 will ImportError on real install"
     )
 
 
 # trl.trainer.utils.pad: emitted into the GRPO compile cell as
-# _unsloth_trl_pad (rl_replacements.py:326).
+# _tunelabs_trl_pad (rl_replacements.py:326).
 
 
 @pytest.mark.parametrize("tag", TRL_TAGS)
@@ -134,13 +134,13 @@ def test_trl_trainer_utils_pad(tag: str):
     assert src is not None, f"{tag}: trl/trainer/utils[.py|/__init__.py] both missing"
     assert has_def(src, "pad", "func") or "def pad(" in src, (
         f"{tag}: trl.trainer.utils.pad missing — "
-        f"unsloth/models/rl_replacements.py:326 emits `from trl.trainer.utils "
-        f"import pad as _unsloth_trl_pad` into the GRPO compile cell"
+        f"tunelabs/models/rl_replacements.py:326 emits `from trl.trainer.utils "
+        f"import pad as _tunelabs_trl_pad` into the GRPO compile cell"
     )
 
 
 # trl.models.unwrap_model_for_generation -- moved between submodules
-# across releases. unsloth/models/rl.py:152-155 handles both paths.
+# across releases. tunelabs/models/rl.py:152-155 handles both paths.
 # Assert at least one resolves on every tag.
 
 
@@ -159,12 +159,12 @@ def test_unwrap_model_for_generation_either_path(tag: str):
             return
     pytest.fail(
         f"{tag}: trl.unwrap_model_for_generation not in any known path "
-        f"({candidates}); unsloth/models/rl.py:152-155 will ImportError"
+        f"({candidates}); tunelabs/models/rl.py:152-155 will ImportError"
     )
 
 
 # trl.experimental.openenv: gated import (rl_replacements.py:1765-1770).
-# When present, must export the symbols unsloth patches.
+# When present, must export the symbols tunelabs patches.
 
 
 @pytest.mark.parametrize("tag", TRL_TAGS)
@@ -172,12 +172,12 @@ def test_trl_experimental_openenv_gated(tag: str):
     src = fetch_text("huggingface/trl", tag, "trl/experimental/openenv/__init__.py")
     if src is None:
         pytest.skip(f"{tag}: trl.experimental.openenv not present (OK)")
-    # Module exists -> utils submodule must be importable (unsloth patches
+    # Module exists -> utils submodule must be importable (tunelabs patches
     # via `import trl.experimental.openenv.utils`).
     utils_src = fetch_text("huggingface/trl", tag, "trl/experimental/openenv/utils.py")
     assert utils_src is not None, (
         f"{tag}: trl.experimental.openenv exists but utils.py missing; "
-        f"unsloth/models/rl_replacements.py:1765 imports openenv.utils explicitly"
+        f"tunelabs/models/rl_replacements.py:1765 imports openenv.utils explicitly"
     )
 
 
@@ -194,13 +194,13 @@ def test_trl_generation_vllm_generation_gated(tag: str):
     if src is None:
         pytest.skip(f"{tag}: trl.generation.vllm_generation not present (OK)")
     assert has_def(src, "VLLMGeneration", "class"), (
-        f"{tag}: class VLLMGeneration missing; unsloth-zoo dispatch "
+        f"{tag}: class VLLMGeneration missing; tunelabs-zoo dispatch "
         f"in models/rl_replacements.py:1852 will silently no-op"
     )
     for method in ("_init_vllm", "sync_weights", "generate"):
         assert has_def(src, method, "func"), (
             f"{tag}: VLLMGeneration.{method} missing; "
-            f"unsloth/models/rl_replacements.py rewrites this method body"
+            f"tunelabs/models/rl_replacements.py rewrites this method body"
         )
 
 
@@ -229,15 +229,15 @@ def test_trl_version_parseable(tag: str):
     )
     assert has_literal or has_subimport or has_metadata or has_version_file, (
         f"{tag}: trl.__version__ not exported via any known mechanism; "
-        f"unsloth/models/rl.py:63 will AttributeError"
+        f"tunelabs/models/rl.py:63 will AttributeError"
     )
 
 
 # Coverage extension (added 2026-05): symbols/source-string contracts
-# unsloth + unsloth-zoo touch that the original suite missed.
+# tunelabs + tunelabs-zoo touch that the original suite missed.
 
 
-# 1. trl.is_conversational — soft import in unsloth-zoo dataset_utils.
+# 1. trl.is_conversational — soft import in tunelabs-zoo dataset_utils.
 
 
 @pytest.mark.parametrize("tag", TRL_TAGS)
@@ -245,11 +245,11 @@ def test_trl_is_conversational_export(tag: str):
     src = fetch_text("huggingface/trl", tag, "trl/__init__.py")
     assert src is not None
     if "is_conversational" not in src:
-        # Old TRLs omit it; unsloth-zoo's gated soft import falls back.
+        # Old TRLs omit it; tunelabs-zoo's gated soft import falls back.
         pytest.skip(f"{tag}: trl.is_conversational not exported (legacy TRL)")
 
 
-# 2-4. trl.trainer.sft_trainer surface used by unsloth tokenizer utils + tests.
+# 2-4. trl.trainer.sft_trainer surface used by tunelabs tokenizer utils + tests.
 
 
 @pytest.mark.parametrize("tag", TRL_TAGS)
@@ -258,7 +258,7 @@ def test_trl_sft_trainer_module_internals(tag: str):
     src = fetch_text("huggingface/trl", tag, "trl/trainer/sft_trainer.py")
     assert src is not None, (
         f"{tag}: trl/trainer/sft_trainer.py missing; "
-        f"unsloth/tokenizer_utils.py:1538 wildcard import fails"
+        f"tunelabs/tokenizer_utils.py:1538 wildcard import fails"
     )
     assert has_def(src, "SFTTrainer", "class"), f"{tag}: class SFTTrainer missing in sft_trainer.py"
     # neftune_post_forward_hook: optional, soft-imported in tokenizer_utils.py:1542.
@@ -267,7 +267,7 @@ def test_trl_sft_trainer_module_internals(tag: str):
 
 
 # 5-6. trl.trainer.dpo_trainer + MODEL_FOR_VISION_2_SEQ_MAPPING_NAMES,
-#      patched by unsloth-zoo/temporary_patches/misc.py:1376-1379.
+#      patched by tunelabs-zoo/temporary_patches/misc.py:1376-1379.
 
 
 @pytest.mark.parametrize("tag", TRL_TAGS)
@@ -275,13 +275,13 @@ def test_trl_dpo_trainer_module_exists(tag: str):
     src = fetch_text("huggingface/trl", tag, "trl/trainer/dpo_trainer.py")
     assert src is not None, (
         f"{tag}: trl/trainer/dpo_trainer.py missing; "
-        f"unsloth-zoo/temporary_patches/misc.py:1376 import fails"
+        f"tunelabs-zoo/temporary_patches/misc.py:1376 import fails"
     )
     assert has_def(src, "DPOTrainer", "class"), f"{tag}: class DPOTrainer missing in dpo_trainer.py"
 
 
 # 7. trl.trainer.utils.ConstantLengthDataset — optional soft import in
-#    unsloth-zoo/dataset_utils.py:596 (TRL 0.20.0 removed it on some paths).
+#    tunelabs-zoo/dataset_utils.py:596 (TRL 0.20.0 removed it on some paths).
 
 
 @pytest.mark.parametrize("tag", TRL_TAGS)
@@ -296,7 +296,7 @@ def test_trl_constant_length_dataset_optional(tag: str):
     _, src = hit
     if "ConstantLengthDataset" not in src:
         pytest.skip(
-            f"{tag}: ConstantLengthDataset removed; unsloth-zoo soft " f"import handles this"
+            f"{tag}: ConstantLengthDataset removed; tunelabs-zoo soft " f"import handles this"
         )
 
 
@@ -325,7 +325,7 @@ def test_trl_models_utils_disable_gradient_checkpointing(tag: str):
     if require:
         assert has_it, (
             f"{tag}: trl.models.utils.disable_gradient_checkpointing "
-            f"missing on TRL >=1.0.0; unsloth/models/rl.py:1979 patch silent no-op"
+            f"missing on TRL >=1.0.0; tunelabs/models/rl.py:1979 patch silent no-op"
         )
 
 
@@ -348,7 +348,7 @@ def test_trl_import_utils_available_pattern(tag: str):
     has_pattern = bool(re.search(r"\b\w+_available\b", src))
     assert has_pattern, (
         f"{tag}: trl.import_utils has no `_available` cache var; "
-        f"unsloth/import_fixes.py:508-516 silently no-ops"
+        f"tunelabs/import_fixes.py:508-516 silently no-ops"
     )
 
 
@@ -366,7 +366,7 @@ def test_trl_openenv_utils_generators(tag: str):
     assert legacy or new, (
         f"{tag}: openenv.utils has neither `generate_rollout_completions` "
         f"nor `_generate_rollout_completions_colocate`; "
-        f"unsloth/models/rl_replacements.py:1775-1781 patch breaks"
+        f"tunelabs/models/rl_replacements.py:1775-1781 patch breaks"
     )
 
 
@@ -376,7 +376,7 @@ def test_trl_openenv_utils_generators(tag: str):
 
 @pytest.mark.parametrize("tag", TRL_TAGS)
 def test_trl_grpo_trainer_required_methods(tag: str):
-    """GRPOTrainer methods unsloth rewrites against; drift silently skips
+    """GRPOTrainer methods tunelabs rewrites against; drift silently skips
     the rewrite. _get_per_token_logps was renamed to
     _get_per_token_logps_and_entropies in TRL 0.20+; either is fine."""
     src = fetch_text("huggingface/trl", tag, "trl/trainer/grpo_trainer.py")
@@ -385,7 +385,7 @@ def test_trl_grpo_trainer_required_methods(tag: str):
     for m in ("_prepare_inputs", "_generate_and_score_completions", "compute_loss"):
         assert has_def(src, m, "func"), (
             f"{tag}: GRPOTrainer.{m} missing; "
-            f"unsloth/models/rl_replacements.py dispatch by name silently skips"
+            f"tunelabs/models/rl_replacements.py dispatch by name silently skips"
         )
     # Per-token-logps surface: ONE of the two names must exist.
     has_legacy = has_def(src, "_get_per_token_logps", "func")
@@ -393,7 +393,7 @@ def test_trl_grpo_trainer_required_methods(tag: str):
     assert has_legacy or has_new, (
         f"{tag}: neither GRPOTrainer._get_per_token_logps (TRL <=0.19) nor "
         f"._get_per_token_logps_and_entropies (TRL >=0.20) found; "
-        f"unsloth's per-token-logps rewrite no-ops on both dispatch keys"
+        f"tunelabs's per-token-logps rewrite no-ops on both dispatch keys"
     )
     # Optional/version-dependent — informational only.
     for m in ("_generate_single_turn", "_move_model_to_vllm", "_calculate_rewards"):
@@ -418,7 +418,7 @@ def test_trl_grpo_source_inference_mode_unwrap(tag: str):
     assert has_inference_mode and has_unwrap, (
         f"{tag}: GRPOTrainer source missing torch.inference_mode={has_inference_mode} "
         f"or self.accelerator.unwrap_model={has_unwrap}; "
-        f"unsloth/models/rl_replacements.py:526 autocast insertion no-ops"
+        f"tunelabs/models/rl_replacements.py:526 autocast insertion no-ops"
     )
 
 
@@ -461,7 +461,7 @@ def test_trl_kto_get_batch_logps_signature(tag: str):
         return
     pytest.fail(
         f"{tag}: KTO log-prob computation not found in any of {candidates}; "
-        f"unsloth/models/rl_replacements.py KTO rewrite silently skipped"
+        f"tunelabs/models/rl_replacements.py KTO rewrite silently skipped"
     )
 
 
@@ -479,12 +479,12 @@ def test_trl_sft_trainer_class(tag: str):
     assert has_def(src, "SFTTrainer", "class"), f"{tag}: class SFTTrainer missing"
 
 
-# 19-21. DPOTrainer methods unsloth-zoo's rl_replacements rewrites.
+# 19-21. DPOTrainer methods tunelabs-zoo's rl_replacements rewrites.
 
 
 @pytest.mark.parametrize("tag", TRL_TAGS)
 def test_trl_dpo_trainer_methods(tag: str):
-    """DPOTrainer methods unsloth's rewriters key on (rl_replacements.py
+    """DPOTrainer methods tunelabs's rewriters key on (rl_replacements.py
     :222-394). All version-windowed and non-required (the rewriter
     cleanly no-ops when absent); presence/absence is logged as
     informational so a silent regression stays visible."""
@@ -504,7 +504,7 @@ def test_trl_dpo_trainer_methods(tag: str):
         _ = _present  # informational; rewriter no-ops cleanly when absent
 
 
-# 22-23. grpo_trainer must have in scope the helpers unsloth's rewriters
+# 22-23. grpo_trainer must have in scope the helpers tunelabs's rewriters
 #        reference (profiling_context, maybe_apply_chat_template,
 #        truncate_with_protected_tokens), defined or imported from trl.*.
 
@@ -512,7 +512,7 @@ def test_trl_dpo_trainer_methods(tag: str):
 @pytest.mark.parametrize("tag", TRL_TAGS)
 def test_trl_grpo_internal_helpers_in_scope(tag: str):
     """Chat-template kwargs must propagate via legacy
-    `maybe_apply_chat_template` (TRL <=0.24, rewritten by unsloth) or
+    `maybe_apply_chat_template` (TRL <=0.24, rewritten by tunelabs) or
     successor `apply_chat_template(... **chat_template_kwargs)` (TRL
     >=0.25, native). Either pattern wires the path."""
     src = fetch_text("huggingface/trl", tag, "trl/trainer/grpo_trainer.py")
@@ -523,7 +523,7 @@ def test_trl_grpo_internal_helpers_in_scope(tag: str):
         f"{tag}: GRPOTrainer source does NOT propagate chat-template kwargs "
         f"via legacy `maybe_apply_chat_template` OR successor "
         f"`apply_chat_template(... **chat_template_kwargs)`; "
-        f"unsloth/models/rl_replacements.py:909-927 rewrite no-ops AND "
+        f"tunelabs/models/rl_replacements.py:909-927 rewrite no-ops AND "
         f"native TRL doesn't carry the kwargs either — likely real bug"
     )
 

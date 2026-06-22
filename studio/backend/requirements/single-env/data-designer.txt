@@ -1,4 +1,4 @@
-# Install Data Designer in same env as Unsloth.
+# Install Data Designer in same env as TuneLabs.
 data-designer==0.5.4
 data-designer-config==0.5.4
 data-designer-engine==0.5.4

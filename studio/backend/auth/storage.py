@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """SQLite storage for auth data (user credentials + JWT secret)."""
 
@@ -16,7 +16,7 @@ from typing import Optional, Tuple
 from utils.paths import auth_db_path, ensure_dir
 
 DB_PATH = auth_db_path()
-DEFAULT_ADMIN_USERNAME = "unsloth"
+DEFAULT_ADMIN_USERNAME = "tunelabs"
 
 # Plaintext bootstrap password file beside auth.db, deleted on first password
 # change so the credential never lingers on disk.
@@ -673,7 +673,7 @@ def clear_desktop_secret() -> None:
 # API key management
 # ---------------------------------------------------------------------------
 
-API_KEY_PREFIX = "sk-unsloth-"
+API_KEY_PREFIX = "sk-tunelabs-"
 
 
 def create_api_key(
@@ -769,7 +769,7 @@ def revoke_api_key(username: str, key_id: int) -> bool:
 def revoke_internal_api_key(key_id: int) -> bool:
     """Revoke an internal workflow-minted key without requiring a username.
 
-    Used by the recipe runner to retire its sk-unsloth-* key once the job
+    Used by the recipe runner to retire its sk-tunelabs-* key once the job
     terminates, shrinking the window a leaked key could be abused.
     """
     conn = get_connection()

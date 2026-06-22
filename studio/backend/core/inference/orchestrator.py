@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """
 Inference orchestrator — subprocess-based.
@@ -108,13 +108,13 @@ class InferenceOrchestrator:
         return result
 
     def _fetch_top_models(self) -> None:
-        """Fetch top GGUF and non-GGUF repos from unsloth by downloads."""
+        """Fetch top GGUF and non-GGUF repos from tunelabs by downloads."""
         try:
             import httpx
             resp = httpx.get(
                 "https://huggingface.co/api/models",
                 params = {
-                    "author": "unsloth",
+                    "author": "tunelabs",
                     "sort": "downloads",
                     "direction": "-1",
                     "limit": "80",
@@ -720,7 +720,7 @@ class InferenceOrchestrator:
         """Load a model for inference.
 
         Always spawns a fresh subprocess per load for a clean interpreter (no
-        stale unsloth patches, torch.compile caches, or getsource failures).
+        stale tunelabs patches, torch.compile caches, or getsource failures).
         """
         from utils.transformers_version import needs_transformers_5
 
@@ -751,7 +751,7 @@ class InferenceOrchestrator:
             sub_config["gpu_selection"] = gpu_selection
 
             # Always kill the existing subprocess and spawn fresh: reusing one
-            # after unsloth patches torch internals breaks getsource on reload.
+            # after tunelabs patches torch internals breaks getsource on reload.
             if self._ensure_subprocess_alive():
                 self._cancel_generation()
                 time.sleep(0.3)

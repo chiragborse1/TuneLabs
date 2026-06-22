@@ -1,6 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 set -euo pipefail
 
 # ============================================================
@@ -23,7 +23,7 @@ set -euo pipefail
 #   2. Installs uv, mlx-vlm, transformers, torch, torchvision
 # ============================================================
 
-# ── Output style (inspired by unsloth/install.sh) ─────────────
+# ── Output style (inspired by tunelabs/install.sh) ─────────────
 RULE=""
 _rule_i=0
 while [ "$_rule_i" -lt 52 ]; do
@@ -66,7 +66,7 @@ done
 
 # Default venv location
 if [ -z "$VENV_DIR" ]; then
-    VENV_DIR="$HOME/.unsloth/unsloth_qwen3_6_mlx"
+    VENV_DIR="$HOME/.tunelabs/tunelabs_qwen3_6_mlx"
 fi
 
 # ── Banner ────────────────────────────────────────────────────
@@ -181,10 +181,10 @@ fi
 #
 # Rotate by:
 #   _PATCH_COMMIT=<new SHA>
-#   curl -sSLf "https://raw.githubusercontent.com/unslothai/unsloth/$_PATCH_COMMIT/unsloth/models/patches/mlx_vlm_qwen3_5/qwen3_5.py" | shasum -a 256
-#   curl -sSLf "https://raw.githubusercontent.com/unslothai/unsloth/$_PATCH_COMMIT/unsloth/models/patches/mlx_vlm_qwen3_5/generate.py" | shasum -a 256
+#   curl -sSLf "https://raw.githubusercontent.com/tunelabsai/tunelabs/$_PATCH_COMMIT/tunelabs/models/patches/mlx_vlm_qwen3_5/qwen3_5.py" | shasum -a 256
+#   curl -sSLf "https://raw.githubusercontent.com/tunelabsai/tunelabs/$_PATCH_COMMIT/tunelabs/models/patches/mlx_vlm_qwen3_5/generate.py" | shasum -a 256
 _PATCH_COMMIT="013c99e51bbb8c4b83d88f3b150a1e53251a19d2"
-_PATCH_BASE="https://raw.githubusercontent.com/unslothai/unsloth/${_PATCH_COMMIT}/unsloth/models/patches/mlx_vlm_qwen3_5"
+_PATCH_BASE="https://raw.githubusercontent.com/tunelabsai/tunelabs/${_PATCH_COMMIT}/tunelabs/models/patches/mlx_vlm_qwen3_5"
 _PATCH_SHA_QWEN35="4b6fbbcc59b1d6b935e7204351aae1476836d25542a11c7885402b672d2efa64"
 _PATCH_SHA_GENERATE="50c4cbb8c3d94c0c74a4d209db6d2b23b102944c147c6421f2eded427b8edaf7"
 
@@ -232,16 +232,16 @@ echo ""
 printf "  ${C_TITLE}%s${C_RST}\n" "Qwen3.6 MLX installed!"
 printf "  ${C_DIM}%s${C_RST}\n" "$RULE"
 echo ""
-step "available models" "unsloth/Qwen3.6-35B-A3B-UD-MLX-3bit"
-substep "unsloth/Qwen3.6-35B-A3B-UD-MLX-4bit"
-substep "unsloth/Qwen3.6-35B-A3B-MLX-8bit"
+step "available models" "tunelabs/Qwen3.6-35B-A3B-UD-MLX-3bit"
+substep "tunelabs/Qwen3.6-35B-A3B-UD-MLX-4bit"
+substep "tunelabs/Qwen3.6-35B-A3B-MLX-8bit"
 echo ""
 step "venv activate" "source ${VENV_DIR}/bin/activate"
 echo ""
-step "vision chat" "python -m mlx_vlm.chat --model unsloth/Qwen3.6-35B-A3B-UD-MLX-4bit"
+step "vision chat" "python -m mlx_vlm.chat --model tunelabs/Qwen3.6-35B-A3B-UD-MLX-4bit"
 substep "Use /image path/to/image.jpg to load an image"
 echo ""
-step "gradio UI" "python -m mlx_vlm.chat_ui --model unsloth/Qwen3.6-35B-A3B-UD-MLX-4bit"
+step "gradio UI" "python -m mlx_vlm.chat_ui --model tunelabs/Qwen3.6-35B-A3B-UD-MLX-4bit"
 echo ""
 printf "  ${C_DIM}%s${C_RST}\n" "$RULE"
 echo ""

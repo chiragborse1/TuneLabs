@@ -1,5 +1,5 @@
-# Single-env pins for unsloth + studio + data-designer
-# Keep compatible with unsloth transformers bounds.
+# Single-env pins for tunelabs + studio + data-designer
+# Keep compatible with tunelabs transformers bounds.
 transformers==4.57.6
 trl==0.23.1
 huggingface-hub==0.36.2

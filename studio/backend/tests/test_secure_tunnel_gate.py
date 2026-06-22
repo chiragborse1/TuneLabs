@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Cloudflare tunnel start gate, incl. --secure on loopback. Imports run.py
 directly, so run under the Studio venv."""
@@ -111,7 +111,7 @@ def test_tool_policy_notice_wording():
 
 
 def test_startup_output_emits_tool_notice_on_network_bind(capsys, monkeypatch):
-    # Plain `unsloth studio -H 0.0.0.0` must not be silent about tools now.
+    # Plain `tunelabs studio -H 0.0.0.0` must not be silent about tools now.
     import run
 
     monkeypatch.setattr(run, "_verify_global_reachability", lambda *a, **k: None)

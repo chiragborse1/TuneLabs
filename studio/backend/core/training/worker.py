@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """
 Training subprocess entry point.
@@ -66,15 +66,15 @@ _CAUSAL_CONV1D_PACKAGE_VERSION = "1.6.1"
 _MAMBA_SSM_RELEASE_TAG = "v2.3.1"
 _MAMBA_SSM_PACKAGE_VERSION = "2.3.1"
 _FLASH_ATTN_RUNTIME_MIN_SEQ_LEN = 32768
-_FLASH_ATTN_SKIP_ENV = "UNSLOTH_STUDIO_SKIP_FLASHATTN_INSTALL"
+_FLASH_ATTN_SKIP_ENV = "TUNELABS_STUDIO_SKIP_FLASHATTN_INSTALL"
 # apache-tvm-ffi 0.1.10/0.1.11 crash Triton with "CUDA: misaligned address" on sm_100.
 _TILELANG_PACKAGE_VERSION = "0.1.8"
 _APACHE_TVM_FFI_PACKAGE_VERSION = "0.1.9"
-_TILELANG_SKIP_ENV = "UNSLOTH_STUDIO_SKIP_TILELANG_INSTALL"
+_TILELANG_SKIP_ENV = "TUNELABS_STUDIO_SKIP_TILELANG_INSTALL"
 # Pin both so plain pip can't silently upgrade torch under the worker (fla-core needs torch>=2.7).
 _FLA_PACKAGE_VERSION = "0.5.0"
 _FLA_CORE_PACKAGE_VERSION = "0.5.0"
-_FLA_SKIP_ENV = "UNSLOTH_STUDIO_SKIP_FLA_INSTALL"
+_FLA_SKIP_ENV = "TUNELABS_STUDIO_SKIP_FLA_INSTALL"
 # `--no-deps` saves torch but loses fla-core's transitive deps; `packaging` is also undeclared upstream.
 _FLA_RUNTIME_DEPS = ("einops", "packaging", "triton")
 _FLA_MIN_TORCH = (2, 7)
@@ -83,7 +83,7 @@ _FLA_MIN_PYTHON = (3, 10)
 _TILELANG_SUPPORTED_LINUX_MACHINES = frozenset(("x86_64", "amd64", "aarch64", "arm64"))
 _TILELANG_INSTALL_TIMEOUT_S = 600
 _TVM_FFI_BROKEN_VERSIONS = ("0.1.10", "0.1.11")
-_FAST_PATH_HOOKS_SKIP_ENV = "UNSLOTH_STUDIO_SKIP_FAST_PATH_HOOKS"
+_FAST_PATH_HOOKS_SKIP_ENV = "TUNELABS_STUDIO_SKIP_FAST_PATH_HOOKS"
 
 # Module-level handle so the torch.library.Library registration survives past
 # run_training_process() and isn't GC'd mid-run.
@@ -570,7 +570,7 @@ def _ensure_flash_linear_attention_unconditional(event_queue: Any) -> bool:
 
 
 def _ensure_flash_linear_attention(event_queue: Any, model_name: str) -> None:
-    """Legacy model-name-gated FLA install, used when UNSLOTH_STUDIO_SKIP_FAST_PATH_HOOKS=1."""
+    """Legacy model-name-gated FLA install, used when TUNELABS_STUDIO_SKIP_FAST_PATH_HOOKS=1."""
     if not _model_wants_tilelang(model_name):
         return
     _ensure_flash_linear_attention_unconditional(event_queue)
@@ -782,7 +782,7 @@ def _ensure_tilelang_backend_unconditional(event_queue: Any) -> bool:
     Returns True iff both import post-call. Step 1 downgrades a broken tvm-ffi
     with --force-reinstall --no-deps so torch / CUDA stay untouched; step 2 is a
     regular install for missing transitive deps. Bypass via
-    UNSLOTH_STUDIO_SKIP_TILELANG_INSTALL=1.
+    TUNELABS_STUDIO_SKIP_TILELANG_INSTALL=1.
     """
     if os.getenv(_TILELANG_SKIP_ENV) == "1":
         return False
@@ -868,7 +868,7 @@ def _ensure_tilelang_backend(event_queue: Any, model_name: str) -> None:
 # Wrap transformers' is_{flash_linear_attention,causal_conv1d}_available so the
 # first call (at modeling import) drives the install. Models that never query
 # the gate (Llama, Gemma, dense Qwen) pay nothing.
-# UNSLOTH_STUDIO_SKIP_FAST_PATH_HOOKS=1 falls back to the substring path.
+# TUNELABS_STUDIO_SKIP_FAST_PATH_HOOKS=1 falls back to the substring path.
 
 
 def _rebind_in_already_imported_modules(*, attr_name: str, old_obj: Any, new_obj: Any) -> int:
@@ -898,7 +898,7 @@ def _rebind_in_already_imported_modules(*, attr_name: str, old_obj: Any, new_obj
 def _install_fast_path_hooks(event_queue: Any, model_name: str) -> None:
     """Hook transformers' is_*_available gates so the first call drives the install.
 
-    Idempotent. UNSLOTH_STUDIO_SKIP_FAST_PATH_HOOKS=1 falls back to the substring gate.
+    Idempotent. TUNELABS_STUDIO_SKIP_FAST_PATH_HOOKS=1 falls back to the substring gate.
     """
     if os.getenv(_FAST_PATH_HOOKS_SKIP_ENV) == "1":
         logger.info("Fast-path hooks disabled via env; using substring fallback")
@@ -1088,7 +1088,7 @@ def _mlx_vlm_max_resized_size(width: int, height: int, target: int) -> tuple[int
     largest_side = max(width, height)
     if largest_side <= target:
         return width, height
-    # Integer formula matches unsloth_zoo's collator (Python round() differs by
+    # Integer formula matches tunelabs_zoo's collator (Python round() differs by
     # 1px on half-pixel cases). max(1, _) avoids a zero-side degenerate output.
     new_w = max(1, (width * target + largest_side // 2) // largest_side)
     new_h = max(1, (height * target + largest_side // 2) // largest_side)
@@ -1341,7 +1341,7 @@ def _mlx_local_dataset_loader_for_files(files: list[str]) -> str:
 def _run_mlx_training(event_queue, stop_queue, config):
     """Self-contained MLX training path for Apple Silicon.
 
-    Uses unsloth_zoo's MLXTrainer directly (no torch/SFTTrainer). Mirrors the
+    Uses tunelabs_zoo's MLXTrainer directly (no torch/SFTTrainer). Mirrors the
     event_queue protocol so the parent process pump works unchanged.
     """
     import time
@@ -1388,16 +1388,16 @@ def _run_mlx_training(event_queue, stop_queue, config):
     import mlx.core as mx
 
     try:
-        from unsloth_zoo.mlx.loader import FastMLXModel
-        from unsloth_zoo.mlx.trainer import (
+        from tunelabs_zoo.mlx.loader import FastMLXModel
+        from tunelabs_zoo.mlx.trainer import (
             MLXTrainer,
             MLXTrainingConfig,
             train_on_responses_only,
         )
     except ImportError as e:
         raise ImportError(
-            "Unsloth: MLX training requires unsloth-zoo with the MLX modules "
-            "(unsloth_zoo.mlx.loader / unsloth_zoo.mlx.trainer). Reinstall via "
+            "TuneLabs: MLX training requires tunelabs-zoo with the MLX modules "
+            "(tunelabs_zoo.mlx.loader / tunelabs_zoo.mlx.trainer). Reinstall via "
             "install.sh on Apple Silicon."
         ) from e
     from utils.datasets.cache_safe import load_dataset_cache_safe as load_dataset
@@ -1553,7 +1553,7 @@ def _run_mlx_training(event_queue, stop_queue, config):
             status_message = f"MLX vision image resize: {vision_image_size} (max dimension)",
         )
     # ── 2. Apply LoRA / full FT ──
-    # gradient_checkpointing stays a string ("mlx"/"unsloth"/"none"/etc.);
+    # gradient_checkpointing stays a string ("mlx"/"tunelabs"/"none"/etc.);
     # get_peft_model and MLXTrainer both accept and handle strings.
     gc_setting = config.get("gradient_checkpointing", "mlx")
     if isinstance(gc_setting, str):
@@ -1785,7 +1785,7 @@ def _run_mlx_training(event_queue, stop_queue, config):
         warmup_steps = 5
 
     # ── 5. Build output dir ──
-    # Resolve to ~/.unsloth/studio/outputs/ so the export page finds it
+    # Resolve to ~/.tunelabs/studio/outputs/ so the export page finds it
     from utils.paths import resolve_output_dir, ensure_dir, default_run_dir_name
 
     output_dir = config.get("output_dir", "")
@@ -1810,7 +1810,7 @@ def _run_mlx_training(event_queue, stop_queue, config):
         max_grad_value = float(max_grad_value)
         if max_grad_value < 0:
             raise ValueError(
-                f"Unsloth MLX: max_grad_value={max_grad_value} must be >= 0 "
+                f"TuneLabs MLX: max_grad_value={max_grad_value} must be >= 0 "
                 "(0 or None disables elementwise clipping)."
             )
     max_grad_leaf_norm = config.get("max_grad_leaf_norm")
@@ -1818,7 +1818,7 @@ def _run_mlx_training(event_queue, stop_queue, config):
         max_grad_leaf_norm = float(max_grad_leaf_norm)
         if max_grad_leaf_norm < 0:
             raise ValueError(
-                f"Unsloth MLX: max_grad_leaf_norm={max_grad_leaf_norm} must be >= 0 "
+                f"TuneLabs MLX: max_grad_leaf_norm={max_grad_leaf_norm} must be >= 0 "
                 "(0 or None disables proportional leaf-norm clipping)."
             )
     weight_decay = config.get("weight_decay", 0.001)
@@ -1918,7 +1918,7 @@ def _run_mlx_training(event_queue, stop_queue, config):
                 os.environ["WANDB_API_KEY"] = wandb_token
             _wandb_sensitive = {"hf_token", "wandb_token", "s3_config"}
             wandb_run = _wandb.init(
-                project = config.get("wandb_project") or "unsloth-mlx",
+                project = config.get("wandb_project") or "tunelabs-mlx",
                 config = {k: v for k, v in config.items() if k not in _wandb_sensitive},
                 reinit = True,
             )
@@ -2105,7 +2105,7 @@ def run_training_process(*, event_queue: Any, stop_queue: Any, config: dict) -> 
         warnings.filterwarnings("ignore")
 
     LogConfig.setup_logging(
-        service_name = "unsloth-studio-training-worker",
+        service_name = "tunelabs-studio-training-worker",
         env = os.getenv("ENVIRONMENT_TYPE", "production"),
     )
 
@@ -2175,9 +2175,9 @@ def run_training_process(*, event_queue: Any, stop_queue: Any, config: dict) -> 
     _lowered = model_name.lower()
     if (
         any(sub in _lowered for sub in _NEMOTRON_TRUST_SUBSTRINGS)
-        and (_lowered.startswith("unsloth/") or _lowered.startswith("nvidia/"))
+        and (_lowered.startswith("tunelabs/") or _lowered.startswith("nvidia/"))
         # Confirm a genuine first-party Hub repo (not a local/spoofed name starting
-        # with "unsloth/"); authenticated so private first-party repos resolve.
+        # with "tunelabs/"); authenticated so private first-party repos resolve.
         and is_trusted_org_repo(model_name, hf_token = config.get("hf_token") or None)
         and not config.get("trust_remote_code", False)
     ):
@@ -2268,7 +2268,7 @@ def run_training_process(*, event_queue: Any, stop_queue: Any, config: dict) -> 
     # 2) FLA + tilelang: gated by the runtime hook on
     #    is_flash_linear_attention_available (hooks also wrap causal-conv1d).
     # 3) mamba-ssm + flash-attn keep their substring / size gates.
-    # 4) UNSLOTH_STUDIO_SKIP_FAST_PATH_HOOKS=1 falls back to the substring path.
+    # 4) TUNELABS_STUDIO_SKIP_FAST_PATH_HOOKS=1 falls back to the substring path.
     try:
         _ensure_causal_conv1d_fast_path(event_queue, model_name)
         if os.getenv(_FAST_PATH_HOOKS_SKIP_ENV) == "1":
@@ -2322,7 +2322,7 @@ def run_training_process(*, event_queue: Any, stop_queue: Any, config: dict) -> 
 
     # ── 1d. Stub torchao on Windows ROCm ──
     # See core/_torchao_stub.py for the rationale (no RCCL backend on Windows
-    # ROCm). No-op elsewhere. Must run before importing transformers/unsloth_zoo.
+    # ROCm). No-op elsewhere. Must run before importing transformers/tunelabs_zoo.
     from core._torchao_stub import install_torchao_windows_rocm_stub
 
     install_torchao_windows_rocm_stub()
@@ -2408,7 +2408,7 @@ def run_training_process(*, event_queue: Any, stop_queue: Any, config: dict) -> 
             # redetectable defaults, while caller overrides remain authoritative.
             if (
                 "BNB_ROCM_VERSION" not in os.environ
-                or os.environ.get("UNSLOTH_BNB_ROCM_VERSION_SOURCE") == "sitecustomize"
+                or os.environ.get("TUNELABS_BNB_ROCM_VERSION_SOURCE") == "sitecustomize"
             ):
                 _bnb_rocm_ver = None
                 _found_rocm_bnb = False
@@ -2443,7 +2443,7 @@ def run_training_process(*, event_queue: Any, stop_queue: Any, config: dict) -> 
                 if _found_rocm_bnb:
                     _bnb_rocm_ver = _bnb_rocm_ver or os.environ.get("BNB_ROCM_VERSION") or "72"
                     os.environ["BNB_ROCM_VERSION"] = _bnb_rocm_ver
-                    os.environ["UNSLOTH_BNB_ROCM_VERSION_SOURCE"] = "detected"
+                    os.environ["TUNELABS_BNB_ROCM_VERSION_SOURCE"] = "detected"
                     logger.info(
                         "Windows ROCm: set BNB_ROCM_VERSION=%s "
                         "(detected from installed BNB wheel; "
@@ -2664,13 +2664,13 @@ def run_training_process(*, event_queue: Any, stop_queue: Any, config: dict) -> 
 
     # ── 2. Now import ML libraries (fresh in this clean process) ──
     try:
-        _send_status(event_queue, "Importing Unsloth...")
+        _send_status(event_queue, "Importing TuneLabs...")
 
         backend_path = str(Path(__file__).resolve().parent.parent.parent)
         if backend_path not in sys.path:
             sys.path.insert(0, backend_path)
 
-        from core.training.trainer import UnslothTrainer, TrainingProgress
+        from core.training.trainer import TuneLabsTrainer, TrainingProgress
         from utils.paths import (
             ensure_dir,
             resolve_output_dir,
@@ -2712,7 +2712,7 @@ def run_training_process(*, event_queue: Any, stop_queue: Any, config: dict) -> 
         return
 
     # ── 3. Create a fresh trainer instance ──
-    trainer = UnslothTrainer()
+    trainer = TuneLabsTrainer()
 
     # Wire up progress callback → event_queue
     def _on_progress(progress: TrainingProgress):
@@ -2915,7 +2915,7 @@ def run_training_process(*, event_queue: Any, stop_queue: Any, config: dict) -> 
             _send_status(event_queue, "Configuring LoRA for continued pretraining...")
             # embed_tokens (if included) goes to modules_to_save — trained
             # full-precision at embedding_learning_rate. lm_head stays a LoRA
-            # target for merge compatibility (see unsloth PR #4106).
+            # target for merge compatibility (see tunelabs PR #4106).
             _user_modules = config.get("target_modules") or []
             wants_embed = "embed_tokens" in _user_modules
             cpt_trains_embeddings = wants_embed
@@ -2938,7 +2938,7 @@ def run_training_process(*, event_queue: Any, stop_queue: Any, config: dict) -> 
                 lora_r = config.get("lora_r", 128),
                 lora_alpha = config.get("lora_alpha", 32),
                 lora_dropout = config.get("lora_dropout", 0.0),
-                use_gradient_checkpointing = config.get("gradient_checkpointing", "unsloth"),
+                use_gradient_checkpointing = config.get("gradient_checkpointing", "tunelabs"),
                 use_rslora = config.get("use_rslora", False),
                 use_loftq = config.get("use_loftq", False),
             )
@@ -2954,7 +2954,7 @@ def run_training_process(*, event_queue: Any, stop_queue: Any, config: dict) -> 
                 lora_r = config.get("lora_r", 16),
                 lora_alpha = config.get("lora_alpha", 16),
                 lora_dropout = config.get("lora_dropout", 0.0),
-                use_gradient_checkpointing = config.get("gradient_checkpointing", "unsloth"),
+                use_gradient_checkpointing = config.get("gradient_checkpointing", "tunelabs"),
                 use_rslora = config.get("use_rslora", False),
                 use_loftq = config.get("use_loftq", False),
             )
@@ -2996,7 +2996,7 @@ def run_training_process(*, event_queue: Any, stop_queue: Any, config: dict) -> 
         if is_cpt:
             if cpt_trains_embeddings:
                 if embedding_lr_value is None:
-                    # Default embedding_learning_rate = lr/10 (Unsloth CPT notebook).
+                    # Default embedding_learning_rate = lr/10 (TuneLabs CPT notebook).
                     embedding_lr_value = lr_value / 10.0
                     logger.info(
                         f"CPT: using default embedding_learning_rate={embedding_lr_value:.1e} "
@@ -3051,7 +3051,7 @@ def run_training_process(*, event_queue: Any, stop_queue: Any, config: dict) -> 
             packing = config.get("packing", False),
             train_on_completions = False if is_cpt else config.get("train_on_completions", False),
             enable_wandb = config.get("enable_wandb", False),
-            wandb_project = config.get("wandb_project", "unsloth-training"),
+            wandb_project = config.get("wandb_project", "tunelabs-training"),
             wandb_token = config.get("wandb_token"),
             enable_tensorboard = config.get("enable_tensorboard", False),
             tensorboard_dir = tensorboard_dir,
@@ -3141,7 +3141,7 @@ def _run_embedding_training(event_queue: Any, stop_queue: Any, config: dict) -> 
     """Self-contained embedding model training pipeline.
 
     Uses FastSentenceTransformer + SentenceTransformerTrainer +
-    MultipleNegativesRankingLoss — separate from UnslothTrainer's LLM/VLM/audio
+    MultipleNegativesRankingLoss — separate from TuneLabsTrainer's LLM/VLM/audio
     paths. Mirrors the reference embedding notebooks:
       All_MiniLM_L6_v2.py, BGE_M3.py, EmbeddingGemma_300M.py,
       ModernBert.py, Qwen3_Embedding_0_6B.py
@@ -3156,11 +3156,11 @@ def _run_embedding_training(event_queue: Any, stop_queue: Any, config: dict) -> 
     # ── 1. Import embedding-specific libraries ──
     _send_status(event_queue, "Importing embedding libraries...")
     try:
-        # Recover from a namespace-package shadow (embedding imports unsloth directly).
+        # Recover from a namespace-package shadow (embedding imports tunelabs directly).
         from core.import_guards import ensure_real_packages
 
-        ensure_real_packages("unsloth_zoo", "unsloth")
-        from unsloth import FastSentenceTransformer, is_bfloat16_supported
+        ensure_real_packages("tunelabs_zoo", "tunelabs")
+        from tunelabs import FastSentenceTransformer, is_bfloat16_supported
         from sentence_transformers import (
             SentenceTransformerTrainer,
             SentenceTransformerTrainingArguments,
@@ -3176,7 +3176,7 @@ def _run_embedding_training(event_queue: Any, stop_queue: Any, config: dict) -> 
             {
                 "type": "error",
                 "error": f"Failed to import embedding libraries: {e}. "
-                "Ensure 'sentence_transformers' and 'unsloth' are installed.",
+                "Ensure 'sentence_transformers' and 'tunelabs' are installed.",
                 "stack": traceback.format_exc(limit = 20),
                 "ts": time.time(),
             }

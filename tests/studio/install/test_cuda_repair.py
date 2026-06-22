@@ -70,7 +70,7 @@ def _run_cuda_repair(
     cvd controls CUDA_VISIBLE_DEVICES: None removes it from the env, any string sets it."""
     env = {}
     if rocm_marker:
-        env["UNSLOTH_ROCM_TORCH_INSTALLED"] = "1"
+        env["TUNELABS_ROCM_TORCH_INSTALLED"] = "1"
     if cvd is not None:
         env["CUDA_VISIBLE_DEVICES"] = cvd
 
@@ -96,7 +96,7 @@ def _run_cuda_repair(
         patch.dict(stack_mod.os.environ, env, clear = False),
     ):
         if not rocm_marker:
-            stack_mod.os.environ.pop("UNSLOTH_ROCM_TORCH_INSTALLED", None)
+            stack_mod.os.environ.pop("TUNELABS_ROCM_TORCH_INSTALLED", None)
         if cvd is None:
             stack_mod.os.environ.pop("CUDA_VISIBLE_DEVICES", None)
         _ensure_cuda_torch()

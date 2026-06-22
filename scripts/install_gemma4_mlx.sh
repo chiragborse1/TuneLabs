@@ -1,6 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 set -euo pipefail
 
 # ============================================================
@@ -20,7 +20,7 @@ set -euo pipefail
 #   2. Installs uv, mlx-vlm, transformers
 # ============================================================
 
-# ── Output style (inspired by unsloth/install.sh) ─────────────
+# ── Output style (inspired by tunelabs/install.sh) ─────────────
 RULE=""
 _rule_i=0
 while [ "$_rule_i" -lt 52 ]; do
@@ -63,7 +63,7 @@ done
 
 # Default venv location
 if [ -z "$VENV_DIR" ]; then
-    VENV_DIR="$HOME/.unsloth/unsloth_gemma4_mlx"
+    VENV_DIR="$HOME/.tunelabs/tunelabs_gemma4_mlx"
 fi
 
 # ── Banner ────────────────────────────────────────────────────
@@ -166,19 +166,19 @@ echo ""
 printf "  ${C_TITLE}%s${C_RST}\n" "Gemma 4 MLX installed!"
 printf "  ${C_DIM}%s${C_RST}\n" "$RULE"
 echo ""
-step "available models" "unsloth/gemma-4-E2B-it-UD-MLX-4bit"
-substep "unsloth/gemma-4-E4B-it-UD-MLX-4bit"
-substep "unsloth/gemma-4-26b-a4b-it-UD-MLX-4bit"
-substep "unsloth/gemma-4-31b-it-UD-MLX-4bit"
+step "available models" "tunelabs/gemma-4-E2B-it-UD-MLX-4bit"
+substep "tunelabs/gemma-4-E4B-it-UD-MLX-4bit"
+substep "tunelabs/gemma-4-26b-a4b-it-UD-MLX-4bit"
+substep "tunelabs/gemma-4-31b-it-UD-MLX-4bit"
 echo ""
 step "venv activate" "source ${VENV_DIR}/bin/activate"
 echo ""
-step "text chat" "python -m mlx_vlm.chat --model unsloth/gemma-4-E2B-it-UD-MLX-4bit"
+step "text chat" "python -m mlx_vlm.chat --model tunelabs/gemma-4-E2B-it-UD-MLX-4bit"
 echo ""
-step "vision chat" "python -m mlx_vlm.chat --model unsloth/gemma-4-31b-it-UD-MLX-4bit"
+step "vision chat" "python -m mlx_vlm.chat --model tunelabs/gemma-4-31b-it-UD-MLX-4bit"
 substep "Use /image path/to/image.jpg to load an image"
 echo ""
-step "gradio UI" "python -m mlx_vlm.chat_ui --model unsloth/gemma-4-31b-it-UD-MLX-4bit"
+step "gradio UI" "python -m mlx_vlm.chat_ui --model tunelabs/gemma-4-31b-it-UD-MLX-4bit"
 echo ""
 printf "  ${C_DIM}%s${C_RST}\n" "$RULE"
 echo ""

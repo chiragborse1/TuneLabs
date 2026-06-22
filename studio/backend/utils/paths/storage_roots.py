@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 from __future__ import annotations
 
@@ -13,17 +13,17 @@ import tempfile
 
 def _infer_studio_home_from_venv() -> Path | None:
     """Return parent of sys.prefix as STUDIO_HOME when running from an
-    installer-managed unsloth_studio venv. Sentinel-gated (share/studio.conf
-    or bin shim) so a dev venv named unsloth_studio isn't misidentified.
+    installer-managed tunelabs_studio venv. Sentinel-gated (share/studio.conf
+    or bin shim) so a dev venv named tunelabs_studio isn't misidentified.
     """
     try:
         prefix = Path(sys.prefix).resolve()
     except (OSError, ValueError):
         return None
-    if prefix.name != "unsloth_studio":
+    if prefix.name != "tunelabs_studio":
         return None
     candidate = prefix.parent
-    shim_name = "unsloth.exe" if os.name == "nt" else "unsloth"
+    shim_name = "tunelabs.exe" if os.name == "nt" else "tunelabs"
     try:
         has_sentinel = (candidate / "share" / "studio.conf").is_file() or (
             candidate / "bin" / shim_name
@@ -38,11 +38,11 @@ def _infer_studio_home_from_venv() -> Path | None:
 def studio_root() -> Path:
     """Studio install root.
 
-    Priority: UNSLOTH_STUDIO_HOME, then STUDIO_HOME alias, then sys.prefix
-    inference, then legacy ~/.unsloth/studio. UNSLOTH_STUDIO_HOME wins if
+    Priority: TUNELABS_STUDIO_HOME, then STUDIO_HOME alias, then sys.prefix
+    inference, then legacy ~/.tunelabs/studio. TUNELABS_STUDIO_HOME wins if
     both are set (specific signal beats generic alias).
     """
-    override = (os.environ.get("UNSLOTH_STUDIO_HOME") or "").strip()
+    override = (os.environ.get("TUNELABS_STUDIO_HOME") or "").strip()
     if not override:
         override = (os.environ.get("STUDIO_HOME") or "").strip()
     if override:
@@ -53,7 +53,7 @@ def studio_root() -> Path:
     inferred = _infer_studio_home_from_venv()
     if inferred is not None:
         return inferred
-    return Path.home() / ".unsloth" / "studio"
+    return Path.home() / ".tunelabs" / "studio"
 
 
 def cache_root() -> Path:
@@ -62,7 +62,7 @@ def cache_root() -> Path:
 
 
 def studio_bin_root() -> Path:
-    """Dir for Studio-managed executables (the `unsloth` shim, downloaded tools like cloudflared)."""
+    """Dir for Studio-managed executables (the `tunelabs` shim, downloaded tools like cloudflared)."""
     return studio_root() / "bin"
 
 
@@ -136,21 +136,21 @@ def _xdg_user_dir(key: str) -> Path | None:
 
 
 def documents_root() -> Path:
-    override = (os.environ.get("UNSLOTH_STUDIO_DOCUMENTS_HOME") or "").strip()
+    override = (os.environ.get("TUNELABS_STUDIO_DOCUMENTS_HOME") or "").strip()
     if override:
         return Path(override).expanduser()
     return _xdg_user_dir("XDG_DOCUMENTS_DIR") or (Path.home() / "Documents")
 
 
 def project_workspaces_root() -> Path:
-    override = (os.environ.get("UNSLOTH_STUDIO_PROJECTS_HOME") or "").strip()
+    override = (os.environ.get("TUNELABS_STUDIO_PROJECTS_HOME") or "").strip()
     if override:
         return Path(override).expanduser()
-    return documents_root() / "Unsloth Studio" / "Projects"
+    return documents_root() / "TuneLabs Studio" / "Projects"
 
 
 def tmp_root() -> Path:
-    return Path(tempfile.gettempdir()) / "unsloth-studio"
+    return Path(tempfile.gettempdir()) / "tunelabs-studio"
 
 
 def seed_uploads_root() -> Path:
@@ -179,7 +179,7 @@ def ensure_dir(path: Path) -> Path:
 
 
 def legacy_hf_cache_dir() -> Path:
-    """Old Unsloth-specific HF hub cache, kept for backward-compat scans."""
+    """Old TuneLabs-specific HF hub cache, kept for backward-compat scans."""
     return cache_root() / "huggingface" / "hub"
 
 
@@ -187,7 +187,7 @@ def hf_default_cache_dir() -> Path:
     """Platform default HuggingFace hub cache (ignoring env overrides).
 
     Where HF caches when no ``HF_HUB_CACHE`` / ``HF_HOME`` is set. Scanned
-    so models downloaded *before* installing Unsloth Studio are discovered.
+    so models downloaded *before* installing TuneLabs Studio are discovered.
     """
     return Path.home() / ".cache" / "huggingface" / "hub"
 

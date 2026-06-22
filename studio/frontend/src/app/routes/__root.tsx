@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { Navbar } from "@/components/navbar";
@@ -84,7 +84,7 @@ export const Route = createRootRoute({
 const HIDDEN_NAVBAR_ROUTES = ["/onboarding", "/login", "/change-password"];
 
 // Fallback when no matched route declares a `staticData.title`.
-const DEFAULT_DOCUMENT_TITLE = "Unsloth Studio";
+const DEFAULT_DOCUMENT_TITLE = "TuneLabs Studio";
 
 function RootLayout() {
   const t = useT();

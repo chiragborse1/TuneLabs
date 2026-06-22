@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 /**
  * VRAM estimation for model loading (4-bit quantization via bitsandbytes).
  *
  * Estimates the total driver-level VRAM (what nvidia-smi reports) to load a
- * model in 4-bit with Unsloth / bitsandbytes, to check it fits the GPU before
+ * model in 4-bit with TuneLabs / bitsandbytes, to check it fits the GPU before
  * training.
  *
  * Formula: totalParams * 0.90 + 1.4 GB
  *
- * Calibrated against isolated Unsloth loads on RTX 5070 Ti (2026.2):
+ * Calibrated against isolated TuneLabs loads on RTX 5070 Ti (2026.2):
  *   Qwen2.5-0.5B  (0.49B) : est 1.8 vs actual 1.86 GB  (-3%)
  *   Llama-3.2-1B  (1.24B) : est 2.5 vs actual 2.54 GB   (-1%)
  *   Llama-3.2-3B  (3.21B) : est 4.3 vs actual 4.40 GB   (-2%)
@@ -51,7 +51,7 @@ function usesQuantizedLoading(method: TrainingMethod, modelId?: string): boolean
 }
 
 /**
- * Estimate VRAM (GB) to load a model with Unsloth. Bytes/param by method:
+ * Estimate VRAM (GB) to load a model with TuneLabs. Bytes/param by method:
  *   QLoRA: 4-bit bnb -> 0.90 (calibrated); LoRA/Full/CPT: fp16 -> 2.0
  *   (theoretical). Formula: totalParams * bytesPerParam + 1.4 GB overhead.
  */

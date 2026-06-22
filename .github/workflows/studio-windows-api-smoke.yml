@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 # Windows counterpart to studio-api-smoke.yml / studio-mac-api-smoke.yml.
 # Same tests/studio/studio_api_smoke.py exercise (CORS hardening, auth
@@ -15,8 +15,8 @@ on:
   pull_request:
     paths:
       - 'studio/**'
-      - 'unsloth/**'
-      - 'unsloth_cli/**'
+      - 'tunelabs/**'
+      - 'tunelabs_cli/**'
       - 'install.ps1'
       - 'pyproject.toml'
       - 'tests/studio/**'
@@ -41,7 +41,7 @@ jobs:
       run:
         shell: bash
     env:
-      GGUF_REPO: unsloth/gemma-3-270m-it-GGUF
+      GGUF_REPO: tunelabs/gemma-3-270m-it-GGUF
       GGUF_VARIANT: UD-Q4_K_XL
       GGUF_FILE: gemma-3-270m-it-UD-Q4_K_XL.gguf
       STUDIO_PORT: '18895'
@@ -107,7 +107,7 @@ jobs:
           # rebuild" and Studio boots with an empty dist directory.
           # Add-MpPreference accepts paths that do not yet exist.
           foreach ($p in @(
-            "$env:USERPROFILE\.unsloth",
+            "$env:USERPROFILE\.tunelabs",
             "$env:USERPROFILE\AppData\Local\uv",
             "$env:GITHUB_WORKSPACE\studio\frontend\node_modules",
             "$env:GITHUB_WORKSPACE\studio\frontend\dist"
@@ -138,8 +138,8 @@ jobs:
           # Filesystem-based check (setup.ps1's stream output isn't
           # captured back through this parent step's pipeline; see
           # studio-windows-ui-smoke.yml for full explanation).
-          LLAMA_DIR=~/.unsloth/llama.cpp
-          INFO="$LLAMA_DIR/UNSLOTH_PREBUILT_INFO.json"
+          LLAMA_DIR=~/.tunelabs/llama.cpp
+          INFO="$LLAMA_DIR/TUNELABS_PREBUILT_INFO.json"
           BIN="$LLAMA_DIR/build/bin/Release/llama-server.exe"
           if grep -q "falling back to source build" logs/install.log; then
             echo "::error::install.ps1 fell back to source-build llama.cpp on Windows."
@@ -147,7 +147,7 @@ jobs:
             exit 1
           fi
           if [ ! -f "$INFO" ]; then
-            echo "::error::no UNSLOTH_PREBUILT_INFO.json at $INFO."
+            echo "::error::no TUNELABS_PREBUILT_INFO.json at $INFO."
             ls -la "$LLAMA_DIR" || true
             exit 1
           fi
@@ -162,12 +162,12 @@ jobs:
       - name: Add Studio shim to GITHUB_PATH
         # install.ps1's User-PATH update doesn't propagate to a
         # running Git Bash session; export the shim dir so the
-        # next `unsloth ...` invocation finds it.
+        # next `tunelabs ...` invocation finds it.
         run: |
-          SHIM_DIR=~/.unsloth/studio/bin
-          if [ ! -f "$SHIM_DIR/unsloth.exe" ]; then
-            echo "::error::unsloth.exe shim not found at $SHIM_DIR"
-            ls -la ~/.unsloth/studio/ || true
+          SHIM_DIR=~/.tunelabs/studio/bin
+          if [ ! -f "$SHIM_DIR/tunelabs.exe" ]; then
+            echo "::error::tunelabs.exe shim not found at $SHIM_DIR"
+            ls -la ~/.tunelabs/studio/ || true
             exit 1
           fi
           cygpath -w "$SHIM_DIR" >> "$GITHUB_PATH"
@@ -177,9 +177,9 @@ jobs:
 
       - name: Reset auth + boot Studio (API-only)
         run: |
-          unsloth studio reset-password
+          tunelabs studio reset-password
           mkdir -p logs
-          UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p "$STUDIO_PORT" \
+          TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p "$STUDIO_PORT" \
             > logs/studio.log 2>&1 &
           echo "STUDIO_PID=$!" >> "$GITHUB_ENV"
 
@@ -195,7 +195,7 @@ jobs:
 
       - name: Pass bootstrap password + rotated targets to the test
         run: |
-          OLD=$(cat ~/.unsloth/studio/auth/.bootstrap_password)
+          OLD=$(cat ~/.tunelabs/studio/auth/.bootstrap_password)
           NEW="ApiSmoke-$(python -c 'import secrets; print(secrets.token_urlsafe(16))')"
           NEW2="ApiSmoke-$(python -c 'import secrets; print(secrets.token_urlsafe(16))')"
           echo "::add-mask::$OLD"
@@ -209,9 +209,9 @@ jobs:
         # Do NOT pin STUDIO_AUTH_DIR here. The Mac/Linux mirrors
         # hardcode runner-specific paths (/Users/runner/...,
         # /home/runner/...), but on Windows the path is
-        # C:\Users\runneradmin\.unsloth\studio\auth and varies by
+        # C:\Users\runneradmin\.tunelabs\studio\auth and varies by
         # runner image. studio_api_smoke.py defaults to
-        # Path.home()/".unsloth"/"studio"/"auth" when the env is
+        # Path.home()/".tunelabs"/"studio"/"auth" when the env is
         # unset, which is correct on every OS.
         env:
           BASE_URL: http://127.0.0.1:18895

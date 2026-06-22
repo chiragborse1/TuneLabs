@@ -1,13 +1,13 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """
 Integration tests for the external providers API.
 
-Requires a running Unsloth Studio server. Configure via env vars:
+Requires a running TuneLabs Studio server. Configure via env vars:
 
     export STUDIO_TEST_URL="http://localhost:8888"   # default
-    export STUDIO_TEST_USER="unsloth"                # default
+    export STUDIO_TEST_USER="tunelabs"                # default
     export STUDIO_TEST_PASSWORD="..."                # required — see .bootstrap_password
 
     # Provider API keys — tests skip when their key is unset
@@ -35,7 +35,7 @@ from cryptography.hazmat.primitives.asymmetric import padding
 # ── Configuration ─────────────────────────────────────────────────
 
 BASE_URL = os.getenv("STUDIO_TEST_URL", "http://localhost:8000")
-USERNAME = os.getenv("STUDIO_TEST_USER", "unsloth")
+USERNAME = os.getenv("STUDIO_TEST_USER", "tunelabs")
 PASSWORD = os.getenv("STUDIO_TEST_PASSWORD", "")
 
 # Skip the whole module when no live Studio server / bootstrap password is

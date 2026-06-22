@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { apiUrl } from "@/lib/api-base";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import { refreshSession } from "../api";
 // while default admin must_change_password is true)
 declare global {
   interface Window {
-    __UNSLOTH_BOOTSTRAP__?: { username: string; password: string };
+    __TUNELABS_BOOTSTRAP__?: { username: string; password: string };
   }
 }
 
@@ -73,7 +73,7 @@ type AuthFormProps = {
   mode: AuthMode;
 };
 
-const HIDDEN_LOGIN_USERNAME = "unsloth";
+const HIDDEN_LOGIN_USERNAME = "tunelabs";
 
 export function AuthForm({ mode }: AuthFormProps): ReactElement | null {
   const navigate = useNavigate();
@@ -157,7 +157,7 @@ export function AuthForm({ mode }: AuthFormProps): ReactElement | null {
   // Seed password from bootstrap credentials injected into HTML by web CLI.
   useEffect(() => {
     function loadBootstrap() {
-      const bootstrap = window.__UNSLOTH_BOOTSTRAP__;
+      const bootstrap = window.__TUNELABS_BOOTSTRAP__;
       if (bootstrap && !isLoginMode && !password) {
         setPassword(bootstrap.password);
       }
@@ -187,11 +187,11 @@ export function AuthForm({ mode }: AuthFormProps): ReactElement | null {
   const switchText = "Password already setup? ";
   const switchLinkTo = "/login";
   const switchLinkText = "Back to login";
-  const currentPassword = password || window.__UNSLOTH_BOOTSTRAP__?.password || "";
-  // On first boot the backend injects __UNSLOTH_BOOTSTRAP__ and we silently
+  const currentPassword = password || window.__TUNELABS_BOOTSTRAP__?.password || "";
+  // On first boot the backend injects __TUNELABS_BOOTSTRAP__ and we silently
   // reuse that password; the Current password input is only rendered for the
   // admin-forced must_change_password path where no bootstrap is available.
-  const hasBootstrapPassword = Boolean(window.__UNSLOTH_BOOTSTRAP__?.password);
+  const hasBootstrapPassword = Boolean(window.__TUNELABS_BOOTSTRAP__?.password);
   const invalidChangePasswordForm =
     !isLoginMode &&
     (currentPassword.length < 8 ||
@@ -294,10 +294,10 @@ export function AuthForm({ mode }: AuthFormProps): ReactElement | null {
       storeAuthTokens(token.access_token, token.refresh_token);
       navigate({ to: getPostAuthRoute() });
     } catch (err: unknown) {
-      // The backend returns the correct PATH-based command ("unsloth studio
+      // The backend returns the correct PATH-based command ("tunelabs studio
       // reset-password"), which the installer puts on PATH on every platform.
       // Do NOT rewrite it to a relative Windows path like
-      // ".\unsloth_studio\Scripts\unsloth.exe ..." -- that only resolves inside
+      // ".\tunelabs_studio\Scripts\tunelabs.exe ..." -- that only resolves inside
       // the Studio home dir and fails with CommandNotFoundException elsewhere.
       // Show the backend message as-is.
       const msg = err instanceof Error ? err.message : "Auth failed.";

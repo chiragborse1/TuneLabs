@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """llama.cpp prebuilt freshness check.
 
-Reads UNSLOTH_PREBUILT_INFO.json (written by install_llama_prebuilt.py)
+Reads TUNELABS_PREBUILT_INFO.json (written by install_llama_prebuilt.py)
 and compares the installed release tag against the latest on GitHub.
 Surfaced via main.py:lifespan() and /api/inference/status. Fails open
 on any missing data so we never show a misleading banner.
@@ -23,13 +23,13 @@ import structlog
 
 logger = structlog.get_logger(__name__)
 
-# 3 days matches Unsloth's typical llama.cpp release cadence.
+# 3 days matches TuneLabs's typical llama.cpp release cadence.
 STALENESS_THRESHOLD_DAYS = 3
 
 # 24h TTL keeps the GitHub call off the hot path and within rate limits.
 _RELEASE_CACHE_TTL_SECONDS = 24 * 60 * 60
 
-_INSTALL_MARKER_NAME = "UNSLOTH_PREBUILT_INFO.json"
+_INSTALL_MARKER_NAME = "TUNELABS_PREBUILT_INFO.json"
 
 _marker_cache: dict[str, Optional[dict]] = {}
 _release_memo: dict[str, tuple[float, Optional[str]]] = {}
@@ -43,11 +43,11 @@ def _cache_dir() -> Path:
         from utils.paths.storage_roots import cache_root
         return cache_root() / "llama_cpp_freshness"
     except Exception:
-        return Path.home() / ".unsloth" / "studio" / "cache" / "llama_cpp_freshness"
+        return Path.home() / ".tunelabs" / "studio" / "cache" / "llama_cpp_freshness"
 
 
 def read_install_marker(binary_path: Optional[str]) -> Optional[dict]:
-    """Walk up from binary_path to find UNSLOTH_PREBUILT_INFO.json.
+    """Walk up from binary_path to find TUNELABS_PREBUILT_INFO.json.
     None = no marker (source build / custom path) or invalid JSON."""
     if not binary_path:
         return None
@@ -121,7 +121,7 @@ def _fetch_latest_release_tag(repo: str, timeout: float = 5.0) -> Optional[str]:
     url = f"https://api.github.com/repos/{repo}/releases?per_page=30"
     headers = {
         "Accept": "application/vnd.github+json",
-        "User-Agent": "unsloth-studio-freshness-check",
+        "User-Agent": "tunelabs-studio-freshness-check",
     }
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     if token:
@@ -191,7 +191,7 @@ def _fetch_latest_release_assets(repo: str, timeout: float = 5.0) -> Optional[di
     url = f"https://api.github.com/repos/{repo}/releases?per_page=30"
     headers = {
         "Accept": "application/vnd.github+json",
-        "User-Agent": "unsloth-studio-freshness-check",
+        "User-Agent": "tunelabs-studio-freshness-check",
     }
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     if token:
@@ -405,7 +405,7 @@ def format_stale_warning(info: dict) -> str:
     age_str = f"{age} day{'s' if age != 1 else ''}" if age is not None else "some time"
     return (
         f"llama.cpp prebuilt is {age_str} behind: installed "
-        f"{installed}, latest {latest}. Run `unsloth studio update` "
+        f"{installed}, latest {latest}. Run `tunelabs studio update` "
         f"to refresh."
     )
 

@@ -61,14 +61,14 @@ fn spawn_update(
         cmd.env_remove("PYTHONPATH");
     }
 
-    // Tauri manages the legacy root; scrub so 'unsloth studio update' targets
+    // Tauri manages the legacy root; scrub so 'tunelabs studio update' targets
     // the same install the desktop app uses, not an inherited custom root.
-    cmd.env_remove("UNSLOTH_STUDIO_HOME");
+    cmd.env_remove("TUNELABS_STUDIO_HOME");
     cmd.env_remove("STUDIO_HOME");
-    // Signal to unsloth_cli that this update was initiated by the Tauri
+    // Signal to tunelabs_cli that this update was initiated by the Tauri
     // desktop bundle so it skips re-creating CLI launchers/.app/.desktop
     // shortcuts (Tauri owns its own bundle entries).
-    cmd.env("UNSLOTH_TAURI_UPDATE", "1");
+    cmd.env("TUNELABS_TAURI_UPDATE", "1");
 
     #[cfg(windows)]
     let mut child: Box<dyn ChildWrapper + Send> = {
@@ -233,10 +233,10 @@ fn run_backend_update_with_terminal_events(
         update.current_attempt = Some(attempt.clone());
     }
 
-    let bin = match crate::process::find_unsloth_binary() {
+    let bin = match crate::process::find_tunelabs_binary() {
         Some(bin) => bin,
         None => {
-            let msg = "Unsloth binary not found. Cannot run update.".to_string();
+            let msg = "TuneLabs binary not found. Cannot run update.".to_string();
             diagnostics::finish_attempt(&diagnostics, &attempt, None, false, Some(msg.clone()));
             clear_current_attempt(&state);
             return Err(msg);

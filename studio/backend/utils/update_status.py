@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-"""Web update status helpers for browser-served Unsloth Studio.
+"""Web update status helpers for browser-served TuneLabs Studio.
 
 Side-effect light: no network work at import time or from /api/health.
 The PyPI check is lazy, cached, and only for PyPI-managed installs.
@@ -22,14 +22,14 @@ from typing import Any
 
 from packaging.version import InvalidVersion, Version
 
-PACKAGE_NAME = "unsloth"
-PYPI_JSON_URL = "https://pypi.org/pypi/unsloth/json"
+PACKAGE_NAME = "tunelabs"
+PYPI_JSON_URL = "https://pypi.org/pypi/tunelabs/json"
 PYPI_TIMEOUT_SECONDS = 3
 PYPI_RESPONSE_MAX_BYTES = 5 * 1024 * 1024
 PYPI_SUCCESS_TTL_SECONDS = 12 * 60 * 60
 PYPI_FAILURE_TTL_SECONDS = 60 * 60
-RELEASE_NOTES_URL = "https://unsloth.ai/docs/new/changelog"
-DISABLE_ENV_VAR = "UNSLOTH_DISABLE_UPDATE_CHECK"
+RELEASE_NOTES_URL = "https://tunelabs.ai/docs/new/changelog"
+DISABLE_ENV_VAR = "TUNELABS_DISABLE_UPDATE_CHECK"
 
 LOCAL_INSTALL_SOURCES = {"editable", "local_path", "vcs", "local_repo"}
 
@@ -224,7 +224,7 @@ def _fetch_latest_pypi_version() -> LatestVersionResult:
     checked_at = _utc_now_iso()
     request = urllib.request.Request(
         PYPI_JSON_URL,
-        headers = {"User-Agent": "unsloth-studio-update-check"},
+        headers = {"User-Agent": "tunelabs-studio-update-check"},
     )
 
     try:
@@ -317,7 +317,7 @@ def _distribution_package_paths(dist: Any) -> list[Path]:
     files = getattr(dist, "files", None) or []
     for file in files:
         text = str(file)
-        if not text.startswith(("unsloth/", "unsloth_cli/", "studio/")):
+        if not text.startswith(("tunelabs/", "tunelabs_cli/", "studio/")):
             continue
         try:
             paths.append(Path(dist.locate_file(file)).resolve())

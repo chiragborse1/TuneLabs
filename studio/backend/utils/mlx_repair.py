@@ -1,25 +1,25 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Best-effort MLX self-heal for Apple Silicon.
 
 On macOS, Studio enables Train/Export only when the MLX training/export stack is
 usable (see utils.hardware.hardware.detect_hardware -> CHAT_ONLY). MLX is pulled
-only transitively via unsloth-zoo, and a resolver backtrack (mlx-vlm ->
+only transitively via tunelabs-zoo, and a resolver backtrack (mlx-vlm ->
 transformers>=5 vs the single-env transformers pin) can silently drop it, leaving
 Train/Export greyed out after a reinstall/update. This reinstalls mlx by name on
 a background thread, then re-detects so the gate re-opens without a manual
-`unsloth studio update`.
+`tunelabs studio update`.
 
 The install mirrors the main Apple Silicon installer (install_python_stack.py):
 it points UV_OVERRIDE at overrides-darwin-arm64.txt so the resolver keeps the
 Studio transformers pin AND installs a current mlx-vlm, and it requires the same
-minimum versions unsloth-zoo declares so a backtracked old mlx-vlm (which still
+minimum versions tunelabs-zoo declares so a backtracked old mlx-vlm (which still
 imports but breaks VLM Train/Export) is never accepted as healthy.
 
 Mirrors the runtime backend self-heal already used for tilelang
 (core.training.worker._ensure_tilelang_backend_unconditional): default-on,
-best-effort, opt out with UNSLOTH_DISABLE_MLX_AUTOREPAIR=1.
+best-effort, opt out with TUNELABS_DISABLE_MLX_AUTOREPAIR=1.
 """
 
 from __future__ import annotations
@@ -38,8 +38,8 @@ import structlog
 
 logger = structlog.get_logger(__name__)
 
-DISABLE_ENV_VAR = "UNSLOTH_DISABLE_MLX_AUTOREPAIR"
-# Minimum versions unsloth-zoo requires on Apple Silicon (its pyproject darwin
+DISABLE_ENV_VAR = "TUNELABS_DISABLE_MLX_AUTOREPAIR"
+# Minimum versions tunelabs-zoo requires on Apple Silicon (its pyproject darwin
 # deps). mlx-vlm especially must be >=0.4.4: an older one still imports but
 # breaks VLM Train/Export, so installing it would wrongly clear chat-only.
 _MLX_MIN_VERSIONS = {"mlx": "0.22.0", "mlx-lm": "0.22.0", "mlx-vlm": "0.4.4"}
@@ -98,7 +98,7 @@ def _mlx_versions_satisfy_minimums() -> bool:
 
 
 def mlx_stack_available() -> bool:
-    """`import mlx.core` works AND mlx/mlx-lm/mlx-vlm meet unsloth-zoo's minimums.
+    """`import mlx.core` works AND mlx/mlx-lm/mlx-vlm meet tunelabs-zoo's minimums.
 
     Check distribution versions before imports so a too-old but importable MLX
     module is not loaded into this process before repair can replace it."""
@@ -182,7 +182,7 @@ def _transformers_constraint_args() -> tuple[list[str], str | None]:
 
 def attempt_mlx_repair(*, timeout: int = _REPAIR_TIMEOUT_S) -> bool:
     """Install a usable mlx/mlx-lm/mlx-vlm stack by name into the running venv.
-    Best-effort; returns True iff the resulting stack meets unsloth-zoo's minimums
+    Best-effort; returns True iff the resulting stack meets tunelabs-zoo's minimums
     (so a backtracked old mlx-vlm is rejected, not accepted). transformers is held
     at its pinned version so the install can never upgrade it underneath Studio."""
     # Prepare the constraint inside the try: this runs on a daemon thread, so an
@@ -195,7 +195,7 @@ def attempt_mlx_repair(*, timeout: int = _REPAIR_TIMEOUT_S) -> bool:
         if cmd is None:
             logger.warning(
                 "MLX self-heal requires uv so Studio can apply dependency overrides; "
-                "staying chat-only. Run `unsloth studio update` to restore uv."
+                "staying chat-only. Run `tunelabs studio update` to restore uv."
             )
             return False
         logger.info("MLX self-heal: installing %s", ", ".join(MLX_PACKAGES))
@@ -253,7 +253,7 @@ def start_mlx_autorepair_if_needed() -> bool:
     reinstall it on a daemon thread (off the startup critical path) and re-detect
     on success. Returns True iff a repair thread was started. No-op (returns False)
     off Apple Silicon, when the stack is already adequate, when already attempted
-    this process, or when disabled via UNSLOTH_DISABLE_MLX_AUTOREPAIR=1."""
+    this process, or when disabled via TUNELABS_DISABLE_MLX_AUTOREPAIR=1."""
     global _attempted
     if os.environ.get(DISABLE_ENV_VAR) == "1":
         return False

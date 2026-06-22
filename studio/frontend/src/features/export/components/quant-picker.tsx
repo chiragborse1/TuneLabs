@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import {
   Tooltip,
@@ -52,7 +52,7 @@ export function QuantPicker({ value, onChange, sizes }: QuantPickerProps) {
             Lower quantization (Q2, Q3) = smaller files but reduced quality.
             Q4–Q5 is a good balance.{" "}
             <a
-              href="https://unsloth.ai/docs/basics/inference-and-deployment/saving-to-gguf"
+              href="https://tunelabs.ai/docs/basics/inference-and-deployment/saving-to-gguf"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary underline"

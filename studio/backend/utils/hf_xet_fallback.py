@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Xet-primary HF downloads with an automatic HTTP fallback on a no-progress stall.
 
@@ -190,7 +190,7 @@ def _download_child_entry(
 
     # Test-only fault injection (never set in production): stall the Xet attempt
     # so the watchdog + HTTP fallback can be exercised against a real repo.
-    if not disable_xet and os.environ.get("UNSLOTH_HF_XET_FORCE_STALL") == "1":
+    if not disable_xet and os.environ.get("TUNELABS_HF_XET_FORCE_STALL") == "1":
         import time as _t
         try:
             from huggingface_hub.constants import HF_HUB_CACHE

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Model management API routes."""
 
@@ -728,7 +728,7 @@ async def list_local_models(
         legacy_real = _safe_resolve(legacy_hf)
         default_real = _safe_resolve(hf_default)
 
-        # Scan legacy Unsloth HF cache for backward compatibility.
+        # Scan legacy TuneLabs HF cache for backward compatibility.
         if _safe_is_dir(legacy_hf) and legacy_real != hf_cache_real:
             local_models += _scan_hf_cache(legacy_hf)
 
@@ -2273,7 +2273,7 @@ async def check_embedding_model(
 @router.get("/gguf-variants", response_model = GgufVariantsResponse)
 async def get_gguf_variants(
     repo_id: str = Query(
-        ..., description = "HuggingFace repo ID (e.g. 'unsloth/gemma-3-4b-it-GGUF')"
+        ..., description = "HuggingFace repo ID (e.g. 'tunelabs/gemma-3-4b-it-GGUF')"
     ),
     hf_token: Optional[str] = Query(None, description = "HuggingFace token for private repos"),
     current_subject: str = Depends(get_current_subject),
@@ -2746,7 +2746,7 @@ def _repo_gguf_last_modified(repo_info) -> float:
 
 @router.get("/cached-gguf")
 async def list_cached_gguf(current_subject: str = Depends(get_current_subject)):
-    """List GGUF repos downloaded to HF cache, legacy Unsloth cache, and HF default cache."""
+    """List GGUF repos downloaded to HF cache, legacy TuneLabs cache, and HF default cache."""
     try:
         cache_scans = _all_hf_cache_scans()
 
@@ -2796,7 +2796,7 @@ async def list_cached_gguf(current_subject: str = Depends(get_current_subject)):
 
 @router.get("/cached-models")
 async def list_cached_models(current_subject: str = Depends(get_current_subject)):
-    """List non-GGUF model repos downloaded to HF cache, legacy Unsloth cache, and HF default cache."""
+    """List non-GGUF model repos downloaded to HF cache, legacy TuneLabs cache, and HF default cache."""
     _WEIGHT_EXTENSIONS = (".safetensors", ".bin")
 
     try:

@@ -6,6 +6,6 @@
 - Do not change fallback logic to hide missing translations.
 - Do not add automatic DOM translation, MutationObserver text replacement, or runtime guess-based translation.
 - Preserve interpolation variables exactly, for example `{count}`, `{model}`, and `{provider}`.
-- Keep product and technical names unchanged unless there is an established localized name, for example `Unsloth Studio`, `LoRA`, `GGUF`, and `Hugging Face`.
+- Keep product and technical names unchanged unless there is an established localized name, for example `TuneLabs Studio`, `LoRA`, `GGUF`, and `Hugging Face`.
 - Keep translation changes small and reviewable. Prefer separate commits for runtime changes, UI migration, and locale text.
 - When adding user-facing Studio UI text, add the English message key first and add non-English overrides only when the translation is clear.

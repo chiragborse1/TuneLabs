@@ -1,16 +1,16 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 #
-# Unsloth Studio uninstaller for Windows PowerShell.
+# TuneLabs Studio uninstaller for Windows PowerShell.
 # Stops running servers and removes install dir, launcher data, CLI shim,
 # desktop and Start Menu shortcuts, the user PATH entry, and the PathBackup
-# registry key. Honors custom roots set via UNSLOTH_STUDIO_HOME / STUDIO_HOME
+# registry key. Honors custom roots set via TUNELABS_STUDIO_HOME / STUDIO_HOME
 # at install time (read back from share\studio.conf).
 #
-# Usage:  irm https://raw.githubusercontent.com/unslothai/unsloth/main/scripts/uninstall.ps1 | iex
+# Usage:  irm https://raw.githubusercontent.com/tunelabsai/tunelabs/main/scripts/uninstall.ps1 | iex
 # Local:  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; .\scripts\uninstall.ps1
 
-function Uninstall-UnslothStudio {
+function Uninstall-TuneLabsStudio {
     $ErrorActionPreference = "Continue"
 
     function _Step { param([string]$Msg) Write-Host $Msg }
@@ -35,14 +35,14 @@ function Uninstall-UnslothStudio {
     }
 
     # A path is a Studio-owned root iff one of install.ps1's sentinels exists:
-    #   <root>\share\studio.conf, <root>\unsloth_studio\.unsloth-studio-owned,
-    #   or <root>\bin\unsloth.exe.
+    #   <root>\share\studio.conf, <root>\tunelabs_studio\.tunelabs-studio-owned,
+    #   or <root>\bin\tunelabs.exe.
     function _IsStudioRoot {
         param([string]$Path)
         if ([string]::IsNullOrWhiteSpace($Path)) { return $false }
         if (Test-Path -LiteralPath (Join-Path $Path "share\studio.conf") -PathType Leaf) { return $true }
-        if (Test-Path -LiteralPath (Join-Path $Path "unsloth_studio\.unsloth-studio-owned") -PathType Leaf) { return $true }
-        if (Test-Path -LiteralPath (Join-Path $Path "bin\unsloth.exe") -PathType Leaf) { return $true }
+        if (Test-Path -LiteralPath (Join-Path $Path "tunelabs_studio\.tunelabs-studio-owned") -PathType Leaf) { return $true }
+        if (Test-Path -LiteralPath (Join-Path $Path "bin\tunelabs.exe") -PathType Leaf) { return $true }
         return $false
     }
 
@@ -78,16 +78,16 @@ function Uninstall-UnslothStudio {
         return $false
     }
 
-    # Parse UNSLOTH_EXE='<path>' out of a share\studio.conf and return the
+    # Parse TUNELABS_EXE='<path>' out of a share\studio.conf and return the
     # implied install root (three dirnames up from the venv exe).
     function _RootFromConf {
         param([string]$ConfFile)
         if (-not (Test-Path -LiteralPath $ConfFile -PathType Leaf)) { return $null }
         $line = Get-Content -LiteralPath $ConfFile -ErrorAction SilentlyContinue |
-            Where-Object { $_ -match "^UNSLOTH_EXE\s*=" } | Select-Object -First 1
+            Where-Object { $_ -match "^TUNELABS_EXE\s*=" } | Select-Object -First 1
         if (-not $line) { return $null }
         # Tolerate ' value ' single-quoted with ''  -> ' apostrophe escape.
-        if ($line -match "^UNSLOTH_EXE\s*=\s*'(.*)'\s*$") {
+        if ($line -match "^TUNELABS_EXE\s*=\s*'(.*)'\s*$") {
             $exe = $Matches[1] -replace "''", "'"
             try {
                 $bin = Split-Path -LiteralPath $exe -Parent
@@ -116,14 +116,14 @@ function Uninstall-UnslothStudio {
     }
 
     # Discover non-default Studio roots from env vars + studio.conf files.
-    # Mirrors install.ps1's precedence: UNSLOTH_STUDIO_HOME wins, STUDIO_HOME
+    # Mirrors install.ps1's precedence: TUNELABS_STUDIO_HOME wins, STUDIO_HOME
     # is ignored when both are set, so uninstalling install A doesn't also
     # delete install B if the user has a stale STUDIO_HOME pointing at B.
     function _CustomStudioRoots {
         $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
         $defaultRoot = $null
         if ($env:USERPROFILE) {
-            $defaultRoot = (Join-Path $env:USERPROFILE ".unsloth\studio")
+            $defaultRoot = (Join-Path $env:USERPROFILE ".tunelabs\studio")
         }
 
         $emit = {
@@ -138,8 +138,8 @@ function Uninstall-UnslothStudio {
         }
 
         $envRoot = $null
-        if ($env:UNSLOTH_STUDIO_HOME) {
-            $envRoot = $env:UNSLOTH_STUDIO_HOME
+        if ($env:TUNELABS_STUDIO_HOME) {
+            $envRoot = $env:TUNELABS_STUDIO_HOME
         } elseif ($env:STUDIO_HOME) {
             $envRoot = $env:STUDIO_HOME
         }
@@ -149,9 +149,9 @@ function Uninstall-UnslothStudio {
             $confRoot = _RootFromConf (Join-Path $expandedEnv "share\studio.conf")
             if ($confRoot) { & $emit $confRoot }
         }
-        # Default-mode conf at LOCALAPPDATA\Unsloth Studio.
+        # Default-mode conf at LOCALAPPDATA\TuneLabs Studio.
         if ($env:LOCALAPPDATA) {
-            $confRoot = _RootFromConf (Join-Path $env:LOCALAPPDATA "Unsloth Studio\studio.conf")
+            $confRoot = _RootFromConf (Join-Path $env:LOCALAPPDATA "TuneLabs Studio\studio.conf")
             if ($confRoot) { & $emit $confRoot }
         }
     }
@@ -214,14 +214,14 @@ function Uninstall-UnslothStudio {
         Remove-Item -LiteralPath $PortFile -Force -ErrorAction SilentlyContinue
     }
 
-    # Stop processes whose ExecutablePath lives under an unsloth_studio venv.
+    # Stop processes whose ExecutablePath lives under an tunelabs_studio venv.
     # Anchoring on the venv path avoids matching unrelated python.exe / studio.exe.
     function _StopStudioProcesses {
         param([string[]]$KnownRoots)
         try {
             $procs = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
                 Where-Object {
-                    $_.ExecutablePath -and ($_.ExecutablePath -match '\\unsloth_studio\\.*\\(unsloth|python|studio)\.exe$') -and
+                    $_.ExecutablePath -and ($_.ExecutablePath -match '\\tunelabs_studio\\.*\\(tunelabs|python|studio)\.exe$') -and
                     $_.CommandLine -and ($_.CommandLine -match 'studio')
                 }
             foreach ($p in $procs) {
@@ -242,7 +242,7 @@ function Uninstall-UnslothStudio {
 
     # Stop processes that would block deleting the paths we remove. Unlike
     # _StopStudioProcesses (venv exe only), this also catches llama-server/llama-cli,
-    # the unsloth.exe shim, and orphaned mp workers under SYSTEM python holding a
+    # the tunelabs.exe shim, and orphaned mp workers under SYSTEM python holding a
     # venv DLL (an open DLL handle blocks the dir delete) -- found by scanning each
     # candidate's loaded modules, not just its image path.
     function _StopProcessesLockingRoots {
@@ -266,7 +266,7 @@ function Uninstall-UnslothStudio {
         # 2. A loaded module under a target root (orphaned mp-fork python holding a
         #    venv DLL). Scoped to names that load our DLLs to keep the scan fast.
         try {
-            $cands = Get-Process -Name python, pythonw, unsloth, llama-server, llama-cli -ErrorAction SilentlyContinue
+            $cands = Get-Process -Name python, pythonw, tunelabs, llama-server, llama-cli -ErrorAction SilentlyContinue
             foreach ($proc in $cands) {
                 $hit = $false
                 try {
@@ -278,20 +278,20 @@ function Uninstall-UnslothStudio {
     }
 
     # Default install root + default data dir.
-    $defaultStudioHome = if ($env:USERPROFILE) { Join-Path $env:USERPROFILE ".unsloth\studio" } else { $null }
-    $defaultDataDir = if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA "Unsloth Studio" } else { $null }
-    # Default-mode ~/.unsloth holds a SHARED llama.cpp build + .cache that are
+    $defaultStudioHome = if ($env:USERPROFILE) { Join-Path $env:USERPROFILE ".tunelabs\studio" } else { $null }
+    $defaultDataDir = if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA "TuneLabs Studio" } else { $null }
+    # Default-mode ~/.tunelabs holds a SHARED llama.cpp build + .cache that are
     # siblings of studio (not under it), so deleting <studio> misses them -- handle
     # explicitly. No-op in env/custom mode (nested under the custom root, removed
-    # with it). A user-set UNSLOTH_LLAMA_CPP_PATH is left alone.
-    $defaultUnslothHome = if ($env:USERPROFILE) { Join-Path $env:USERPROFILE ".unsloth" } else { $null }
-    $defaultLlamaCpp = if ($defaultUnslothHome) { Join-Path $defaultUnslothHome "llama.cpp" } else { $null }
-    $defaultCache = if ($defaultUnslothHome) { Join-Path $defaultUnslothHome ".cache" } else { $null }
+    # with it). A user-set TUNELABS_LLAMA_CPP_PATH is left alone.
+    $defaultTuneLabsHome = if ($env:USERPROFILE) { Join-Path $env:USERPROFILE ".tunelabs" } else { $null }
+    $defaultLlamaCpp = if ($defaultTuneLabsHome) { Join-Path $defaultTuneLabsHome "llama.cpp" } else { $null }
+    $defaultCache = if ($defaultTuneLabsHome) { Join-Path $defaultTuneLabsHome ".cache" } else { $null }
     # llama.cpp atomic-install staging root (install_llama_prebuilt.py .staging,
     # sibling of the install dir). Usually pruned after activate, but an interrupted
     # build can leave a "<name>.staging-XXXX" tree; removing it lets the empty-dir
-    # cleanup of ~/.unsloth below succeed. No-op in env/custom mode and when absent.
-    $defaultStaging = if ($defaultUnslothHome) { Join-Path $defaultUnslothHome ".staging" } else { $null }
+    # cleanup of ~/.tunelabs below succeed. No-op in env/custom mode and when absent.
+    $defaultStaging = if ($defaultTuneLabsHome) { Join-Path $defaultTuneLabsHome ".staging" } else { $null }
 
     # Build known-root list FIRST so the port-file kill can verify ownership.
     $customRoots = @(_CustomStudioRoots)
@@ -300,7 +300,7 @@ function Uninstall-UnslothStudio {
     $knownRoots += $customRoots
 
     # ── Stop running servers ──
-    _Step "Stopping any running Unsloth Studio servers..."
+    _Step "Stopping any running TuneLabs Studio servers..."
     if ($defaultDataDir) {
         _StopByPortFile -PortFile (Join-Path $defaultDataDir "studio.port") -KnownRoots $knownRoots
     }
@@ -325,29 +325,29 @@ function Uninstall-UnslothStudio {
         }
         _RemovePath $r
     }
-    # Default install dir (always at %USERPROFILE%\.unsloth\studio when present).
+    # Default install dir (always at %USERPROFILE%\.tunelabs\studio when present).
     if ($defaultStudioHome) { _RemovePath $defaultStudioHome }
     # Default data dir.
     if ($defaultDataDir) { _RemovePath $defaultDataDir }
     # Default-mode shared llama.cpp build + cache (siblings of studio under
-    # ~/.unsloth). No-op in env/custom mode and when absent.
+    # ~/.tunelabs). No-op in env/custom mode and when absent.
     if ($defaultLlamaCpp) { _RemovePath $defaultLlamaCpp }
     if ($defaultCache) { _RemovePath $defaultCache }
     if ($defaultStaging) { _RemovePath $defaultStaging }
-    # Drop ~/.unsloth itself, but ONLY if now empty -- never nuke unrelated content.
-    if ($defaultUnslothHome -and (Test-Path -LiteralPath $defaultUnslothHome) -and
-        -not (Get-ChildItem -LiteralPath $defaultUnslothHome -Force -ErrorAction SilentlyContinue)) {
-        _RemovePath $defaultUnslothHome
+    # Drop ~/.tunelabs itself, but ONLY if now empty -- never nuke unrelated content.
+    if ($defaultTuneLabsHome -and (Test-Path -LiteralPath $defaultTuneLabsHome) -and
+        -not (Get-ChildItem -LiteralPath $defaultTuneLabsHome -Force -ErrorAction SilentlyContinue)) {
+        _RemovePath $defaultTuneLabsHome
     }
 
     # ── Remove desktop and Start Menu shortcuts ──
     _Step "Removing desktop and Start Menu shortcuts..."
     try {
         $desktop = [Environment]::GetFolderPath("Desktop")
-        if ($desktop) { _RemovePath (Join-Path $desktop "Unsloth Studio.lnk") }
+        if ($desktop) { _RemovePath (Join-Path $desktop "TuneLabs Studio.lnk") }
     } catch { }
     if ($env:APPDATA) {
-        _RemovePath (Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Unsloth Studio.lnk")
+        _RemovePath (Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\TuneLabs Studio.lnk")
     }
     # Invalidate the Win11 Start Menu tile cache so the removed shortcut's tile
     # disappears promptly instead of lingering stale (mirrors install.ps1's
@@ -375,7 +375,7 @@ function Uninstall-UnslothStudio {
                     $removedAny = $false
                     # Only remove PATH entries that live inside a Studio root we
                     # actually own (default or env-mode). A literal substring
-                    # match on `unsloth_studio` would clobber unrelated user
+                    # match on `tunelabs_studio` would clobber unrelated user
                     # virtualenvs that happen to share the name.
                     foreach ($e in $entries) {
                         if ([string]::IsNullOrWhiteSpace($e)) { continue }
@@ -399,7 +399,7 @@ function Uninstall-UnslothStudio {
                         $newPath = ($kept -join ';')
                         $regKey.SetValue('Path', $newPath, [Microsoft.Win32.RegistryValueKind]::ExpandString)
                         try {
-                            $d = "UnslothPathRefresh_" + ([guid]::NewGuid().ToString('N').Substring(0, 8))
+                            $d = "TuneLabsPathRefresh_" + ([guid]::NewGuid().ToString('N').Substring(0, 8))
                             [Environment]::SetEnvironmentVariable($d, '1', 'User')
                             [Environment]::SetEnvironmentVariable($d, [NullString]::Value, 'User')
                         } catch { }
@@ -412,22 +412,22 @@ function Uninstall-UnslothStudio {
     } catch {
         _Substep "could not update user PATH: $($_.Exception.Message)" "Yellow"
     }
-    # Remove HKCU\Software\Unsloth (PathBackup lives here; install.ps1 owns it).
+    # Remove HKCU\Software\TuneLabs (PathBackup lives here; install.ps1 owns it).
     try {
-        Remove-Item -LiteralPath 'HKCU:\Software\Unsloth' -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath 'HKCU:\Software\TuneLabs' -Recurse -Force -ErrorAction SilentlyContinue
     } catch { }
 
     Write-Host ""
-    Write-Host "Unsloth Studio uninstalled."
+    Write-Host "TuneLabs Studio uninstalled."
     Write-Host "Note: Hugging Face model cache at %USERPROFILE%\.cache\huggingface was left in place."
     Write-Host "Remove it manually with 'Remove-Item -Recurse -Force `"$env:USERPROFILE\.cache\huggingface\hub`"' if desired."
-    if (-not $env:UNSLOTH_STUDIO_HOME -and -not $env:STUDIO_HOME) {
+    if (-not $env:TUNELABS_STUDIO_HOME -and -not $env:STUDIO_HOME) {
         Write-Host ""
-        Write-Host "If you installed Unsloth Studio with UNSLOTH_STUDIO_HOME or STUDIO_HOME"
+        Write-Host "If you installed TuneLabs Studio with TUNELABS_STUDIO_HOME or STUDIO_HOME"
         Write-Host "pointing at a custom directory, re-run this script with the same variable"
         Write-Host "set to also remove that install tree, e.g.:"
-        Write-Host "  `$env:UNSLOTH_STUDIO_HOME = 'C:\your\path'; irm https://raw.githubusercontent.com/unslothai/unsloth/main/scripts/uninstall.ps1 | iex"
+        Write-Host "  `$env:TUNELABS_STUDIO_HOME = 'C:\your\path'; irm https://raw.githubusercontent.com/tunelabsai/tunelabs/main/scripts/uninstall.ps1 | iex"
     }
 }
 
-Uninstall-UnslothStudio @args
+Uninstall-TuneLabsStudio @args

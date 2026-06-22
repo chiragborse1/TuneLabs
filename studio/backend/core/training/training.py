@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """
 Training backend — subprocess orchestrator.
 
 Each job runs in a fresh spawn subprocess (solving transformers version-switching);
-the in-process UnslothTrainer singleton is only used inside the worker. This file
+the in-process TuneLabsTrainer singleton is only used inside the worker. This file
 orchestrates the subprocess lifecycle, pumps events from the worker's mp.Queue, and
 exposes the same API to routes/training.py. Pattern follows data_recipe/jobs/manager.py.
 """
@@ -67,9 +67,9 @@ def _coerce_optional_nonneg_float(name: str, value):
     try:
         coerced = float(value)
     except (TypeError, ValueError):
-        raise ValueError(f"Unsloth: {name}={value!r} must be a non-negative float or None.")
+        raise ValueError(f"TuneLabs: {name}={value!r} must be a non-negative float or None.")
     if coerced < 0:
-        raise ValueError(f"Unsloth: {name}={coerced} must be >= 0 (use 0 or None to disable).")
+        raise ValueError(f"TuneLabs: {name}={coerced} must be >= 0 (use 0 or None to disable).")
     return coerced
 
 
@@ -313,7 +313,7 @@ class TrainingBackend:
             "lora_alpha": kwargs.get("lora_alpha", 16),
             "lora_dropout": kwargs.get("lora_dropout", 0.0),
             "target_modules": kwargs.get("target_modules"),
-            "gradient_checkpointing": kwargs.get("gradient_checkpointing", "unsloth"),
+            "gradient_checkpointing": kwargs.get("gradient_checkpointing", "tunelabs"),
             "use_rslora": kwargs.get("use_rslora", False),
             "use_loftq": kwargs.get("use_loftq", False),
             "train_on_completions": kwargs.get("train_on_completions", False),
@@ -323,7 +323,7 @@ class TrainingBackend:
             "finetune_mlp_modules": kwargs.get("finetune_mlp_modules", True),
             "enable_wandb": kwargs.get("enable_wandb", False),
             "wandb_token": kwargs.get("wandb_token"),
-            "wandb_project": kwargs.get("wandb_project", "unsloth-training"),
+            "wandb_project": kwargs.get("wandb_project", "tunelabs-training"),
             "enable_tensorboard": kwargs.get("enable_tensorboard", False),
             "tensorboard_dir": kwargs.get("tensorboard_dir", "runs"),
             "resume_from_checkpoint": kwargs.get("resume_from_checkpoint"),
@@ -358,7 +358,7 @@ class TrainingBackend:
             max_seq_length = config.get("max_seq_length", 2048),
             lora_rank = config.get("lora_r", 16),
             target_modules = config.get("target_modules"),
-            gradient_checkpointing = config.get("gradient_checkpointing", "unsloth"),
+            gradient_checkpointing = config.get("gradient_checkpointing", "tunelabs"),
             optimizer = config.get("optim", "adamw_8bit"),
         )
 

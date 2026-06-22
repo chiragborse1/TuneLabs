@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import type { ReactElement, RefObject, UIEvent } from "react";
 import {
@@ -41,7 +41,7 @@ function formatSourceMessage(execution: RecipeExecutionRecord): string {
       typeof source.retry_after_sec === "number" && source.retry_after_sec > 0
         ? ` Waiting ~${formatMetricValue(source.retry_after_sec)}s.`
         : "";
-    return `Waiting for GitHub rate limit. Unsloth will resume automatically.${wait}`;
+    return `Waiting for GitHub rate limit. TuneLabs will resume automatically.${wait}`;
   }
   return source.message ?? "Crawling GitHub source.";
 }

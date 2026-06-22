@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { useCallback, useEffect, useState } from "react";
 
-const PREV_MAX_STEPS_KEY = "unsloth_prev_max_steps";
-const PREV_SAVE_STEPS_KEY = "unsloth_prev_save_steps";
+const PREV_MAX_STEPS_KEY = "tunelabs_prev_max_steps";
+const PREV_SAVE_STEPS_KEY = "tunelabs_prev_save_steps";
 const DEFAULT_MAX_STEPS = 60;
 const DEFAULT_EPOCHS = 3;
 

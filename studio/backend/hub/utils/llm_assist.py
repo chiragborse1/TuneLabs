@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 from __future__ import annotations
 
@@ -16,13 +16,13 @@ from hub.utils import download_registry
 
 logger = get_logger(__name__)
 
-DEFAULT_HELPER_MODEL_REPO = "unsloth/gemma-4-E2B-it-GGUF"
+DEFAULT_HELPER_MODEL_REPO = "tunelabs/gemma-4-E2B-it-GGUF"
 DEFAULT_HELPER_MODEL_VARIANT = "UD-Q4_K_XL"
 README_MAX_CHARS = 1500
 
 
 def _helper_disabled() -> bool:
-    return os.environ.get("UNSLOTH_HELPER_MODEL_DISABLE", "").strip().lower() in {
+    return os.environ.get("TUNELABS_HELPER_MODEL_DISABLE", "").strip().lower() in {
         "1",
         "true",
     }
@@ -158,8 +158,8 @@ def _run_multi_pass_advisor(
     if _helper_disabled():
         return None
 
-    repo = os.environ.get("UNSLOTH_HELPER_MODEL_REPO", DEFAULT_HELPER_MODEL_REPO)
-    variant = os.environ.get("UNSLOTH_HELPER_MODEL_VARIANT", DEFAULT_HELPER_MODEL_VARIANT)
+    repo = os.environ.get("TUNELABS_HELPER_MODEL_REPO", DEFAULT_HELPER_MODEL_REPO)
+    variant = os.environ.get("TUNELABS_HELPER_MODEL_VARIANT", DEFAULT_HELPER_MODEL_VARIANT)
     backend = None
     try:
         from core.inference.llama_cpp import LlamaCppBackend

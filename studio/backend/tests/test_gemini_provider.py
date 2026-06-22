@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Unit tests for the native Gemini API translation layer.
 
@@ -5181,7 +5181,7 @@ def test_gemini_custom_oai_compat_base_skips_native_allowlist():
             provider_type = "gemini",
             base_url = "https://litellm.example/v1",
         )
-        result = _asyncio.run(list_provider_models(req, current_subject = "unsloth"))
+        result = _asyncio.run(list_provider_models(req, current_subject = "tunelabs"))
     finally:
         _providers.ExternalProviderClient = orig
     ids = {m.id for m in result}

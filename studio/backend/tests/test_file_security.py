@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Tests for the malware / unsafe-file gate (utils.security.file_security).
 
@@ -193,7 +193,7 @@ def test_no_first_party_exemption():
         "filesWithIssues": [{"path": "pytorch_model.bin", "level": "unsafe"}],
     }
     with _patch_status(status):
-        d = evaluate_file_security("unsloth/some-model")
+        d = evaluate_file_security("tunelabs/some-model")
     assert d.blocked is True
 
 
@@ -486,14 +486,14 @@ def _patch_status_capture(status):
 
 
 def test_spark_tts_llm_alias_scans_real_repo():
-    # "Spark-TTS-0.5B/LLM" loads as unsloth/Spark-TTS-0.5B with LLM as load root; scanning
+    # "Spark-TTS-0.5B/LLM" loads as tunelabs/Spark-TTS-0.5B with LLM as load root; scanning
     # the literal alias 404s and fails open, missing a flagged LLM/ pickle.
     status = {"filesWithIssues": [{"path": "LLM/pytorch_model.bin", "level": "unsafe"}]}
     cap, seen = _patch_status_capture(status)
     with cap, patch("utils.paths.is_local_path", return_value = False), _patch_no_index():
         d = evaluate_file_security("Spark-TTS-0.5B/LLM", load_subdirs = ())
-    assert seen["repo"] == "unsloth/Spark-TTS-0.5B"  # scanned the real repo, not the alias
-    assert d.model_name == "unsloth/Spark-TTS-0.5B"
+    assert seen["repo"] == "tunelabs/Spark-TTS-0.5B"  # scanned the real repo, not the alias
+    assert d.model_name == "tunelabs/Spark-TTS-0.5B"
     assert d.blocked is True
     assert d.unsafe_files == [{"path": "LLM/pytorch_model.bin", "level": "unsafe"}]
 
@@ -510,12 +510,12 @@ def test_non_llm_alias_is_not_rewritten():
 
 def test_generic_slash_llm_repo_is_scanned_as_itself():
     # A third-party repo merely ending in "/LLM" is not a bicodec alias, so it must be
-    # scanned as itself; rewriting to unsloth/<parent> would scan the wrong repo.
+    # scanned as itself; rewriting to tunelabs/<parent> would scan the wrong repo.
     status = {"filesWithIssues": [{"path": "pytorch_model.bin", "level": "unsafe"}]}
     cap, seen = _patch_status_capture(status)
     with cap, patch("utils.paths.is_local_path", return_value = False):
         d = evaluate_file_security("evil/LLM")
-    assert seen["repo"] == "evil/LLM"  # scanned the real repo, not unsloth/evil
+    assert seen["repo"] == "evil/LLM"  # scanned the real repo, not tunelabs/evil
     assert d.model_name == "evil/LLM"
     assert d.blocked is True
 
@@ -527,8 +527,8 @@ def test_security_load_subdirs_yaml_fallback(monkeypatch):
 
     monkeypatch.setattr(mc, "detect_audio_type", lambda *_a, **_k: None)
     monkeypatch.setattr(mc, "load_model_defaults", lambda *_a, **_k: {"audio_type": "bicodec"})
-    assert security_load_subdirs("unsloth/Spark-TTS-0.5B") == ("LLM",)
+    assert security_load_subdirs("tunelabs/Spark-TTS-0.5B") == ("LLM",)
 
     # A non-bicodec default contributes no subdir.
     monkeypatch.setattr(mc, "load_model_defaults", lambda *_a, **_k: {"audio_type": None})
-    assert security_load_subdirs("unsloth/Llama-3.2-1B") == ()
+    assert security_load_subdirs("tunelabs/Llama-3.2-1B") == ()

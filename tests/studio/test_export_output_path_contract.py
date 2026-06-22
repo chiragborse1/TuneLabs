@@ -110,9 +110,9 @@ def test_mlx_hub_only_uses_temp_directory():
     assert "import tempfile" in src.split("class ExportBackend")[0]
 
 
-def test_is_mlx_imported_from_unsloth():
+def test_is_mlx_imported_from_tunelabs():
     src = EXPORT.read_text()
-    assert "from unsloth import" in src
+    assert "from tunelabs import" in src
     head = src.split("class ExportBackend")[0]
     assert "_IS_MLX" in head
     assert "_IS_MLX = platform.system()" not in src

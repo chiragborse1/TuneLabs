@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 import asyncio
 import os
@@ -18,7 +18,7 @@ from routes import training_history
 BASE_RUN = {
     "id": "run-1",
     "status": "stopped",
-    "model_name": "unsloth/test-model",
+    "model_name": "tunelabs/test-model",
     "dataset_name": "test-dataset",
     "display_name": "Existing name",
     "started_at": "2026-01-01T00:00:00Z",

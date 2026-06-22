@@ -6,16 +6,16 @@ os.environ.setdefault("PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION", "python")
 
 from transformers.utils import sentencepiece_model_pb2
 
-from unsloth.tokenizer_utils import fix_sentencepiece_gguf
+from tunelabs.tokenizer_utils import fix_sentencepiece_gguf
 
 
 NORMAL, CONTROL, USER_DEFINED = 1, 3, 4
 
 _SAVE_PY = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "unsloth", "save.py")
+    os.path.join(os.path.dirname(__file__), "..", "..", "tunelabs", "save.py")
 )
 _TOK_PY = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "unsloth", "tokenizer_utils.py")
+    os.path.join(os.path.dirname(__file__), "..", "..", "tunelabs", "tokenizer_utils.py")
 )
 
 
@@ -85,7 +85,7 @@ def test_save_py_except_clause_is_broad_exception():
     with open(_SAVE_PY) as f:
         tree = ast.parse(f.read())
     for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef) and node.name == "unsloth_save_pretrained_gguf":
+        if isinstance(node, ast.FunctionDef) and node.name == "tunelabs_save_pretrained_gguf":
             for subnode in ast.walk(node):
                 if isinstance(subnode, ast.Try):
                     body_src = "\n".join(ast.unparse(s) for s in subnode.body)
@@ -97,7 +97,7 @@ def test_save_py_except_clause_is_broad_exception():
                     assert handler.type.id == "Exception"
                     return
     raise AssertionError(
-        "fix_sentencepiece_gguf try block not found in unsloth_save_pretrained_gguf"
+        "fix_sentencepiece_gguf try block not found in tunelabs_save_pretrained_gguf"
     )
 
 

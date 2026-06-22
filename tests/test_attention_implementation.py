@@ -1,9 +1,9 @@
 from types import SimpleNamespace
 
-import unsloth  # noqa: F401
+import tunelabs  # noqa: F401
 from transformers.utils import import_utils
 
-from unsloth.models import _utils
+from tunelabs.models import _utils
 
 
 class SupportsFlexAndSdpa:
@@ -19,7 +19,7 @@ def _config(model_type, **kwargs):
 
 
 def _set_flex_available(monkeypatch, available):
-    monkeypatch.setenv("UNSLOTH_ENABLE_FLEX_ATTENTION", "1")
+    monkeypatch.setenv("TUNELABS_ENABLE_FLEX_ATTENTION", "1")
     monkeypatch.setattr(
         import_utils,
         "is_torch_flex_attn_available",

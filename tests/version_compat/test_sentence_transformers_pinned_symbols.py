@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team.
-"""Pinned-symbol compat check for the symbols unsloth's sentence_transformer
+# Copyright 2026-present the TuneLabs AI Inc. team.
+"""Pinned-symbol compat check for the symbols tunelabs's sentence_transformer
 integration relies on, across ST PyPI minors (GitHub raw fetch + symbol grep)."""
 
 from __future__ import annotations
@@ -32,11 +32,11 @@ def test_st_top_level_exports(tag: str):
     missing = [n for n in needed if n not in src]
     assert not missing, (
         f"{tag}: sentence_transformers top-level missing {missing}; "
-        f"unsloth.models.sentence_transformer:1467,2154 will ImportError"
+        f"tunelabs.models.sentence_transformer:1467,2154 will ImportError"
     )
 
 
-# Sub-modules: unsloth walks `sentence_transformers.models` for these classes.
+# Sub-modules: tunelabs walks `sentence_transformers.models` for these classes.
 @pytest.mark.parametrize("tag", ST_TAGS)
 def test_st_models_re_exports(tag: str):
     """Transformer / Pooling / Normalize must stay reachable via
@@ -54,7 +54,7 @@ def test_st_models_re_exports(tag: str):
         missing = [n for n in needed if n not in src]
         assert not missing, (
             f"{tag}: legacy sentence_transformers/models layout missing "
-            f"{missing}; unsloth.models.sentence_transformer:1016,1206,1467 "
+            f"{missing}; tunelabs.models.sentence_transformer:1016,1206,1467 "
             f"ImportError"
         )
         return
@@ -100,7 +100,7 @@ def test_st_models_re_exports(tag: str):
     )
 
 
-# Transformer base class: unsloth probes alternate paths; at least ONE must resolve.
+# Transformer base class: tunelabs probes alternate paths; at least ONE must resolve.
 @pytest.mark.parametrize("tag", ST_TAGS)
 def test_st_transformer_base_class_either_path(tag: str):
     candidates = [
@@ -115,12 +115,12 @@ def test_st_transformer_base_class_either_path(tag: str):
             return
     pytest.fail(
         f"{tag}: class Transformer not in any of {candidates} — "
-        f"unsloth's three-path probe in sentence_transformer.py:1169-1171 "
+        f"tunelabs's three-path probe in sentence_transformer.py:1169-1171 "
         f"will ImportError on every fallback"
     )
 
 
-# sentence_transformers.util: import_from_string + load_dir_path helpers unsloth calls.
+# sentence_transformers.util: import_from_string + load_dir_path helpers tunelabs calls.
 @pytest.mark.parametrize("tag", ST_TAGS)
 def test_st_util_helpers(tag: str):
     """util.{import_from_string, load_dir_path} must resolve; accept either the

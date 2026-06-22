@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import secrets
 from datetime import datetime, timedelta, timezone
@@ -159,7 +159,7 @@ async def _get_current_subject(
     """FastAPI dependency: validate the JWT and return the subject. Use on protected routes."""
     token = credentials.credentials
 
-    # --- API key path (sk-unsloth-...) ---
+    # --- API key path (sk-tunelabs-...) ---
     if token.startswith(API_KEY_PREFIX):
         username = validate_api_key(token)
         if username is None:

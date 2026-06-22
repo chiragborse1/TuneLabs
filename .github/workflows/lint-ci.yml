@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 # Whole-repo, multi-language source-lint gate. Runs on every PR
 # (no path filter) because each step is sub-second to a few seconds
@@ -69,7 +69,7 @@ jobs:
         # files. Hard gate.
         run: |
           python -m compileall -q -j 0 \
-            unsloth unsloth_cli studio tests cli.py unsloth-cli.py
+            tunelabs tunelabs_cli studio tests cli.py tunelabs-cli.py
 
       - name: Python ruff check (whole repo)
         # The narrow rule set in pyproject.toml [tool.ruff.lint]
@@ -77,7 +77,7 @@ jobs:
         # comparisons, undefined names. The whole repo passes today,
         # so this is a hard gate.
         run: |
-          ruff check unsloth unsloth_cli studio tests cli.py unsloth-cli.py
+          ruff check tunelabs tunelabs_cli studio tests cli.py tunelabs-cli.py
 
       - name: Import-hoist verifier self-test
         # scripts/verify_import_hoist.py is a scope-aware (LEGB) AST
@@ -125,7 +125,7 @@ jobs:
           mapfile -t CHANGED < <(
             git diff --name-only --diff-filter=M \
               "$MERGE_BASE" HEAD -- '*.py' \
-              | grep -vE '(^|/)(unsloth_compiled_cache|node_modules|build|dist)/' || true
+              | grep -vE '(^|/)(tunelabs_compiled_cache|node_modules|build|dist)/' || true
           )
           if [ "${#CHANGED[@]}" -eq 0 ]; then
             echo "no in-place-modified Python files to check"
@@ -142,14 +142,14 @@ jobs:
         # before it ships. AST-based so commented-out debugger
         # markers don't false-positive (a bare grep would; there
         # are three commented `# breakpoint()` markers in
-        # unsloth/models/rl* today). Sub-second.
+        # tunelabs/models/rl* today). Sub-second.
         run: |
           python <<'PY'
           import ast, pathlib, sys
 
           SKIP_PARTS = {".venv", "venv", "build", "dist", ".git",
-                        "unsloth_compiled_cache", "node_modules",
-                        "unsloth.egg-info"}
+                        "tunelabs_compiled_cache", "node_modules",
+                        "tunelabs.egg-info"}
 
           bad = []
           scanned = 0
@@ -186,12 +186,12 @@ jobs:
         #      files elsewhere.
         #   2. Apache-2.0 long form, marker phrase
         #      "Licensed under the Apache License". Used across
-        #      unsloth/ and unsloth_cli/.
+        #      tunelabs/ and tunelabs_cli/.
         #   3. GNU long form, marker phrase "General Public License".
         #      That single substring covers GPL, LGPL ("GNU Lesser
         #      General Public License") and AGPL ("GNU Affero
         #      General Public License") preambles, all three of
-        #      which appear in unsloth/kernels/* (LGPL/AGPL) without
+        #      which appear in tunelabs/kernels/* (LGPL/AGPL) without
         #      the SPDX line.
         # Empty files (mainly empty __init__.py) are skipped.
         # Surfaced as a warning; cleaning up the actual misses is a
@@ -207,8 +207,8 @@ jobs:
               "General Public License",         # GPL / LGPL / AGPL long form
           )
           SKIP_PARTS = {".venv", "venv", "build", "dist", ".git",
-                        "unsloth_compiled_cache", "node_modules",
-                        "unsloth.egg-info"}
+                        "tunelabs_compiled_cache", "node_modules",
+                        "tunelabs.egg-info"}
 
           studio_missing = []
           other_missing  = []
@@ -269,8 +269,8 @@ jobs:
           import pathlib, sys, yaml
 
           SKIP_PARTS = {".venv", "venv", "build", "dist", ".git",
-                        "node_modules", "unsloth_compiled_cache",
-                        "unsloth.egg-info"}
+                        "node_modules", "tunelabs_compiled_cache",
+                        "tunelabs.egg-info"}
 
           bad = []
           scanned = 0
@@ -306,8 +306,8 @@ jobs:
           import fnmatch, json, pathlib, sys
 
           SKIP_PARTS = {".venv", "venv", "build", "dist", ".git",
-                        "node_modules", "unsloth_compiled_cache",
-                        "unsloth.egg-info"}
+                        "node_modules", "tunelabs_compiled_cache",
+                        "tunelabs.egg-info"}
           SKIP_NAMES = {"package-lock.json", "bun.lock"}
           SKIP_PATTERNS = ("tsconfig*.json",)
 
@@ -347,7 +347,7 @@ jobs:
         continue-on-error: true
         run: |
           codespell \
-            --skip='*.lock,*.lockb,*.json,*.svg,*.png,*.jpg,*.jpeg,*.gif,*.ico,*.woff*,*.ttf,*.eot,*.zip,*.gz,*.gguf,*.safetensors,*.bin,node_modules,.git,build,dist,unsloth_compiled_cache,unsloth.egg-info,target,studio/frontend/dist,*.pyc,*-licenses.txt,LICENSE*' \
+            --skip='*.lock,*.lockb,*.json,*.svg,*.png,*.jpg,*.jpeg,*.gif,*.ico,*.woff*,*.ttf,*.eot,*.zip,*.gz,*.gguf,*.safetensors,*.bin,node_modules,.git,build,dist,tunelabs_compiled_cache,tunelabs.egg-info,target,studio/frontend/dist,*.pyc,*-licenses.txt,LICENSE*' \
             --ignore-words-list='ans,bu,hel,fo,te,ot,hist,ned,sav,recurser,datas,nin,parm,parms,checkin,nd,fr,inout,donot,uint' \
             --quiet-level=2
 
@@ -376,4 +376,4 @@ jobs:
         # non-blocking until the custom pipeline is wired in here.
         continue-on-error: true
         run: |
-          ruff format --check unsloth unsloth_cli studio tests cli.py unsloth-cli.py
+          ruff format --check tunelabs tunelabs_cli studio tests cli.py tunelabs-cli.py

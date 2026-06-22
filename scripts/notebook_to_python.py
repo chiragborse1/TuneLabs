@@ -308,7 +308,7 @@ Examples:
   python notebook_to_python.py notebook.ipynb
   python notebook_to_python.py -o scripts/ notebook1.ipynb notebook2.ipynb
   python notebook_to_python.py --output ./converted https://github.com/user/repo/blob/main/notebook.ipynb
-  python notebook_to_python.py https://github.com/unslothai/notebooks/blob/main/nb/Oute_TTS_(1B).ipynb
+  python notebook_to_python.py https://github.com/tunelabsai/notebooks/blob/main/nb/Oute_TTS_(1B).ipynb
 """,
     )
     parser.add_argument("notebooks", nargs = "+", help = "Notebook files or URLs to convert.")

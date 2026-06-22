@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """
 Regression tests for the export log ring-buffer cursor semantics.
@@ -105,7 +105,7 @@ def test_sse_default_cursor_catches_all_current_run_lines(orchestrator) -> None:
     run_start = orchestrator.get_run_start_seq()
 
     # Worker emits early lines BEFORE the SSE connects.
-    _append(orchestrator, "Importing Unsloth...")
+    _append(orchestrator, "Importing TuneLabs...")
     _append(orchestrator, "Loading checkpoint: /foo/bar")
     _append(orchestrator, "Starting export...")
 
@@ -115,7 +115,7 @@ def test_sse_default_cursor_catches_all_current_run_lines(orchestrator) -> None:
     # All three early lines must be present. Pre-fix this was [].
     lines = [e["line"] for e in entries]
     assert lines == [
-        "Importing Unsloth...",
+        "Importing TuneLabs...",
         "Loading checkpoint: /foo/bar",
         "Starting export...",
     ]

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 # End-to-end Studio chat UI smoke via Playwright + Chromium against a
 # headless Linux runner. Boots Studio with the smallest GGUF
@@ -20,8 +20,8 @@ on:
   pull_request:
     paths:
       - 'studio/**'
-      - 'unsloth/**'
-      - 'unsloth_cli/**'
+      - 'tunelabs/**'
+      - 'tunelabs_cli/**'
       - 'install.sh'
       - 'pyproject.toml'
       # The Playwright test files themselves -- a PR that ONLY edits
@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      GGUF_REPO: unsloth/gemma-3-270m-it-GGUF
+      GGUF_REPO: tunelabs/gemma-3-270m-it-GGUF
       GGUF_VARIANT: UD-Q4_K_XL
       GGUF_FILE: gemma-3-270m-it-UD-Q4_K_XL.gguf
       STUDIO_PORT: '18892'
@@ -115,9 +115,9 @@ jobs:
 
       - name: Reset auth + boot Studio
         run: |
-          unsloth studio reset-password
+          tunelabs studio reset-password
           mkdir -p logs
-          UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p "$STUDIO_PORT" \
+          TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p "$STUDIO_PORT" \
             > logs/studio.log 2>&1 &
           echo "STUDIO_PID=$!" >> "$GITHUB_ENV"
 
@@ -149,7 +149,7 @@ jobs:
         # only ever exists for the lifetime of this single job, masked
         # in the log via ::add-mask::.
         run: |
-          OLD=$(cat ~/.unsloth/studio/auth/.bootstrap_password)
+          OLD=$(cat ~/.tunelabs/studio/auth/.bootstrap_password)
           NEW="CIUi-$(python -c 'import secrets; print(secrets.token_urlsafe(16))')"
           NEW2="CIUi-$(python -c 'import secrets; print(secrets.token_urlsafe(16))')"
           echo "::add-mask::$OLD"
@@ -164,7 +164,7 @@ jobs:
           BASE_URL: http://127.0.0.1:18892
           # The test file lives in the repo so it can be run locally
           # against a freshly-installed Studio (BASE_URL=...; STUDIO_OLD_PW=
-          # $(cat ~/.unsloth/studio/auth/.bootstrap_password); python ...).
+          # $(cat ~/.tunelabs/studio/auth/.bootstrap_password); python ...).
           PW_ART_DIR: logs/playwright
           # Strict mode: in CI a missing button / nav / dialog must
           # FAIL the test. Locally the test still runs against partial
@@ -187,9 +187,9 @@ jobs:
       # warm install we already did) so this adds little wall time.
       - name: Reset auth + boot Studio for extra UI tests (port 18894)
         run: |
-          unsloth studio reset-password
+          tunelabs studio reset-password
           mkdir -p logs
-          UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p 18894 \
+          TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p 18894 \
             > logs/studio_extra.log 2>&1 &
           echo "STUDIO_EXTRA_PID=$!" >> "$GITHUB_ENV"
 
@@ -205,7 +205,7 @@ jobs:
 
       - name: Pass bootstrap pw for extra UI test
         run: |
-          OLD=$(cat ~/.unsloth/studio/auth/.bootstrap_password)
+          OLD=$(cat ~/.tunelabs/studio/auth/.bootstrap_password)
           NEW="CIUiExtra-$(python -c 'import secrets; print(secrets.token_urlsafe(16))')"
           echo "::add-mask::$OLD"
           echo "::add-mask::$NEW"
@@ -236,9 +236,9 @@ jobs:
       # earlier UI tests. No GGUF -- the bug surface is the composer.
       - name: Reset auth + boot Studio for IME / i18n tests (port 18896)
         run: |
-          unsloth studio reset-password
+          tunelabs studio reset-password
           mkdir -p logs
-          UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p 18896 \
+          TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p 18896 \
             > logs/studio_ime.log 2>&1 &
           echo "STUDIO_IME_PID=$!" >> "$GITHUB_ENV"
 
@@ -279,7 +279,7 @@ jobs:
           # Capture backend + llama-server logs (all three Studios share this
           # dir) so a stray 500 has a server-side traceback.
           mkdir -p logs/server-logs
-          cp -r ~/.unsloth/studio/logs/. logs/server-logs/ 2>/dev/null || true
+          cp -r ~/.tunelabs/studio/logs/. logs/server-logs/ 2>/dev/null || true
 
       - name: Upload Playwright artifacts
         # Always upload so a green run's screenshots stay reviewable --

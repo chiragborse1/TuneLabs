@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 """Tests for 5-path architecture-aware KV cache VRAM estimation.
 
@@ -413,7 +413,7 @@ class TestDynamicSwaResolver:
     def _isolate_cache(self, monkeypatch, tmp_path):
         from core.inference import llama_cpp as lc
 
-        monkeypatch.setenv("UNSLOTH_STUDIO_HOME", str(tmp_path))
+        monkeypatch.setenv("TUNELABS_STUDIO_HOME", str(tmp_path))
         monkeypatch.setattr(lc, "_SWA_CACHE", None)
         return tmp_path
 
@@ -527,7 +527,7 @@ class TestDynamicSwaResolver:
 
     def test_offline_env_skips_network(self, monkeypatch, tmp_path):
         self._isolate_cache(monkeypatch, tmp_path)
-        monkeypatch.setenv("UNSLOTH_STUDIO_OFFLINE", "1")
+        monkeypatch.setenv("TUNELABS_STUDIO_OFFLINE", "1")
         from core.inference import llama_cpp as lc
 
         def boom(*a, **kw):
@@ -563,7 +563,7 @@ class TestTransformersIntrospection:
     def _isolate_cache(self, monkeypatch, tmp_path):
         from core.inference import llama_cpp as lc
 
-        monkeypatch.setenv("UNSLOTH_STUDIO_HOME", str(tmp_path))
+        monkeypatch.setenv("TUNELABS_STUDIO_HOME", str(tmp_path))
         monkeypatch.setattr(lc, "_SWA_CACHE", None)
         return tmp_path
 

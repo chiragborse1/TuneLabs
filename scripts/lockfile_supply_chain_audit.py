@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 """Lockfile supply-chain audit for the Studio frontend and Tauri shell.
 
@@ -682,7 +682,7 @@ def main(argv: list[str] | None = None) -> int:
     # Require a real justification (>=5 chars, not a boolean-shaped token)
     # for the skip env var. An invalid value warns and falls through to
     # run the audit (fail-safe); a valid one warns and skips with rc=0.
-    _skip_raw = os.environ.get("UNSLOTH_LOCKFILE_AUDIT_SKIP")
+    _skip_raw = os.environ.get("TUNELABS_LOCKFILE_AUDIT_SKIP")
     if _skip_raw is not None:
         _skip = _skip_raw.strip()
         _invalid_tokens = {"", "1", "0", "true", "false", "yes", "no", "on", "off"}
@@ -690,7 +690,7 @@ def main(argv: list[str] | None = None) -> int:
             print(
                 "::warning::Lockfile audit skip REQUIRES a justification "
                 f"value (>=5 chars, not '{_skip_raw}'). Proceeding with "
-                "audit. Use e.g. UNSLOTH_LOCKFILE_AUDIT_SKIP=ticket-1234.",
+                "audit. Use e.g. TUNELABS_LOCKFILE_AUDIT_SKIP=ticket-1234.",
                 file = sys.stderr,
                 flush = True,
             )

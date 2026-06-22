@@ -217,7 +217,7 @@ class TestResolveRequestedLlamaTag:
         self, monkeypatch: pytest.MonkeyPatch
     ):
         invalid = PublishedReleaseBundle(
-            repo = "unslothai/llama.cpp",
+            repo = "tunelabsai/llama.cpp",
             release_tag = "v2.0",
             upstream_tag = "b9000",
             assets = {},
@@ -226,7 +226,7 @@ class TestResolveRequestedLlamaTag:
             selection_log = [],
         )
         valid = PublishedReleaseBundle(
-            repo = "unslothai/llama.cpp",
+            repo = "tunelabsai/llama.cpp",
             release_tag = "v1.0",
             upstream_tag = "b8999",
             assets = {},
@@ -262,7 +262,7 @@ class TestResolveRequestedLlamaTag:
         monkeypatch.setattr(MOD, "load_approved_release_checksums", fake_load)
         monkeypatch.setattr(MOD, "latest_upstream_release_tag", lambda: "b7777")
 
-        assert resolve_requested_llama_tag("latest", "unslothai/llama.cpp") == "b8999"
+        assert resolve_requested_llama_tag("latest", "tunelabsai/llama.cpp") == "b8999"
 
     def test_latest_with_published_release_tag_passes_pin_through(
         self, monkeypatch: pytest.MonkeyPatch
@@ -307,14 +307,14 @@ class TestResolveRequestedLlamaTag:
         assert (
             resolve_requested_llama_tag(
                 "latest",
-                "unslothai/llama.cpp",
+                "tunelabsai/llama.cpp",
                 "llama-prebuilt-main",
             )
             == "b9001"
         )
         assert captured == {
             "requested_tag": "latest",
-            "published_repo": "unslothai/llama.cpp",
+            "published_repo": "tunelabsai/llama.cpp",
             "published_release_tag": "llama-prebuilt-main",
         }
 
@@ -496,14 +496,14 @@ class TestSetupShLogic:
                 if [ $? -ne 0 ]; then
                     echo "WARN: fetch failed"
                 else
-                    git -C "$LlamaCppDir" checkout -B unsloth-llama-build FETCH_HEAD
+                    git -C "$LlamaCppDir" checkout -B tunelabs-llama-build FETCH_HEAD
                 fi
             fi
         """)
         run_bash(script)
         log = log_file.read_text()
         assert "fetch --depth 1 origin b8508" in log
-        assert "checkout -B unsloth-llama-build FETCH_HEAD" in log
+        assert "checkout -B tunelabs-llama-build FETCH_HEAD" in log
         assert "pull" not in log, "Should use fetch, not pull"
 
     def test_fetch_failure_warns_not_aborts(self, tmp_path: Path):
@@ -529,7 +529,7 @@ class TestSetupShLogic:
                 if [ $? -ne 0 ]; then
                     echo "WARN: fetch failed -- using existing source"
                 else
-                    git -C "$LlamaCppDir" checkout -B unsloth-llama-build FETCH_HEAD
+                    git -C "$LlamaCppDir" checkout -B tunelabs-llama-build FETCH_HEAD
                 fi
             fi
             echo "BuildOk=$BuildOk"
@@ -591,23 +591,23 @@ class TestLatestTagResolution:
         )
         assert output == "b7777"
 
-    def test_env_override_unsloth_llama_tag(self):
+    def test_env_override_tunelabs_llama_tag(self):
         output = run_bash(
-            'echo "${UNSLOTH_LLAMA_TAG:-latest}"',
-            env = {"UNSLOTH_LLAMA_TAG": "b1234"},
+            'echo "${TUNELABS_LLAMA_TAG:-latest}"',
+            env = {"TUNELABS_LLAMA_TAG": "b1234"},
         )
         assert output == "b1234"
 
     def test_env_unset_defaults_to_latest(self):
         env = os.environ.copy()
-        env.pop("UNSLOTH_LLAMA_TAG", None)
-        output = run_bash('echo "${UNSLOTH_LLAMA_TAG:-latest}"', env = env)
+        env.pop("TUNELABS_LLAMA_TAG", None)
+        output = run_bash('echo "${TUNELABS_LLAMA_TAG:-latest}"', env = env)
         assert output == "latest"
 
     def test_env_empty_defaults_to_latest(self):
         output = run_bash(
-            'echo "${UNSLOTH_LLAMA_TAG:-latest}"',
-            env = {"UNSLOTH_LLAMA_TAG": ""},
+            'echo "${TUNELABS_LLAMA_TAG:-latest}"',
+            env = {"TUNELABS_LLAMA_TAG": ""},
         )
         assert output == "latest"
 
@@ -671,7 +671,7 @@ class TestSourceCodePatterns:
     def test_setup_sh_reports_installed_prebuilt_release(self):
         """Shell wrapper should report the installed prebuilt release from metadata."""
         content = SETUP_SH.read_text()
-        assert "UNSLOTH_PREBUILT_INFO.json" in content
+        assert "TUNELABS_PREBUILT_INFO.json" in content
         assert "installed release:" in content
         assert 'print_installed_llama_prebuilt_release "$LLAMA_CPP_DIR"' in content
 
@@ -770,7 +770,7 @@ class TestSourceCodePatterns:
     def test_setup_ps1_uses_checkout_b(self):
         """PS1 should use checkout -B, not checkout --force FETCH_HEAD."""
         content = SETUP_PS1.read_text()
-        assert "checkout -B unsloth-llama-build" in content
+        assert "checkout -B tunelabs-llama-build" in content
         assert "checkout --force FETCH_HEAD" not in content
 
     def test_setup_ps1_clone_uses_branch_tag(self):
@@ -804,7 +804,7 @@ class TestSourceCodePatterns:
         """PS1 wrapper should report the installed prebuilt release from metadata."""
         content = SETUP_PS1.read_text()
         assert "Get-InstalledLlamaPrebuiltRelease" in content
-        assert "UNSLOTH_PREBUILT_INFO.json" in content
+        assert "TUNELABS_PREBUILT_INFO.json" in content
         assert "installed release:" in content
         assert (
             "$installedRelease = Get-InstalledLlamaPrebuiltRelease -InstallDir $LlamaCppDir"
@@ -845,7 +845,7 @@ class TestSourceCodePatterns:
     def test_setup_ps1_uses_local_tempfile_helper(self):
         """PS1 should not depend on New-TemporaryFile being available anywhere."""
         content = SETUP_PS1.read_text()
-        assert "function New-UnslothTemporaryFile" in content
+        assert "function New-TuneLabsTemporaryFile" in content
         assert "$resolveErrorLog = New-TemporaryFile" not in content
 
     def test_setup_ps1_find_nvcc_uses_version_sort_for_latest_toolkit(self):

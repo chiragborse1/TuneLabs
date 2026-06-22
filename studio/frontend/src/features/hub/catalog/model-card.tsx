@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { classifyUnslothSupport } from "@/features/hub/hooks/use-hub-model-search";
+import { classifyTuneLabsSupport } from "@/features/hub/hooks/use-hub-model-search";
 import { ownerPaletteColor } from "@/features/hub/lib/avatar-theme";
 import { buildAdaptiveCardAccentStyle } from "@/features/hub/lib/card-accent";
 import { useDominantColor } from "@/features/hub/lib/use-dominant-color";
@@ -175,7 +175,7 @@ function resolveTrendingGlow(row: DiscoverRow): Pick<
     };
   }
   if (
-    signature.includes("unsloth") ||
+    signature.includes("tunelabs") ||
     signature.includes("lfm") ||
     signature.includes("liquid")
   ) {
@@ -239,7 +239,7 @@ export const ModelCard = memo(function ModelCard({
     () =>
       isDataset
         ? null
-        : classifyUnslothSupport({
+        : classifyTuneLabsSupport({
             modelId: row.id,
             pipelineTag: row.result.pipelineTag,
             tags: row.result.tags,
@@ -292,9 +292,9 @@ export const ModelCard = memo(function ModelCard({
           </p>
           <span className="hub-trending-owner flex min-w-0 items-center gap-1 text-[11.5px] leading-[15px] text-muted-foreground/80">
             <span className="truncate">{row.owner}</span>
-            {row.owner.toLowerCase() === "unsloth" && (
+            {row.owner.toLowerCase() === "tunelabs" && (
               <span
-                aria-label="Verified Unsloth"
+                aria-label="Verified TuneLabs"
                 className="hub-verified-badge size-3.5 shrink-0 text-primary"
               />
             )}

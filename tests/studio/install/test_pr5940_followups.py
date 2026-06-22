@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 """AMD-Windows installer follow-ups (PR #5940): hf-hub validation-model fetch
 + urllib fallback, amd-smi RunAsInvoker injection, name->arch table parity.
@@ -248,7 +248,7 @@ def test_amd_smi_allowed_on_windows_with_hip_sdk():
 def test_amd_smi_opt_in_forces_on_windows_no_sdk():
     assert (
         _amd_smi_allowed_under(
-            "Windows", hipinfo_present = False, env = {"UNSLOTH_ENABLE_AMD_SMI": "1"}
+            "Windows", hipinfo_present = False, env = {"TUNELABS_ENABLE_AMD_SMI": "1"}
         )
         is True
     )
@@ -256,7 +256,7 @@ def test_amd_smi_opt_in_forces_on_windows_no_sdk():
 
 def test_amd_smi_opt_out_overrides_hip_sdk():
     assert (
-        _amd_smi_allowed_under("Windows", hipinfo_present = True, env = {"UNSLOTH_ENABLE_AMD_SMI": "0"})
+        _amd_smi_allowed_under("Windows", hipinfo_present = True, env = {"TUNELABS_ENABLE_AMD_SMI": "0"})
         is False
     )
 
@@ -265,7 +265,7 @@ def test_ps_installers_gate_amd_smi_on_windows():
     # Both PowerShell installers must gate amd-smi like _amd_smi_allowed().
     for ps in (_INSTALL_PS1, _SETUP_PS1):
         text = ps.read_text(encoding = "utf-8")
-        assert "UNSLOTH_ENABLE_AMD_SMI" in text, f"{ps.name} missing amd-smi opt-in gate"
+        assert "TUNELABS_ENABLE_AMD_SMI" in text, f"{ps.name} missing amd-smi opt-in gate"
         assert "amdSmiAllowed" in text, f"{ps.name} missing amd-smi gate variable"
 
 

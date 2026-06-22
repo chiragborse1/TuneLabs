@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """
 Training API routes
@@ -229,7 +229,7 @@ async def start_training(
             "target_modules": request.target_modules if request.target_modules else None,
             "gradient_checkpointing": request.gradient_checkpointing.strip()
             if request.gradient_checkpointing and request.gradient_checkpointing.strip()
-            else "unsloth",
+            else "tunelabs",
             "use_rslora": request.use_rslora,
             "use_loftq": request.use_loftq,
             "train_on_completions": request.train_on_completions,
@@ -254,8 +254,8 @@ async def start_training(
         }
 
         # Training page has no trust_remote_code toggle, so honor the YAML default
-        # -- but only for genuine first-party (unsloth/nvidia) Hub repos, never a
-        # local path or a name merely starting with "unsloth/".
+        # -- but only for genuine first-party (tunelabs/nvidia) Hub repos, never a
+        # local path or a name merely starting with "tunelabs/".
         if not training_kwargs["trust_remote_code"]:
             from utils.security.trusted_org import is_trusted_org_repo
 

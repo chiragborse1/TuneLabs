@@ -44,7 +44,7 @@ def _write(path: Path, content: dict) -> Path:
 # Lockfile fixtures
 def _v3_lockfile(packages: dict) -> dict:
     return {
-        "name": "unsloth-theme",
+        "name": "tunelabs-theme",
         "version": "0.0.0",
         "lockfileVersion": 3,
         "requires": True,
@@ -54,7 +54,7 @@ def _v3_lockfile(packages: dict) -> dict:
 
 def _v2_lockfile(packages: dict, dependencies: dict) -> dict:
     return {
-        "name": "unsloth-theme",
+        "name": "tunelabs-theme",
         "version": "0.0.0",
         "lockfileVersion": 2,
         "requires": True,
@@ -68,7 +68,7 @@ def test_no_new_install_scripts_exit_0(tmp_path: Path):
     """If base == head, nothing new can have been added."""
     same = _v3_lockfile(
         {
-            "": {"name": "unsloth-theme", "version": "0.0.0"},
+            "": {"name": "tunelabs-theme", "version": "0.0.0"},
             "node_modules/node-gyp": {
                 "version": "10.0.1",
                 "resolved": "https://registry.npmjs.org/node-gyp/-/node-gyp-10.0.1.tgz",
@@ -87,7 +87,7 @@ def test_no_new_install_scripts_exit_0(tmp_path: Path):
 def test_new_dep_with_postinstall_exits_1(tmp_path: Path):
     """A NEW dep in head with `hasInstallScript: true` must exit 1."""
     base_pkgs = {
-        "": {"name": "unsloth-theme", "version": "0.0.0"},
+        "": {"name": "tunelabs-theme", "version": "0.0.0"},
         "node_modules/react": {
             "version": "19.2.4",
             "resolved": "https://registry.npmjs.org/react/-/react-19.2.4.tgz",
@@ -114,7 +114,7 @@ def test_new_dep_with_postinstall_exits_1(tmp_path: Path):
 def test_existing_dep_with_postinstall_ignored(tmp_path: Path):
     """An install-script dep present in BOTH base and head is not new."""
     base_pkgs = {
-        "": {"name": "unsloth-theme", "version": "0.0.0"},
+        "": {"name": "tunelabs-theme", "version": "0.0.0"},
         "node_modules/node-gyp": {
             "version": "10.0.1",
             "resolved": "https://registry.npmjs.org/node-gyp/-/node-gyp-10.0.1.tgz",
@@ -150,11 +150,11 @@ def test_existing_dep_with_postinstall_ignored(tmp_path: Path):
 def test_v2_v3_lockfile_format_support(tmp_path: Path):
     """A lockfileVersion 2 lockfile with the same shape parses the same."""
     base_pkgs = {
-        "": {"name": "unsloth-theme", "version": "0.0.0"},
+        "": {"name": "tunelabs-theme", "version": "0.0.0"},
     }
     base_deps = {}  # v2 carries both; empty deps OK
     head_pkgs = {
-        "": {"name": "unsloth-theme", "version": "0.0.0"},
+        "": {"name": "tunelabs-theme", "version": "0.0.0"},
         "node_modules/v2-postinstall-dep": {
             "version": "2.0.0",
             "resolved": (

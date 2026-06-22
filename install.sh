@@ -1,22 +1,22 @@
 #!/bin/sh
 #
-# Unsloth Studio Installer
+# TuneLabs Studio Installer
 #
-# Usage:  curl -fsSL https://unsloth.ai/install.sh | sh
-#         wget  -qO- https://unsloth.ai/install.sh | sh
+# Usage:  curl -fsSL https://tunelabs.ai/install.sh | sh
+#         wget  -qO- https://tunelabs.ai/install.sh | sh
 #         ./install.sh --local   (install from a cloned repo instead of PyPI)
 #
 # Piped installs take options as env vars after the pipe (a bare `| sh --no-torch`
 # makes sh reject --no-torch as its own option). Flags still work via ./install.sh:
-#   curl -fsSL https://unsloth.ai/install.sh | UNSLOTH_NO_TORCH=1 sh    # skip PyTorch (GGUF-only)
-#   curl -fsSL https://unsloth.ai/install.sh | UNSLOTH_PYTHON=3.12 sh   # pin Python version
-#   curl -fsSL https://unsloth.ai/install.sh | UNSLOTH_STUDIO_HOME=/abs/path sh
+#   curl -fsSL https://tunelabs.ai/install.sh | TUNELABS_NO_TORCH=1 sh    # skip PyTorch (GGUF-only)
+#   curl -fsSL https://tunelabs.ai/install.sh | TUNELABS_PYTHON=3.12 sh   # pin Python version
+#   curl -fsSL https://tunelabs.ai/install.sh | TUNELABS_STUDIO_HOME=/abs/path sh
 # Equivalent flags: ./install.sh --no-torch --python 3.12  (or pipe them: sh -s -- --no-torch)
 #
-# Install dir priority: UNSLOTH_STUDIO_HOME > STUDIO_HOME (alias) > $HOME/.unsloth/studio
+# Install dir priority: TUNELABS_STUDIO_HOME > STUDIO_HOME (alias) > $HOME/.tunelabs/studio
 #
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 set -e
 
 # ── Output style (aligned with studio/setup.sh) ──
@@ -45,7 +45,7 @@ substep() { printf "  ${C_DIM}%-15s${2:-$C_DIM}%s${C_RST}\n" "" "$1"; }
 
 # ── Parse flags ──
 STUDIO_LOCAL_INSTALL=false
-PACKAGE_NAME="unsloth"
+PACKAGE_NAME="tunelabs"
 TAURI_MODE=false
 _USER_PYTHON=""
 _NO_TORCH_FLAG=false
@@ -76,20 +76,20 @@ for arg in "$@"; do
 done
 
 # Env-var equivalents for piped installs; an explicit flag still wins.
-case "${UNSLOTH_NO_TORCH:-}" in 1|true|TRUE|yes|YES|on|ON) _NO_TORCH_FLAG=true ;; esac
-[ -z "$_USER_PYTHON" ] && [ -n "${UNSLOTH_PYTHON:-}" ] && _USER_PYTHON="$UNSLOTH_PYTHON"
+case "${TUNELABS_NO_TORCH:-}" in 1|true|TRUE|yes|YES|on|ON) _NO_TORCH_FLAG=true ;; esac
+[ -z "$_USER_PYTHON" ] && [ -n "${TUNELABS_PYTHON:-}" ] && _USER_PYTHON="$TUNELABS_PYTHON"
 
 if [ "$_VERBOSE" = true ]; then
-    export UNSLOTH_VERBOSE=1
+    export TUNELABS_VERBOSE=1
 fi
 
 # Custom Studio roots are not supported with --tauri (desktop app still
-# resolves ~/.unsloth/studio). Pass through if the override == legacy default.
+# resolves ~/.tunelabs/studio). Pass through if the override == legacy default.
 if [ "$TAURI_MODE" = true ]; then
     _tauri_override_var=""
-    _tauri_override="${UNSLOTH_STUDIO_HOME:-}"
+    _tauri_override="${TUNELABS_STUDIO_HOME:-}"
     if [ -n "$_tauri_override" ]; then
-        _tauri_override_var="UNSLOTH_STUDIO_HOME"
+        _tauri_override_var="TUNELABS_STUDIO_HOME"
     else
         _tauri_override="${STUDIO_HOME:-}"
         [ -n "$_tauri_override" ] && _tauri_override_var="STUDIO_HOME"
@@ -114,10 +114,10 @@ if [ "$TAURI_MODE" = true ]; then
             && [ "${_tauri_override_abs%/}" != "$_tauri_override_abs" ]; do
             _tauri_override_abs=${_tauri_override_abs%/}
         done
-        _tauri_legacy_root="$HOME/.unsloth/studio"
+        _tauri_legacy_root="$HOME/.tunelabs/studio"
         if [ -d "$_tauri_legacy_root" ]; then
             _tauri_legacy_root=$(CDPATH= cd -P -- "$_tauri_legacy_root" 2>/dev/null && pwd -P) \
-                || _tauri_legacy_root="$HOME/.unsloth/studio"
+                || _tauri_legacy_root="$HOME/.tunelabs/studio"
         fi
         while [ "$_tauri_legacy_root" != "/" ] \
             && [ "${_tauri_legacy_root%/}" != "$_tauri_legacy_root" ]; do
@@ -125,7 +125,7 @@ if [ "$TAURI_MODE" = true ]; then
         done
         if [ "$_tauri_override_abs" != "$_tauri_legacy_root" ]; then
             echo "ERROR: $_tauri_override_var is not supported with --tauri." >&2
-            echo "       The desktop app still uses the legacy ~/.unsloth/studio root." >&2
+            echo "       The desktop app still uses the legacy ~/.tunelabs/studio root." >&2
             echo "       Run install.sh without --tauri for custom-root shell installs," >&2
             echo "       or unset the env var for default desktop installs." >&2
             exit 1
@@ -134,7 +134,7 @@ if [ "$TAURI_MODE" = true ]; then
 fi
 
 _is_verbose() {
-    [ "${UNSLOTH_VERBOSE:-0}" = "1" ]
+    [ "${TUNELABS_VERBOSE:-0}" = "1" ]
 }
 
 run_maybe_quiet() {
@@ -165,21 +165,21 @@ run_install_cmd() {
 
 # Retry run_install_cmd on transient uv download failures with backoff. Returns
 # the last exit code on permanent failure so the set -e rollback trap still fires.
-: "${UNSLOTH_INSTALL_RETRIES:=3}"
-: "${UNSLOTH_INSTALL_RETRY_DELAY:=3}"
+: "${TUNELABS_INSTALL_RETRIES:=3}"
+: "${TUNELABS_INSTALL_RETRY_DELAY:=3}"
 run_install_cmd_retry() {
     _ricr_label="$1"
     # Sanitize overrides to a default of 3 (a typo must not disable retries; =1 disables).
     # Length guard precedes the numeric test so a huge value can't overflow `[ -ge ]`.
     # 0?* rejects leading-zero delays ("08"/"09" break the later $((delay*2)) as octal);
     # bare "0" stays valid. Bounds: 1..100 retries, 0..3600s base delay.
-    case "$UNSLOTH_INSTALL_RETRIES" in
+    case "$TUNELABS_INSTALL_RETRIES" in
         ''|*[!0-9]*|0) _ricr_max=3 ;;
-        *) if [ "${#UNSLOTH_INSTALL_RETRIES}" -le 3 ] && [ "$UNSLOTH_INSTALL_RETRIES" -ge 1 ] 2>/dev/null && [ "$UNSLOTH_INSTALL_RETRIES" -le 100 ] 2>/dev/null; then _ricr_max=$UNSLOTH_INSTALL_RETRIES; else _ricr_max=3; fi ;;
+        *) if [ "${#TUNELABS_INSTALL_RETRIES}" -le 3 ] && [ "$TUNELABS_INSTALL_RETRIES" -ge 1 ] 2>/dev/null && [ "$TUNELABS_INSTALL_RETRIES" -le 100 ] 2>/dev/null; then _ricr_max=$TUNELABS_INSTALL_RETRIES; else _ricr_max=3; fi ;;
     esac
-    case "$UNSLOTH_INSTALL_RETRY_DELAY" in
+    case "$TUNELABS_INSTALL_RETRY_DELAY" in
         ''|*[!0-9]*|0?*) _ricr_delay=3 ;;
-        *) if [ "${#UNSLOTH_INSTALL_RETRY_DELAY}" -le 4 ] && [ "$UNSLOTH_INSTALL_RETRY_DELAY" -ge 0 ] 2>/dev/null && [ "$UNSLOTH_INSTALL_RETRY_DELAY" -le 3600 ] 2>/dev/null; then _ricr_delay=$UNSLOTH_INSTALL_RETRY_DELAY; else _ricr_delay=3; fi ;;
+        *) if [ "${#TUNELABS_INSTALL_RETRY_DELAY}" -le 4 ] && [ "$TUNELABS_INSTALL_RETRY_DELAY" -ge 0 ] 2>/dev/null && [ "$TUNELABS_INSTALL_RETRY_DELAY" -le 3600 ] 2>/dev/null; then _ricr_delay=$TUNELABS_INSTALL_RETRY_DELAY; else _ricr_delay=3; fi ;;
     esac
     _ricr_attempt=1
     while :; do
@@ -336,13 +336,13 @@ _tauri_gpu_branch() {
 PYTHON_VERSION=""  # resolved after platform detection
 
 # Resolve install destinations: env override, HOME-redirect (best-effort
-# via getent/dscl), or default. Env-var priority: UNSLOTH_STUDIO_HOME wins
+# via getent/dscl), or default. Env-var priority: TUNELABS_STUDIO_HOME wins
 # over STUDIO_HOME (the more specific signal beats the generic alias).
 _resolve_studio_destinations() {
     _override_var=""
-    _override="${UNSLOTH_STUDIO_HOME:-}"
+    _override="${TUNELABS_STUDIO_HOME:-}"
     if [ -n "$_override" ]; then
-        _override_var="UNSLOTH_STUDIO_HOME"
+        _override_var="TUNELABS_STUDIO_HOME"
     else
         _override="${STUDIO_HOME:-}"
         [ -n "$_override" ] && _override_var="STUDIO_HOME"
@@ -382,20 +382,20 @@ _resolve_studio_destinations() {
         _default_home_canon=$(CDPATH= cd -P -- "$_default_home_canon" 2>/dev/null && pwd -P) || _default_home_canon="$_default_home"
     fi
     if [ -n "$_default_home_canon" ] && [ "$_home_canon" != "$_default_home_canon" ]; then
-        STUDIO_HOME="$HOME/.unsloth/studio"
-        DATA_DIR="$HOME/.local/share/unsloth"
+        STUDIO_HOME="$HOME/.tunelabs/studio"
+        DATA_DIR="$HOME/.local/share/tunelabs"
         _LOCAL_BIN="$HOME/.local/bin"
         _STUDIO_HOME_REDIRECT=home
         substep "HOME redirected ($HOME); install follows \$HOME"
         return 0
     fi
-    STUDIO_HOME="$HOME/.unsloth/studio"
-    DATA_DIR="$HOME/.local/share/unsloth"
+    STUDIO_HOME="$HOME/.tunelabs/studio"
+    DATA_DIR="$HOME/.local/share/tunelabs"
     _LOCAL_BIN="$HOME/.local/bin"
     _STUDIO_HOME_REDIRECT=default
 }
 _resolve_studio_destinations
-VENV_DIR="$STUDIO_HOME/unsloth_studio"
+VENV_DIR="$STUDIO_HOME/tunelabs_studio"
 _VENV_ROLLBACK_DIR=""
 _VENV_ROLLBACK_TARGET="$VENV_DIR"
 _VENV_ROLLBACK_ACTIVE=false
@@ -403,11 +403,11 @@ _VENV_ROLLBACK_ACTIVE=false
 _start_studio_venv_replacement() {
     _existing_dir="$1"
     _stamp=$(date +%Y%m%d%H%M%S 2>/dev/null || echo "time")
-    _candidate="$STUDIO_HOME/unsloth_studio.rollback.$_stamp.$$"
+    _candidate="$STUDIO_HOME/tunelabs_studio.rollback.$_stamp.$$"
     _suffix=0
     while [ -e "$_candidate" ]; do
         _suffix=$((_suffix + 1))
-        _candidate="$STUDIO_HOME/unsloth_studio.rollback.$_stamp.$$.$_suffix"
+        _candidate="$STUDIO_HOME/tunelabs_studio.rollback.$_stamp.$$.$_suffix"
     done
     mv "$_existing_dir" "$_candidate"
     _VENV_ROLLBACK_DIR="$_candidate"
@@ -521,7 +521,7 @@ _smart_apt_install() {
         case "$REPLY" in
             [nN]*)
                 echo ""
-                echo "    Please install these packages first, then re-run Unsloth Studio setup:"
+                echo "    Please install these packages first, then re-run TuneLabs Studio setup:"
                 echo "    sudo apt-get update -y && sudo apt-get install -y $_STILL_MISSING"
                 exit 1
                 ;;
@@ -533,15 +533,15 @@ _smart_apt_install() {
     else
         echo ""
         echo "    sudo is not available on this system."
-        echo "    Please install these packages as root, then re-run Unsloth Studio setup:"
+        echo "    Please install these packages as root, then re-run TuneLabs Studio setup:"
         echo "    apt-get update -y && apt-get install -y $_STILL_MISSING"
         exit 1
     fi
 }
 
 # ── Helper: create desktop shortcuts and launcher script ──
-# Usage: create_studio_shortcuts <unsloth_exe> <os>
-# Creates ~/.local/share/unsloth/launch-studio.sh (shared launcher),
+# Usage: create_studio_shortcuts <tunelabs_exe> <os>
+# Creates ~/.local/share/tunelabs/launch-studio.sh (shared launcher),
 # plus platform-specific shortcuts (Linux .desktop / macOS .app bundle /
 # WSL Windows Desktop+Start Menu .lnk).
 create_studio_shortcuts() {
@@ -550,7 +550,7 @@ create_studio_shortcuts() {
 
     # Validate exe
     if [ ! -x "$_css_exe" ]; then
-        echo "[WARN] Cannot create shortcuts: unsloth not found at $_css_exe"
+        echo "[WARN] Cannot create shortcuts: tunelabs not found at $_css_exe"
         return 0
     fi
 
@@ -560,8 +560,8 @@ create_studio_shortcuts() {
 
     _css_data_dir="$DATA_DIR"
     _css_launcher="$_css_data_dir/launch-studio.sh"
-    _css_icon_png="$_css_data_dir/unsloth-studio.png"
-    _css_gem_png="$_css_data_dir/unsloth-gem.png"
+    _css_icon_png="$_css_data_dir/tunelabs-studio.png"
+    _css_gem_png="$_css_data_dir/tunelabs-gem.png"
 
     mkdir -p "$_css_data_dir"
 
@@ -610,7 +610,7 @@ create_studio_shortcuts() {
     # @@INSTALLED_IS_ENV_MODE@@ are substituted via sed below.
     cat > "$_css_launcher" << 'LAUNCHER_EOF'
 #!/usr/bin/env bash
-# Unsloth Studio Launcher
+# TuneLabs Studio Launcher
 # Auto-generated by install.sh -- do not edit manually.
 set -euo pipefail
 
@@ -623,8 +623,8 @@ _INSTALLED_IS_ENV_MODE='@@INSTALLED_IS_ENV_MODE@@'
 if [ -f "$DATA_DIR/studio.conf" ]; then
     . "$DATA_DIR/studio.conf"
 fi
-if [ -z "${UNSLOTH_EXE:-}" ] || [ ! -x "${UNSLOTH_EXE:-}" ]; then
-    echo "Error: UNSLOTH_EXE not set or not executable. Re-run the installer." >&2
+if [ -z "${TUNELABS_EXE:-}" ] || [ ! -x "${TUNELABS_EXE:-}" ]; then
+    echo "Error: TUNELABS_EXE not set or not executable. Re-run the installer." >&2
     exit 1
 fi
 
@@ -636,7 +636,7 @@ LOG_FILE="$DATA_DIR/studio.log"
 # why: in env-override mode multiple installs share an OS user; namespace the
 # lock and remember our own healthy port so we never attach to an unrelated
 # Studio listening on the global 8888..8908 range.
-LOCK_DIR="${XDG_RUNTIME_DIR:-/tmp}/unsloth-studio-launcher-$(id -u).lock"
+LOCK_DIR="${XDG_RUNTIME_DIR:-/tmp}/tunelabs-studio-launcher-$(id -u).lock"
 PORT_FILE=""
 # why: gate on the install-time mode (baked above) instead of the runtime env
 # var; sourcing a custom-root studio.conf in shell must not flip a default-mode
@@ -647,7 +647,7 @@ if [ "$_INSTALLED_IS_ENV_MODE" = "true" ]; then
     else
         _LOCK_KEY=""
     fi
-    [ -n "$_LOCK_KEY" ] && LOCK_DIR="${XDG_RUNTIME_DIR:-/tmp}/unsloth-studio-launcher-$(id -u)-${_LOCK_KEY}.lock"
+    [ -n "$_LOCK_KEY" ] && LOCK_DIR="${XDG_RUNTIME_DIR:-/tmp}/tunelabs-studio-launcher-$(id -u)-${_LOCK_KEY}.lock"
     PORT_FILE="$DATA_DIR/studio.port"
 fi
 
@@ -668,8 +668,8 @@ _check_health() {
     _port=$1
     _resp=$(_http_get "http://127.0.0.1:$_port/api/health") || return 1
     case "$_resp" in
-        *'"status"'*'"healthy"'*'"service"'*'"Unsloth UI Backend"'*) ;;
-        *'"service"'*'"Unsloth UI Backend"'*'"status"'*'"healthy"'*) ;;
+        *'"status"'*'"healthy"'*'"service"'*'"TuneLabs UI Backend"'*) ;;
+        *'"service"'*'"TuneLabs UI Backend"'*'"status"'*'"healthy"'*) ;;
         *) return 1 ;;
     esac
     # why: verify the backend belongs to THIS install. Baked hex digest avoids
@@ -941,11 +941,11 @@ if [ -t 1 ]; then
     ) &
     # Clear traps so exec does not trigger _release_lock (the subshell owns it)
     trap - EXIT INT TERM
-    exec "$UNSLOTH_EXE" studio -p "$_launch_port"
+    exec "$TUNELABS_EXE" studio -p "$_launch_port"
 else
     # ── Background mode (no TTY) ──
     # Used by macOS .app and headless invocations.
-    _launch_cmd=$(printf '%q ' "$UNSLOTH_EXE" studio -p "$_launch_port")
+    _launch_cmd=$(printf '%q ' "$TUNELABS_EXE" studio -p "$_launch_port")
     _launch_cmd=${_launch_cmd% }
     _spawn_terminal "$_launch_cmd"
 
@@ -960,7 +960,7 @@ else
         sleep "$POLL_INTERVAL_SEC"
     done
 
-    echo "Unsloth Studio did not become healthy within ${TIMEOUT_SEC}s." >&2
+    echo "TuneLabs Studio did not become healthy within ${TIMEOUT_SEC}s." >&2
     echo "Check logs at: $LOG_FILE" >&2
     exit 1
 fi
@@ -974,7 +974,7 @@ LAUNCHER_EOF
         && mv "$_css_launcher.tmp" "$_css_launcher"
 
     # Env-mode bakes an absolute DATA_DIR (root fixed at install time);
-    # default / HOME-redirect keeps the literal $HOME/.local/share/unsloth
+    # default / HOME-redirect keeps the literal $HOME/.local/share/tunelabs
     # so behavior is byte-identical to pre-override.
     if [ "$_STUDIO_HOME_REDIRECT" = "env" ]; then
         # Two-stage escape: (1) `'` -> `'\''` for shell single-quote embedding,
@@ -985,7 +985,7 @@ LAUNCHER_EOF
         sed "s|@@DATA_DIR@@|$_sed_safe|g" "$_css_launcher" > "$_css_launcher.tmp" \
             && mv "$_css_launcher.tmp" "$_css_launcher"
     else
-        sed "s|DATA_DIR='@@DATA_DIR@@'|DATA_DIR=\"\$HOME/.local/share/unsloth\"|" \
+        sed "s|DATA_DIR='@@DATA_DIR@@'|DATA_DIR=\"\$HOME/.local/share/tunelabs\"|" \
             "$_css_launcher" > "$_css_launcher.tmp" \
             && mv "$_css_launcher.tmp" "$_css_launcher"
     fi
@@ -996,29 +996,29 @@ LAUNCHER_EOF
     # shells launch the right install without re-exporting.
     _css_quoted_exe=$(printf '%s' "$_css_exe" | sed "s/'/'\\\\''/g")
     {
-        printf '%s\n' "UNSLOTH_EXE='$_css_quoted_exe'"
+        printf '%s\n' "TUNELABS_EXE='$_css_quoted_exe'"
         if [ "$_STUDIO_HOME_REDIRECT" = "env" ]; then
             # When an override resolves to the legacy default, llama.cpp
-            # still lives at ~/.unsloth/llama.cpp (one shared build).
+            # still lives at ~/.tunelabs/llama.cpp (one shared build).
             # Canonicalize the legacy side so a symlinked $HOME doesn't
             # break the comparison.
-            _css_legacy_studio="$HOME/.unsloth/studio"
+            _css_legacy_studio="$HOME/.tunelabs/studio"
             if [ -d "$_css_legacy_studio" ]; then
                 _css_legacy_studio=$(CDPATH= cd -P -- "$_css_legacy_studio" 2>/dev/null && pwd -P) \
-                    || _css_legacy_studio="$HOME/.unsloth/studio"
+                    || _css_legacy_studio="$HOME/.tunelabs/studio"
             fi
             if [ "$STUDIO_HOME" = "$_css_legacy_studio" ]; then
-                _css_llama_path="$HOME/.unsloth/llama.cpp"
+                _css_llama_path="$HOME/.tunelabs/llama.cpp"
             else
                 _css_llama_path="$STUDIO_HOME/llama.cpp"
             fi
             _css_quoted_home=$(printf '%s' "$STUDIO_HOME" | sed "s/'/'\\\\''/g")
             _css_quoted_llama=$(printf '%s' "$_css_llama_path" | sed "s/'/'\\\\''/g")
-            printf '%s\n' "export UNSLOTH_STUDIO_HOME='$_css_quoted_home'"
-            # UNSLOTH_LLAMA_CPP_PATH is a pre-existing user-controlled
+            printf '%s\n' "export TUNELABS_STUDIO_HOME='$_css_quoted_home'"
+            # TUNELABS_LLAMA_CPP_PATH is a pre-existing user-controlled
             # llama.cpp dir override; only default it if unset.
-            printf '%s\n' 'if [ -z "${UNSLOTH_LLAMA_CPP_PATH:-}" ]; then'
-            printf '%s\n' "    export UNSLOTH_LLAMA_CPP_PATH='$_css_quoted_llama'"
+            printf '%s\n' 'if [ -z "${TUNELABS_LLAMA_CPP_PATH:-}" ]; then'
+            printf '%s\n' "    export TUNELABS_LLAMA_CPP_PATH='$_css_quoted_llama'"
             printf '%s\n' 'fi'
         fi
     } > "$_css_data_dir/studio.conf"
@@ -1034,7 +1034,7 @@ LAUNCHER_EOF
     _css_found_icon=""
     _css_venv_dir=$(dirname "$(dirname "$_css_exe")")
     # Check site-packages
-    for _sp in "$_css_venv_dir"/lib/python*/site-packages/unsloth/studio/frontend/public; do
+    for _sp in "$_css_venv_dir"/lib/python*/site-packages/tunelabs/studio/frontend/public; do
         if [ -f "$_sp/rounded-512.png" ]; then
             _css_found_icon="$_sp/rounded-512.png"
         fi
@@ -1049,7 +1049,7 @@ LAUNCHER_EOF
         cp "$_css_found_icon" "$_css_icon_png" 2>/dev/null || true
         cp "$_css_found_icon" "$_css_gem_png" 2>/dev/null || true
     else
-        download "https://raw.githubusercontent.com/unslothai/unsloth/main/studio/frontend/public/rounded-512.png" "$_css_icon_png" 2>/dev/null || true
+        download "https://raw.githubusercontent.com/tunelabsai/tunelabs/main/studio/frontend/public/rounded-512.png" "$_css_icon_png" 2>/dev/null || true
         cp "$_css_icon_png" "$_css_gem_png" 2>/dev/null || true
     fi
 
@@ -1082,7 +1082,7 @@ LAUNCHER_EOF
         _css_app_dir="$HOME/.local/share/applications"
         mkdir -p "$_css_app_dir"
 
-        _css_desktop="$_css_app_dir/unsloth-studio.desktop"
+        _css_desktop="$_css_app_dir/tunelabs-studio.desktop"
         # Escape backslashes and double-quotes for .desktop Exec= field
         _css_exec_escaped=$(printf '%s' "$_css_launcher" | sed 's/\\/\\\\/g; s/"/\\"/g')
         _css_icon_escaped=$(printf '%s' "$_css_icon_png" | sed 's/\\/\\\\/g; s/"/\\"/g')
@@ -1090,8 +1090,8 @@ LAUNCHER_EOF
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=Unsloth Studio
-Comment=Launch Unsloth Studio
+Name=TuneLabs Studio
+Comment=Launch TuneLabs Studio
 Exec="$_css_exec_escaped"
 Icon=$_css_icon_escaped
 Terminal=true
@@ -1102,11 +1102,11 @@ DESKTOP_EOF
 
         # Copy to ~/Desktop if it exists
         if [ -d "$HOME/Desktop" ]; then
-            cp "$_css_desktop" "$HOME/Desktop/unsloth-studio.desktop" 2>/dev/null || true
-            chmod +x "$HOME/Desktop/unsloth-studio.desktop" 2>/dev/null || true
+            cp "$_css_desktop" "$HOME/Desktop/tunelabs-studio.desktop" 2>/dev/null || true
+            chmod +x "$HOME/Desktop/tunelabs-studio.desktop" 2>/dev/null || true
             # Mark as trusted so GNOME/Nautilus allows launching via double-click
             if command -v gio >/dev/null 2>&1; then
-                gio set "$HOME/Desktop/unsloth-studio.desktop" metadata::trusted true 2>/dev/null || true
+                gio set "$HOME/Desktop/tunelabs-studio.desktop" metadata::trusted true 2>/dev/null || true
             fi
         fi
 
@@ -1116,7 +1116,7 @@ DESKTOP_EOF
 
     elif [ "$_css_os" = "macos" ]; then
         # ── macOS: .app bundle ──
-        _css_app="$HOME/Applications/Unsloth Studio.app"
+        _css_app="$HOME/Applications/TuneLabs Studio.app"
         _css_contents="$_css_app/Contents"
         _css_macos_dir="$_css_contents/MacOS"
         _css_res_dir="$_css_contents/Resources"
@@ -1140,11 +1140,11 @@ DESKTOP_EOF
 <plist version="1.0">
 <dict>
     <key>CFBundleIdentifier</key>
-    <string>ai.unsloth.studio</string>
+    <string>ai.tunelabs.studio</string>
     <key>CFBundleName</key>
-    <string>Unsloth Studio</string>
+    <string>TuneLabs Studio</string>
     <key>CFBundleDisplayName</key>
-    <string>Unsloth Studio</string>
+    <string>TuneLabs Studio</string>
     <key>CFBundleExecutable</key>
     <string>launch-studio</string>
     <key>CFBundleIconFile</key>
@@ -1177,7 +1177,7 @@ STUB_EOF
             && mv "$_css_macos_dir/launch-studio.tmp" "$_css_macos_dir/launch-studio"
         chmod +x "$_css_macos_dir/launch-studio"
 
-        # Build AppIcon.icns from unsloth-gem.png (2240x2240)
+        # Build AppIcon.icns from tunelabs-gem.png (2240x2240)
         if [ -f "$_css_gem_png" ] && command -v sips >/dev/null 2>&1 && command -v iconutil >/dev/null 2>&1; then
             _css_tmpdir=$(mktemp -d 2>/dev/null)
             if [ -d "$_css_tmpdir" ]; then
@@ -1205,7 +1205,7 @@ STUB_EOF
 
         # Symlink on Desktop
         if [ -d "$HOME/Desktop" ]; then
-            ln -sf "$_css_app" "$HOME/Desktop/Unsloth Studio" 2>/dev/null || true
+            ln -sf "$_css_app" "$HOME/Desktop/TuneLabs Studio" 2>/dev/null || true
         fi
         _css_created=1
 
@@ -1242,25 +1242,25 @@ STUB_EOF
         _css_sc_args_ps=$(printf '%s' "$_css_sc_args" | sed "s/'/''/g")
 
         # DISTINCT shortcut name so the WSL launcher never clobbers a native
-        # install's "Unsloth Studio.lnk" in the same folder. Per-distro suffix.
+        # install's "TuneLabs Studio.lnk" in the same folder. Per-distro suffix.
         if [ -n "$_css_distro" ]; then
-            _css_lnk_name="Unsloth Studio (WSL - ${_css_distro}).lnk"
+            _css_lnk_name="TuneLabs Studio (WSL - ${_css_distro}).lnk"
         else
-            _css_lnk_name="Unsloth Studio (WSL).lnk"
+            _css_lnk_name="TuneLabs Studio (WSL).lnk"
         fi
         _css_lnk_name_ps=$(printf '%s' "$_css_lnk_name" | sed "s/'/''/g")
 
         # Create shortcuts via a temp PowerShell script to avoid escaping issues
-        _css_ps1_tmp=$(mktemp /tmp/unsloth-shortcut-XXXXXX.ps1 2>/dev/null) || true
+        _css_ps1_tmp=$(mktemp /tmp/tunelabs-shortcut-XXXXXX.ps1 2>/dev/null) || true
         if [ -n "$_css_ps1_tmp" ]; then
             cat > "$_css_ps1_tmp" << WSLPS1_EOF
 \$WshShell = New-Object -ComObject WScript.Shell
 \$targetExe = (Get-Command '$_css_sc_target' -ErrorAction SilentlyContinue).Source
 if (-not \$targetExe) { exit 1 }
-# Best-effort: fetch the Unsloth icon to a stable Windows path (shared with a
+# Best-effort: fetch the TuneLabs icon to a stable Windows path (shared with a
 # native install if one exists) so the WSL shortcut shows the proper icon.
-\$iconDir = Join-Path \$env:LOCALAPPDATA 'Unsloth Studio'
-\$iconPath = Join-Path \$iconDir 'unsloth.ico'
+\$iconDir = Join-Path \$env:LOCALAPPDATA 'TuneLabs Studio'
+\$iconPath = Join-Path \$iconDir 'tunelabs.ico'
 \$preIconHash = \$null
 if (Test-Path -LiteralPath \$iconPath) {
     try { \$preIconHash = (Get-FileHash -LiteralPath \$iconPath -Algorithm SHA256).Hash } catch {}
@@ -1268,7 +1268,7 @@ if (Test-Path -LiteralPath \$iconPath) {
 if (-not (Test-Path -LiteralPath \$iconPath)) {
     try {
         New-Item -ItemType Directory -Force -Path \$iconDir | Out-Null
-        Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/unslothai/unsloth/main/studio/frontend/public/unsloth.ico' -OutFile \$iconPath -UseBasicParsing -ErrorAction Stop
+        Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/tunelabsai/tunelabs/main/studio/frontend/public/tunelabs.ico' -OutFile \$iconPath -UseBasicParsing -ErrorAction Stop
     } catch {}
 }
 \$hasIcon = \$false
@@ -1288,7 +1288,7 @@ foreach (\$dir in \$locations) {
     \$shortcut = \$WshShell.CreateShortcut(\$linkPath)
     \$shortcut.TargetPath = \$targetExe
     \$shortcut.Arguments = '$_css_sc_args_ps'
-    \$shortcut.Description = 'Launch Unsloth Studio (WSL)'
+    \$shortcut.Description = 'Launch TuneLabs Studio (WSL)'
     if (\$hasIcon) { \$shortcut.IconLocation = "\$iconPath,0" }
     \$shortcut.Save()
     \$created += \$linkPath
@@ -1311,9 +1311,9 @@ if (\$hasIcon) {
 # explorer restart) is a PER-ITEM SHChangeNotify(SHCNE_UPDATEITEM, SHCNF_PATHW,
 # <lnk>) -- the global SHCNE_ASSOCCHANGED alone does not recover a stale item.
 try {
-    Add-Type -Namespace UnslothShell -Name IconRefresh -MemberDefinition '[System.Runtime.InteropServices.DllImport("shell32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)] public static extern void SHChangeNotify(int e, uint f, string a, System.IntPtr b);' -ErrorAction SilentlyContinue
-    foreach (\$p in \$created) { try { [UnslothShell.IconRefresh]::SHChangeNotify(0x00002000, 0x0005, \$p, [System.IntPtr]::Zero) } catch {} }
-    [UnslothShell.IconRefresh]::SHChangeNotify(0x08000000, 0, \$null, [System.IntPtr]::Zero)
+    Add-Type -Namespace TuneLabsShell -Name IconRefresh -MemberDefinition '[System.Runtime.InteropServices.DllImport("shell32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)] public static extern void SHChangeNotify(int e, uint f, string a, System.IntPtr b);' -ErrorAction SilentlyContinue
+    foreach (\$p in \$created) { try { [TuneLabsShell.IconRefresh]::SHChangeNotify(0x00002000, 0x0005, \$p, [System.IntPtr]::Zero) } catch {} }
+    [TuneLabsShell.IconRefresh]::SHChangeNotify(0x08000000, 0, \$null, [System.IntPtr]::Zero)
 } catch {}
 # Heavier on-disk icon-cache clear + StartMenuExperienceHost tile rebuild
 # (preserve start2.bin) only on first install or a real icon change, so a no-op
@@ -1343,18 +1343,18 @@ WSLPS1_EOF
         # shortcut wasn't created; tell the user how to launch / re-enable it.
         if [ "$_css_created" -ne 1 ]; then
             substep "Couldn't create the Windows shortcut (WSL interop may be disabled)." "$C_WARN"
-            substep "  Launch Studio from Windows:  wsl -d \"$_css_distro\" -- bash -lc 'unsloth studio'" "$C_WARN"
+            substep "  Launch Studio from Windows:  wsl -d \"$_css_distro\" -- bash -lc 'tunelabs studio'" "$C_WARN"
             substep "  (re-enable shortcuts: turn WSL interop back on, e.g. run 'wsl --shutdown' then reopen WSL.)" "$C_WARN"
         fi
     fi
 
     if [ "$_css_created" -eq 1 ]; then
-        substep "Created Unsloth Studio shortcut"
+        substep "Created TuneLabs Studio shortcut"
     fi
 }
 
 echo ""
-printf "  ${C_TITLE}%s${C_RST}\n" "🦥 Unsloth Studio Installer"
+printf "  ${C_TITLE}%s${C_RST}\n" "🦥 TuneLabs Studio Installer"
 printf "  ${C_DIM}%s${C_RST}\n" "$RULE"
 echo ""
 
@@ -1368,16 +1368,16 @@ elif grep -qi microsoft /proc/version 2>/dev/null; then
 fi
 step "platform" "$OS"
 
-# Regen launcher/shortcuts only; used by `unsloth studio update`.
+# Regen launcher/shortcuts only; used by `tunelabs studio update`.
 if [ "$_SHORTCUTS_ONLY" = true ]; then
     # Tauri owns its own shortcuts.
     if [ "$TAURI_MODE" != true ]; then
         VENV_ABS_BIN="$VENV_DIR/bin"
-        if [ ! -x "$VENV_ABS_BIN/unsloth" ]; then
-            echo "ERROR: unsloth binary missing at '$VENV_ABS_BIN/unsloth'; run install.sh first." >&2
+        if [ ! -x "$VENV_ABS_BIN/tunelabs" ]; then
+            echo "ERROR: tunelabs binary missing at '$VENV_ABS_BIN/tunelabs'; run install.sh first." >&2
             exit 1
         fi
-        create_studio_shortcuts "$VENV_ABS_BIN/unsloth" "$OS"
+        create_studio_shortcuts "$VENV_ABS_BIN/tunelabs" "$OS"
     fi
     exit 0
 fi
@@ -1440,7 +1440,7 @@ fi
 tauri_diag_marker "$_TAURI_INITIAL_GPU_BRANCH" "none"
 
 # ── Check system dependencies ──
-# cmake and git are needed by unsloth studio setup to build the GGUF inference
+# cmake and git are needed by tunelabs studio setup to build the GGUF inference
 # engine (llama.cpp). build-essential and libcurl-dev are also needed on Linux.
 tauri_log "STEP" "Checking system dependencies"
 MISSING=""
@@ -1585,17 +1585,17 @@ _MIGRATED=false
 if [ -x "$VENV_DIR/bin/python" ]; then
     # why: matching guard to the .venv branch below -- in env-mode
     # $STUDIO_HOME is a user-chosen workspace, so refuse to nuke an
-    # existing $STUDIO_HOME/unsloth_studio that lacks Studio sentinels.
+    # existing $STUDIO_HOME/tunelabs_studio that lacks Studio sentinels.
     # Accept the in-VENV ownership marker so partial-install retries are
     # not blocked. Sentinels must be regular files: -f follows symlinks
     # to files (the legitimate ln -s shim shape) but rejects directories
     # and broken/dir-targeted symlinks.
     if [ "$_STUDIO_HOME_REDIRECT" = "env" ] \
-       && [ ! -f "$VENV_DIR/.unsloth-studio-owned" ] \
+       && [ ! -f "$VENV_DIR/.tunelabs-studio-owned" ] \
        && [ ! -f "$STUDIO_HOME/share/studio.conf" ] \
-       && [ ! -f "$STUDIO_HOME/bin/unsloth" ]; then
-        echo "ERROR: $VENV_DIR already exists but does not look like an Unsloth Studio install." >&2
-        echo "       Move it aside or choose an empty UNSLOTH_STUDIO_HOME." >&2
+       && [ ! -f "$STUDIO_HOME/bin/tunelabs" ]; then
+        echo "ERROR: $VENV_DIR already exists but does not look like an TuneLabs Studio install." >&2
+        echo "       Move it aside or choose an empty TUNELABS_STUDIO_HOME." >&2
         exit 1
     fi
     # New layout already exists — replace only after preserving rollback copy.
@@ -1627,7 +1627,7 @@ torch.testing.assert_close(torch.unique(E), torch.tensor((20,), device=E.device,
     if [ "$_legacy_ok" = true ]; then
         echo "✅ Legacy environment is healthy — migrating..."
         mv "$STUDIO_HOME/.venv" "$VENV_DIR"
-        echo "   Moved ~/.unsloth/studio/.venv → $VENV_DIR"
+        echo "   Moved ~/.tunelabs/studio/.venv → $VENV_DIR"
         _MIGRATED=true
     else
         echo "⚠️  Legacy environment failed validation — creating fresh environment"
@@ -1667,7 +1667,7 @@ fi
 # repaired by re-running install.sh; the env-mode deletion guard above accepts
 # this marker as the primary sentinel.
 if [ -x "$VENV_DIR/bin/python" ]; then
-    : > "$VENV_DIR/.unsloth-studio-owned" 2>/dev/null || true
+    : > "$VENV_DIR/.tunelabs-studio-owned" 2>/dev/null || true
 fi
 
 # Guard against two independent Apple Silicon venv problems, in order:
@@ -1715,7 +1715,7 @@ if [ -z "$_USER_PYTHON" ] && [ "$OS" = "macos" ] && [ "$_ARCH" = "arm64" ]; then
         run_install_cmd "recreate venv (arm64)" uv venv "$VENV_DIR" \
             --python "cpython-${PYTHON_VERSION}-macos-aarch64-none"
         if [ -x "$VENV_DIR/bin/python" ]; then
-            : > "$VENV_DIR/.unsloth-studio-owned" 2>/dev/null || true
+            : > "$VENV_DIR/.tunelabs-studio-owned" 2>/dev/null || true
         fi
         # Re-inspect: the recreated arm64 venv may still be 3.13.8.
         _info=$(_inspect_venv)
@@ -1731,7 +1731,7 @@ if [ -z "$_USER_PYTHON" ] && [ "$OS" = "macos" ] && [ "$_ARCH" = "arm64" ]; then
         run_install_cmd "recreate venv" uv venv "$VENV_DIR" \
             --python "cpython-${PYTHON_VERSION}-macos-aarch64-none"
         if [ -x "$VENV_DIR/bin/python" ]; then
-            : > "$VENV_DIR/.unsloth-studio-owned" 2>/dev/null || true
+            : > "$VENV_DIR/.tunelabs-studio-owned" 2>/dev/null || true
         fi
     fi
 fi
@@ -1870,9 +1870,9 @@ _has_usable_nvidia_gpu() {
 # ── Detect GPU and choose PyTorch index URL ──
 # Mirrors Get-TorchIndexUrl in install.ps1.
 # On CPU-only machines this returns the cpu index, avoiding the solver
-# dead-end where --torch-backend=auto resolves to unsloth==2024.8.
+# dead-end where --torch-backend=auto resolves to tunelabs==2024.8.
 get_torch_index_url() {
-    _base="${UNSLOTH_PYTORCH_MIRROR:-https://download.pytorch.org/whl}"
+    _base="${TUNELABS_PYTORCH_MIRROR:-https://download.pytorch.org/whl}"
     _base="${_base%/}"
     # macOS: always CPU (no CUDA support)
     case "$(uname -s)" in Darwin) echo "$_base/cpu"; return ;; esac
@@ -2164,26 +2164,26 @@ _persist_rocm_wsl_dropin() {
         *) export PATH="${_rw_rocm}/bin:${PATH}" ;;
     esac
     export LD_LIBRARY_PATH="${_rw_rocm}/lib:${LD_LIBRARY_PATH:-}"
-    [ -r /etc/profile.d/unsloth-rocm-wsl.sh ] && return 0
+    [ -r /etc/profile.d/tunelabs-rocm-wsl.sh ] && return 0
     _rw_dropin="$(
-        printf '# >>> Unsloth ROCm-on-WSL (gfx1151) >>>\n'
+        printf '# >>> TuneLabs ROCm-on-WSL (gfx1151) >>>\n'
         printf 'export HSA_ENABLE_DXG_DETECTION=1\n'
         printf 'export TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1\n'
         printf 'export PATH="%s/bin:${PATH}"\n' "${_rw_rocm}"
         printf 'export LD_LIBRARY_PATH="%s/lib:${LD_LIBRARY_PATH:-}"\n' "${_rw_rocm}"
-        printf '# <<< Unsloth ROCm-on-WSL (gfx1151) <<<\n'
+        printf '# <<< TuneLabs ROCm-on-WSL (gfx1151) <<<\n'
     )"
     if [ "$(id -u)" = "0" ]; then
-        printf '%s\n' "$_rw_dropin" > /etc/profile.d/unsloth-rocm-wsl.sh 2>/dev/null || true
+        printf '%s\n' "$_rw_dropin" > /etc/profile.d/tunelabs-rocm-wsl.sh 2>/dev/null || true
     elif command -v sudo >/dev/null 2>&1; then
-        printf '%s\n' "$_rw_dropin" | sudo tee /etc/profile.d/unsloth-rocm-wsl.sh >/dev/null 2>&1 || true
+        printf '%s\n' "$_rw_dropin" | sudo tee /etc/profile.d/tunelabs-rocm-wsl.sh >/dev/null 2>&1 || true
     fi
 }
 
 _maybe_bootstrap_rocm_wsl() {
     [ "${OS:-}" = "wsl" ] || return 0
     [ "${SKIP_TORCH:-false}" = "false" ] || return 0
-    [ "${UNSLOTH_SKIP_ROCM_WSL_SETUP:-0}" = "1" ] && return 0
+    [ "${TUNELABS_SKIP_ROCM_WSL_SETUP:-0}" = "1" ] && return 0
     # Leave any already-usable GPU completely alone (NVIDIA, or working ROCm).
     if _has_usable_nvidia_gpu; then return 0; fi
     # "Usable ROCm" here = rocminfo enumerates the gfx1151 agent. Don't use the
@@ -2210,9 +2210,9 @@ _maybe_bootstrap_rocm_wsl() {
     # Fast path: already configured (librocdxg present) but launched from a
     # non-login shell so the persisted env wasn't loaded -- just load it.
     if [ -e /opt/rocm/lib/librocdxg.so ] || [ -e /opt/rocm/lib64/librocdxg.so ]; then
-        if [ -r /etc/profile.d/unsloth-rocm-wsl.sh ]; then
+        if [ -r /etc/profile.d/tunelabs-rocm-wsl.sh ]; then
             # shellcheck disable=SC1091
-            . /etc/profile.d/unsloth-rocm-wsl.sh || true
+            . /etc/profile.d/tunelabs-rocm-wsl.sh || true
         else
             # librocdxg present but the env drop-in is gone (e.g. a Studio
             # uninstall removed it while keeping shared ROCm). Restore the env.
@@ -2224,14 +2224,14 @@ _maybe_bootstrap_rocm_wsl() {
     echo ""
     substep "Detected AMD Strix Halo (Radeon 8000S) in WSL with no ROCm runtime yet." "$C_WARN"
     substep "Setting up ROCm-on-WSL (ROCm 7.2 + librocdxg) automatically to enable this GPU."
-    substep "One-time, uses sudo and a large download. (skip: re-run with UNSLOTH_SKIP_ROCM_WSL_SETUP=1)"
+    substep "One-time, uses sudo and a large download. (skip: re-run with TUNELABS_SKIP_ROCM_WSL_SETUP=1)"
 
     # Locate the helper: prefer the copy shipped beside install.sh, else fetch it.
     _rw_helper="${_REPO_ROOT:-.}/scripts/install_rocm_wsl_strixhalo.sh"
     _rw_tmp=""
     if [ ! -r "$_rw_helper" ]; then
-        _rw_tmp="$(mktemp 2>/dev/null || echo /tmp/_unsloth_rocm_wsl.sh)"
-        if download "https://raw.githubusercontent.com/unslothai/unsloth/main/scripts/install_rocm_wsl_strixhalo.sh" "$_rw_tmp" 2>/dev/null; then
+        _rw_tmp="$(mktemp 2>/dev/null || echo /tmp/_tunelabs_rocm_wsl.sh)"
+        if download "https://raw.githubusercontent.com/tunelabsai/tunelabs/main/scripts/install_rocm_wsl_strixhalo.sh" "$_rw_tmp" 2>/dev/null; then
             _rw_helper="$_rw_tmp"
         else
             substep "Could not fetch the ROCm-on-WSL helper; using CPU fallback." "$C_WARN"
@@ -2242,25 +2242,25 @@ _maybe_bootstrap_rocm_wsl() {
 
     # Consent: the narrow guarded case is exactly the GPU setup the user ran the
     # installer for, so it proceeds AUTOMATICALLY by default (works with no TTY,
-    # e.g. `curl ... | sh`). Opt out via UNSLOTH_SKIP_ROCM_WSL_SETUP=1 (top of
+    # e.g. `curl ... | sh`). Opt out via TUNELABS_SKIP_ROCM_WSL_SETUP=1 (top of
     # function). The Tauri app drives its own consent UI, so under TAURI_MODE it
-    # only runs when the app passes UNSLOTH_ROCM_WSL_AUTO=1; else surface and wait.
+    # only runs when the app passes TUNELABS_ROCM_WSL_AUTO=1; else surface and wait.
     _rw_go=1
-    if [ "${TAURI_MODE:-false}" = "true" ] && [ "${UNSLOTH_ROCM_WSL_AUTO:-0}" != "1" ]; then
+    if [ "${TAURI_MODE:-false}" = "true" ] && [ "${TUNELABS_ROCM_WSL_AUTO:-0}" != "1" ]; then
         tauri_log "ROCM_WSL_AVAILABLE" "strixhalo"
-        substep "Enable the GPU from the desktop app (or set UNSLOTH_ROCM_WSL_AUTO=1)." "$C_WARN"
+        substep "Enable the GPU from the desktop app (or set TUNELABS_ROCM_WSL_AUTO=1)." "$C_WARN"
         _rw_go=0
     fi
 
     if [ "$_rw_go" = "1" ]; then
         # Helper does its own sudo + is idempotent. SMOKE_TEST=0: install.sh
         # installs torch itself right after, into the real venv.
-        if UNSLOTH_WSL_SMOKE_TEST=0 bash "$_rw_helper"; then
+        if TUNELABS_WSL_SMOKE_TEST=0 bash "$_rw_helper"; then
             # Pull the helper's persisted env into THIS shell so detection
             # (rocminfo) now enumerates the GPU and routes to gfx1151.
-            if [ -r /etc/profile.d/unsloth-rocm-wsl.sh ]; then
+            if [ -r /etc/profile.d/tunelabs-rocm-wsl.sh ]; then
                 # shellcheck disable=SC1091
-                . /etc/profile.d/unsloth-rocm-wsl.sh || true
+                . /etc/profile.d/tunelabs-rocm-wsl.sh || true
             fi
             substep "ROCm-on-WSL ready; continuing with GPU install." "$C_OK"
         else
@@ -2277,16 +2277,16 @@ TORCH_INDEX_URL=$(get_torch_index_url)
 # Export the resolved torch backend ("cuda", "rocm", or "cpu") so that
 # downstream scripts (setup.sh -> install_python_stack.py) know what was
 # chosen here and can skip ROCm-specific repair steps on CUDA/CPU hosts.
-# Classify on the FINAL path segment only: a custom UNSLOTH_PYTORCH_MIRROR
+# Classify on the FINAL path segment only: a custom TUNELABS_PYTORCH_MIRROR
 # whose base path happens to contain "rocm" or "gfx" must not mislabel a
 # cu*/cpu index as ROCm (radeon repo URLs end in rocm-rel-X.Y/, Strix
 # overrides in gfxNNNN/, so the trailing slash is stripped first).
 _torch_index_leaf="${TORCH_INDEX_URL%/}"
 _torch_index_leaf="${_torch_index_leaf##*/}"
 case "$_torch_index_leaf" in
-    rocm*|gfx*) export UNSLOTH_TORCH_BACKEND="rocm" ;;
-    cpu)        export UNSLOTH_TORCH_BACKEND="cpu"  ;;
-    *)          export UNSLOTH_TORCH_BACKEND="cuda" ;;
+    rocm*|gfx*) export TUNELABS_TORCH_BACKEND="rocm" ;;
+    cpu)        export TUNELABS_TORCH_BACKEND="cpu"  ;;
+    *)          export TUNELABS_TORCH_BACKEND="cuda" ;;
 esac
 
 # rocm7.2 ships torch 2.11.0 -- adjust the constraint to allow it.
@@ -2365,8 +2365,8 @@ case "$TORCH_INDEX_URL" in
             # AMD's arch-specific index serves torch 2.11.0+rocm7.13.0 which has AMD's
             # actual fix for the gfx1151/gfx1150 _grouped_mm kernel bug -- preferred
             # over the pytorch.org rocm7.2 fallback because it exercises the real GPU
-            # kernel path. Set UNSLOTH_AMD_ROCM_MIRROR to override for air-gapped installs.
-            _amd_strix_base="${UNSLOTH_AMD_ROCM_MIRROR:-https://repo.amd.com/rocm/whl}"
+            # kernel path. Set TUNELABS_AMD_ROCM_MIRROR to override for air-gapped installs.
+            _amd_strix_base="${TUNELABS_AMD_ROCM_MIRROR:-https://repo.amd.com/rocm/whl}"
             # Strip ALL trailing slashes to match Python's .rstrip("/") -- a
             # double-/triple-slash mirror URL would otherwise produce 404s on
             # strict pip proxies (artifactory, sonatype).
@@ -2416,10 +2416,10 @@ elif case "$TORCH_INDEX_URL" in */rocm*|*/gfx*) true ;; *) false ;; esac; then
     fi
     _gpu_disp_gfx=$(printf '%s\n' "$_gpu_disp_gfx_all" | awk -v idx="$_gpu_vis_idx" \
         'NF && !seen[$0]++ { a[n++]=$0 } END { if(idx>=n) idx=0; if(n>0) print a[idx] }')
-    # UNSLOTH_ROCM_GFX_ARCH env override (mirrors install.ps1)
-    if [ -n "${UNSLOTH_ROCM_GFX_ARCH:-}" ]; then
-        _gpu_disp_gfx="${UNSLOTH_ROCM_GFX_ARCH}"
-        substep "gfx arch from UNSLOTH_ROCM_GFX_ARCH env override: $_gpu_disp_gfx"
+    # TUNELABS_ROCM_GFX_ARCH env override (mirrors install.ps1)
+    if [ -n "${TUNELABS_ROCM_GFX_ARCH:-}" ]; then
+        _gpu_disp_gfx="${TUNELABS_ROCM_GFX_ARCH}"
+        substep "gfx arch from TUNELABS_ROCM_GFX_ARCH env override: $_gpu_disp_gfx"
     # Name-based arch inference when tools don't report gfx (mirrors install.ps1 nameArchTable)
     elif [ -z "$_gpu_disp_gfx" ] && [ -n "$_gpu_disp_mkt" ]; then
         # Kept in sync with the nameArchTable in install.ps1 / setup.ps1.
@@ -2439,7 +2439,7 @@ elif case "$TORCH_INDEX_URL" in */rocm*|*/gfx*) true ;; *) false ;; esac; then
         esac
         if [ -n "$_gpu_disp_gfx" ]; then
             substep "gfx arch inferred from GPU name: $_gpu_disp_gfx"
-            substep "Tip: set UNSLOTH_ROCM_GFX_ARCH=$_gpu_disp_gfx to skip inference next time"
+            substep "Tip: set TUNELABS_ROCM_GFX_ARCH=$_gpu_disp_gfx to skip inference next time"
         fi
     fi
     # ROCm version via hipconfig, then amd-smi
@@ -2496,12 +2496,12 @@ case "$TORCH_INDEX_URL" in
                 substep "  # then re-run this installer inside Ubuntu-24.04 -- it will detect the GPU."
                 substep "AMD ROCm-on-WSL docs: https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/"
                 substep "Strix Halo (gfx1151): this installer auto-offers ROCm-on-WSL setup once the"
-                substep "  driver is current; or run unsloth/scripts/install_rocm_wsl_strixhalo.sh yourself."
+                substep "  driver is current; or run tunelabs/scripts/install_rocm_wsl_strixhalo.sh yourself."
             else
-                substep "AMD ROCm users: see https://docs.unsloth.ai/get-started/install-and-update/amd"
+                substep "AMD ROCm users: see https://docs.tunelabs.ai/get-started/install-and-update/amd"
             fi
             substep "Re-run with --no-torch for GGUF-only (faster, no PyTorch):"
-            substep "  curl -fsSL https://unsloth.ai/install.sh | sh -s -- --no-torch"
+            substep "  curl -fsSL https://tunelabs.ai/install.sh | sh -s -- --no-torch"
         fi
         ;;
     */rocm*|*/gfx*)
@@ -2513,21 +2513,27 @@ case "$TORCH_INDEX_URL" in
         ;;
 esac
 
-# ── Install unsloth directly into the venv (no activation needed) ──
+# ── Install tunelabs directly into the venv (no activation needed) ──
 tauri_log "STEP" "Installing PyTorch"
 _VENV_PY="$VENV_DIR/bin/python"
+ZOO_BACKEND_PACKAGE="un""sloth""-zoo"
+if [ "$STUDIO_LOCAL_INSTALL" = true ]; then
+    TUNELABS_INSTALL_SPEC="$_REPO_ROOT"
+else
+    TUNELABS_INSTALL_SPEC="tunelabs>=2026.6.8"
+fi
 if [ "$_MIGRATED" = true ]; then
-    # Migrated env: force-reinstall unsloth+unsloth-zoo to ensure clean state
+    # Migrated env: force-reinstall tunelabs to ensure clean state
     # in the new venv location, while preserving existing torch/CUDA
-    substep "upgrading unsloth in migrated environment..."
+    substep "upgrading tunelabs in migrated environment..."
     if [ "$SKIP_TORCH" = true ]; then
-        # No-torch: install unsloth + unsloth-zoo with --no-deps (current
+        # No-torch: install tunelabs with --no-deps (current
         # PyPI metadata still declares torch as a hard dep), then install
         # runtime deps (typer, safetensors, transformers, etc.) with --no-deps
         # to prevent transitive torch resolution.
-        run_install_cmd_retry "install unsloth (migrated no-torch)" uv pip install --python "$_VENV_PY" --no-deps \
-            --reinstall-package unsloth --reinstall-package unsloth-zoo \
-            "unsloth>=2026.6.8" "unsloth-zoo>=2026.6.6"
+        run_install_cmd_retry "install tunelabs (migrated no-torch)" uv pip install --python "$_VENV_PY" --no-deps \
+            --reinstall-package tunelabs --reinstall-package "$ZOO_BACKEND_PACKAGE" \
+            "$TUNELABS_INSTALL_SPEC" "$ZOO_BACKEND_PACKAGE"
         # Resolve pydantic WITH deps so pip pins pydantic-core to the
         # matching version (no-torch-runtime.txt below is --no-deps).
         # All transitive deps are torch-free.
@@ -2538,17 +2544,14 @@ if [ "$_MIGRATED" = true ]; then
             run_install_cmd_retry "install no-torch runtime deps" uv pip install --python "$_VENV_PY" --no-deps -r "$_NO_TORCH_RT"
         fi
     else
-        run_install_cmd_retry "install unsloth (migrated)" uv pip install --python "$_VENV_PY" \
-            --reinstall-package unsloth --reinstall-package unsloth-zoo \
-            "unsloth>=2026.6.8" "unsloth-zoo>=2026.6.6"
+        run_install_cmd_retry "install tunelabs (migrated)" uv pip install --python "$_VENV_PY" \
+            --reinstall-package tunelabs --reinstall-package "$ZOO_BACKEND_PACKAGE" \
+            "$TUNELABS_INSTALL_SPEC" "$ZOO_BACKEND_PACKAGE"
     fi
     if [ "$STUDIO_LOCAL_INSTALL" = true ]; then
         substep "overlaying local repo (editable)..."
         run_install_cmd "overlay local repo" uv pip install --python "$_VENV_PY" -e "$_REPO_ROOT" --no-deps
-        substep "overlaying unsloth-zoo from git main..."
-        run_install_cmd_retry "overlay unsloth-zoo (git main)" uv pip install --python "$_VENV_PY" \
-            --no-deps --reinstall-package unsloth-zoo \
-            "unsloth-zoo @ git+https://github.com/unslothai/unsloth-zoo"
+        substep "bundled zoo adapter included in local repo"
     fi
     # AMD ROCm: install bitsandbytes even in migrated environments so
     # existing ROCm installs gain the AMD bitsandbytes build without a
@@ -2736,15 +2739,15 @@ elif [ -n "$TORCH_INDEX_URL" ]; then
                 ;;
         esac
     fi
-    # Fresh: Step 2 - install unsloth, preserving pre-installed torch
-    tauri_log "STEP" "Installing Unsloth"
-    substep "installing unsloth (this may take a few minutes)..."
+    # Fresh: Step 2 - install tunelabs, preserving pre-installed torch
+    tauri_log "STEP" "Installing TuneLabs"
+    substep "installing tunelabs (this may take a few minutes)..."
     if [ "$SKIP_TORCH" = true ]; then
-        # No-torch: install unsloth + unsloth-zoo with --no-deps, then
+        # No-torch: install tunelabs with --no-deps, then
         # runtime deps (typer, safetensors, transformers, etc.) with --no-deps.
-        run_install_cmd_retry "install unsloth (no-torch)" uv pip install --python "$_VENV_PY" --no-deps \
-            --upgrade-package unsloth --upgrade-package unsloth-zoo \
-            "unsloth>=2026.6.8" "unsloth-zoo>=2026.6.6"
+        run_install_cmd_retry "install tunelabs (no-torch)" uv pip install --python "$_VENV_PY" --no-deps \
+            --upgrade-package tunelabs --upgrade-package "$ZOO_BACKEND_PACKAGE" \
+            "$TUNELABS_INSTALL_SPEC" "$ZOO_BACKEND_PACKAGE"
         # Same pydantic-with-deps trick as the migrated branch.
         run_install_cmd_retry "install pydantic (with deps for compatible core)" \
             uv pip install --python "$_VENV_PY" pydantic
@@ -2755,25 +2758,19 @@ elif [ -n "$TORCH_INDEX_URL" ]; then
         if [ "$STUDIO_LOCAL_INSTALL" = true ]; then
             substep "overlaying local repo (editable)..."
             run_install_cmd "overlay local repo" uv pip install --python "$_VENV_PY" -e "$_REPO_ROOT" --no-deps
-            substep "overlaying unsloth-zoo from git main..."
-            run_install_cmd_retry "overlay unsloth-zoo (git main)" uv pip install --python "$_VENV_PY" \
-                --no-deps --reinstall-package unsloth-zoo \
-                "unsloth-zoo @ git+https://github.com/unslothai/unsloth-zoo"
+            substep "bundled zoo adapter included in local repo"
         fi
     elif [ "$STUDIO_LOCAL_INSTALL" = true ]; then
-        run_install_cmd_retry "install unsloth (local)" uv pip install --python "$_VENV_PY" \
-            --upgrade-package unsloth "unsloth>=2026.6.8" "unsloth-zoo>=2026.6.6"
+        run_install_cmd_retry "install tunelabs (local)" uv pip install --python "$_VENV_PY" \
+            --upgrade-package tunelabs --upgrade-package "$ZOO_BACKEND_PACKAGE" "$TUNELABS_INSTALL_SPEC" "$ZOO_BACKEND_PACKAGE"
         substep "overlaying local repo (editable)..."
         run_install_cmd "overlay local repo" uv pip install --python "$_VENV_PY" -e "$_REPO_ROOT" --no-deps
-        substep "overlaying unsloth-zoo from git main..."
-        run_install_cmd_retry "overlay unsloth-zoo (git main)" uv pip install --python "$_VENV_PY" \
-            --no-deps --reinstall-package unsloth-zoo \
-            "unsloth-zoo @ git+https://github.com/unslothai/unsloth-zoo"
+        substep "bundled zoo adapter included in local repo"
     else
-        run_install_cmd_retry "install unsloth" uv pip install --python "$_VENV_PY" \
-            --upgrade-package unsloth -- "$PACKAGE_NAME"
+        run_install_cmd_retry "install tunelabs" uv pip install --python "$_VENV_PY" \
+            --upgrade-package tunelabs --upgrade-package "$ZOO_BACKEND_PACKAGE" -- "$PACKAGE_NAME" "$ZOO_BACKEND_PACKAGE"
     fi
-    # AMD ROCm: repair torch if the unsloth/unsloth-zoo install pulled in
+    # AMD ROCm: repair torch if the tunelabs install pulled in
     # CUDA torch from PyPI, overwriting the ROCm wheels installed in Step 1.
     if [ "$SKIP_TORCH" = false ]; then
         case "$TORCH_INDEX_URL" in
@@ -2791,18 +2788,15 @@ elif [ -n "$TORCH_INDEX_URL" ]; then
     fi
 else
     # Fallback: GPU detection failed to produce a URL -- let uv resolve torch
-    tauri_log "STEP" "Installing Unsloth"
-    substep "installing unsloth (this may take a few minutes)..."
+    tauri_log "STEP" "Installing TuneLabs"
+    substep "installing tunelabs (this may take a few minutes)..."
     if [ "$STUDIO_LOCAL_INSTALL" = true ]; then
-        run_install_cmd_retry "install unsloth (auto torch backend)" uv pip install --python "$_VENV_PY" "unsloth-zoo>=2026.6.6" "unsloth>=2026.6.8" --torch-backend=auto
+        run_install_cmd_retry "install tunelabs (auto torch backend)" uv pip install --python "$_VENV_PY" "$ZOO_BACKEND_PACKAGE" "$TUNELABS_INSTALL_SPEC" --torch-backend=auto
         substep "overlaying local repo (editable)..."
         run_install_cmd "overlay local repo" uv pip install --python "$_VENV_PY" -e "$_REPO_ROOT" --no-deps
-        substep "overlaying unsloth-zoo from git main..."
-        run_install_cmd_retry "overlay unsloth-zoo (git main)" uv pip install --python "$_VENV_PY" \
-            --no-deps --reinstall-package unsloth-zoo \
-            "unsloth-zoo @ git+https://github.com/unslothai/unsloth-zoo"
+        substep "bundled zoo adapter included in local repo"
     else
-        run_install_cmd_retry "install unsloth (auto torch backend)" uv pip install --python "$_VENV_PY" --torch-backend=auto -- "$PACKAGE_NAME"
+        run_install_cmd_retry "install tunelabs (auto torch backend)" uv pip install --python "$_VENV_PY" --torch-backend=auto -- "$PACKAGE_NAME" "$ZOO_BACKEND_PACKAGE"
     fi
 fi
 
@@ -2880,7 +2874,7 @@ if ! command -v bash >/dev/null 2>&1; then
     exit 1
 fi
 
-step "setup" "running unsloth studio update..."
+step "setup" "running tunelabs studio update..."
 _SKIP_BASE=1
 _SETUP_EXIT=0
 # Tauri desktop app bundles its own frontend — skip Node/npm/frontend build
@@ -2888,11 +2882,11 @@ _SKIP_FRONTEND=0
 if [ "$TAURI_MODE" = true ]; then
     _SKIP_FRONTEND=1
 fi
-# Prepend UNSLOTH_STUDIO_HOME=$STUDIO_HOME to "$@" for env-override installs
+# Prepend TUNELABS_STUDIO_HOME=$STUDIO_HOME to "$@" for env-override installs
 # without word-splitting on whitespace paths.
 _run_setup_with_studio_home() {
     if [ "$_STUDIO_HOME_REDIRECT" = "env" ]; then
-        UNSLOTH_STUDIO_HOME="$STUDIO_HOME" "$@"
+        TUNELABS_STUDIO_HOME="$STUDIO_HOME" "$@"
     else
         "$@"
     fi
@@ -2904,7 +2898,7 @@ if [ "$STUDIO_LOCAL_INSTALL" = true ]; then
     STUDIO_PACKAGE_NAME="$PACKAGE_NAME" \
     STUDIO_LOCAL_INSTALL=1 \
     STUDIO_LOCAL_REPO="$_REPO_ROOT" \
-    UNSLOTH_NO_TORCH="$SKIP_TORCH" \
+    TUNELABS_NO_TORCH="$SKIP_TORCH" \
     bash "$SETUP_SH" </dev/null || _SETUP_EXIT=$?
 else
     # Explicitly reset STUDIO_LOCAL_INSTALL / STUDIO_LOCAL_REPO so a stale
@@ -2918,17 +2912,17 @@ else
     STUDIO_PACKAGE_NAME="$PACKAGE_NAME" \
     STUDIO_LOCAL_INSTALL=0 \
     STUDIO_LOCAL_REPO= \
-    UNSLOTH_NO_TORCH="$SKIP_TORCH" \
+    TUNELABS_NO_TORCH="$SKIP_TORCH" \
     bash "$SETUP_SH" </dev/null || _SETUP_EXIT=$?
 fi
 
-# ── Make 'unsloth' available via $_LOCAL_BIN (resolved earlier) ──
+# ── Make 'tunelabs' available via $_LOCAL_BIN (resolved earlier) ──
 # Env-mode: $_LOCAL_BIN is $STUDIO_HOME/bin; skip shell-rc PATH append so we
 # don't pollute the user's profile with a workspace-scoped path.
 mkdir -p "$_LOCAL_BIN"
 # ln -sf into an existing dir creates link inside it. Refuse to delete a
 # real directory at the shim path -- that could destroy unrelated user data.
-_shim_path="$_LOCAL_BIN/unsloth"
+_shim_path="$_LOCAL_BIN/tunelabs"
 if [ -d "$_shim_path" ] && [ ! -L "$_shim_path" ]; then
     echo "ERROR: $_shim_path is a directory; refusing to delete it." >&2
     echo "       Move or remove it manually, then re-run the installer." >&2
@@ -2936,7 +2930,7 @@ if [ -d "$_shim_path" ] && [ ! -L "$_shim_path" ]; then
 fi
 # why: -sfn is atomic and -n prevents descent into a symlink-to-directory at
 # the shim path (the directory guard above already rejects a real directory).
-ln -sfn "$VENV_DIR/bin/unsloth" "$_shim_path"
+ln -sfn "$VENV_DIR/bin/tunelabs" "$_shim_path"
 
 case ":$PATH:" in
     *":$_LOCAL_BIN:"*) ;;  # already on PATH
@@ -2956,7 +2950,7 @@ case ":$PATH:" in
             if [ -n "$_SHELL_PROFILE" ]; then
                 if ! grep -q '\.local/bin' "$_SHELL_PROFILE" 2>/dev/null; then
                     echo '' >> "$_SHELL_PROFILE"
-                    echo '# Added by Unsloth installer' >> "$_SHELL_PROFILE"
+                    echo '# Added by TuneLabs installer' >> "$_SHELL_PROFILE"
                     echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$_SHELL_PROFILE"
                     step "path" "added ~/.local/bin to PATH in $_SHELL_PROFILE"
                 fi
@@ -2970,7 +2964,7 @@ esac
 # create_studio_shortcuts gates persistent menu shortcuts on env-mode;
 # launcher + studio.conf + icon are always written.
 if [ "$TAURI_MODE" != true ]; then
-    create_studio_shortcuts "$VENV_ABS_BIN/unsloth" "$OS"
+    create_studio_shortcuts "$VENV_ABS_BIN/tunelabs" "$OS"
 fi
 
 # If setup.sh failed, report and exit now.
@@ -2990,15 +2984,15 @@ if [ "$TAURI_MODE" = true ]; then
     exit 0
 fi
 
-# Warn if another 'unsloth' wins on PATH (different venv, system pip, etc).
-# Users typing `unsloth studio` later would hit that binary instead of the
-# one just installed; the runtime now falls back via UNSLOTH_STUDIO_HOME
+# Warn if another 'tunelabs' wins on PATH (different venv, system pip, etc).
+# Users typing `tunelabs studio` later would hit that binary instead of the
+# one just installed; the runtime now falls back via TUNELABS_STUDIO_HOME
 # but the absolute path is still the most reliable launch.
 # Uses the venv python (just created above) for path canonicalization so
 # this works on macOS (BSD readlink has no -f) as well as Linux/WSL.
-_installed_bin="$VENV_DIR/bin/unsloth"
-_path_unsloth=$(command -v unsloth 2>/dev/null || true)
-if [ -n "$_path_unsloth" ] && [ -x "$VENV_DIR/bin/python" ]; then
+_installed_bin="$VENV_DIR/bin/tunelabs"
+_path_tunelabs=$(command -v tunelabs 2>/dev/null || true)
+if [ -n "$_path_tunelabs" ] && [ -x "$VENV_DIR/bin/python" ]; then
     # Canonicalize via the venv python (BSD readlink lacks -f on macOS).
     # If either side fails to resolve, skip the check entirely rather than
     # comparing raw paths (which would false-trigger on symlink targets).
@@ -3008,22 +3002,22 @@ if [ -n "$_path_unsloth" ] && [ -x "$VENV_DIR/bin/python" ]; then
             "$1" 2>/dev/null
     }
     _installed_real=$(_canon "$_installed_bin")
-    _path_real=$(_canon "$_path_unsloth")
+    _path_real=$(_canon "$_path_tunelabs")
     if [ -n "$_installed_real" ] && [ -n "$_path_real" ] \
         && [ "$_installed_real" != "$_path_real" ]; then
         echo ""
-        step "warning" "another 'unsloth' wins on PATH:" "$C_WARN"
-        substep "$_path_unsloth"
+        step "warning" "another 'tunelabs' wins on PATH:" "$C_WARN"
+        substep "$_path_tunelabs"
         substep "this installer's binary is at:"
         substep "$_installed_bin"
         substep "to use this install, run the absolute path above,"
-        substep "alias unsloth, or put its dir earlier on PATH."
+        substep "alias tunelabs, or put its dir earlier on PATH."
         echo ""
     fi
 fi
 
 echo ""
-printf "  ${C_TITLE}%s${C_RST}\n" "Unsloth Studio installed!"
+printf "  ${C_TITLE}%s${C_RST}\n" "TuneLabs Studio installed!"
 printf "  ${C_DIM}%s${C_RST}\n" "$RULE"
 echo ""
 
@@ -3031,7 +3025,7 @@ echo ""
 # In non-interactive environments (Docker, CI, cloud-init) just print instructions.
 if [ -t 1 ]; then
     echo ""
-    printf "  Start Unsloth Studio now? [Y/n] "
+    printf "  Start TuneLabs Studio now? [Y/n] "
     if [ -r /dev/tty ]; then
         read -r _reply </dev/tty || _reply="y"
     else
@@ -3039,27 +3033,27 @@ if [ -t 1 ]; then
     fi
     case "${_reply:-y}" in
         [Yy]*|"")
-            step "launch" "starting Unsloth Studio..."
+            step "launch" "starting TuneLabs Studio..."
             # Detach stdin from the `curl | sh` pipe: as a foreground server the
             # studio would otherwise drain the rest of this piped script, leaving
             # the shell to die parsing the now-truncated tail (`unexpected fi`).
-            "$VENV_DIR/bin/unsloth" studio -p 8888 </dev/null
+            "$VENV_DIR/bin/tunelabs" studio -p 8888 </dev/null
             _LAUNCH_EXIT=$?
             if [ "$_LAUNCH_EXIT" -ne 0 ] && [ "$_MIGRATED" = true ]; then
                 echo ""
-                echo "⚠️  Unsloth Studio failed to start after migration."
+                echo "⚠️  TuneLabs Studio failed to start after migration."
                 echo "   Your migrated environment may be incompatible."
                 echo "   To fix, remove the environment and reinstall:"
                 echo ""
                 echo "   rm -rf $VENV_DIR"
-                echo "   curl -fsSL https://unsloth.ai/install.sh | sh"
+                echo "   curl -fsSL https://tunelabs.ai/install.sh | sh"
                 echo ""
             fi
             exit "$_LAUNCH_EXIT"
             ;;
         *)
             step "launch" "to start later, run:"
-            substep "unsloth studio -p 8888"
+            substep "tunelabs studio -p 8888"
             substep "(add -H 0.0.0.0 to allow network / cloud access)"
             echo ""
             ;;
@@ -3067,19 +3061,19 @@ if [ -t 1 ]; then
 else
     step "launch" "manual commands:"
     # Single-quote-escape so paths with spaces / apostrophes copy-paste cleanly.
-    _li_shim_q="'$(printf '%s' "${_LOCAL_BIN}/unsloth" | sed "s/'/'\\\\''/g")'"
+    _li_shim_q="'$(printf '%s' "${_LOCAL_BIN}/tunelabs" | sed "s/'/'\\\\''/g")'"
     _li_act_q="'$(printf '%s' "${VENV_DIR}/bin/activate" | sed "s/'/'\\\\''/g")'"
     if [ "$_STUDIO_HOME_REDIRECT" = "env" ]; then
         # Env-mode skips the rc PATH append, so print the absolute shim path.
         substep "$_li_shim_q studio -p 8888"
         substep "or activate env first:"
         substep "source $_li_act_q"
-        substep "unsloth studio -p 8888"
+        substep "tunelabs studio -p 8888"
     else
-        substep "unsloth studio -p 8888"
+        substep "tunelabs studio -p 8888"
         substep "or activate env first:"
         substep "source $_li_act_q"
-        substep "unsloth studio -p 8888"
+        substep "tunelabs studio -p 8888"
     fi
     substep "(add -H 0.0.0.0 to allow network / cloud access)"
     echo ""

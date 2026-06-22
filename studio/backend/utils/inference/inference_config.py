@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Load inference params (temperature, top_p, top_k, min_p) from model YAML, family defaults, or default.yaml."""
 
@@ -44,7 +44,7 @@ def _load_family_defaults():
 def get_family_inference_params(model_id: str) -> Dict[str, Any]:
     """Look up recommended inference params by model family.
 
-    Extracts the family from the identifier (e.g. "unsloth/Qwen3.5-9B-GGUF" ->
+    Extracts the family from the identifier (e.g. "tunelabs/Qwen3.5-9B-GGUF" ->
     "qwen3.5") and returns matching params from inference_defaults.json, or {}.
     """
     _load_family_defaults()

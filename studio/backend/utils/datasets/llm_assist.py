@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """LLM-assisted dataset analysis using an ephemeral GGUF helper model.
 
@@ -21,7 +21,7 @@ from loggers import get_logger
 
 logger = get_logger(__name__)
 
-DEFAULT_HELPER_MODEL_REPO = "unsloth/Qwen3.5-4B-MTP-GGUF"
+DEFAULT_HELPER_MODEL_REPO = "tunelabs/Qwen3.5-4B-MTP-GGUF"
 DEFAULT_HELPER_MODEL_VARIANT = "UD-Q4_K_XL"
 
 README_MAX_CHARS = 1500
@@ -49,11 +49,11 @@ def precache_helper_gguf():
 
     Lets later ``_run_with_helper()`` calls skip the download. No-op if cached or disabled.
     """
-    if os.environ.get("UNSLOTH_HELPER_MODEL_DISABLE", "").strip() in ("1", "true"):
+    if os.environ.get("TUNELABS_HELPER_MODEL_DISABLE", "").strip() in ("1", "true"):
         return
 
-    repo = os.environ.get("UNSLOTH_HELPER_MODEL_REPO", DEFAULT_HELPER_MODEL_REPO)
-    variant = os.environ.get("UNSLOTH_HELPER_MODEL_VARIANT", DEFAULT_HELPER_MODEL_VARIANT)
+    repo = os.environ.get("TUNELABS_HELPER_MODEL_REPO", DEFAULT_HELPER_MODEL_REPO)
+    variant = os.environ.get("TUNELABS_HELPER_MODEL_VARIANT", DEFAULT_HELPER_MODEL_VARIANT)
 
     try:
         from huggingface_hub import HfApi, hf_hub_download
@@ -91,11 +91,11 @@ def precache_helper_gguf():
 
 def _run_with_helper(prompt: str, max_tokens: int = 256) -> Optional[str]:
     """Load helper model, run one chat completion, unload. Returns text or None on failure."""
-    if os.environ.get("UNSLOTH_HELPER_MODEL_DISABLE", "").strip() in ("1", "true"):
+    if os.environ.get("TUNELABS_HELPER_MODEL_DISABLE", "").strip() in ("1", "true"):
         return None
 
-    repo = os.environ.get("UNSLOTH_HELPER_MODEL_REPO", DEFAULT_HELPER_MODEL_REPO)
-    variant = os.environ.get("UNSLOTH_HELPER_MODEL_VARIANT", DEFAULT_HELPER_MODEL_VARIANT)
+    repo = os.environ.get("TUNELABS_HELPER_MODEL_REPO", DEFAULT_HELPER_MODEL_REPO)
+    variant = os.environ.get("TUNELABS_HELPER_MODEL_VARIANT", DEFAULT_HELPER_MODEL_VARIANT)
 
     backend = None
     try:
@@ -431,11 +431,11 @@ def _run_multi_pass_advisor(
 
     Returns combined result dict or None.
     """
-    if os.environ.get("UNSLOTH_HELPER_MODEL_DISABLE", "").strip() in ("1", "true"):
+    if os.environ.get("TUNELABS_HELPER_MODEL_DISABLE", "").strip() in ("1", "true"):
         return None
 
-    repo = os.environ.get("UNSLOTH_HELPER_MODEL_REPO", DEFAULT_HELPER_MODEL_REPO)
-    variant = os.environ.get("UNSLOTH_HELPER_MODEL_VARIANT", DEFAULT_HELPER_MODEL_VARIANT)
+    repo = os.environ.get("TUNELABS_HELPER_MODEL_REPO", DEFAULT_HELPER_MODEL_REPO)
+    variant = os.environ.get("TUNELABS_HELPER_MODEL_VARIANT", DEFAULT_HELPER_MODEL_VARIANT)
 
     backend = None
     try:

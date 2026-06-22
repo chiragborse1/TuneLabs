@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { getAuthToken, refreshSession } from "@/features/auth";
 import { useT } from "@/i18n";
@@ -63,7 +63,7 @@ async function fetchStudioVersions(): Promise<StudioVersions> {
   }
 }
 
-// Shared "Unsloth" version block, shown in both General and About. The About
+// Shared "TuneLabs" version block, shown in both General and About. The About
 // tab passes llamaCppVersion to surface the installed llama.cpp build alongside
 // the version rows; General omits it, so the row only shows on About.
 export function StudioVersionSection({
@@ -88,7 +88,7 @@ export function StudioVersionSection({
   }, []);
 
   return (
-    <SettingsSection title="Unsloth">
+    <SettingsSection title="TuneLabs">
       <SettingsRow label={t("settings.about.studioVersion")}>
         <code className="font-mono text-xs text-muted-foreground">
           {studioVersion}

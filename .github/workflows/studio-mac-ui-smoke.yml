@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 # Mac counterpart to studio-ui-smoke.yml. Same Playwright + Chromium
 # end-to-end chat UI flow, but on macos-14 (M1) so we catch
@@ -14,8 +14,8 @@ on:
   pull_request:
     paths:
       - 'studio/**'
-      - 'unsloth/**'
-      - 'unsloth_cli/**'
+      - 'tunelabs/**'
+      - 'tunelabs_cli/**'
       - 'install.sh'
       - 'pyproject.toml'
       - 'tests/studio/**'
@@ -37,7 +37,7 @@ jobs:
     runs-on: macos-14
     timeout-minutes: 35
     env:
-      GGUF_REPO: unsloth/gemma-3-270m-it-GGUF
+      GGUF_REPO: tunelabs/gemma-3-270m-it-GGUF
       GGUF_VARIANT: UD-Q4_K_XL
       GGUF_FILE: gemma-3-270m-it-UD-Q4_K_XL.gguf
       STUDIO_PORT: '18896'
@@ -143,9 +143,9 @@ jobs:
 
       - name: Reset auth + boot Studio
         run: |
-          unsloth studio reset-password
+          tunelabs studio reset-password
           mkdir -p logs
-          UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p "$STUDIO_PORT" \
+          TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p "$STUDIO_PORT" \
             > logs/studio.log 2>&1 &
           echo "STUDIO_PID=$!" >> "$GITHUB_ENV"
 
@@ -161,7 +161,7 @@ jobs:
 
       - name: Pass bootstrap password to the Playwright step
         run: |
-          OLD=$(cat ~/.unsloth/studio/auth/.bootstrap_password)
+          OLD=$(cat ~/.tunelabs/studio/auth/.bootstrap_password)
           NEW="CIUi-$(python -c 'import secrets; print(secrets.token_urlsafe(16))')"
           NEW2="CIUi-$(python -c 'import secrets; print(secrets.token_urlsafe(16))')"
           echo "::add-mask::$OLD"
@@ -208,8 +208,8 @@ jobs:
               echo "::warning::Playwright flake on attempt ${attempt}; resetting Studio and retrying..."
               kill "${STUDIO_PID}" 2>/dev/null || true
               sleep 2
-              unsloth studio reset-password
-              UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p "$STUDIO_PORT" \
+              tunelabs studio reset-password
+              TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p "$STUDIO_PORT" \
                 > "logs/studio_retry_${attempt}.log" 2>&1 &
               STUDIO_PID=$!
               echo "STUDIO_PID=$STUDIO_PID" >> "$GITHUB_ENV"
@@ -220,7 +220,7 @@ jobs:
                 fi
                 sleep 1
               done
-              STUDIO_OLD_PW=$(cat ~/.unsloth/studio/auth/.bootstrap_password)
+              STUDIO_OLD_PW=$(cat ~/.tunelabs/studio/auth/.bootstrap_password)
               STUDIO_NEW_PW="CIUi-$(python -c 'import secrets; print(secrets.token_urlsafe(16))')"
               STUDIO_NEW2_PW="CIUi-$(python -c 'import secrets; print(secrets.token_urlsafe(16))')"
               echo "::add-mask::$STUDIO_OLD_PW"
@@ -242,9 +242,9 @@ jobs:
 
       - name: Reset auth + boot Studio for extra UI tests (port 18897)
         run: |
-          unsloth studio reset-password
+          tunelabs studio reset-password
           mkdir -p logs
-          UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p 18897 \
+          TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p 18897 \
             > logs/studio_extra.log 2>&1 &
           echo "STUDIO_EXTRA_PID=$!" >> "$GITHUB_ENV"
 
@@ -260,7 +260,7 @@ jobs:
 
       - name: Pass bootstrap pw for extra UI test
         run: |
-          OLD=$(cat ~/.unsloth/studio/auth/.bootstrap_password)
+          OLD=$(cat ~/.tunelabs/studio/auth/.bootstrap_password)
           NEW="CIUiExtra-$(python -c 'import secrets; print(secrets.token_urlsafe(16))')"
           echo "::add-mask::$OLD"
           echo "::add-mask::$NEW"
@@ -298,8 +298,8 @@ jobs:
               echo "::warning::Playwright flake on attempt ${attempt}; resetting Studio and retrying..."
               kill "${STUDIO_EXTRA_PID}" 2>/dev/null || true
               sleep 2
-              unsloth studio reset-password
-              UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p 18897 \
+              tunelabs studio reset-password
+              TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p 18897 \
                 > "logs/studio_extra_retry_${attempt}.log" 2>&1 &
               STUDIO_EXTRA_PID=$!
               echo "STUDIO_EXTRA_PID=$STUDIO_EXTRA_PID" >> "$GITHUB_ENV"
@@ -310,7 +310,7 @@ jobs:
                 fi
                 sleep 1
               done
-              STUDIO_OLD_PW=$(cat ~/.unsloth/studio/auth/.bootstrap_password)
+              STUDIO_OLD_PW=$(cat ~/.tunelabs/studio/auth/.bootstrap_password)
               STUDIO_NEW_PW="CIUiExtra-$(python -c 'import secrets; print(secrets.token_urlsafe(16))')"
               echo "::add-mask::$STUDIO_OLD_PW"
               echo "::add-mask::$STUDIO_NEW_PW"

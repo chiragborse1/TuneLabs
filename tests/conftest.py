@@ -1,14 +1,14 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 """GPU-free test harness.
 
-unsloth_zoo.device_type calls get_device_type() at import time and raises
+tunelabs_zoo.device_type calls get_device_type() at import time and raises
 NotImplementedError on CI runners with no CUDA/XPU/HIP. Pre-load it under a
 mocked torch.cuda.is_available()==True so its @cache permanently captures
 "cuda"; on a real accelerator the pre-load is skipped.
 
-Mirrors the conftest harness in unslothai/unsloth-zoo PR #624.
+Mirrors the conftest harness in tunelabsai/tunelabs-zoo PR #624.
 """
 
 from __future__ import annotations
@@ -124,23 +124,23 @@ def _install_device_type_stub(name: str) -> None:
 
 
 if not _has_real_accelerator():
-    if not _preload_device_type("unsloth_zoo", prereqs = ("utils",)):
-        _install_device_type_stub("unsloth_zoo.device_type")
-    if not _preload_device_type("unsloth"):
-        _install_device_type_stub("unsloth.device_type")
+    if not _preload_device_type("tunelabs_zoo", prereqs = ("utils",)):
+        _install_device_type_stub("tunelabs_zoo.device_type")
+    if not _preload_device_type("tunelabs"):
+        _install_device_type_stub("tunelabs.device_type")
     _patch_torch_cuda_for_import()
 
 
 # ---------------------------------------------------------------------------
-# Apply upstream-drift fixes (vllm/triton/peft) by triggering ``import unsloth``
-# (they run at import time in unsloth/import_fixes.py). The harness above lets
+# Apply upstream-drift fixes (vllm/triton/peft) by triggering ``import tunelabs``
+# (they run at import time in tunelabs/import_fixes.py). The harness above lets
 # the import survive CPU-only runners; the ImportError is swallowed otherwise.
 # ---------------------------------------------------------------------------
 
 
 def _apply_upstream_import_fixes_for_tests() -> None:
     try:
-        import unsloth  # noqa: F401  # runs unsloth/import_fixes.py
+        import tunelabs  # noqa: F401  # runs tunelabs/import_fixes.py
     except Exception:
         pass
 

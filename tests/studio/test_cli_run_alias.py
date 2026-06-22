@@ -1,11 +1,11 @@
-"""AST-based tests that `unsloth run` is registered as a top-level alias for `unsloth studio run`."""
+"""AST-based tests that `tunelabs run` is registered as a top-level alias for `tunelabs studio run`."""
 
 from __future__ import annotations
 
 import ast
 from pathlib import Path
 
-_CLI_INIT = Path(__file__).resolve().parents[2] / "unsloth_cli" / "__init__.py"
+_CLI_INIT = Path(__file__).resolve().parents[2] / "tunelabs_cli" / "__init__.py"
 
 
 def _module_calls(source: str):
@@ -41,7 +41,7 @@ def test_top_level_run_alias_registered():
             break
     assert (
         found_decorator_call
-    ), 'Expected `app.command("run", ...)` registration in unsloth_cli/__init__.py'
+    ), 'Expected `app.command("run", ...)` registration in tunelabs_cli/__init__.py'
 
 
 def test_studio_run_imported_for_alias():
@@ -52,7 +52,7 @@ def test_studio_run_imported_for_alias():
     for node in ast.walk(tree):
         if not isinstance(node, ast.ImportFrom):
             continue
-        if node.module != "unsloth_cli.commands.studio":
+        if node.module != "tunelabs_cli.commands.studio":
             continue
         for alias in node.names:
             if alias.name == "run":
@@ -60,4 +60,4 @@ def test_studio_run_imported_for_alias():
                 break
     assert (
         has_import
-    ), "Expected `from unsloth_cli.commands.studio import run` in unsloth_cli/__init__.py"
+    ), "Expected `from tunelabs_cli.commands.studio import run` in tunelabs_cli/__init__.py"

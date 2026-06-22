@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import json
 import uuid
@@ -80,7 +80,7 @@ def _validate_url(url: str) -> str:
         if _looks_like_command(trimmed):
             detail = (
                 "Local commands aren't enabled on this server. To allow them, "
-                "set UNSLOTH_STUDIO_ALLOW_STDIO_MCP=1 and restart Studio, or use "
+                "set TUNELABS_STUDIO_ALLOW_STDIO_MCP=1 and restart Studio, or use "
                 "an http:// or https:// URL instead."
             )
         else:

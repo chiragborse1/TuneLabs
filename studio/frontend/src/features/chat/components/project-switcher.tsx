@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import {
   DropdownMenu,
@@ -75,7 +75,7 @@ export function ProjectSwitcher({
         side="bottom"
         align="start"
         sideOffset={0}
-        className="unsloth-plus-menu ring-0 min-w-56 max-w-72 max-h-72 font-heading"
+        className="tunelabs-plus-menu ring-0 min-w-56 max-w-72 max-h-72 font-heading"
       >
         {showLoadingRow ? (
           <DropdownMenuItem disabled={true} className="text-muted-foreground">

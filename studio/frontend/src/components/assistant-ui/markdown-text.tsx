@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 "use client";
 
@@ -25,11 +25,11 @@ import { Block, type BlockProps, Streamdown, defaultUrlTransform, type UrlTransf
 import { createCodePlugin } from "./code-plugin";
 import "katex/dist/katex.min.css";
 import { AudioPlayer } from "./audio-player";
-import { unslothDarkTheme, unslothLightTheme } from "./code-themes";
+import { tunelabsDarkTheme, tunelabsLightTheme } from "./code-themes";
 
 const math = createMathPlugin({ singleDollarTextMath: true });
 const code = createCodePlugin({
-  themes: [unslothLightTheme, unslothDarkTheme],
+  themes: [tunelabsLightTheme, tunelabsDarkTheme],
 });
 const { withSmoothContextProvider } = INTERNAL;
 
@@ -414,7 +414,7 @@ const MarkdownTextImpl = () => {
             panZoom: true,
           },
         }}
-        shikiTheme={[unslothLightTheme, unslothDarkTheme]}
+        shikiTheme={[tunelabsLightTheme, tunelabsDarkTheme]}
         BlockComponent={StreamdownBlock}
       >
         {processedText}

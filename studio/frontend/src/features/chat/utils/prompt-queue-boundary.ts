@@ -1,4 +1,4 @@
-export const PROMPT_QUEUE_STOP_EVENT = "unsloth:prompt-queue-stop";
+export const PROMPT_QUEUE_STOP_EVENT = "tunelabs:prompt-queue-stop";
 
 export function requestPromptQueueStop() {
   if (typeof window === "undefined") {

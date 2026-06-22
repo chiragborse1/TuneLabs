@@ -1,7 +1,7 @@
 # Model defaults for OuteAI/Llama-OuteTTS-1.0-1B
 # Based on Oute_TTS_(1B).ipynb
 # Also applies to: OuteAI/Llama-OuteTTS-1.0-1B
-# added inference parameters from unsloth notebook
+# added inference parameters from tunelabs notebook
 
 audio_type: dac
 
@@ -20,7 +20,7 @@ training:
   random_seed: 3407
   packing: false
   train_on_completions: true
-  gradient_checkpointing: "unsloth"
+  gradient_checkpointing: "tunelabs"
   optim: "adamw_8bit"
   lr_scheduler_type: "linear"
 

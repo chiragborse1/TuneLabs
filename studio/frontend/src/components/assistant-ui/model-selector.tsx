@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 "use client";
 
@@ -153,7 +153,7 @@ function ModelSelectorTrigger({
         type="button"
         data-tour={dataTour}
         className={cn(
-          "unsloth-model-selector-trigger flex min-w-0 items-center gap-2 transition-colors",
+          "tunelabs-model-selector-trigger flex min-w-0 items-center gap-2 transition-colors",
           variant === "outline" &&
           "rounded-full border border-border/60 hover:bg-[#ececec] dark:hover:bg-[#2d2e32]",
           variant === "ghost" && "rounded-full hover:bg-[#ececec] dark:hover:bg-[#2d2e32]",
@@ -304,7 +304,7 @@ function ModelSelectorContent({
       data-tour={dataTour}
       onKeyDown={handlePickerEntryKeyDown}
       className={cn(
-        "unsloth-model-selector-menu menu-soft-surface ring-0 w-[min(440px,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] min-w-0 gap-0 px-3 pt-3 pb-2",
+        "tunelabs-model-selector-menu menu-soft-surface ring-0 w-[min(440px,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] min-w-0 gap-0 px-3 pt-3 pb-2",
         className,
       )}
     >

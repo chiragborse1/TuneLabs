@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Unit tests for the llama-server pass-through args validator.
 
@@ -77,7 +77,7 @@ validate_extra_args = _lsa.validate_extra_args
         ["-rea", "auto"],
         # Soft-managed: user flags last-wins over Studio's auto-set version.
         # --parallel / -np / --n-parallel are hard-denied (KV-cache + slot
-        # count would desync); use `unsloth studio run --parallel N` instead.
+        # count would desync); use `tunelabs studio run --parallel N` instead.
         ["-c", "131072"],
         ["--ctx-size", "8192"],
         ["--flash-attn", "off"],

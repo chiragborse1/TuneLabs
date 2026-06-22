@@ -1,4 +1,4 @@
-from unsloth import FastLanguageModel
+from tunelabs import FastLanguageModel
 from trl import SFTTrainer, SFTConfig
 from datasets import load_dataset
 import torch
@@ -37,7 +37,7 @@ def formatting_prompts_func(examples):
 print("Loading 4-bit Mxfp4 gpt-oss model for training...")
 max_seq_length = 1024
 model, tokenizer = FastLanguageModel.from_pretrained(
-    "unsloth/gpt-oss-20b", max_seq_length = max_seq_length, load_in_4bit = True
+    "tunelabs/gpt-oss-20b", max_seq_length = max_seq_length, load_in_4bit = True
 )
 
 dataset = load_dataset("HuggingFaceH4/Multilingual-Thinking", split = "train[:50]").map(
@@ -57,7 +57,7 @@ model = FastLanguageModel.get_peft_model(
         "down_proj",
     ],
     lora_alpha = 16,
-    use_gradient_checkpointing = "unsloth",
+    use_gradient_checkpointing = "tunelabs",
     random_state = 3407,
 )
 
@@ -91,5 +91,5 @@ torch.cuda.empty_cache()
 gc.collect()
 
 safe_remove_directory("./outputs")
-safe_remove_directory("./unsloth_compiled_cache")  # cache created by this process
+safe_remove_directory("./tunelabs_compiled_cache")  # cache created by this process
 print("✅ Cleanup complete. Exiting training script.")

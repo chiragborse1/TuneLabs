@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { authFetch } from "@/features/auth";
 import { readFastApiError } from "@/lib/format-fastapi-error";
@@ -7,7 +7,7 @@ import { readFastApiError } from "@/lib/format-fastapi-error";
 export const DEFAULT_UPLOAD_LIMIT_MB = 500;
 export const DEFAULT_UPLOAD_LIMIT_BYTES = DEFAULT_UPLOAD_LIMIT_MB * 1024 * 1024;
 
-const UPLOAD_LIMIT_EVENT = "unsloth-upload-limit-change";
+const UPLOAD_LIMIT_EVENT = "tunelabs-upload-limit-change";
 
 export type UploadLimitSettings = {
   maxUploadSizeMb: number;

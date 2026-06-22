@@ -396,7 +396,7 @@ mod tests {
             .unwrap()
             .as_nanos();
         std::env::temp_dir().join(format!(
-            "unsloth-native-intents-{name}-{}-{nanos}",
+            "tunelabs-native-intents-{name}-{}-{nanos}",
             std::process::id()
         ))
     }

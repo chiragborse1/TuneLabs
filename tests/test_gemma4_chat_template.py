@@ -8,7 +8,7 @@ from jinja2.exceptions import TemplateError
 
 CHAT_TEMPLATES_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "unsloth",
+    "tunelabs",
     "chat_templates.py",
 )
 

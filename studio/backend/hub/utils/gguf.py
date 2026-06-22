@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """GGUF filename helpers. Quantization variants are derived from filenames, not parsed from binary GGUF headers."""
 
@@ -87,7 +87,7 @@ def is_mtp_drafter_path(path: str) -> bool:
     """True for a separate-file MTP drafter (speculative head), a companion to
     the main model rather than a selectable quant.
 
-    Covers the repo-root ``mtp-*.gguf`` (the Q8_0 copy unsloth ships for
+    Covers the repo-root ``mtp-*.gguf`` (the Q8_0 copy tunelabs ships for
     llama.cpp ``-hf`` auto-discovery) and the ``MTP/`` subdir copies (Gemma 4).
     Repos that bake the head into the main GGUF (Qwen) have no such file, so
     this is False for them. Must be excluded from main-model selection

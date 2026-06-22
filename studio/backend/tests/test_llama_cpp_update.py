@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Hermetic tests for the in-app llama.cpp update orchestration.
 
@@ -25,7 +25,7 @@ if str(_BACKEND) not in sys.path:
 import utils.llama_cpp_freshness as freshness  # noqa: E402
 import utils.llama_cpp_update as upd  # noqa: E402
 
-MARKER = "UNSLOTH_PREBUILT_INFO.json"
+MARKER = "TUNELABS_PREBUILT_INFO.json"
 
 
 class _FakeInstallerPopen:
@@ -80,7 +80,7 @@ def _patch_installer_popen(
 def _write_install(
     dir_: Path,
     tag: str,
-    repo: str = "unslothai/llama.cpp",
+    repo: str = "tunelabsai/llama.cpp",
     asset: str | None = None,
     release_tag: str | None = None,
 ) -> str:
@@ -109,11 +109,11 @@ def _clean_state(monkeypatch, tmp_path):
     upd._reset_job_for_tests()
     upd._resolve_memo.clear()
     # Isolate the freshness disk cache so the suite never writes the real
-    # ~/.unsloth cache (the default when storage_roots can't be imported).
+    # ~/.tunelabs cache (the default when storage_roots can't be imported).
     monkeypatch.setattr(freshness, "_cache_dir", lambda: tmp_path / ".freshness_cache")
     # Deterministic markerless paths: no host-pinned binary, no custom dir.
     monkeypatch.delenv("LLAMA_SERVER_PATH", raising = False)
-    monkeypatch.delenv("UNSLOTH_LLAMA_CPP_PATH", raising = False)
+    monkeypatch.delenv("TUNELABS_LLAMA_CPP_PATH", raising = False)
     # Never hit the network in these tests.
     monkeypatch.setattr(freshness, "_fetch_latest_release_tag", lambda repo, timeout = 5.0: None)
     yield
@@ -130,7 +130,7 @@ def _no_prebuilt(monkeypatch):
 def _prebuilt(
     monkeypatch,
     *,
-    repo = "unslothai/llama.cpp",
+    repo = "tunelabsai/llama.cpp",
     release_tag = "b9585",
     llama_tag = None,
     asset = None,
@@ -175,7 +175,7 @@ def test_status_source_build_offers_prebuilt(monkeypatch, tmp_path):
     assert st["update_available"] is True
     assert st["source_build"] is True
     assert st["latest_tag"] == "b9585"
-    assert st["published_repo"] == "unslothai/llama.cpp"
+    assert st["published_repo"] == "tunelabsai/llama.cpp"
 
 
 def test_status_source_build_compares_llama_tag(monkeypatch, tmp_path):
@@ -230,7 +230,7 @@ def test_status_source_build_suppressed_when_newer(monkeypatch, tmp_path):
 
 def test_status_source_build_offers_same_base_mix(monkeypatch, tmp_path):
     # The reported banner bug: a source build at the same upstream base as a new
-    # Unsloth prebuilt that adds a mix-<sha> suffix. The base build numbers match
+    # TuneLabs prebuilt that adds a mix-<sha> suffix. The base build numbers match
     # (9596 == 9596) but the mix carries extra patches the source build lacks, so
     # the update must still surface -- mirroring the marker path's is_behind.
     binary = tmp_path / "llama.cpp" / "build" / "bin" / "llama-server"
@@ -295,7 +295,7 @@ def test_installed_version_skips_probe_while_job_runs(monkeypatch, tmp_path):
     # be skipped (return None) exactly like get_update_status's source probe.
     binary = tmp_path / "build" / "bin" / "llama-server"
     binary.parent.mkdir(parents = True)
-    binary.write_text("stub")  # markerless: no UNSLOTH_PREBUILT_INFO.json
+    binary.write_text("stub")  # markerless: no TUNELABS_PREBUILT_INFO.json
     monkeypatch.setattr(upd, "_find_binary", lambda: str(binary))
     probed = {"n": 0}
 
@@ -354,11 +354,11 @@ def test_start_update_source_build_installs_prebuilt(monkeypatch, tmp_path):
     binary = install_dir / "build" / "bin" / "llama-server"
     binary.parent.mkdir(parents = True)
     binary.write_text("stub")  # no marker
-    monkeypatch.delenv("UNSLOTH_LLAMA_CPP_PATH", raising = False)
+    monkeypatch.delenv("TUNELABS_LLAMA_CPP_PATH", raising = False)
     monkeypatch.setattr(upd, "_find_binary", lambda: str(binary))
     monkeypatch.setattr(upd, "_installer_script", lambda: tmp_path / "install_llama_prebuilt.py")
     _prebuilt(
-        monkeypatch, repo = "unslothai/llama.cpp", asset = "app-b9585-linux-x64-rocm-gfx110X.tar.gz"
+        monkeypatch, repo = "tunelabsai/llama.cpp", asset = "app-b9585-linux-x64-rocm-gfx110X.tar.gz"
     )
 
     captured = {}
@@ -389,7 +389,7 @@ def test_start_update_source_build_installs_prebuilt(monkeypatch, tmp_path):
         time.sleep(0.05)
     cmd = captured["cmd"]
     assert "--install-dir" in cmd and str(install_dir) in cmd
-    assert "--published-repo" in cmd and "unslothai/llama.cpp" in cmd
+    assert "--published-repo" in cmd and "tunelabsai/llama.cpp" in cmd
     assert "--llama-tag" in cmd and "latest" in cmd
     assert cmd[cmd.index("--rocm-gfx") + 1] == "gfx110x"
     assert "--simple-policy" not in cmd and "--cpu-fallback" not in cmd
@@ -443,9 +443,9 @@ def test_start_update_happy_path(monkeypatch, tmp_path):
     assert "--install-dir" in captured["cmd"]
     assert str(install_dir) in captured["cmd"]
     assert "--llama-tag" in captured["cmd"] and "latest" in captured["cmd"]
-    assert "unslothai/llama.cpp" in captured["cmd"]
+    assert "tunelabsai/llama.cpp" in captured["cmd"]
     assert job["progress"] == 1.0
-    assert popen_kwargs["env"]["UNSLOTH_PROGRESS_PERCENT_STEP"] == "5"
+    assert popen_kwargs["env"]["TUNELABS_PROGRESS_PERCENT_STEP"] == "5"
 
 
 def test_start_update_reports_full_release_tag(monkeypatch, tmp_path):
@@ -533,7 +533,7 @@ def _capture_install_cmd(
     tmp_path,
     *,
     tag = "b9493",
-    repo = "unslothai/llama.cpp",
+    repo = "tunelabsai/llama.cpp",
     asset = None,
     latest = "b9518",
 ) -> list:
@@ -582,7 +582,7 @@ def test_install_cmd_rocm_marker_forwards_gfx(monkeypatch, tmp_path):
     assert "--has-rocm" not in cmd
     assert "--cpu-fallback" not in cmd
     assert "--simple-policy" not in cmd
-    assert "--published-repo" in cmd and "unslothai/llama.cpp" in cmd
+    assert "--published-repo" in cmd and "tunelabsai/llama.cpp" in cmd
 
 
 def test_install_cmd_fork_rocm_marker_forwards_has_rocm(monkeypatch, tmp_path):
@@ -763,7 +763,7 @@ def test_resolve_prebuilt_parses_and_caches(monkeypatch, tmp_path):
         returncode = 0
         # stderr noise plus the JSON line on stdout (installer logs to stderr).
         stdout = (
-            '{"prebuilt_available": true, "repo": "unslothai/llama.cpp", "release_tag": "b9585"}'
+            '{"prebuilt_available": true, "repo": "tunelabsai/llama.cpp", "release_tag": "b9585"}'
         )
         stderr = "[llama-prebuilt] some log\n"
 
@@ -820,7 +820,7 @@ def test_llama_install_root_finds_llama_cpp_ancestor(monkeypatch, tmp_path):
     binary = root / "build" / "bin" / "llama-server"
     binary.parent.mkdir(parents = True)
     binary.write_text("stub")
-    monkeypatch.delenv("UNSLOTH_LLAMA_CPP_PATH", raising = False)
+    monkeypatch.delenv("TUNELABS_LLAMA_CPP_PATH", raising = False)
     assert upd._llama_install_root(str(binary)) == root
 
 
@@ -830,22 +830,22 @@ def test_llama_install_root_unmanaged_path_returns_none(monkeypatch, tmp_path):
     binary = tmp_path / "usr" / "local" / "bin" / "llama-server"
     binary.parent.mkdir(parents = True)
     binary.write_text("stub")
-    monkeypatch.delenv("UNSLOTH_LLAMA_CPP_PATH", raising = False)
+    monkeypatch.delenv("TUNELABS_LLAMA_CPP_PATH", raising = False)
     assert upd._llama_install_root(str(binary)) is None
 
 
-def test_llama_install_root_unsloth_env_dir(monkeypatch, tmp_path):
-    # UNSLOTH_LLAMA_CPP_PATH dir holding the active binary is the managed root.
+def test_llama_install_root_tunelabs_env_dir(monkeypatch, tmp_path):
+    # TUNELABS_LLAMA_CPP_PATH dir holding the active binary is the managed root.
     root = tmp_path / "vendor" / "llama"
     binary = root / "llama-server"
     binary.parent.mkdir(parents = True)
     binary.write_text("stub")
-    monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", str(root))
+    monkeypatch.setenv("TUNELABS_LLAMA_CPP_PATH", str(root))
     assert upd._llama_install_root(str(binary)) == root
 
 
 def test_llama_install_root_ignores_inactive_env_root(monkeypatch, tmp_path):
-    # UNSLOTH_LLAMA_CPP_PATH set but the active binary is not under it: do not
+    # TUNELABS_LLAMA_CPP_PATH set but the active binary is not under it: do not
     # target the stale env root, resolve from the binary's own llama.cpp tree.
     inactive = tmp_path / "custom-empty"
     inactive.mkdir()
@@ -853,7 +853,7 @@ def test_llama_install_root_ignores_inactive_env_root(monkeypatch, tmp_path):
     binary = active / "build" / "bin" / "llama-server"
     binary.parent.mkdir(parents = True)
     binary.write_text("stub")
-    monkeypatch.setenv("UNSLOTH_LLAMA_CPP_PATH", str(inactive))
+    monkeypatch.setenv("TUNELABS_LLAMA_CPP_PATH", str(inactive))
     assert upd._llama_install_root(str(binary)) == active
 
 
@@ -865,7 +865,7 @@ def test_llama_install_root_refuses_pinned_checkout_under_llama_cpp(monkeypatch,
     binary.parent.mkdir(parents = True)
     binary.write_text("stub")
     monkeypatch.setenv("LLAMA_SERVER_PATH", str(binary))
-    monkeypatch.delenv("UNSLOTH_LLAMA_CPP_PATH", raising = False)
+    monkeypatch.delenv("TUNELABS_LLAMA_CPP_PATH", raising = False)
     assert upd._llama_install_root(str(binary)) is None
 
 
@@ -949,7 +949,7 @@ def test_status_source_build_includes_update_size(monkeypatch, tmp_path):
     monkeypatch.setattr(upd, "_find_binary", lambda: str(binary))
     _prebuilt(
         monkeypatch,
-        repo = "unslothai/llama.cpp",
+        repo = "tunelabsai/llama.cpp",
         release_tag = "b9585",
         asset = "app-b9585-linux-x64-cpu.tar.gz",
     )
@@ -959,7 +959,7 @@ def test_status_source_build_includes_update_size(monkeypatch, tmp_path):
         "latest_release_assets",
         lambda repo, *, force_refresh = False: (
             {"app-b9585-linux-x64-cpu.tar.gz": 77_000_000}
-            if repo == "unslothai/llama.cpp"
+            if repo == "tunelabsai/llama.cpp"
             else None
         ),
     )

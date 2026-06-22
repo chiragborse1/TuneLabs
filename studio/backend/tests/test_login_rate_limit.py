@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 """Tests for the per-(ip, username) login rate limiter.
 
 Covers:
   - bucket key is (client-ip, username.lower())
-  - X-Forwarded-For honoured only when UNSLOTH_STUDIO_TRUST_FORWARDED is set
+  - X-Forwarded-For honoured only when TUNELABS_STUDIO_TRUST_FORWARDED is set
   - 429 detail body does NOT leak the client IP
   - One username failing doesn't lock out a different user from the same IP
   - One IP failing doesn't lock out the same user from a different IP
@@ -36,12 +36,12 @@ def _reset_buckets():
 
 @pytest.fixture
 def env_no_proxy(monkeypatch):
-    monkeypatch.delenv("UNSLOTH_STUDIO_TRUST_FORWARDED", raising = False)
+    monkeypatch.delenv("TUNELABS_STUDIO_TRUST_FORWARDED", raising = False)
 
 
 @pytest.fixture
 def env_trust_proxy(monkeypatch):
-    monkeypatch.setenv("UNSLOTH_STUDIO_TRUST_FORWARDED", "1")
+    monkeypatch.setenv("TUNELABS_STUDIO_TRUST_FORWARDED", "1")
 
 
 class _FakeRequest:
@@ -249,12 +249,12 @@ class TestLogin429Body:
         for _ in range(_LOGIN_MAX_FAILS):
             r = login_client.post(
                 "/api/auth/login",
-                json = {"username": "unsloth", "password": "wrong"},
+                json = {"username": "tunelabs", "password": "wrong"},
             )
             assert r.status_code == 401
         r = login_client.post(
             "/api/auth/login",
-            json = {"username": "unsloth", "password": "wrong"},
+            json = {"username": "tunelabs", "password": "wrong"},
         )
         assert r.status_code == 429
         detail = r.json()["detail"]

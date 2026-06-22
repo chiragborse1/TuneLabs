@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
 """
 Training VRAM estimation.
 
 Total VRAM = weights + LoRA adapters + optimizer states + gradients
            + activations + CUDA overhead.
-Activation formula from unsloth_zoo/vllm_utils.py.
+Activation formula from tunelabs_zoo/vllm_utils.py.
 All constants empirically calibrated against Llama-3.2-1B on B200.
 """
 
@@ -63,7 +63,7 @@ OPTIMIZER_BYTES_PER_PARAM: Dict[str, int] = {
 GC_LAYER_MULTIPLIERS = {
     "none": (None, None),
     "true": (2.0, 1.0),
-    "unsloth": (1.5, 1.0),
+    "tunelabs": (1.5, 1.0),
 }
 
 
@@ -110,7 +110,7 @@ class TrainingVramConfig:
     max_seq_length: int = 2048
     lora_rank: int = 16
     target_modules: list = field(default_factory = lambda: list(DEFAULT_TARGET_MODULES))
-    gradient_checkpointing: str = "unsloth"
+    gradient_checkpointing: str = "tunelabs"
     optimizer: str = "adamw_8bit"
     load_in_4bit: bool = True
     attention_implementation: str = "flash_attention_2"
@@ -939,7 +939,7 @@ def compute_lora_params(arch: ModelArchConfig, lora_rank: int, target_modules: l
             n_moe = n_layers - n_dense
             # peft "all-linear" attaches LoRA to nn.Linear only; routed experts
             # are nn.Parameter and need explicit gate_proj/up_proj/down_proj
-            # naming via Unsloth's get_moe_target_parameters. Shared experts are
+            # naming via TuneLabs's get_moe_target_parameters. Shared experts are
             # nn.Linear, picked up by get_peft_regex.
             routed_moe = (
                 0

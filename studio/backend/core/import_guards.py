@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-"""Recover `unsloth`/`unsloth_zoo` from a namespace-package shadow. Stdlib-only."""
+"""Recover `tunelabs`/`tunelabs_zoo` from a namespace-package shadow. Stdlib-only."""
 
 from __future__ import annotations
 
@@ -12,8 +12,8 @@ import sys
 def ensure_real_packages(*names: str) -> None:
     """Drop sys.path entries where a bare `<name>/` dir (no __init__.py) shadows
     the installed package as a namespace, import the real packages, restore
-    sys.path. No-op without a shadow. Pass dependency-first (e.g. "unsloth_zoo",
-    "unsloth"); imports run dependency-last."""
+    sys.path. No-op without a shadow. Pass dependency-first (e.g. "tunelabs_zoo",
+    "tunelabs"); imports run dependency-last."""
     import importlib
     import importlib.util
 
@@ -46,7 +46,7 @@ def ensure_real_packages(*names: str) -> None:
             del sys.modules[cached]
     try:
         importlib.invalidate_caches()
-        # import unsloth before unsloth_zoo: unsloth.__init__ runs GPU/bnb fixes zoo relies on
+        # import tunelabs before tunelabs_zoo: tunelabs.__init__ runs GPU/bnb fixes zoo relies on
         for name in reversed(names):
             importlib.import_module(name)
     finally:

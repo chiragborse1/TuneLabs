@@ -37,7 +37,7 @@ assert_not_contains() {
 echo ""
 echo "=== install.sh launcher template ==="
 
-# Extract the heredoc that generates ~/.local/share/unsloth/launch-studio.sh.
+# Extract the heredoc that generates ~/.local/share/tunelabs/launch-studio.sh.
 _launcher=$(awk '/cat > "\$_css_launcher"/{found=1} found{print} /^LAUNCHER_EOF$/{found=0}' "$INSTALL_SH")
 assert_contains \
     "launcher template: extraction found the heredoc content" \
@@ -85,7 +85,7 @@ echo "=== README.md Launch section ==="
 _readme_launch=$(awk '/^#### Launch$/{found=1} found{print} /^#### Update$/{found=0}' "$README")
 assert_contains \
     "README: Launch section exists" \
-    "$_readme_launch" "unsloth studio"
+    "$_readme_launch" "tunelabs studio"
 assert_not_contains \
     "README: Launch section primary command has no -H 0.0.0.0" \
     "$_readme_launch" "studio -H 0.0.0.0"

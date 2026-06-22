@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { useSyncExternalStore } from "react";
 
 type Listener = () => void;
 
-const CHANNEL_NAME = "unsloth.inventory";
-const STORAGE_KEY = "unsloth.inventory.bump";
+const CHANNEL_NAME = "tunelabs.inventory";
+const STORAGE_KEY = "tunelabs.inventory.bump";
 const OUTBOUND_CHANNEL_CLOSE_DELAY_MS = 250;
 
 let _version = 0;

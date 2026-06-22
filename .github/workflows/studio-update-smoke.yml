@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved.
 
-# Verifies that `unsloth studio update --local` is idempotent: a fresh
-# install via install.sh, followed by `unsloth studio update --local`,
+# Verifies that `tunelabs studio update --local` is idempotent: a fresh
+# install via install.sh, followed by `tunelabs studio update --local`,
 # succeeds and is a no-op for the llama.cpp prebuilt (it should report
 # "prebuilt up to date and validated", not re-run the source build).
 #
@@ -20,7 +20,7 @@ on:
       - 'studio/install_python_stack.py'
       - 'studio/install_llama_prebuilt.py'
       - 'studio/backend/requirements/**'
-      - 'unsloth_cli/commands/studio.py'
+      - 'tunelabs_cli/commands/studio.py'
       - 'pyproject.toml'
       - '.github/workflows/studio-update-smoke.yml'
   push:
@@ -58,7 +58,7 @@ jobs:
         with:
           python-version: '3.12'
           # Don't cache pip: this job runs `bash install.sh` and
-          # `unsloth studio update --local` which both go through
+          # `tunelabs studio update --local` which both go through
           # `uv` and never populate ~/.cache/pip. setup-python's
           # post-step then fatal-errors with "Cache folder path is
           # retrieved for pip but doesn't exist on disk".
@@ -78,7 +78,7 @@ jobs:
           bash install.sh --local --no-torch 2>&1 | tee logs/install.log
 
       - name: First update should be a no-op (prebuilt already validated)
-        # `unsloth studio update --local` runs studio/setup.sh against
+        # `tunelabs studio update --local` runs studio/setup.sh against
         # the local repo. Right after install.sh the llama.cpp prebuilt
         # has just been installed and validated, so the second run must
         # take the "prebuilt up to date and validated" code path. Any
@@ -89,7 +89,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           set -o pipefail
-          unsloth studio update --local 2>&1 | tee logs/update.log
+          tunelabs studio update --local 2>&1 | tee logs/update.log
           if grep -q "falling back to source build" logs/update.log; then
             echo "::error::studio update fell back to source-build llama.cpp on a fresh install. setup.sh idempotency regressed."
             grep -E "llama-prebuilt|llama.cpp" logs/update.log | tail -60
@@ -112,7 +112,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           set -o pipefail
-          unsloth studio update --local 2>&1 | tee logs/update2.log
+          tunelabs studio update --local 2>&1 | tee logs/update2.log
           grep -q "falling back to source build" logs/update2.log && {
               echo "::error::second update fell back to source build"
               tail -60 logs/update2.log; exit 1; } || true
@@ -124,7 +124,7 @@ jobs:
         # llama-server binary, the server would fail to start here.
         run: |
           mkdir -p logs
-          UNSLOTH_API_ONLY=1 unsloth studio -H 127.0.0.1 -p 18891 \
+          TUNELABS_API_ONLY=1 tunelabs studio -H 127.0.0.1 -p 18891 \
             > logs/studio.log 2>&1 &
           PID=$!
           for i in $(seq 1 60); do
@@ -162,10 +162,10 @@ jobs:
           sh scripts/uninstall.sh 2>&1 | tee logs/uninstall.log
           leak=0
           for p in \
-            "$HOME/.unsloth/studio" \
-            "$HOME/.local/share/unsloth" \
-            "$HOME/Desktop/Unsloth Studio.desktop" \
-            "$HOME/.local/bin/unsloth"; do
+            "$HOME/.tunelabs/studio" \
+            "$HOME/.local/share/tunelabs" \
+            "$HOME/Desktop/TuneLabs Studio.desktop" \
+            "$HOME/.local/bin/tunelabs"; do
             if [ -e "$p" ] || [ -L "$p" ]; then
               echo "::error::leak: $p"
               ls -la "$p" 2>&1 | head -3

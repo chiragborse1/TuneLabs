@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { toast } from "@/lib/toast";
 import { create } from "zustand";
@@ -23,30 +23,30 @@ import {
   savePersistedChatSettingsPatch,
 } from "../utils/chat-settings-storage";
 
-const HF_TOKEN_KEY = "unsloth_hf_token";
-const HF_TOKEN_CHANGED_EVENT = "unsloth:hf-token-changed";
-export const CHAT_REASONING_ENABLED_KEY = "unsloth_chat_reasoning_enabled";
-export const CHAT_TOOLS_ENABLED_KEY = "unsloth_chat_tools_enabled";
-export const CHAT_CODE_TOOLS_ENABLED_KEY = "unsloth_chat_code_tools_enabled";
-export const CHAT_IMAGE_TOOLS_ENABLED_KEY = "unsloth_chat_image_tools_enabled";
-export const CHAT_ARTIFACTS_ENABLED_KEY = "unsloth_chat_artifacts_enabled";
+const HF_TOKEN_KEY = "tunelabs_hf_token";
+const HF_TOKEN_CHANGED_EVENT = "tunelabs:hf-token-changed";
+export const CHAT_REASONING_ENABLED_KEY = "tunelabs_chat_reasoning_enabled";
+export const CHAT_TOOLS_ENABLED_KEY = "tunelabs_chat_tools_enabled";
+export const CHAT_CODE_TOOLS_ENABLED_KEY = "tunelabs_chat_code_tools_enabled";
+export const CHAT_IMAGE_TOOLS_ENABLED_KEY = "tunelabs_chat_image_tools_enabled";
+export const CHAT_ARTIFACTS_ENABLED_KEY = "tunelabs_chat_artifacts_enabled";
 export const CHAT_COLLAPSE_HTML_ARTIFACTS_KEY =
-  "unsloth_chat_collapse_html_artifacts";
+  "tunelabs_chat_collapse_html_artifacts";
 export const CHAT_ALLOW_ARTIFACT_NETWORK_ACCESS_KEY =
-  "unsloth_chat_allow_artifact_network_access";
-export const CHAT_MCP_ENABLED_KEY = "unsloth_chat_mcp_enabled";
-export const CHAT_CONFIRM_TOOL_CALLS_KEY = "unsloth_chat_confirm_tool_calls";
-export const CHAT_LOAD_ON_SELECTION_KEY = "unsloth_chat_load_on_selection";
-export const CHAT_BYPASS_PERMISSIONS_KEY = "unsloth_chat_bypass_permissions";
+  "tunelabs_chat_allow_artifact_network_access";
+export const CHAT_MCP_ENABLED_KEY = "tunelabs_chat_mcp_enabled";
+export const CHAT_CONFIRM_TOOL_CALLS_KEY = "tunelabs_chat_confirm_tool_calls";
+export const CHAT_LOAD_ON_SELECTION_KEY = "tunelabs_chat_load_on_selection";
+export const CHAT_BYPASS_PERMISSIONS_KEY = "tunelabs_chat_bypass_permissions";
 export const CHAT_WEB_FETCH_TOOLS_ENABLED_KEY =
-  "unsloth_chat_web_fetch_tools_enabled";
-export const CHAT_RAG_SOURCE_KEY = "unsloth_chat_rag_source";
-export const CHAT_RAG_MODE_KEY = "unsloth_chat_rag_mode";
-export const CHAT_RAG_TOP_K_KEY = "unsloth_chat_rag_top_k";
-export const CHAT_RAG_AUTOINJECT_KEY = "unsloth_chat_rag_autoinject";
+  "tunelabs_chat_web_fetch_tools_enabled";
+export const CHAT_RAG_SOURCE_KEY = "tunelabs_chat_rag_source";
+export const CHAT_RAG_MODE_KEY = "tunelabs_chat_rag_mode";
+export const CHAT_RAG_TOP_K_KEY = "tunelabs_chat_rag_top_k";
+export const CHAT_RAG_AUTOINJECT_KEY = "tunelabs_chat_rag_autoinject";
 export const CHAT_RAG_AUTOINJECT_MIN_SCORE_KEY =
-  "unsloth_chat_rag_autoinject_min_score";
-export const CHAT_SPECULATIVE_TYPE_KEY = "unsloth_chat_speculative_type";
+  "tunelabs_chat_rag_autoinject_min_score";
+export const CHAT_SPECULATIVE_TYPE_KEY = "tunelabs_chat_speculative_type";
 
 // Persist only the model-agnostic intents (auto/ngram/off). MTP modes
 // (mtp/mtp+ngram) and spec_draft_n_max stay session-only: a persisted MTP
@@ -140,7 +140,7 @@ function loadRagNumber(
 // /api/inference/status.active_model. External selections have no such mirror,
 // so without explicit localStorage persistence here the user's external pick
 // is reset to the default on every refresh.
-const LAST_EXTERNAL_CHECKPOINT_KEY = "unsloth_chat_last_external_checkpoint";
+const LAST_EXTERNAL_CHECKPOINT_KEY = "tunelabs_chat_last_external_checkpoint";
 
 function loadLastExternalCheckpoint(): string | null {
   if (typeof window === "undefined") return null;

@@ -1,4 +1,4 @@
-# Copyright 2023-present Daniel Han-Chen, Michael Han-Chen & the Unsloth team. All rights reserved.
+# Copyright 2023-present Daniel Han-Chen, Michael Han-Chen & the TuneLabs team. All rights reserved.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -19,8 +19,8 @@ import math
 
 import torch
 
-from unsloth.utils import attention_dispatch
-from unsloth.utils import packing as packing_utils
+from tunelabs.utils import attention_dispatch
+from tunelabs.utils import packing as packing_utils
 
 
 def _make_seq_info(lengths):

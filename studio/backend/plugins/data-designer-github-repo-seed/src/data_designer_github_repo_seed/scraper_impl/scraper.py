@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Scraper orchestration: issues, PRs, discussions, commits, releases, etc.
 
@@ -610,8 +610,8 @@ def setup_logging(log_file: Path) -> None:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--base-dir", default = "/mnt/disks/unslothai/ubuntu/workspace_34/github_scraper")
-    ap.add_argument("--repos", nargs = "+", default = ["unslothai/unsloth", "unslothai/unsloth-zoo"])
+    ap.add_argument("--base-dir", default = "/mnt/disks/tunelabsai/ubuntu/workspace_34/github_scraper")
+    ap.add_argument("--repos", nargs = "+", default = ["tunelabsai/tunelabs", "tunelabsai/tunelabs-zoo"])
     ap.add_argument("--trial", action = "store_true", help = "Small trial run")
     ap.add_argument(
         "--only",

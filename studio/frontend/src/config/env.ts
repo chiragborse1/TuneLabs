@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { apiUrl } from "@/lib/api-base";
 import { create } from "zustand";
@@ -68,7 +68,7 @@ export async function fetchDeviceType(options?: {
     const token =
       typeof window === "undefined"
         ? null
-        : localStorage.getItem("unsloth_auth_token");
+        : localStorage.getItem("tunelabs_auth_token");
     const res = await fetch(apiUrl("/api/health"), {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });

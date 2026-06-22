@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import type { PipelineType } from "@huggingface/hub";
 import { listModels } from "@huggingface/hub";
@@ -121,10 +121,10 @@ function makeMapModel(excludeGguf: boolean, excludedTags: Set<string>) {
   };
 }
 
-/** Number of unsloth results to pull up-front before yielding general results. */
-const UNSLOTH_PREFETCH = 20;
-/** Fewer unsloth results before the pinned model when a publisher is searched. */
-const UNSLOTH_PINNED_PREFETCH = 4;
+/** Number of tunelabs results to pull up-front before yielding general results. */
+const TUNELABS_PREFETCH = 20;
+/** Fewer tunelabs results before the pinned model when a publisher is searched. */
+const TUNELABS_PINNED_PREFETCH = 4;
 /** Matches a valid "owner/repo" identifier (exactly two non-empty segments). */
 const PUBLISHER_RE = /^([^/\s]+)\/([^/\s]+)$/;
 
@@ -147,7 +147,7 @@ function primeFromListing(
 }
 
 /**
- * Creates a merged async generator that yields unsloth-owned models first,
+ * Creates a merged async generator that yields tunelabs-owned models first,
  * then general results (with deduplication).
  */
 async function* mergedModelIterator(
@@ -163,8 +163,8 @@ async function* mergedModelIterator(
   };
 
   // Fire both iterators immediately (parallel network requests on first pull)
-  const unslothIter = listModels({
-    search: { query, owner: "unsloth", ...(task ? { task } : {}) },
+  const tunelabsIter = listModels({
+    search: { query, owner: "tunelabs", ...(task ? { task } : {}) },
     ...common,
   });
   const generalIter = listModels({
@@ -182,12 +182,12 @@ async function* mergedModelIterator(
       }).catch(() => null)
     : null;
 
-  const limit = pinnedId ? UNSLOTH_PINNED_PREFETCH : UNSLOTH_PREFETCH;
+  const limit = pinnedId ? TUNELABS_PINNED_PREFETCH : TUNELABS_PREFETCH;
 
-  // Phase 1: pull & yield unsloth models first
+  // Phase 1: pull & yield tunelabs models first
   const seen = new Set<string>();
   let count = 0;
-  for await (const model of unslothIter) {
+  for await (const model of tunelabsIter) {
     const m = model as { name?: string };
     if (m.name) {
       seen.add(m.name);
@@ -226,7 +226,7 @@ async function* mergedModelIterator(
 
 /**
  * Creates an async generator that yields priority models (fetched individually
- * via modelInfo for full metadata), then the general unsloth listing.
+ * via modelInfo for full metadata), then the general tunelabs listing.
  */
 async function* priorityThenListingIterator(
   priorityIds: readonly string[],
@@ -260,9 +260,9 @@ async function* priorityThenListingIterator(
     }
   }
 
-  // Phase 2: yield general unsloth listing, skipping already-seen
+  // Phase 2: yield general tunelabs listing, skipping already-seen
   const generalIter = listModels({
-    search: { owner: "unsloth", ...(task ? { task } : {}) },
+    search: { owner: "tunelabs", ...(task ? { task } : {}) },
     ...common,
   });
   for await (const model of generalIter) {
@@ -291,7 +291,7 @@ export function useHfModelSearch(
   const { isPublisherQuery, searchQuery, pinnedId, trimmed } = useMemo(() => {
     const t = query.trim();
     const m = PUBLISHER_RE.exec(t);
-    const is = !!m && m[1].toLowerCase() !== "unsloth";
+    const is = !!m && m[1].toLowerCase() !== "tunelabs";
     return {
       isPublisherQuery: is,
       searchQuery: is ? m![2] : t,
@@ -303,12 +303,12 @@ export function useHfModelSearch(
   const createIter = useCallback(
     () => {
       if (!trimmed) {
-        // No query: priority models first (full metadata), then general unsloth.
+        // No query: priority models first (full metadata), then general tunelabs.
         if (priorityIds && priorityIds.length > 0) {
           return priorityThenListingIterator(priorityIds, task, accessToken) as AsyncGenerator<unknown>;
         }
         return listModels({
-          search: { owner: "unsloth", ...(task ? { task } : {}) },
+          search: { owner: "tunelabs", ...(task ? { task } : {}) },
           additionalFields: ["safetensors", "tags"],
           fetch: withPopularitySort,
           ...(accessToken ? { credentials: { accessToken } } : {}),
@@ -316,9 +316,9 @@ export function useHfModelSearch(
       }
       // Typed query: disable the task filter so explicitly searched models
       // appear even with wrong/missing HF task metadata. For a valid
-      // "owner/repo" query, strip the org prefix so unsloth variants
+      // "owner/repo" query, strip the org prefix so tunelabs variants
       // surface, then pin the original publisher model after a small batch.
-      // unsloth-owned queries are left as-is for the full prefetch + sort.
+      // tunelabs-owned queries are left as-is for the full prefetch + sort.
       return mergedModelIterator(searchQuery, undefined, accessToken, pinnedId) as AsyncGenerator<unknown>;
     },
     [trimmed, searchQuery, pinnedId, task, accessToken, priorityIds],
@@ -329,16 +329,16 @@ export function useHfModelSearch(
   const mapModel = useMemo(() => makeMapModel(excludeGguf, excludedTags), [excludeGguf, excludedTags]);
   const search = useHfPaginatedSearch(createIter, mapModel);
 
-  // Secondary sort: unsloth models always float to the top. Skip for a
-  // specific non-unsloth publisher query (e.g. "openai/gpt-oss-20b") --
+  // Secondary sort: tunelabs models always float to the top. Skip for a
+  // specific non-tunelabs publisher query (e.g. "openai/gpt-oss-20b") --
   // the iterator already handles pinned ordering there.
   const results = useMemo(
     () =>
       isPublisherQuery
         ? search.results
         : [...search.results].sort((a, b) => {
-            const aFirst = a.id.startsWith("unsloth/") ? 0 : 1;
-            const bFirst = b.id.startsWith("unsloth/") ? 0 : 1;
+            const aFirst = a.id.startsWith("tunelabs/") ? 0 : 1;
+            const bFirst = b.id.startsWith("tunelabs/") ? 0 : 1;
             return aFirst - bFirst;
           }),
     [search.results, isPublisherQuery],

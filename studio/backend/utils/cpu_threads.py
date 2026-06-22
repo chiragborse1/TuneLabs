@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Early CPU thread-pool configuration for Studio processes."""
 
@@ -16,23 +16,23 @@ _THREAD_POOL_ENV_VARS = (
 
 
 def configure_cpu_threads(env: Optional[MutableMapping[str, str]] = None) -> None:
-    """Apply ``UNSLOTH_CPU_THREADS`` to native CPU pools when configured.
+    """Apply ``TUNELABS_CPU_THREADS`` to native CPU pools when configured.
 
     Must run before importing libraries that initialize an OpenMP or BLAS
     pool. Library-specific vars are left untouched so users can override a
     single runtime independently.
     """
     environ = os.environ if env is None else env
-    configured = environ.get("UNSLOTH_CPU_THREADS", "").strip()
+    configured = environ.get("TUNELABS_CPU_THREADS", "").strip()
     if not configured:
         return
 
     try:
         thread_count = int(configured)
     except ValueError as exc:
-        raise ValueError("UNSLOTH_CPU_THREADS must be a positive integer") from exc
+        raise ValueError("TUNELABS_CPU_THREADS must be a positive integer") from exc
     if thread_count < 1:
-        raise ValueError("UNSLOTH_CPU_THREADS must be a positive integer")
+        raise ValueError("TUNELABS_CPU_THREADS must be a positive integer")
 
     value = str(thread_count)
     for variable in _THREAD_POOL_ENV_VARS:

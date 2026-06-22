@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -128,7 +128,7 @@ export function SummaryStep() {
           </div>
           <Separator className="my-2" />
           <div className="space-y-1 text-sm">
-            <Row label="unsloth" value={hw.unsloth ?? "---"} mono />
+            <Row label="tunelabs" value={hw.tunelabs ?? "---"} mono />
             <Row label="torch" value={hw.torch ?? "---"} mono />
             <Row label="transformers" value={hw.transformers ?? "---"} mono />
           </div>

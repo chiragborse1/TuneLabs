@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Loading a NEW chat model while training runs: can_load_chat_during_training
 (VRAM fit check), _guard_chat_load_against_training and _effective_load_in_4bit
@@ -58,7 +58,7 @@ class TestCanLoadAutoHF(_GpuCacheResetMixin, unittest.TestCase):
             patch("utils.hardware.auto_select_gpu_ids", return_value = ([0], meta)) as auto_mock,
         ):
             ok, info = tv.can_load_chat_during_training(
-                model_name = "unsloth/Qwen3-1.7B",
+                model_name = "tunelabs/Qwen3-1.7B",
                 hf_token = None,
                 load_in_4bit = True,
                 max_seq_length = 0,
@@ -176,7 +176,7 @@ class TestCanLoadGGUF(_GpuCacheResetMixin, unittest.TestCase):
             patch("utils.hardware.auto_select_gpu_ids") as auto_mock,
         ):
             ok, info = tv.can_load_chat_during_training(
-                model_name = "unsloth/gemma-GGUF",
+                model_name = "tunelabs/gemma-GGUF",
                 hf_token = None,
                 load_in_4bit = True,
                 max_seq_length = 0,
@@ -316,7 +316,7 @@ class TestChatLoadGuardRoute(unittest.TestCase):
         ):
             self.route._guard_chat_load_against_training(
                 config,
-                model_identifier = "unsloth/Qwen3-1.7B",
+                model_identifier = "tunelabs/Qwen3-1.7B",
                 hf_token = None,
                 load_in_4bit = True,
                 max_seq_length = 0,
@@ -378,7 +378,7 @@ class TestEffectiveLoadIn4bit(unittest.TestCase):
     def test_lora_method_flips_to_16bit(self):
         import tempfile
         with tempfile.TemporaryDirectory() as d:
-            self._write_adapter(d, {"unsloth_training_method": "lora"})
+            self._write_adapter(d, {"tunelabs_training_method": "lora"})
             cfg = SimpleNamespace(is_lora = True, path = d, base_model = "x")
             # requested 4-bit, but a 'lora' adapter loads 16-bit
             self.assertFalse(self.route._effective_load_in_4bit(cfg, True))
@@ -386,7 +386,7 @@ class TestEffectiveLoadIn4bit(unittest.TestCase):
     def test_qlora_method_keeps_4bit(self):
         import tempfile
         with tempfile.TemporaryDirectory() as d:
-            self._write_adapter(d, {"unsloth_training_method": "qlora"})
+            self._write_adapter(d, {"tunelabs_training_method": "qlora"})
             cfg = SimpleNamespace(is_lora = True, path = d, base_model = "x")
             self.assertTrue(self.route._effective_load_in_4bit(cfg, True))
 
@@ -424,10 +424,10 @@ class TestValidateRefusesDuringTraining(unittest.TestCase):
         from models.inference import ValidateModelRequest
 
         request = ValidateModelRequest(
-            model_path = "unsloth/Qwen3-1.7B", load_in_4bit = load_in_4bit, max_seq_length = 4096
+            model_path = "tunelabs/Qwen3-1.7B", load_in_4bit = load_in_4bit, max_seq_length = 4096
         )
         cfg = SimpleNamespace(
-            identifier = "unsloth/Qwen3-1.7B",
+            identifier = "tunelabs/Qwen3-1.7B",
             display_name = "Qwen3-1.7B",
             is_gguf = False,
             is_lora = False,
@@ -439,7 +439,7 @@ class TestValidateRefusesDuringTraining(unittest.TestCase):
             patch.object(
                 self.route,
                 "_resolve_model_identifier_for_request",
-                return_value = ("unsloth/Qwen3-1.7B", "unsloth/Qwen3-1.7B", False),
+                return_value = ("tunelabs/Qwen3-1.7B", "tunelabs/Qwen3-1.7B", False),
             ),
             patch.object(self.route.ModelConfig, "from_identifier", return_value = cfg),
             patch.object(self.route, "load_inference_config", return_value = {}),
@@ -652,7 +652,7 @@ class TestLoadModelGuardIntegration(unittest.TestCase):
         llama = SimpleNamespace(is_loaded = False, model_identifier = None, hf_variant = None)
         llama.unload_model = MagicMock()
         cfg = SimpleNamespace(is_gguf = False, is_lora = False, path = None, base_model = None)
-        request = LoadRequest(model_path = "unsloth/Qwen3-1.7B")
+        request = LoadRequest(model_path = "tunelabs/Qwen3-1.7B")
         info = {"required_gb": 40.0, "usable_gb": 5.0, "needed_gb": 50.0, "mode": "auto"}
 
         with (
@@ -660,7 +660,7 @@ class TestLoadModelGuardIntegration(unittest.TestCase):
             patch.object(
                 self.route,
                 "_resolve_model_identifier_for_request",
-                return_value = ("unsloth/Qwen3-1.7B", "unsloth/Qwen3-1.7B", False),
+                return_value = ("tunelabs/Qwen3-1.7B", "tunelabs/Qwen3-1.7B", False),
             ),
             patch.object(self.route, "resolve_effective_chat_template_override", return_value = None),
             patch.object(self.route, "get_inference_backend", return_value = inf),

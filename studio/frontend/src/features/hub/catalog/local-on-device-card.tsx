@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { TrainIcon } from "../components/train-icon";
 import {
@@ -312,7 +312,7 @@ export function LocalOnDeviceCard({
             className="mt-[1px] size-3.5 shrink-0"
           />
           <span>
-            This looks like an older Hub cache. It may use a format that Unsloth
+            This looks like an older Hub cache. It may use a format that TuneLabs
             no longer loads (missing config or unsupported quantization). You
             can still keep it on disk, or delete it to free space.
           </span>

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import {
   buildBackendChatExport,
@@ -66,7 +66,7 @@ type ThreadListArgs = {
 // (chat_legacy_imports) is the source of truth so a studio.db wipe stays
 // recoverable. The hint only short-circuits the listing paths' "also
 // surface Dexie threads?" branches once the ledger has covered everything.
-const LEGACY_CHAT_IMPORT_KEY = "unsloth_chat_legacy_imported_to_studio_db";
+const LEGACY_CHAT_IMPORT_KEY = "tunelabs_chat_legacy_imported_to_studio_db";
 
 let legacyChatImportPromise: Promise<void> | null = null;
 
@@ -153,7 +153,7 @@ export function isExpectedBackgroundChatStorageError(error: unknown): boolean {
     (error.message === "Invalid or expired token" ||
       error.message === "Not authenticated" ||
       error.message === "Request failed (401)" ||
-      error.message === "Unsloth isn't running -- please relaunch it.")
+      error.message === "TuneLabs isn't running -- please relaunch it.")
   );
 }
 
@@ -283,7 +283,7 @@ async function backfillLegacyThreadFields(
   }
 }
 
-// Fast-path: check whether the "unsloth-chat" DB exists without opening
+// Fast-path: check whether the "tunelabs-chat" DB exists without opening
 // it. Supported on modern Chromium/Firefox/Safari; older browsers return
 // undefined and we fall through to the next probe.
 async function dexieDbAbsent(): Promise<boolean> {

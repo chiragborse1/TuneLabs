@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """_preflight_first_batch rejects an empty/non-integer first batch (the base-model
 empty-chat-template crash) before train(). The real methods are bound onto a light
@@ -18,7 +18,7 @@ import torch
 def _stub_if_missing(name, attrs):
     """Register a stub module for a dep the CPU backend CI job does not install.
 
-    The pytest job has studio.txt + torch + transformers but not unsloth/trl,
+    The pytest job has studio.txt + torch + transformers but not tunelabs/trl,
     which core.training.trainer imports at module scope. Stub the absent ones
     (real installs are left alone) so importing it for the two pure helper
     methods never breaks test collection. __spec__ = None keeps the trainer's
@@ -41,14 +41,14 @@ def _stub_if_missing(name, attrs):
         setattr(sys.modules[parent], child, mod)
 
 
-_stub_if_missing("unsloth", ("FastLanguageModel", "FastVisionModel", "is_bfloat16_supported"))
-_stub_if_missing("unsloth.chat_templates", ("get_chat_template",))
+_stub_if_missing("tunelabs", ("FastLanguageModel", "FastVisionModel", "is_bfloat16_supported"))
+_stub_if_missing("tunelabs.chat_templates", ("get_chat_template",))
 _stub_if_missing("trl", ("SFTTrainer", "SFTConfig"))
 
-from core.training.trainer import UnslothTrainer  # noqa: E402
+from core.training.trainer import TuneLabsTrainer  # noqa: E402
 
-_preflight = UnslothTrainer._preflight_first_batch
-_renders_empty = UnslothTrainer._chat_template_renders_empty
+_preflight = TuneLabsTrainer._preflight_first_batch
+_renders_empty = TuneLabsTrainer._chat_template_renders_empty
 
 
 class _FakeInnerTrainer:

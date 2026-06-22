@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import { isTauri } from "@/lib/api-base";
 import { copyToClipboard } from "@/lib/copy-to-clipboard";
@@ -64,11 +64,11 @@ export function redactDiagnosticsText(text: string): string {
 
   // Redact Studio paths before broader home-directory paths.
   redacted = redacted.replace(
-    /(?:\/Users|\/home)\/[^\s/]+\/\.unsloth\/studio/gi,
+    /(?:\/Users|\/home)\/[^\s/]+\/\.tunelabs\/studio/gi,
     "<studio_home>",
   );
   redacted = redacted.replace(
-    /[A-Z]:\\Users\\[^\s\\]+\\\.unsloth\\studio/gi,
+    /[A-Z]:\\Users\\[^\s\\]+\\\.tunelabs\\studio/gi,
     "<studio_home>",
   );
   redacted = redacted.replace(/(?:\/Users|\/home)\/[^\s/]+/gi, "$HOME");

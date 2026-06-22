@@ -1,4 +1,4 @@
-from unsloth import FastLanguageModel, FastModel
+from tunelabs import FastLanguageModel, FastModel
 from transformers import CsmForConditionalGeneration
 import torch
 
@@ -26,7 +26,7 @@ print(f"{'='*80}")
 
 
 model, tokenizer = FastModel.from_pretrained(
-    model_name = "unsloth/csm-1b",
+    model_name = "tunelabs/csm-1b",
     max_seq_length = 2048,
     dtype = None,
     auto_model = CsmForConditionalGeneration,
@@ -52,7 +52,7 @@ model = FastModel.get_peft_model(
     lora_alpha = 32,
     lora_dropout = 0,
     bias = "none",
-    use_gradient_checkpointing = "unsloth",
+    use_gradient_checkpointing = "tunelabs",
     random_state = 3407,
     use_rslora = False,
     loftq_config = None,
@@ -118,7 +118,7 @@ model, processor = FastModel.from_pretrained(
 
 from transformers import AutoProcessor
 
-processor = AutoProcessor.from_pretrained("unsloth/csm-1b")
+processor = AutoProcessor.from_pretrained("tunelabs/csm-1b")
 
 print("✅ Model loaded for inference successfully!")
 
@@ -157,5 +157,5 @@ except Exception as e:
 print("✅ All sections passed successfully!")
 
 
-safe_remove_directory("./unsloth_compiled_cache")
+safe_remove_directory("./tunelabs_compiled_cache")
 safe_remove_directory("./csm")

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """
 Regression tests for loggers.handlers.filter_sensitive_data.
@@ -31,7 +31,7 @@ class TestNoTruncation:
         # Mirrors logger.info at studio/backend/core/inference/llama_cpp.py:2283
         event = (
             "Using mmproj for vision: "
-            "/home/user/.cache/unsloth/models/some-vision-model-uncensored-r1-distill/mmproj-F16.gguf"
+            "/home/user/.cache/tunelabs/models/some-vision-model-uncensored-r1-distill/mmproj-F16.gguf"
         )
         out = _run({"event": event})
         assert out["event"] == event
@@ -39,9 +39,9 @@ class TestNoTruncation:
     def test_llama_server_command_survives(self):
         # Mirrors logger.info at studio/backend/core/inference/llama_cpp.py:2312
         event = (
-            "Starting llama-server: /home/user/.unsloth/studio/llama.cpp/build/bin/llama-server "
-            "-m /home/user/.cache/unsloth/models/foo.gguf --port 8090 -c 259072 --parallel 1 "
-            "--flash-attn on --mmproj /home/user/.cache/unsloth/models/mmproj-F16.gguf"
+            "Starting llama-server: /home/user/.tunelabs/studio/llama.cpp/build/bin/llama-server "
+            "-m /home/user/.cache/tunelabs/models/foo.gguf --port 8090 -c 259072 --parallel 1 "
+            "--flash-attn on --mmproj /home/user/.cache/tunelabs/models/mmproj-F16.gguf"
         )
         out = _run({"event": event})
         assert out["event"] == event
@@ -49,7 +49,7 @@ class TestNoTruncation:
     def test_traceback_with_paths_survives(self):
         traceback_str = (
             "Traceback (most recent call last):\n"
-            '  File "/home/user/.unsloth/studio/unsloth_studio/lib/python3.11/site-packages/'
+            '  File "/home/user/.tunelabs/studio/tunelabs_studio/lib/python3.11/site-packages/'
             'studio/backend/core/inference/llama_cpp.py", line 2312, in start\n'
             '    raise RuntimeError("llama-server crashed: bad alloc, /dev/shm full")\n'
             "RuntimeError: llama-server crashed: bad alloc, /dev/shm full"

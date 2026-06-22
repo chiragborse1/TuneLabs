@@ -9,11 +9,11 @@ import pytest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-IMPORT_FIXES = REPO_ROOT / "unsloth" / "import_fixes.py"
+IMPORT_FIXES = REPO_ROOT / "tunelabs" / "import_fixes.py"
 
 
 def _load_patch_function():
-    spec = importlib.util.spec_from_file_location("_unsloth_import_fixes_under_test", IMPORT_FIXES)
+    spec = importlib.util.spec_from_file_location("_tunelabs_import_fixes_under_test", IMPORT_FIXES)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module.patch_peft_weight_converter_compatibility

@@ -294,7 +294,7 @@ mod tests {
 
     #[test]
     fn choose_preflight_classifies_core_cases() {
-        let bin = || PathBuf::from("/managed/unsloth");
+        let bin = || PathBuf::from("/managed/tunelabs");
         let ready = || ManagedProbe::Ready { bin: bin() };
         let stale = || ManagedProbe::Stale {
             bin: bin(),
@@ -393,7 +393,7 @@ mod tests {
     fn external_conflict_blocks_managed_flow() {
         let result = choose_preflight(
             ManagedProbe::Ready {
-                bin: PathBuf::from("/managed/unsloth"),
+                bin: PathBuf::from("/managed/tunelabs"),
             },
             BackendProbe::ExternalConflict {
                 port: 8888,
@@ -411,7 +411,7 @@ mod tests {
             Some("same_root_external_backend_active".to_string())
         );
         assert!(!result.can_auto_repair);
-        assert_eq!(result.managed_bin, Some(PathBuf::from("/managed/unsloth")));
+        assert_eq!(result.managed_bin, Some(PathBuf::from("/managed/tunelabs")));
     }
 
     #[test]
@@ -482,11 +482,11 @@ mod tests {
             .unwrap()
             .as_nanos();
         let dir = std::env::temp_dir().join(format!(
-            "unsloth-preflight-{test_name}-{}-{nanos}",
+            "tunelabs-preflight-{test_name}-{}-{nanos}",
             std::process::id()
         ));
         fs::create_dir_all(&dir).unwrap();
-        let bin = dir.join("unsloth");
+        let bin = dir.join("tunelabs");
         fs::write(&bin, script).unwrap();
         let mut perms = fs::metadata(&bin).unwrap().permissions();
         perms.set_mode(0o755);
@@ -578,7 +578,7 @@ exit 1
     fn desktop_ready_health_with_owner(root_id: &str, include_owner: bool) -> String {
         let owner = desktop_owner_json(include_owner);
         format!(
-            r#"{{"status":"healthy","service":"Unsloth UI Backend","version":"2026.5.3","desktop_protocol_version":1,"desktop_manageability_version":1,"supports_desktop_auth":true,"supports_desktop_backend_ownership":true,"studio_root_id":"{root_id}"{owner}}}"#
+            r#"{{"status":"healthy","service":"TuneLabs UI Backend","version":"2026.5.3","desktop_protocol_version":1,"desktop_manageability_version":1,"supports_desktop_auth":true,"supports_desktop_backend_ownership":true,"studio_root_id":"{root_id}"{owner}}}"#
         )
     }
 
@@ -625,7 +625,7 @@ exit 1
     #[tokio::test]
     async fn backend_health_without_desktop_capability_fields_is_still_candidate() {
         let port = backend_server(
-            r#"{"status":"healthy","service":"Unsloth UI Backend"}"#,
+            r#"{"status":"healthy","service":"TuneLabs UI Backend"}"#,
             "401 Unauthorized",
         )
         .await;
@@ -638,7 +638,7 @@ exit 1
     async fn backend_with_auth_support_but_missing_protocol_is_old() {
         let probe = probe_test_backend(
             format!(
-                r#"{{"status":"healthy","service":"Unsloth UI Backend","version":"2026.5.3","desktop_manageability_version":1,"supports_desktop_auth":true,"supports_desktop_backend_ownership":true,"studio_root_id":"{EXPECTED_ROOT_ID}"{}}}"#,
+                r#"{{"status":"healthy","service":"TuneLabs UI Backend","version":"2026.5.3","desktop_manageability_version":1,"supports_desktop_auth":true,"supports_desktop_backend_ownership":true,"studio_root_id":"{EXPECTED_ROOT_ID}"{}}}"#,
                 desktop_owner_json(true)
             ),
             "401 Unauthorized",
@@ -671,7 +671,7 @@ exit 1
     async fn stale_same_root_without_desktop_owner_is_external_conflict() {
         let probe = probe_test_backend(
             format!(
-                r#"{{"status":"healthy","service":"Unsloth UI Backend","version":"2026.5.1","desktop_protocol_version":1,"desktop_manageability_version":1,"supports_desktop_auth":true,"supports_desktop_backend_ownership":true,"studio_root_id":"{EXPECTED_ROOT_ID}"}}"#,
+                r#"{{"status":"healthy","service":"TuneLabs UI Backend","version":"2026.5.1","desktop_protocol_version":1,"desktop_manageability_version":1,"supports_desktop_auth":true,"supports_desktop_backend_ownership":true,"studio_root_id":"{EXPECTED_ROOT_ID}"}}"#,
             ),
             "401 Unauthorized",
         )
@@ -703,7 +703,7 @@ exit 1
     #[tokio::test]
     async fn backend_missing_root_id_is_external_conflict_before_auth_probe() {
         let probe = probe_test_backend(
-            r#"{"status":"healthy","service":"Unsloth UI Backend","desktop_protocol_version":1,"supports_desktop_auth":true}"#,
+            r#"{"status":"healthy","service":"TuneLabs UI Backend","desktop_protocol_version":1,"supports_desktop_auth":true}"#,
             "401 Unauthorized",
         )
         .await;
@@ -751,7 +751,7 @@ exit 1
     async fn backend_capability_false_is_old_even_when_route_401() {
         let probe = probe_test_backend(
             format!(
-                r#"{{"status":"healthy","service":"Unsloth UI Backend","version":"2026.5.3","desktop_protocol_version":1,"desktop_manageability_version":1,"supports_desktop_auth":false,"supports_desktop_backend_ownership":true,"desktop_auth_stale_reason":"cap_false","studio_root_id":"{EXPECTED_ROOT_ID}"{}}}"#,
+                r#"{{"status":"healthy","service":"TuneLabs UI Backend","version":"2026.5.3","desktop_protocol_version":1,"desktop_manageability_version":1,"supports_desktop_auth":false,"supports_desktop_backend_ownership":true,"desktop_auth_stale_reason":"cap_false","studio_root_id":"{EXPECTED_ROOT_ID}"{}}}"#,
                 desktop_owner_json(true)
             ),
             "401 Unauthorized",

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import type { HfSortKey } from "@/features/hub/hooks/use-hub-model-search";
 import {
@@ -11,9 +11,9 @@ import type { IconSvgElement } from "@hugeicons/react";
 import type { ModelFormatFilter } from "../types";
 
 export type ChannelId =
-  | "unsloth-trending"
-  | "unsloth-latest"
-  | "unsloth-safetensors";
+  | "tunelabs-trending"
+  | "tunelabs-latest"
+  | "tunelabs-safetensors";
 
 export interface ChannelPreset {
   id: ChannelId;
@@ -26,36 +26,36 @@ export interface ChannelPreset {
   idSuffix?: string;
   format: ModelFormatFilter;
   sort: HfSortKey;
-  // Keep only formats Unsloth can fine-tune (drops fp8, nvfp4, w4a16, etc.).
+  // Keep only formats TuneLabs can fine-tune (drops fp8, nvfp4, w4a16, etc.).
   finetunableOnly?: boolean;
 }
 
 export const CHANNEL_PRESETS: readonly ChannelPreset[] = [
   {
-    id: "unsloth-trending",
-    label: "Unsloth Trending",
+    id: "tunelabs-trending",
+    label: "TuneLabs Trending",
     icon: SparklesIcon,
-    hint: "Most trending models published by Unsloth.",
-    owner: "unsloth",
+    hint: "Most trending models published by TuneLabs.",
+    owner: "tunelabs",
     tags: ["gguf"],
     format: "gguf",
     sort: "trendingScore",
   },
   {
-    id: "unsloth-latest",
-    label: "Latest Unsloth",
+    id: "tunelabs-latest",
+    label: "Latest TuneLabs",
     icon: NewReleasesIcon,
-    hint: "Freshly released models from the Unsloth channel.",
-    owner: "unsloth",
+    hint: "Freshly released models from the TuneLabs channel.",
+    owner: "tunelabs",
     format: "all",
     sort: "lastModified",
   },
   {
-    id: "unsloth-safetensors",
+    id: "tunelabs-safetensors",
     label: "Fine-tune ready",
     icon: SlidersHorizontalIcon,
     hint: "Checkpoints ready to fine-tune.",
-    owner: "unsloth",
+    owner: "tunelabs",
     format: "checkpoint",
     sort: "lastModified",
     finetunableOnly: true,
@@ -76,20 +76,20 @@ export const HUB_SECTION_ORDER: readonly HubSection[] = [
 ];
 
 export const SECTION_TO_CHANNEL: Record<HubSection, ChannelId> = {
-  trending: "unsloth-trending",
-  latest: "unsloth-latest",
-  finetune: "unsloth-safetensors",
+  trending: "tunelabs-trending",
+  latest: "tunelabs-latest",
+  finetune: "tunelabs-safetensors",
 };
 
 export const CHANNEL_TO_SECTION: Record<ChannelId, HubSection> = {
-  "unsloth-trending": "trending",
-  "unsloth-latest": "latest",
-  "unsloth-safetensors": "finetune",
+  "tunelabs-trending": "trending",
+  "tunelabs-latest": "latest",
+  "tunelabs-safetensors": "finetune",
 };
 
 export const HUB_SECTION_TITLE: Record<HubSection, string> = {
   trending: "Trending Now",
-  latest: "Latest Unsloth Models",
+  latest: "Latest TuneLabs Models",
   finetune: "Fine-tune Ready",
 };
 

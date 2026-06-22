@@ -1,4 +1,4 @@
-from unsloth.models._utils import resolve_model_class
+from tunelabs.models._utils import resolve_model_class
 
 
 class _AutoModelLike:

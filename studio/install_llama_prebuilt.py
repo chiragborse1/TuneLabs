@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-"""Cross platform llama.cpp prebuilt installer for Unsloth Studio"""
+"""Cross platform llama.cpp prebuilt installer for TuneLabs Studio"""
 
 from __future__ import annotations
 
@@ -59,13 +59,13 @@ def _amd_smi_allowed() -> bool:
 
     On Windows w/o a working HIP runtime, amd-smi elevates a child and pops a
     UAC/DiskPart prompt RunAsInvoker can't suppress. Only call it on Windows
-    when a HIP SDK is detectable (hipinfo present) or UNSLOTH_ENABLE_AMD_SMI=1;
+    when a HIP SDK is detectable (hipinfo present) or TUNELABS_ENABLE_AMD_SMI=1;
     Linux/macOS always allowed. When skipped, the gfx arch still arrives via the
     forwarded --rocm-gfx, so prebuilt selection is unaffected.
     """
     if platform.system() != "Windows":
         return True
-    flag = os.environ.get("UNSLOTH_ENABLE_AMD_SMI", "").strip().lower()
+    flag = os.environ.get("TUNELABS_ENABLE_AMD_SMI", "").strip().lower()
     if flag in ("1", "true", "yes", "on"):
         return True
     if flag in ("0", "false", "no", "off"):
@@ -124,17 +124,17 @@ def env_int(
 # (no matching GitHub release), forces a source build, and causes HTTP 422
 # errors. Only use "master" temporarily when the latest release is missing
 # support for a new model architecture.
-DEFAULT_LLAMA_TAG = os.environ.get("UNSLOTH_LLAMA_TAG", "latest")
+DEFAULT_LLAMA_TAG = os.environ.get("TUNELABS_LLAMA_TAG", "latest")
 # Default published repo for prebuilt release resolution. Linux uses
-# Unsloth prebuilts; setup.sh/setup.ps1 pass --published-repo explicitly
+# TuneLabs prebuilts; setup.sh/setup.ps1 pass --published-repo explicitly
 # for macOS/Windows to override with ggml-org/llama.cpp when needed.
-DEFAULT_PUBLISHED_REPO = "unslothai/llama.cpp"
-DEFAULT_PUBLISHED_TAG = os.environ.get("UNSLOTH_LLAMA_RELEASE_TAG")
+DEFAULT_PUBLISHED_REPO = "tunelabsai/llama.cpp"
+DEFAULT_PUBLISHED_TAG = os.environ.get("TUNELABS_LLAMA_RELEASE_TAG")
 DEFAULT_PUBLISHED_MANIFEST_ASSET = os.environ.get(
-    "UNSLOTH_LLAMA_RELEASE_MANIFEST_ASSET", "llama-prebuilt-manifest.json"
+    "TUNELABS_LLAMA_RELEASE_MANIFEST_ASSET", "llama-prebuilt-manifest.json"
 )
 DEFAULT_PUBLISHED_SHA256_ASSET = os.environ.get(
-    "UNSLOTH_LLAMA_RELEASE_SHA256_ASSET", "llama-prebuilt-sha256.json"
+    "TUNELABS_LLAMA_RELEASE_SHA256_ASSET", "llama-prebuilt-sha256.json"
 )
 UPSTREAM_REPO = "ggml-org/llama.cpp"
 UPSTREAM_RELEASES_API = f"https://api.github.com/repos/{UPSTREAM_REPO}/releases/latest"
@@ -159,7 +159,7 @@ HTTP_FETCH_ATTEMPTS = 4
 HTTP_FETCH_BASE_DELAY_SECONDS = 0.75
 JSON_FETCH_ATTEMPTS = 3
 DEFAULT_GITHUB_RELEASE_SCAN_MAX_PAGES = env_int(
-    "UNSLOTH_LLAMA_GITHUB_RELEASE_SCAN_MAX_PAGES",
+    "TUNELABS_LLAMA_GITHUB_RELEASE_SCAN_MAX_PAGES",
     5,
     minimum = 1,
 )
@@ -167,7 +167,7 @@ SERVER_PORT_BIND_ATTEMPTS = 3
 SERVER_BIND_RETRY_WINDOW_SECONDS = 5.0
 TTY_PROGRESS_START_DELAY_SECONDS = 0.5
 DEFAULT_MAX_PREBUILT_RELEASE_FALLBACKS = env_int(
-    "UNSLOTH_LLAMA_MAX_PREBUILT_RELEASE_FALLBACKS",
+    "TUNELABS_LLAMA_MAX_PREBUILT_RELEASE_FALLBACKS",
     2,
     minimum = 1,
 )
@@ -175,14 +175,14 @@ DEFAULT_MAX_PREBUILT_RELEASE_FALLBACKS = env_int(
 # newer macOS than the host, only caught at validate time, so an older host must
 # skip the whole run. Free on new hosts (first plan validates, extras unused).
 DEFAULT_MAX_MACOS_RELEASE_FALLBACKS = env_int(
-    "UNSLOTH_LLAMA_MAX_MACOS_RELEASE_FALLBACKS",
+    "TUNELABS_LLAMA_MAX_MACOS_RELEASE_FALLBACKS",
     16,
     minimum = 1,
 )
 # Last upstream macOS release before ggml-org moved macOS builds to Tahoe.
 _PINNED_MACOS_FALLBACK_TAG = "b9415"
 _PINNED_MACOS_LATEST_FLOOR = (26, 0)
-FORCE_COMPILE_DEFAULT_REF = os.environ.get("UNSLOTH_LLAMA_FORCE_COMPILE_REF", "master")
+FORCE_COMPILE_DEFAULT_REF = os.environ.get("TUNELABS_LLAMA_FORCE_COMPILE_REF", "master")
 
 # Lowest CUDA major we ship prebuilts for, and the highest major we probe for
 # installed runtime libraries. Detection and runtime-line derivation are
@@ -237,7 +237,7 @@ class AssetChoice:
     source_label: str
     # Paired runtime archive (Windows CUDA cudart bundle). When set,
     # install_from_archives also downloads it and overlays its DLLs on
-    # top of the main install. See unslothai/unsloth#5106.
+    # top of the main install. See tunelabsai/tunelabs#5106.
     runtime_name: str | None = None
     runtime_url: str | None = None
     runtime_sha256: str | None = None
@@ -457,7 +457,7 @@ def should_send_hf_auth(url: str | None) -> bool:
 
 def auth_headers(url: str | None = None) -> dict[str, str]:
     headers = {
-        "User-Agent": "unsloth-studio-llama-prebuilt",
+        "User-Agent": "tunelabs-studio-llama-prebuilt",
     }
     token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
     if token and should_send_github_auth(url):
@@ -824,9 +824,9 @@ def format_byte_count(num_bytes: float) -> str:
 
 def _progress_percent_step() -> int:
     """Non-tty milestone granularity. The in-app updater sets
-    UNSLOTH_PROGRESS_PERCENT_STEP=5 to stream finer progress lines."""
+    TUNELABS_PROGRESS_PERCENT_STEP=5 to stream finer progress lines."""
     try:
-        step = int(os.environ.get("UNSLOTH_PROGRESS_PERCENT_STEP", "25"))
+        step = int(os.environ.get("TUNELABS_PROGRESS_PERCENT_STEP", "25"))
     except ValueError:
         return 25
     return min(max(step, 1), 50)
@@ -1566,7 +1566,7 @@ def resolve_simple_install_release_plans(
     max_release_fallbacks: int = DEFAULT_MAX_PREBUILT_RELEASE_FALLBACKS,
 ) -> tuple[str, list[InstallReleasePlan]]:
     repo = published_repo or DEFAULT_PUBLISHED_REPO
-    # The fork (unslothai) ships a manifest describing every bundle's GPU/arch
+    # The fork (tunelabsai) ships a manifest describing every bundle's GPU/arch
     # coverage, so all fork hosts select from it. Upstream (ggml-org) ships no
     # manifest and is selected by asset filename in the loop below.
     if repo == DEFAULT_PUBLISHED_REPO:
@@ -2571,21 +2571,21 @@ def resolve_requested_llama_tag(
 
     Resolution order:
       1. Concrete tag (e.g. "b8508") -- returned as-is.
-      2. "latest" with published_repo -- resolve the latest usable Unsloth
+      2. "latest" with published_repo -- resolve the latest usable TuneLabs
          published release bundle and return its upstream_tag. This is the
          preferred version that matches the published prebuilt metadata.
       3. "latest" without published_repo or if (2) fails -- query the upstream
          ggml-org/llama.cpp repo. This may return a newer, untested tag.
 
-    The Unsloth repo is preferred because its releases are pinned to specific
-    upstream tags that have been validated with Unsloth Studio. Using the
+    The TuneLabs repo is preferred because its releases are pinned to specific
+    upstream tags that have been validated with TuneLabs Studio. Using the
     upstream bleeding-edge tag risks API/ABI incompatibilities.
     """
     normalized_requested = normalized_requested_llama_tag(requested_tag)
     if normalized_requested != "latest":
         return normalized_requested
-    # Prefer the Unsloth release repo tag (tested/approved) over bleeding-edge
-    # upstream. For example, unslothai/llama.cpp may publish b8508 while
+    # Prefer the TuneLabs release repo tag (tested/approved) over bleeding-edge
+    # upstream. For example, tunelabsai/llama.cpp may publish b8508 while
     # ggml-org/llama.cpp latest is b8514. The source-build fallback should
     # compile the same version the prebuilt path would have installed.
     if published_repo:
@@ -3070,7 +3070,7 @@ def _apply_host_overrides(
     force_cpu: bool = False,
 ) -> HostInfo:
     """Fold setup.sh/setup.ps1's forwarded detection into the host profile.
-    A forwarded gfx (--rocm-gfx or UNSLOTH_ROCM_GFX_ARCH) is authoritative and
+    A forwarded gfx (--rocm-gfx or TUNELABS_ROCM_GFX_ARCH) is authoritative and
     implies ROCm: the installer's own hipinfo/amd-smi probe can miss the arch on
     amd-smi-only hosts or when setup inferred it from the GPU name, leaving
     rocm_gfx_target None and no per-gfx ROCm prebuilt selected. force_cpu is the
@@ -4215,7 +4215,7 @@ def ensure_diffusion_visual_server(
 ) -> None:
     """Best-effort placement of the DiffusionGemma visual-server binary next to
     llama-server in the install tree, so Studio can serve DiffusionGemma GGUFs
-    without any DG_* env. This is an Unsloth artifact (not a ggml-org one), so it
+    without any DG_* env. This is an TuneLabs artifact (not a ggml-org one), so it
     is optional: if it is already present we just make it executable, otherwise we
     try the published release and quietly skip on absence. A source build
     (setup.sh / setup.ps1) copies it from build/bin directly. Users can always
@@ -4665,7 +4665,7 @@ def confirm_install_tree(install_dir: Path, host: HostInfo) -> None:
             install_dir / "gguf-py",
         ]
 
-    expected.append(install_dir / "UNSLOTH_PREBUILT_INFO.json")
+    expected.append(install_dir / "TUNELABS_PREBUILT_INFO.json")
     missing = [str(path) for path in expected if not path.exists()]
     if missing:
         raise RuntimeError("activated install was missing expected files: " + ", ".join(missing))
@@ -6042,7 +6042,7 @@ def write_prebuilt_metadata(
         "source": choice.source_label,
         # Binary-side repo/tag for non-fork sources (e.g. the ggml-org upstream
         # CPU/HIP prebuilts). published_repo/release_tag always refer to the
-        # unsloth source tree; these capture where the actual binaries came from
+        # tunelabs source tree; these capture where the actual binaries came from
         # so the install summary can show both.
         "binary_repo": choice.repo,
         "binary_release_tag": choice.tag,
@@ -6062,7 +6062,7 @@ def write_prebuilt_metadata(
         "prebuilt_fallback_used": prebuilt_fallback_used,
         "installed_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
-    (install_dir / "UNSLOTH_PREBUILT_INFO.json").write_text(json.dumps(metadata, indent = 2) + "\n")
+    (install_dir / "TUNELABS_PREBUILT_INFO.json").write_text(json.dumps(metadata, indent = 2) + "\n")
 
 
 def expected_install_fingerprint(
@@ -6103,7 +6103,7 @@ def expected_install_fingerprint(
 
 
 def load_prebuilt_metadata(install_dir: Path) -> dict[str, Any] | None:
-    metadata_path = install_dir / "UNSLOTH_PREBUILT_INFO.json"
+    metadata_path = install_dir / "TUNELABS_PREBUILT_INFO.json"
     if not metadata_path.is_file():
         return None
     try:
@@ -6525,7 +6525,7 @@ def install_prebuilt(
                         f"{current.release_tag} upstream_tag={current.llama_tag}; skipping download and install"
                     )
                     return
-            with tempfile.TemporaryDirectory(prefix = "unsloth-llama-prebuilt-") as tmp:
+            with tempfile.TemporaryDirectory(prefix = "tunelabs-llama-prebuilt-") as tmp:
                 work_dir = Path(tmp)
                 probe_path = work_dir / "stories260K.gguf"
                 download_validation_model(probe_path, validation_model_cache_path(install_dir))
@@ -6608,15 +6608,15 @@ def install_prebuilt(
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description = "Install and validate a prebuilt llama.cpp bundle for Unsloth Studio."
+        description = "Install and validate a prebuilt llama.cpp bundle for TuneLabs Studio."
     )
-    parser.add_argument("--install-dir", help = "Target ~/.unsloth/llama.cpp directory")
+    parser.add_argument("--install-dir", help = "Target ~/.tunelabs/llama.cpp directory")
     parser.add_argument(
         "--llama-tag",
         default = DEFAULT_LLAMA_TAG,
         help = (
-            "llama.cpp release tag. Defaults to the latest usable published Unsloth "
-            "release unless UNSLOTH_LLAMA_TAG overrides it."
+            "llama.cpp release tag. Defaults to the latest usable published TuneLabs "
+            "release unless TUNELABS_LLAMA_TAG overrides it."
         ),
     )
     parser.add_argument(
@@ -6645,12 +6645,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--rocm-gfx",
-        default = os.environ.get("UNSLOTH_ROCM_GFX_ARCH"),
+        default = os.environ.get("TUNELABS_ROCM_GFX_ARCH"),
         help = (
             "Forward the AMD gfx target (e.g. gfx1151) that setup.ps1/setup.sh "
             "resolved, so the per-gfx ROCm prebuilt is selected even when the "
             "installer's own hipinfo/amd-smi probe cannot report it. Implies "
-            "--has-rocm. Defaults to the UNSLOTH_ROCM_GFX_ARCH environment variable."
+            "--has-rocm. Defaults to the TUNELABS_ROCM_GFX_ARCH environment variable."
         ),
     )
     parser.add_argument(

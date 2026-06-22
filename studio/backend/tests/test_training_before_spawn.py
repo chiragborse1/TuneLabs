@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """
 start_training()'s before_spawn hook must run iff a training subprocess is
@@ -38,7 +38,7 @@ def _start(backend, hook):
         return backend.start_training(
             job_id = "before-spawn-test",
             before_spawn = hook,
-            model_name = "unsloth/test",
+            model_name = "tunelabs/test",
             training_type = "LoRA/QLoRA",
         )
 
@@ -95,7 +95,7 @@ class TestBeforeSpawnHook(unittest.TestCase):
                 backend.start_training(
                     job_id = "before-spawn-test",
                     before_spawn = hook,
-                    model_name = "unsloth/test",
+                    model_name = "tunelabs/test",
                     training_type = "LoRA/QLoRA",
                     gpu_ids = [99],
                 )
@@ -124,7 +124,7 @@ class TestBeforeSpawnHook(unittest.TestCase):
             ok = backend.start_training(
                 job_id = "before-spawn-test",
                 before_spawn = hook,
-                model_name = "unsloth/test",
+                model_name = "tunelabs/test",
                 training_type = "LoRA/QLoRA",
             )  # gpu_ids omitted -> auto mode
         self.assertTrue(ok)
@@ -151,7 +151,7 @@ class TestBeforeSpawnHook(unittest.TestCase):
             ok = backend.start_training(
                 job_id = "before-spawn-test",
                 before_spawn = hook,
-                model_name = "unsloth/test",
+                model_name = "tunelabs/test",
                 training_type = "LoRA/QLoRA",
                 gpu_ids = [5],
             )

@@ -1,4 +1,4 @@
-from unsloth import FastLanguageModel, FastModel
+from tunelabs import FastLanguageModel, FastModel
 from transformers import CsmForConditionalGeneration
 import torch
 
@@ -30,7 +30,7 @@ print(f"{'='*80}")
 
 
 model, tokenizer = FastLanguageModel.from_pretrained(
-    model_name = "unsloth/orpheus-3b-0.1-ft",
+    model_name = "tunelabs/orpheus-3b-0.1-ft",
     max_seq_length = 2048,  # Choose any for long context!
     dtype = None,  # Select None for auto detection
     load_in_4bit = False,  # Select True for 4bit which reduces memory usage
@@ -55,8 +55,8 @@ model = FastLanguageModel.get_peft_model(
     lora_alpha = 64,
     lora_dropout = 0,  # Supports any, but = 0 is optimized
     bias = "none",  # Supports any, but = "none" is optimized
-    # [NEW] "unsloth" uses 30% less VRAM, fits 2x larger batch sizes!
-    use_gradient_checkpointing = "unsloth",  # True or "unsloth" for very long context
+    # [NEW] "tunelabs" uses 30% less VRAM, fits 2x larger batch sizes!
+    use_gradient_checkpointing = "tunelabs",  # True or "tunelabs" for very long context
     random_state = 3407,
     use_rslora = False,  # We support rank stabilized LoRA
     loftq_config = None,  # And LoftQ
@@ -112,7 +112,7 @@ print(f"{'='*80}")
 
 
 model, tokenizer = FastLanguageModel.from_pretrained(
-    model_name = "unsloth/orpheus-3b-0.1-ft",
+    model_name = "tunelabs/orpheus-3b-0.1-ft",
     max_seq_length = 2048,  # Choose any for long context!
     dtype = None,  # Select None for auto detection
     load_in_4bit = False,  # Select True for 4bit which reduces memory usage
@@ -120,7 +120,7 @@ model, tokenizer = FastLanguageModel.from_pretrained(
 )
 
 # from transformers import AutoProcessor
-# processor = AutoProcessor.from_pretrained("unsloth/csm-1b")
+# processor = AutoProcessor.from_pretrained("tunelabs/csm-1b")
 
 print("✅ Model loaded for inference successfully!")
 
@@ -272,5 +272,5 @@ del my_samples, samples
 print("✅ All sections passed successfully!")
 
 
-safe_remove_directory("./unsloth_compiled_cache")
+safe_remove_directory("./tunelabs_compiled_cache")
 safe_remove_directory("./orpheus")

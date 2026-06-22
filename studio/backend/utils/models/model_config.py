@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Model and LoRA configuration handling."""
 
@@ -88,373 +88,373 @@ def extract_model_size_b(model_id: str) -> float | None:
 # Canonical filename derives from the first model name in each list.
 MODEL_NAME_MAPPING = {
     # ── Embedding models ──
-    "unsloth_all-MiniLM-L6-v2.yaml": [
-        "unsloth/all-MiniLM-L6-v2",
+    "tunelabs_all-MiniLM-L6-v2.yaml": [
+        "tunelabs/all-MiniLM-L6-v2",
         "sentence-transformers/all-MiniLM-L6-v2",
     ],
-    "unsloth_bge-m3.yaml": [
-        "unsloth/bge-m3",
+    "tunelabs_bge-m3.yaml": [
+        "tunelabs/bge-m3",
         "BAAI/bge-m3",
     ],
-    "unsloth_embeddinggemma-300m.yaml": [
-        "unsloth/embeddinggemma-300m",
+    "tunelabs_embeddinggemma-300m.yaml": [
+        "tunelabs/embeddinggemma-300m",
         "google/embeddinggemma-300m",
     ],
-    "unsloth_gte-modernbert-base.yaml": [
-        "unsloth/gte-modernbert-base",
+    "tunelabs_gte-modernbert-base.yaml": [
+        "tunelabs/gte-modernbert-base",
         "Alibaba-NLP/gte-modernbert-base",
     ],
-    "unsloth_Qwen3-Embedding-0.6B.yaml": [
-        "unsloth/Qwen3-Embedding-0.6B",
+    "tunelabs_Qwen3-Embedding-0.6B.yaml": [
+        "tunelabs/Qwen3-Embedding-0.6B",
         "Qwen/Qwen3-Embedding-0.6B",
-        "unsloth/Qwen3-Embedding-4B",
+        "tunelabs/Qwen3-Embedding-4B",
         "Qwen/Qwen3-Embedding-4B",
     ],
     # ── Other models ──
-    "unsloth_answerdotai_ModernBERT-large.yaml": [
+    "tunelabs_answerdotai_ModernBERT-large.yaml": [
         "answerdotai/ModernBERT-large",
     ],
-    "unsloth_Qwen2.5-Coder-7B-Instruct-bnb-4bit.yaml": [
-        "unsloth/Qwen2.5-Coder-7B-Instruct-bnb-4bit",
-        "unsloth/Qwen2.5-Coder-7B-Instruct",
+    "tunelabs_Qwen2.5-Coder-7B-Instruct-bnb-4bit.yaml": [
+        "tunelabs/Qwen2.5-Coder-7B-Instruct-bnb-4bit",
+        "tunelabs/Qwen2.5-Coder-7B-Instruct",
         "Qwen/Qwen2.5-Coder-7B-Instruct",
     ],
-    "unsloth_codegemma-7b-bnb-4bit.yaml": [
-        "unsloth/codegemma-7b-bnb-4bit",
-        "unsloth/codegemma-7b",
+    "tunelabs_codegemma-7b-bnb-4bit.yaml": [
+        "tunelabs/codegemma-7b-bnb-4bit",
+        "tunelabs/codegemma-7b",
         "google/codegemma-7b",
     ],
-    "unsloth_ERNIE-4.5-21B-A3B-PT.yaml": [
-        "unsloth/ERNIE-4.5-21B-A3B-PT",
+    "tunelabs_ERNIE-4.5-21B-A3B-PT.yaml": [
+        "tunelabs/ERNIE-4.5-21B-A3B-PT",
     ],
-    "unsloth_ERNIE-4.5-VL-28B-A3B-PT.yaml": [
-        "unsloth/ERNIE-4.5-VL-28B-A3B-PT",
+    "tunelabs_ERNIE-4.5-VL-28B-A3B-PT.yaml": [
+        "tunelabs/ERNIE-4.5-VL-28B-A3B-PT",
     ],
     "tiiuae_Falcon-H1-0.5B-Instruct.yaml": [
         "tiiuae/Falcon-H1-0.5B-Instruct",
-        "unsloth/Falcon-H1-0.5B-Instruct",
+        "tunelabs/Falcon-H1-0.5B-Instruct",
     ],
-    "unsloth_functiongemma-270m-it.yaml": [
-        "unsloth/functiongemma-270m-it-unsloth-bnb-4bit",
+    "tunelabs_functiongemma-270m-it.yaml": [
+        "tunelabs/functiongemma-270m-it-tunelabs-bnb-4bit",
         "google/functiongemma-270m-it",
-        "unsloth/functiongemma-270m-it-unsloth-bnb-4bit",
+        "tunelabs/functiongemma-270m-it-tunelabs-bnb-4bit",
     ],
-    "unsloth_gemma-2-2b.yaml": [
-        "unsloth/gemma-2-2b-bnb-4bit",
+    "tunelabs_gemma-2-2b.yaml": [
+        "tunelabs/gemma-2-2b-bnb-4bit",
         "google/gemma-2-2b",
     ],
-    "unsloth_gemma-2-27b-bnb-4bit.yaml": [
-        "unsloth/gemma-2-9b-bnb-4bit",
-        "unsloth/gemma-2-9b",
+    "tunelabs_gemma-2-27b-bnb-4bit.yaml": [
+        "tunelabs/gemma-2-9b-bnb-4bit",
+        "tunelabs/gemma-2-9b",
         "google/gemma-2-9b",
-        "unsloth/gemma-2-27b",
+        "tunelabs/gemma-2-27b",
         "google/gemma-2-27b",
     ],
-    "unsloth_gemma-3-4b-pt.yaml": [
-        "unsloth/gemma-3-4b-pt-unsloth-bnb-4bit",
+    "tunelabs_gemma-3-4b-pt.yaml": [
+        "tunelabs/gemma-3-4b-pt-tunelabs-bnb-4bit",
         "google/gemma-3-4b-pt",
-        "unsloth/gemma-3-4b-pt-bnb-4bit",
+        "tunelabs/gemma-3-4b-pt-bnb-4bit",
     ],
-    "unsloth_gemma-3-4b-it.yaml": [
-        "unsloth/gemma-3-4b-it-unsloth-bnb-4bit",
+    "tunelabs_gemma-3-4b-it.yaml": [
+        "tunelabs/gemma-3-4b-it-tunelabs-bnb-4bit",
         "google/gemma-3-4b-it",
-        "unsloth/gemma-3-4b-it-bnb-4bit",
+        "tunelabs/gemma-3-4b-it-bnb-4bit",
     ],
-    "unsloth_gemma-3-27b-it.yaml": [
-        "unsloth/gemma-3-27b-it-unsloth-bnb-4bit",
+    "tunelabs_gemma-3-27b-it.yaml": [
+        "tunelabs/gemma-3-27b-it-tunelabs-bnb-4bit",
         "google/gemma-3-27b-it",
-        "unsloth/gemma-3-27b-it-bnb-4bit",
+        "tunelabs/gemma-3-27b-it-bnb-4bit",
     ],
-    "unsloth_gemma-3-270m-it.yaml": [
-        "unsloth/gemma-3-270m-it-unsloth-bnb-4bit",
+    "tunelabs_gemma-3-270m-it.yaml": [
+        "tunelabs/gemma-3-270m-it-tunelabs-bnb-4bit",
         "google/gemma-3-270m-it",
-        "unsloth/gemma-3-270m-it-bnb-4bit",
+        "tunelabs/gemma-3-270m-it-bnb-4bit",
     ],
-    "unsloth_gemma-3n-E4B-it.yaml": [
-        "unsloth/gemma-3n-E4B-it-unsloth-bnb-4bit",
+    "tunelabs_gemma-3n-E4B-it.yaml": [
+        "tunelabs/gemma-3n-E4B-it-tunelabs-bnb-4bit",
         "google/gemma-3n-E4B-it",
-        "unsloth/gemma-3n-E4B-it-unsloth-bnb-4bit",
+        "tunelabs/gemma-3n-E4B-it-tunelabs-bnb-4bit",
     ],
-    "unsloth_gemma-3n-E4B.yaml": [
-        "unsloth/gemma-3n-E4B-unsloth-bnb-4bit",
+    "tunelabs_gemma-3n-E4B.yaml": [
+        "tunelabs/gemma-3n-E4B-tunelabs-bnb-4bit",
         "google/gemma-3n-E4B",
     ],
-    "unsloth_gemma-4-31B-it.yaml": [
-        "unsloth/gemma-4-31B-it",
+    "tunelabs_gemma-4-31B-it.yaml": [
+        "tunelabs/gemma-4-31B-it",
         "google/gemma-4-31B-it",
     ],
-    "unsloth_gemma-4-26B-A4B-it.yaml": [
-        "unsloth/gemma-4-26B-A4B-it",
+    "tunelabs_gemma-4-26B-A4B-it.yaml": [
+        "tunelabs/gemma-4-26B-A4B-it",
         "google/gemma-4-26B-A4B-it",
     ],
-    "unsloth_gemma-4-E2B-it.yaml": [
-        "unsloth/gemma-4-E2B-it",
+    "tunelabs_gemma-4-E2B-it.yaml": [
+        "tunelabs/gemma-4-E2B-it",
         "google/gemma-4-E2B-it",
     ],
-    "unsloth_gemma-4-E4B-it.yaml": [
-        "unsloth/gemma-4-E4B-it",
+    "tunelabs_gemma-4-E4B-it.yaml": [
+        "tunelabs/gemma-4-E4B-it",
         "google/gemma-4-E4B-it",
     ],
-    "unsloth_gemma-4-31B.yaml": [
-        "unsloth/gemma-4-31B",
+    "tunelabs_gemma-4-31B.yaml": [
+        "tunelabs/gemma-4-31B",
         "google/gemma-4-31B",
     ],
-    "unsloth_gemma-4-26B-A4B.yaml": [
-        "unsloth/gemma-4-26B-A4B",
+    "tunelabs_gemma-4-26B-A4B.yaml": [
+        "tunelabs/gemma-4-26B-A4B",
         "google/gemma-4-26B-A4B",
     ],
-    "unsloth_gemma-4-E2B.yaml": [
-        "unsloth/gemma-4-E2B",
+    "tunelabs_gemma-4-E2B.yaml": [
+        "tunelabs/gemma-4-E2B",
         "google/gemma-4-E2B",
     ],
-    "unsloth_gemma-4-E4B.yaml": [
-        "unsloth/gemma-4-E4B",
+    "tunelabs_gemma-4-E4B.yaml": [
+        "tunelabs/gemma-4-E4B",
         "google/gemma-4-E4B",
     ],
-    "unsloth_gpt-oss-20b.yaml": [
+    "tunelabs_gpt-oss-20b.yaml": [
         "openai/gpt-oss-20b",
-        "unsloth/gpt-oss-20b-unsloth-bnb-4bit",
-        "unsloth/gpt-oss-20b-BF16",
+        "tunelabs/gpt-oss-20b-tunelabs-bnb-4bit",
+        "tunelabs/gpt-oss-20b-BF16",
     ],
-    "unsloth_gpt-oss-120b.yaml": [
+    "tunelabs_gpt-oss-120b.yaml": [
         "openai/gpt-oss-120b",
-        "unsloth/gpt-oss-120b-unsloth-bnb-4bit",
+        "tunelabs/gpt-oss-120b-tunelabs-bnb-4bit",
     ],
-    "unsloth_granite-4.0-350m-unsloth-bnb-4bit.yaml": [
-        "unsloth/granite-4.0-350m",
+    "tunelabs_granite-4.0-350m-tunelabs-bnb-4bit.yaml": [
+        "tunelabs/granite-4.0-350m",
         "ibm-granite/granite-4.0-350m",
-        "unsloth/granite-4.0-350m-bnb-4bit",
+        "tunelabs/granite-4.0-350m-bnb-4bit",
     ],
-    "unsloth_granite-4.0-h-micro.yaml": [
+    "tunelabs_granite-4.0-h-micro.yaml": [
         "ibm-granite/granite-4.0-h-micro",
-        "unsloth/granite-4.0-h-micro-bnb-4bit",
-        "unsloth/granite-4.0-h-micro-unsloth-bnb-4bit",
+        "tunelabs/granite-4.0-h-micro-bnb-4bit",
+        "tunelabs/granite-4.0-h-micro-tunelabs-bnb-4bit",
     ],
-    "unsloth_LFM2-1.2B.yaml": [
-        "unsloth/LFM2-1.2B",
+    "tunelabs_LFM2-1.2B.yaml": [
+        "tunelabs/LFM2-1.2B",
     ],
-    "unsloth_llama-3-8b-bnb-4bit.yaml": [
-        "unsloth/llama-3-8b",
+    "tunelabs_llama-3-8b-bnb-4bit.yaml": [
+        "tunelabs/llama-3-8b",
         "meta-llama/Meta-Llama-3-8B",
     ],
-    "unsloth_llama-3-8b-Instruct-bnb-4bit.yaml": [
-        "unsloth/llama-3-8b-Instruct",
+    "tunelabs_llama-3-8b-Instruct-bnb-4bit.yaml": [
+        "tunelabs/llama-3-8b-Instruct",
         "meta-llama/Meta-Llama-3-8B-Instruct",
     ],
-    "unsloth_Meta-Llama-3.1-70B-bnb-4bit.yaml": [
-        "unsloth/Meta-Llama-3.1-8B-bnb-4bit",
-        "unsloth/Meta-Llama-3.1-8B-unsloth-bnb-4bit",
+    "tunelabs_Meta-Llama-3.1-70B-bnb-4bit.yaml": [
+        "tunelabs/Meta-Llama-3.1-8B-bnb-4bit",
+        "tunelabs/Meta-Llama-3.1-8B-tunelabs-bnb-4bit",
         "meta-llama/Meta-Llama-3.1-8B",
-        "unsloth/Meta-Llama-3.1-70B-bnb-4bit",
-        "unsloth/Meta-Llama-3.1-8B",
-        "unsloth/Meta-Llama-3.1-70B",
+        "tunelabs/Meta-Llama-3.1-70B-bnb-4bit",
+        "tunelabs/Meta-Llama-3.1-8B",
+        "tunelabs/Meta-Llama-3.1-70B",
         "meta-llama/Meta-Llama-3.1-70B",
-        "unsloth/Meta-Llama-3.1-405B-bnb-4bit",
+        "tunelabs/Meta-Llama-3.1-405B-bnb-4bit",
         "meta-llama/Meta-Llama-3.1-405B",
     ],
-    "unsloth_Meta-Llama-3.1-8B-Instruct-bnb-4bit.yaml": [
-        "unsloth/Meta-Llama-3.1-8B-Instruct-unsloth-bnb-4bit",
-        "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit",
+    "tunelabs_Meta-Llama-3.1-8B-Instruct-bnb-4bit.yaml": [
+        "tunelabs/Meta-Llama-3.1-8B-Instruct-tunelabs-bnb-4bit",
+        "tunelabs/Meta-Llama-3.1-8B-Instruct-bnb-4bit",
         "meta-llama/Meta-Llama-3.1-8B-Instruct",
-        "unsloth/Meta-Llama-3.1-8B-Instruct",
+        "tunelabs/Meta-Llama-3.1-8B-Instruct",
         "RedHatAI/Llama-3.1-8B-Instruct-FP8",
-        "unsloth/Llama-3.1-8B-Instruct-FP8-Block",
-        "unsloth/Llama-3.1-8B-Instruct-FP8-Dynamic",
+        "tunelabs/Llama-3.1-8B-Instruct-FP8-Block",
+        "tunelabs/Llama-3.1-8B-Instruct-FP8-Dynamic",
     ],
-    "unsloth_Llama-3.2-3B-Instruct.yaml": [
-        "unsloth/Llama-3.2-3B-Instruct-unsloth-bnb-4bit",
+    "tunelabs_Llama-3.2-3B-Instruct.yaml": [
+        "tunelabs/Llama-3.2-3B-Instruct-tunelabs-bnb-4bit",
         "meta-llama/Llama-3.2-3B-Instruct",
-        "unsloth/Llama-3.2-3B-Instruct-bnb-4bit",
+        "tunelabs/Llama-3.2-3B-Instruct-bnb-4bit",
         "RedHatAI/Llama-3.2-3B-Instruct-FP8",
-        "unsloth/Llama-3.2-3B-Instruct-FP8-Block",
-        "unsloth/Llama-3.2-3B-Instruct-FP8-Dynamic",
+        "tunelabs/Llama-3.2-3B-Instruct-FP8-Block",
+        "tunelabs/Llama-3.2-3B-Instruct-FP8-Dynamic",
     ],
-    "unsloth_Llama-3.2-1B-Instruct.yaml": [
-        "unsloth/Llama-3.2-1B-Instruct-unsloth-bnb-4bit",
+    "tunelabs_Llama-3.2-1B-Instruct.yaml": [
+        "tunelabs/Llama-3.2-1B-Instruct-tunelabs-bnb-4bit",
         "meta-llama/Llama-3.2-1B-Instruct",
-        "unsloth/Llama-3.2-1B-Instruct-bnb-4bit",
+        "tunelabs/Llama-3.2-1B-Instruct-bnb-4bit",
         "RedHatAI/Llama-3.2-1B-Instruct-FP8",
-        "unsloth/Llama-3.2-1B-Instruct-FP8-Block",
-        "unsloth/Llama-3.2-1B-Instruct-FP8-Dynamic",
+        "tunelabs/Llama-3.2-1B-Instruct-FP8-Block",
+        "tunelabs/Llama-3.2-1B-Instruct-FP8-Dynamic",
     ],
-    "unsloth_Llama-3.2-11B-Vision-Instruct.yaml": [
-        "unsloth/Llama-3.2-11B-Vision-Instruct-unsloth-bnb-4bit",
+    "tunelabs_Llama-3.2-11B-Vision-Instruct.yaml": [
+        "tunelabs/Llama-3.2-11B-Vision-Instruct-tunelabs-bnb-4bit",
         "meta-llama/Llama-3.2-11B-Vision-Instruct",
-        "unsloth/Llama-3.2-11B-Vision-Instruct-bnb-4bit",
+        "tunelabs/Llama-3.2-11B-Vision-Instruct-bnb-4bit",
     ],
-    "unsloth_Llama-3.3-70B-Instruct.yaml": [
-        "unsloth/Llama-3.3-70B-Instruct-unsloth-bnb-4bit",
+    "tunelabs_Llama-3.3-70B-Instruct.yaml": [
+        "tunelabs/Llama-3.3-70B-Instruct-tunelabs-bnb-4bit",
         "meta-llama/Llama-3.3-70B-Instruct",
-        "unsloth/Llama-3.3-70B-Instruct-bnb-4bit",
+        "tunelabs/Llama-3.3-70B-Instruct-bnb-4bit",
         "RedHatAI/Llama-3.3-70B-Instruct-FP8",
-        "unsloth/Llama-3.3-70B-Instruct-FP8-Block",
-        "unsloth/Llama-3.3-70B-Instruct-FP8-Dynamic",
+        "tunelabs/Llama-3.3-70B-Instruct-FP8-Block",
+        "tunelabs/Llama-3.3-70B-Instruct-FP8-Dynamic",
     ],
-    "unsloth_Llasa-3B.yaml": [
+    "tunelabs_Llasa-3B.yaml": [
         "HKUSTAudio/Llasa-1B",
-        "unsloth/Llasa-3B",
+        "tunelabs/Llasa-3B",
     ],
-    "unsloth_Magistral-Small-2509-unsloth-bnb-4bit.yaml": [
-        "unsloth/Magistral-Small-2509",
+    "tunelabs_Magistral-Small-2509-tunelabs-bnb-4bit.yaml": [
+        "tunelabs/Magistral-Small-2509",
         "mistralai/Magistral-Small-2509",
-        "unsloth/Magistral-Small-2509-bnb-4bit",
+        "tunelabs/Magistral-Small-2509-bnb-4bit",
     ],
-    "unsloth_Ministral-3-3B-Instruct-2512.yaml": [
-        "unsloth/Ministral-3-3B-Instruct-2512",
+    "tunelabs_Ministral-3-3B-Instruct-2512.yaml": [
+        "tunelabs/Ministral-3-3B-Instruct-2512",
     ],
-    "unsloth_mistral-7b-v0.3-bnb-4bit.yaml": [
-        "unsloth/mistral-7b-v0.3-bnb-4bit",
-        "unsloth/mistral-7b-v0.3",
+    "tunelabs_mistral-7b-v0.3-bnb-4bit.yaml": [
+        "tunelabs/mistral-7b-v0.3-bnb-4bit",
+        "tunelabs/mistral-7b-v0.3",
         "mistralai/Mistral-7B-v0.3",
     ],
-    "unsloth_Mistral-Nemo-Base-2407-bnb-4bit.yaml": [
-        "unsloth/Mistral-Nemo-Base-2407-bnb-4bit",
-        "unsloth/Mistral-Nemo-Base-2407",
+    "tunelabs_Mistral-Nemo-Base-2407-bnb-4bit.yaml": [
+        "tunelabs/Mistral-Nemo-Base-2407-bnb-4bit",
+        "tunelabs/Mistral-Nemo-Base-2407",
         "mistralai/Mistral-Nemo-Base-2407",
-        "unsloth/Mistral-Nemo-Instruct-2407-bnb-4bit",
-        "unsloth/Mistral-Nemo-Instruct-2407",
+        "tunelabs/Mistral-Nemo-Instruct-2407-bnb-4bit",
+        "tunelabs/Mistral-Nemo-Instruct-2407",
         "mistralai/Mistral-Nemo-Instruct-2407",
     ],
-    "unsloth_Mistral-Small-Instruct-2409.yaml": [
-        "unsloth/Mistral-Small-Instruct-2409-bnb-4bit",
+    "tunelabs_Mistral-Small-Instruct-2409.yaml": [
+        "tunelabs/Mistral-Small-Instruct-2409-bnb-4bit",
         "mistralai/Mistral-Small-Instruct-2409",
     ],
-    "unsloth_mistral-7b-instruct-v0.3-bnb-4bit.yaml": [
-        "unsloth/mistral-7b-instruct-v0.3-bnb-4bit",
-        "unsloth/mistral-7b-instruct-v0.3",
+    "tunelabs_mistral-7b-instruct-v0.3-bnb-4bit.yaml": [
+        "tunelabs/mistral-7b-instruct-v0.3-bnb-4bit",
+        "tunelabs/mistral-7b-instruct-v0.3",
         "mistralai/Mistral-7B-Instruct-v0.3",
     ],
-    "unsloth_Qwen2.5-1.5B-Instruct.yaml": [
-        "unsloth/Qwen2.5-1.5B-Instruct-unsloth-bnb-4bit",
+    "tunelabs_Qwen2.5-1.5B-Instruct.yaml": [
+        "tunelabs/Qwen2.5-1.5B-Instruct-tunelabs-bnb-4bit",
         "Qwen/Qwen2.5-1.5B-Instruct",
-        "unsloth/Qwen2.5-1.5B-Instruct-bnb-4bit",
+        "tunelabs/Qwen2.5-1.5B-Instruct-bnb-4bit",
     ],
-    "unsloth_Nemotron-3-Nano-30B-A3B.yaml": [
-        "unsloth/Nemotron-3-Nano-30B-A3B",
+    "tunelabs_Nemotron-3-Nano-30B-A3B.yaml": [
+        "tunelabs/Nemotron-3-Nano-30B-A3B",
     ],
-    "unsloth_orpheus-3b-0.1-ft.yaml": [
-        "unsloth/orpheus-3b-0.1-ft",
-        "unsloth/orpheus-3b-0.1-ft-unsloth-bnb-4bit",
+    "tunelabs_orpheus-3b-0.1-ft.yaml": [
+        "tunelabs/orpheus-3b-0.1-ft",
+        "tunelabs/orpheus-3b-0.1-ft-tunelabs-bnb-4bit",
         "canopylabs/orpheus-3b-0.1-ft",
-        "unsloth/orpheus-3b-0.1-ft-bnb-4bit",
+        "tunelabs/orpheus-3b-0.1-ft-bnb-4bit",
     ],
     "OuteAI_Llama-OuteTTS-1.0-1B.yaml": [
         "OuteAI/Llama-OuteTTS-1.0-1B",
-        "unsloth/Llama-OuteTTS-1.0-1B",
-        "unsloth/llama-outetts-1.0-1b",
+        "tunelabs/Llama-OuteTTS-1.0-1B",
+        "tunelabs/llama-outetts-1.0-1b",
         "OuteAI/OuteTTS-1.0-0.6B",
-        "unsloth/OuteTTS-1.0-0.6B",
-        "unsloth/outetts-1.0-0.6b",
+        "tunelabs/OuteTTS-1.0-0.6B",
+        "tunelabs/outetts-1.0-0.6b",
     ],
-    "unsloth_PaddleOCR-VL.yaml": [
-        "unsloth/PaddleOCR-VL",
+    "tunelabs_PaddleOCR-VL.yaml": [
+        "tunelabs/PaddleOCR-VL",
     ],
-    "unsloth_Phi-3-medium-4k-instruct.yaml": [
-        "unsloth/Phi-3-medium-4k-instruct-bnb-4bit",
+    "tunelabs_Phi-3-medium-4k-instruct.yaml": [
+        "tunelabs/Phi-3-medium-4k-instruct-bnb-4bit",
         "microsoft/Phi-3-medium-4k-instruct",
     ],
-    "unsloth_Phi-3.5-mini-instruct.yaml": [
-        "unsloth/Phi-3.5-mini-instruct-bnb-4bit",
+    "tunelabs_Phi-3.5-mini-instruct.yaml": [
+        "tunelabs/Phi-3.5-mini-instruct-bnb-4bit",
         "microsoft/Phi-3.5-mini-instruct",
     ],
-    "unsloth_Phi-4.yaml": [
-        "unsloth/phi-4-unsloth-bnb-4bit",
+    "tunelabs_Phi-4.yaml": [
+        "tunelabs/phi-4-tunelabs-bnb-4bit",
         "microsoft/phi-4",
-        "unsloth/phi-4-bnb-4bit",
+        "tunelabs/phi-4-bnb-4bit",
     ],
-    "unsloth_Pixtral-12B-2409.yaml": [
-        "unsloth/Pixtral-12B-2409-unsloth-bnb-4bit",
+    "tunelabs_Pixtral-12B-2409.yaml": [
+        "tunelabs/Pixtral-12B-2409-tunelabs-bnb-4bit",
         "mistralai/Pixtral-12B-2409",
-        "unsloth/Pixtral-12B-2409-bnb-4bit",
+        "tunelabs/Pixtral-12B-2409-bnb-4bit",
     ],
-    "unsloth_Qwen2-7B.yaml": [
-        "unsloth/Qwen2-7B-bnb-4bit",
+    "tunelabs_Qwen2-7B.yaml": [
+        "tunelabs/Qwen2-7B-bnb-4bit",
         "Qwen/Qwen2-7B",
     ],
-    "unsloth_Qwen2-VL-7B-Instruct.yaml": [
-        "unsloth/Qwen2-VL-7B-Instruct-unsloth-bnb-4bit",
+    "tunelabs_Qwen2-VL-7B-Instruct.yaml": [
+        "tunelabs/Qwen2-VL-7B-Instruct-tunelabs-bnb-4bit",
         "Qwen/Qwen2-VL-7B-Instruct",
-        "unsloth/Qwen2-VL-7B-Instruct-bnb-4bit",
+        "tunelabs/Qwen2-VL-7B-Instruct-bnb-4bit",
     ],
-    "unsloth_Qwen2.5-7B.yaml": [
-        "unsloth/Qwen2.5-7B-unsloth-bnb-4bit",
+    "tunelabs_Qwen2.5-7B.yaml": [
+        "tunelabs/Qwen2.5-7B-tunelabs-bnb-4bit",
         "Qwen/Qwen2.5-7B",
-        "unsloth/Qwen2.5-7B-bnb-4bit",
+        "tunelabs/Qwen2.5-7B-bnb-4bit",
     ],
-    "unsloth_Qwen2.5-Coder-1.5B-Instruct.yaml": [
-        "unsloth/Qwen2.5-Coder-1.5B-Instruct-bnb-4bit",
+    "tunelabs_Qwen2.5-Coder-1.5B-Instruct.yaml": [
+        "tunelabs/Qwen2.5-Coder-1.5B-Instruct-bnb-4bit",
         "Qwen/Qwen2.5-Coder-1.5B-Instruct",
     ],
-    "unsloth_Qwen2.5-Coder-14B-Instruct.yaml": [
-        "unsloth/Qwen2.5-Coder-14B-Instruct-bnb-4bit",
+    "tunelabs_Qwen2.5-Coder-14B-Instruct.yaml": [
+        "tunelabs/Qwen2.5-Coder-14B-Instruct-bnb-4bit",
         "Qwen/Qwen2.5-Coder-14B-Instruct",
     ],
-    "unsloth_Qwen2.5-VL-7B-Instruct-bnb-4bit.yaml": [
-        "unsloth/Qwen2.5-VL-7B-Instruct",
+    "tunelabs_Qwen2.5-VL-7B-Instruct-bnb-4bit.yaml": [
+        "tunelabs/Qwen2.5-VL-7B-Instruct",
         "Qwen/Qwen2.5-VL-7B-Instruct",
-        "unsloth/Qwen2.5-VL-7B-Instruct-unsloth-bnb-4bit",
+        "tunelabs/Qwen2.5-VL-7B-Instruct-tunelabs-bnb-4bit",
     ],
-    "unsloth_Qwen3-0.6B.yaml": [
-        "unsloth/Qwen3-0.6B-unsloth-bnb-4bit",
+    "tunelabs_Qwen3-0.6B.yaml": [
+        "tunelabs/Qwen3-0.6B-tunelabs-bnb-4bit",
         "Qwen/Qwen3-0.6B",
-        "unsloth/Qwen3-0.6B-bnb-4bit",
+        "tunelabs/Qwen3-0.6B-bnb-4bit",
         "Qwen/Qwen3-0.6B-FP8",
-        "unsloth/Qwen3-0.6B-FP8",
+        "tunelabs/Qwen3-0.6B-FP8",
     ],
-    "unsloth_Qwen3-4B-Instruct-2507.yaml": [
-        "unsloth/Qwen3-4B-Instruct-2507-unsloth-bnb-4bit",
+    "tunelabs_Qwen3-4B-Instruct-2507.yaml": [
+        "tunelabs/Qwen3-4B-Instruct-2507-tunelabs-bnb-4bit",
         "Qwen/Qwen3-4B-Instruct-2507",
-        "unsloth/Qwen3-4B-Instruct-2507-bnb-4bit",
+        "tunelabs/Qwen3-4B-Instruct-2507-bnb-4bit",
         "Qwen/Qwen3-4B-Instruct-2507-FP8",
-        "unsloth/Qwen3-4B-Instruct-2507-FP8",
+        "tunelabs/Qwen3-4B-Instruct-2507-FP8",
     ],
-    "unsloth_Qwen3-4B-Thinking-2507.yaml": [
-        "unsloth/Qwen3-4B-Thinking-2507-unsloth-bnb-4bit",
+    "tunelabs_Qwen3-4B-Thinking-2507.yaml": [
+        "tunelabs/Qwen3-4B-Thinking-2507-tunelabs-bnb-4bit",
         "Qwen/Qwen3-4B-Thinking-2507",
-        "unsloth/Qwen3-4B-Thinking-2507-bnb-4bit",
+        "tunelabs/Qwen3-4B-Thinking-2507-bnb-4bit",
         "Qwen/Qwen3-4B-Thinking-2507-FP8",
-        "unsloth/Qwen3-4B-Thinking-2507-FP8",
+        "tunelabs/Qwen3-4B-Thinking-2507-FP8",
     ],
-    "unsloth_Qwen3-14B-Base-unsloth-bnb-4bit.yaml": [
-        "unsloth/Qwen3-14B-Base",
+    "tunelabs_Qwen3-14B-Base-tunelabs-bnb-4bit.yaml": [
+        "tunelabs/Qwen3-14B-Base",
         "Qwen/Qwen3-14B-Base",
-        "unsloth/Qwen3-14B-Base-bnb-4bit",
+        "tunelabs/Qwen3-14B-Base-bnb-4bit",
     ],
-    "unsloth_Qwen3-14B.yaml": [
-        "unsloth/Qwen3-14B-unsloth-bnb-4bit",
+    "tunelabs_Qwen3-14B.yaml": [
+        "tunelabs/Qwen3-14B-tunelabs-bnb-4bit",
         "Qwen/Qwen3-14B",
-        "unsloth/Qwen3-14B-bnb-4bit",
+        "tunelabs/Qwen3-14B-bnb-4bit",
         "Qwen/Qwen3-14B-FP8",
-        "unsloth/Qwen3-14B-FP8",
+        "tunelabs/Qwen3-14B-FP8",
     ],
-    "unsloth_Qwen3-32B.yaml": [
-        "unsloth/Qwen3-32B-unsloth-bnb-4bit",
+    "tunelabs_Qwen3-32B.yaml": [
+        "tunelabs/Qwen3-32B-tunelabs-bnb-4bit",
         "Qwen/Qwen3-32B",
-        "unsloth/Qwen3-32B-bnb-4bit",
+        "tunelabs/Qwen3-32B-bnb-4bit",
         "Qwen/Qwen3-32B-FP8",
-        "unsloth/Qwen3-32B-FP8",
+        "tunelabs/Qwen3-32B-FP8",
     ],
-    "unsloth_Qwen3-VL-8B-Instruct-unsloth-bnb-4bit.yaml": [
+    "tunelabs_Qwen3-VL-8B-Instruct-tunelabs-bnb-4bit.yaml": [
         "Qwen/Qwen3-VL-8B-Instruct-FP8",
-        "unsloth/Qwen3-VL-8B-Instruct-FP8",
-        "unsloth/Qwen3-VL-8B-Instruct",
+        "tunelabs/Qwen3-VL-8B-Instruct-FP8",
+        "tunelabs/Qwen3-VL-8B-Instruct",
         "Qwen/Qwen3-VL-8B-Instruct",
-        "unsloth/Qwen3-VL-8B-Instruct-bnb-4bit",
+        "tunelabs/Qwen3-VL-8B-Instruct-bnb-4bit",
     ],
     "sesame_csm-1b.yaml": [
         "sesame/csm-1b",
-        "unsloth/csm-1b",
+        "tunelabs/csm-1b",
     ],
     "Spark-TTS-0.5B_LLM.yaml": [
         "Spark-TTS-0.5B/LLM",
-        "unsloth/Spark-TTS-0.5B",
+        "tunelabs/Spark-TTS-0.5B",
     ],
-    "unsloth_tinyllama-bnb-4bit.yaml": [
-        "unsloth/tinyllama",
+    "tunelabs_tinyllama-bnb-4bit.yaml": [
+        "tunelabs/tinyllama",
         "TinyLlama/TinyLlama-1.1B-intermediate-step-1431k-3T",
     ],
-    "unsloth_whisper-large-v3.yaml": [
-        "unsloth/whisper-large-v3",
+    "tunelabs_whisper-large-v3.yaml": [
+        "tunelabs/whisper-large-v3",
         "openai/whisper-large-v3",
     ],
 }
@@ -1290,12 +1290,12 @@ def detect_mtp_file(path: str, search_root: Optional[str] = None) -> Optional[st
     The drafter that pairs with the main weights sits at the repo/snapshot
     root (Gemma 4); the weight itself may be at the root or in a quant subdir,
     so scan the weight's directory and ``search_root``. Matches by the
-    ``mtp-`` filename prefix unsloth uses for ``-hf`` auto-discovery -- the
+    ``mtp-`` filename prefix tunelabs uses for ``-hf`` auto-discovery -- the
     same signal as the HF download path. Repos that bake the head into the
     main GGUF (Qwen) have no such sibling, so this returns None.
 
     Pairs by name so a multi-model folder can't attach a foreign drafter:
-    unsloth names the drafter ``mtp-<model>.gguf`` where ``<model>`` prefixes
+    tunelabs names the drafter ``mtp-<model>.gguf`` where ``<model>`` prefixes
     the weight filename across all Gemma 4 repos (e.g.
     ``mtp-gemma-4-12B-it.gguf`` next to ``gemma-4-12B-it-qat-Q4_0.gguf``).
     An unmatched drafter is skipped (fail-safe: no MTP).
@@ -1376,7 +1376,7 @@ def detect_gguf_model(path: str) -> Optional[str]:
     return None
 
 
-# Preferred GGUF quant levels, descending priority. UD (Unsloth Dynamic)
+# Preferred GGUF quant levels, descending priority. UD (TuneLabs Dynamic)
 # variants beat standard quants on quality per bit; repos without UD fall back
 # to standard quants. Ordered by size/quality tradeoff, not raw quality.
 _GGUF_QUANT_PREFERENCE = [
@@ -1397,7 +1397,7 @@ _GGUF_QUANT_PREFERENCE = [
     "UD-IQ2_XXS",
     "UD-IQ1_M",
     "UD-IQ1_S",
-    # Standard quants (fallback for non-Unsloth repos)
+    # Standard quants (fallback for non-TuneLabs repos)
     "Q4_K_M",
     "Q4_K_S",
     "Q5_K_M",
@@ -2206,11 +2206,11 @@ def get_base_model_from_checkpoint(checkpoint_path: str) -> Optional[str]:
         #         logger.warning(f"Could not load training_args.bin: {e}")
 
         dir_name = checkpoint_path_obj.name
-        if dir_name.startswith("unsloth_"):
+        if dir_name.startswith("tunelabs_"):
             parts = dir_name.split("_")
             if len(parts) >= 2:
                 model_parts = parts[1:-1]
-                base_model = "unsloth/" + "_".join(model_parts)
+                base_model = "tunelabs/" + "_".join(model_parts)
                 logger.info("Detected base model from directory name: %s", base_model)
                 return base_model
 
@@ -2257,13 +2257,13 @@ def get_base_model_from_lora(lora_path: str) -> Optional[str]:
         #     except Exception as e:
         #         logger.warning(f"Could not load training_args.bin: {e}")
 
-        # Last resort: parse from dir name (unsloth_<model>_<timestamp>)
+        # Last resort: parse from dir name (tunelabs_<model>_<timestamp>)
         dir_name = lora_path_obj.name
-        if dir_name.startswith("unsloth_"):
+        if dir_name.startswith("tunelabs_"):
             parts = dir_name.split("_")
             if len(parts) >= 2:
-                model_parts = parts[1:-1]  # Skip "unsloth" and timestamp
-                base_model = "unsloth/" + "_".join(model_parts)
+                model_parts = parts[1:-1]  # Skip "tunelabs" and timestamp
+                base_model = "tunelabs/" + "_".join(model_parts)
                 logger.info(f"Detected base model from directory name: {base_model}")
                 return base_model
 
@@ -2446,7 +2446,7 @@ class ModelConfig:
     gguf_mmproj_file: Optional[str] = None  # Full path to the mmproj .gguf file (vision projection)
     gguf_mtp_file: Optional[str] = None  # Full path to the separate MTP drafter (local mode)
     gguf_hf_repo: Optional[str] = (
-        None  # HF repo ID for -hf mode (e.g. "unsloth/gemma-3-4b-it-GGUF")
+        None  # HF repo ID for -hf mode (e.g. "tunelabs/gemma-3-4b-it-GGUF")
     )
     gguf_variant: Optional[str] = None  # Quantization variant (e.g. "Q4_K_M")
     base_model: Optional[str] = None  # Base model (for LoRAs)
@@ -2528,9 +2528,9 @@ class ModelConfig:
         is_local = is_local_path(identifier)
         path = normalize_path(identifier) if is_local else identifier
 
-        # Add unsloth/ prefix for shorthand HF models
+        # Add tunelabs/ prefix for shorthand HF models
         if not is_local and "/" not in identifier:
-            identifier = f"unsloth/{identifier}"
+            identifier = f"tunelabs/{identifier}"
             path = identifier
 
         # Reuse a cached case-variant's exact repo_id spelling to avoid
@@ -2768,9 +2768,9 @@ class ModelConfig:
         is_local = is_local_path(identifier)
         path = normalize_path(identifier) if is_local else identifier
 
-        # Add unsloth/ prefix for shorthand HF models
+        # Add tunelabs/ prefix for shorthand HF models
         if not is_local and "/" not in identifier:
-            identifier = f"unsloth/{identifier}"
+            identifier = f"tunelabs/{identifier}"
             path = identifier
 
         if not is_local:

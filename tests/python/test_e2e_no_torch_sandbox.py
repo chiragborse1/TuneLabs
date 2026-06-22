@@ -30,7 +30,7 @@ VLM_PROCESSING = DATASETS_DIR / "vlm_processing.py"
 HARDWARE_PY = HARDWARE_DIR / "hardware.py"
 
 # Studio venv for server tests
-STUDIO_VENV = Path.home() / ".unsloth" / "studio" / "unsloth_studio"
+STUDIO_VENV = Path.home() / ".tunelabs" / "studio" / "tunelabs_studio"
 
 sys.path.insert(0, str(STUDIO_DIR))
 
@@ -881,26 +881,26 @@ class TestInstallPythonStackFiltering:
                 assert pkg in filtered_text, f"{pkg} should survive NO_TORCH filtering"
 
     def test_infer_no_torch_env_var_overrides_platform(self):
-        """UNSLOTH_NO_TORCH=true on Linux -> True; =false on Intel Mac -> False."""
+        """TUNELABS_NO_TORCH=true on Linux -> True; =false on Intel Mac -> False."""
         import install_python_stack as ips
 
         # Explicit true on Linux
         with (
-            mock.patch.dict(os.environ, {"UNSLOTH_NO_TORCH": "true"}),
+            mock.patch.dict(os.environ, {"TUNELABS_NO_TORCH": "true"}),
             mock.patch.object(ips, "IS_MAC_INTEL", False),
         ):
             assert ips._infer_no_torch() is True
 
         # explicit false on Intel Mac
         with (
-            mock.patch.dict(os.environ, {"UNSLOTH_NO_TORCH": "false"}),
+            mock.patch.dict(os.environ, {"TUNELABS_NO_TORCH": "false"}),
             mock.patch.object(ips, "IS_MAC_INTEL", True),
         ):
             assert ips._infer_no_torch() is False
 
         # Unset on Intel Mac -> True (platform fallback)
         env = os.environ.copy()
-        env.pop("UNSLOTH_NO_TORCH", None)
+        env.pop("TUNELABS_NO_TORCH", None)
         with (
             mock.patch.dict(os.environ, env, clear = True),
             mock.patch.object(ips, "IS_MAC_INTEL", True),
@@ -951,7 +951,7 @@ class TestLiveServerStartup:
     def _check_studio_venv(self):
         py = _studio_venv_python()
         if py is None:
-            pytest.skip("Studio venv not found at ~/.unsloth/studio/unsloth_studio")
+            pytest.skip("Studio venv not found at ~/.tunelabs/studio/tunelabs_studio")
 
     @pytest.fixture(scope = "class")
     def server_process(self):

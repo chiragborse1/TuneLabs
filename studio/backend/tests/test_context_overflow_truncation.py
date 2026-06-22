@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Tests for the opt-in ``context_overflow="truncate_middle"`` passthrough policy.
 
@@ -219,7 +219,7 @@ def test_clip_long_contents_reaches_target_and_keeps_structure():
 
 
 def test_overflow_truncation_requested_reads_field(monkeypatch):
-    monkeypatch.delenv("UNSLOTH_CONTEXT_OVERFLOW", raising = False)
+    monkeypatch.delenv("TUNELABS_CONTEXT_OVERFLOW", raising = False)
 
     class _P:
         context_overflow = "truncate_middle"
@@ -233,7 +233,7 @@ def test_overflow_truncation_requested_reads_field(monkeypatch):
 
 
 def test_overflow_truncation_server_default_env(monkeypatch):
-    """UNSLOTH_CONTEXT_OVERFLOW enables the policy for clients that cannot
+    """TUNELABS_CONTEXT_OVERFLOW enables the policy for clients that cannot
     send custom body fields; an explicit per-request 'error' still wins."""
 
     class _Unset:
@@ -242,10 +242,10 @@ def test_overflow_truncation_server_default_env(monkeypatch):
     class _ExplicitError:
         context_overflow = "error"
 
-    monkeypatch.setenv("UNSLOTH_CONTEXT_OVERFLOW", "truncate_middle")
+    monkeypatch.setenv("TUNELABS_CONTEXT_OVERFLOW", "truncate_middle")
     assert _overflow_truncation_requested(_Unset()) is True
     assert _overflow_truncation_requested(_ExplicitError()) is False
-    monkeypatch.setenv("UNSLOTH_CONTEXT_OVERFLOW", "error")
+    monkeypatch.setenv("TUNELABS_CONTEXT_OVERFLOW", "error")
     assert _overflow_truncation_requested(_Unset()) is False
 
 
@@ -256,7 +256,7 @@ def test_overflow_truncation_server_default_env(monkeypatch):
 
 class _FakeLlamaBackend:
     is_loaded = True
-    model_identifier = "unsloth/Qwen3.6-27B-GGUF"
+    model_identifier = "tunelabs/Qwen3.6-27B-GGUF"
     context_length = 67584
     max_context_length = 262144
 
@@ -271,7 +271,7 @@ def test_v1_models_exposes_real_context_window(monkeypatch):
     models = _openai_model_objects()
     assert len(models) == 1
     entry = models[0]
-    assert entry["id"] == "unsloth/Qwen3.6-27B-GGUF"
+    assert entry["id"] == "tunelabs/Qwen3.6-27B-GGUF"
     # The REAL (post /props readback) window, not the requested one.
     assert entry["context_length"] == 67584
     assert entry["max_context_length"] == 262144

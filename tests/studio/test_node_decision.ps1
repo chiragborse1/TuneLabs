@@ -50,7 +50,7 @@ Check "good + skip -> system"         ((D "v22.17.1" "11.13.0" "1") -eq "system"
 # reuse (system) arm must touch nothing -- no prefix pin, no global install.
 $nodeSourceOffset = $source.IndexOf('$NodeSource = Get-NodeDecision')
 $skipFrontendBranchOffset = $source.IndexOf('} elseif ($SkipFrontend) {')
-$customHomeErrorOffset = $source.IndexOf('UNSLOTH_STUDIO_HOME/STUDIO_HOME=$NodeOverride does not exist')
+$customHomeErrorOffset = $source.IndexOf('TUNELABS_STUDIO_HOME/STUDIO_HOME=$NodeOverride does not exist')
 $nodeParentMkdirOffset = $source.IndexOf('New-Item -ItemType Directory -Force -Path $NodeParent')
 $npmPrefixOffset = $source.IndexOf('$env:NPM_CONFIG_PREFIX = $NodeDir')
 $nodePathClearOffset = $source.IndexOf('Remove-Item Env:NODE_PATH')

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """Checkpoint scanning utilities for discovering training runs and checkpoints."""
 
@@ -85,7 +85,7 @@ def scan_checkpoints(
                 pass
 
             # Fallback: extract base model name from the folder name, e.g.
-            # "unsloth_Llama-3.2-3B-Instruct_1771227800" → "unsloth/Llama-3.2-3B-Instruct"
+            # "tunelabs_Llama-3.2-3B-Instruct_1771227800" → "tunelabs/Llama-3.2-3B-Instruct"
             if not metadata.get("base_model"):
                 parts = item.name.rsplit("_", 1)
                 if len(parts) == 2 and parts[1].isdigit():

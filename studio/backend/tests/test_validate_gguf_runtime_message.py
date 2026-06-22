@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """/api/inference/validate and /load must surface an actionable "install the runtime"
 message when a GGUF model's llama-server is missing, not a generic error."""
@@ -28,7 +28,7 @@ def _load_route_module(name: str, relative_path: str):
 
 _GGUF_MSG = (
     "This is a GGUF model, but the llama.cpp runtime (llama-server) is not "
-    "installed. Run `unsloth studio setup` to download the prebuilt runtime, "
+    "installed. Run `tunelabs studio setup` to download the prebuilt runtime, "
     "then try again. (Advanced: set LLAMA_SERVER_PATH to an existing binary.)"
 )
 
@@ -50,9 +50,9 @@ class TestValidateGgufRuntimeMessage(unittest.TestCase):
 
     def test_missing_llama_server_returns_actionable_message(self):
         route = _load_route_module("inf_route_runtime_msg_1", "routes/inference.py")
-        err = self._validate(route, "unsloth/Qwen3-1.7B-GGUF", LlamaServerNotFoundError(_GGUF_MSG))
+        err = self._validate(route, "tunelabs/Qwen3-1.7B-GGUF", LlamaServerNotFoundError(_GGUF_MSG))
         self.assertEqual(err.status_code, 400)
-        self.assertIn("unsloth studio setup", err.detail)
+        self.assertIn("tunelabs studio setup", err.detail)
         self.assertIn("llama.cpp runtime", err.detail)
         self.assertNotEqual(err.detail, "Invalid model")
 
@@ -63,7 +63,7 @@ class TestValidateGgufRuntimeMessage(unittest.TestCase):
         route = _load_route_module("inf_route_runtime_msg_2", "routes/inference.py")
         err = self._validate(route, "not/a-real-model", RuntimeError("totally different failure"))
         self.assertEqual(err.status_code, 400)
-        self.assertNotIn("unsloth studio setup", err.detail)
+        self.assertNotIn("tunelabs studio setup", err.detail)
         self.assertNotIn("llama.cpp runtime", err.detail)
         self.assertEqual(err.detail, "totally different failure")
 
@@ -91,14 +91,14 @@ class TestLoadGgufRuntimeMessage(unittest.TestCase):
 
     def test_missing_llama_server_returns_actionable_message(self):
         route = _load_route_module("inf_route_load_runtime_msg_1", "routes/inference.py")
-        err = self._load(route, "unsloth/Qwen3-1.7B-GGUF", LlamaServerNotFoundError(_GGUF_MSG))
+        err = self._load(route, "tunelabs/Qwen3-1.7B-GGUF", LlamaServerNotFoundError(_GGUF_MSG))
         self.assertEqual(err.status_code, 400)
-        self.assertIn("unsloth studio setup", err.detail)
+        self.assertIn("tunelabs studio setup", err.detail)
         self.assertIn("llama.cpp runtime", err.detail)
 
     def test_other_load_errors_still_500(self):
         route = _load_route_module("inf_route_load_runtime_msg_2", "routes/inference.py")
-        err = self._load(route, "unsloth/some-model", RuntimeError("totally different failure"))
+        err = self._load(route, "tunelabs/some-model", RuntimeError("totally different failure"))
         self.assertEqual(err.status_code, 500)
 
 

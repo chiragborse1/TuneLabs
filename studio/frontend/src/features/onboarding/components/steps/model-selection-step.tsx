@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 import {
   Combobox,
@@ -205,7 +205,7 @@ export function ModelSelectionStep() {
             <TooltipContent>
               Search Hugging Face models or pick from our recommended list.{" "}
               <a
-                href="https://unsloth.ai/docs/get-started/fine-tuning-llms-guide/what-model-should-i-use"
+                href="https://tunelabs.ai/docs/get-started/fine-tuning-llms-guide/what-model-should-i-use"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary underline"
@@ -335,7 +335,7 @@ export function ModelSelectionStep() {
                     16-bit for better quality. Full fine-tune updates all
                     weights.{" "}
                     <a
-                      href="https://unsloth.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
+                      href="https://tunelabs.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-primary underline"

@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team.
+# Copyright 2026-present the TuneLabs AI Inc. team.
 """Pinned-symbol compat check across vLLM PyPI minors >= 0.9.0 (GitHub raw-fetch, no pip/GPU).
 
 Catches API drift like vLLM PR #30253 (vllm.lora.models split), 0.14
 supports_tower_connector_lora(), 0.15 create_lora_manager rename, the
 lora_path -> lora_dir rename, and the 0.11 v0 graph-capture removal.
-Asserts every symbol unsloth-zoo's vllm_utils + vllm_lora_* expects is present.
+Asserts every symbol tunelabs-zoo's vllm_utils + vllm_lora_* expects is present.
 """
 
 from __future__ import annotations
@@ -80,12 +80,12 @@ def _has_def(
 
 @pytest.mark.parametrize("tag", VLLM_TAGS)
 def test_vllm_lora_request_hard_imports(tag: str):
-    """LoRARequest, get_adapter_absolute_path, PEFTHelper -- hard-imported by unsloth-zoo's vllm_lora_worker_manager."""
+    """LoRARequest, get_adapter_absolute_path, PEFTHelper -- hard-imported by tunelabs-zoo's vllm_lora_worker_manager."""
     src = _fetch_text("vllm-project/vllm", tag, "vllm/lora/request.py")
     assert src is not None, f"vllm/lora/request.py missing in {tag}"
     assert _has_def(
         src, "LoRARequest", "class"
-    ), f"vllm/lora/request.py:LoRARequest missing in {tag} (unsloth-zoo HARD-imports it)"
+    ), f"vllm/lora/request.py:LoRARequest missing in {tag} (tunelabs-zoo HARD-imports it)"
 
     src_utils = _fetch_text("vllm-project/vllm", tag, "vllm/lora/utils.py")
     assert src_utils is not None, f"vllm/lora/utils.py missing in {tag}"
@@ -102,7 +102,7 @@ def test_vllm_lora_request_hard_imports(tag: str):
 
 @pytest.mark.parametrize("tag", VLLM_TAGS)
 def test_vllm_config_lora_config(tag: str):
-    """vllm.config.LoRAConfig -- hard-imported at module top of unsloth_zoo.vllm_lora_worker_manager."""
+    """vllm.config.LoRAConfig -- hard-imported at module top of tunelabs_zoo.vllm_lora_worker_manager."""
     candidates = [
         "vllm/config/__init__.py",
         "vllm/config.py",
@@ -149,7 +149,7 @@ def test_vllm_lora_models_either_path(tag: str):
         pytest.fail(
             f"{tag}: neither legacy vllm/lora/models.py nor split "
             f"vllm/lora/{{lora_model,model_manager}}.py found; "
-            f"unsloth-zoo's try/except will fail-closed at import"
+            f"tunelabs-zoo's try/except will fail-closed at import"
         )
 
     combined = (lora_model_src or "") + "\n" + (model_mgr_src or "")
@@ -157,7 +157,7 @@ def test_vllm_lora_models_either_path(tag: str):
     if missing:
         pytest.fail(
             f"{tag}: post-#30253 path missing symbols {missing}. "
-            f"unsloth-zoo's try/except for vllm.lora.models will fall "
+            f"tunelabs-zoo's try/except for vllm.lora.models will fall "
             f"through to the new path and crash."
         )
 
@@ -167,7 +167,7 @@ def test_vllm_lora_models_either_path(tag: str):
 
 @pytest.mark.parametrize("tag", VLLM_TAGS)
 def test_vllm_worker_lora_manager_class(tag: str):
-    """vllm.lora.worker_manager.WorkerLoRAManager -- unsloth-zoo subclasses it; signature drives old_init vs new_init."""
+    """vllm.lora.worker_manager.WorkerLoRAManager -- tunelabs-zoo subclasses it; signature drives old_init vs new_init."""
     src = _fetch_text("vllm-project/vllm", tag, "vllm/lora/worker_manager.py")
     if src is None:
         # Some vLLM versions split this; check fallback locations.
@@ -193,15 +193,15 @@ def test_lora_request_no_removed_kwargs(tag: str):
     assert has_dir or has_path, f"{tag}: vllm.lora.request has neither lora_dir nor lora_path"
 
 
-# UNSLOTH_VLLM_STANDBY hard-error windows: unsloth-zoo refuses standby on
+# TUNELABS_VLLM_STANDBY hard-error windows: tunelabs-zoo refuses standby on
 #   0.10.0 <= vllm < 0.11.0 (std::bad_alloc) and 0.14.0 <= vllm < 0.15.0 (cudaErrorIllegalAddress).
 
 
 def _vllm_zoo_local_path() -> str | None:
-    """Return the on-runner path to unsloth_zoo.vllm_utils source, or None."""
+    """Return the on-runner path to tunelabs_zoo.vllm_utils source, or None."""
     try:
         import importlib.util
-        spec = importlib.util.find_spec("unsloth_zoo.vllm_utils")
+        spec = importlib.util.find_spec("tunelabs_zoo.vllm_utils")
         if spec and spec.origin:
             return spec.origin
     except Exception:
@@ -209,17 +209,17 @@ def _vllm_zoo_local_path() -> str | None:
     return None
 
 
-def test_unsloth_zoo_standby_guards_present():
-    """Sanity: the two hard-error windows exist in unsloth_zoo.vllm_utils; catches a revert that drops them."""
+def test_tunelabs_zoo_standby_guards_present():
+    """Sanity: the two hard-error windows exist in tunelabs_zoo.vllm_utils; catches a revert that drops them."""
     path = _vllm_zoo_local_path()
     if path is None:
-        pytest.skip("unsloth_zoo not installed on runner")
+        pytest.skip("tunelabs_zoo not installed on runner")
     src = open(path, encoding = "utf-8").read()
     has_10x_guard = re.search(r"0\.10\.0", src) and re.search(r"standby", src, re.IGNORECASE)
     has_14x_guard = re.search(r"0\.14\.0", src) and re.search(r"standby", src, re.IGNORECASE)
     assert has_10x_guard or has_14x_guard, (
-        "unsloth_zoo.vllm_utils dropped the UNSLOTH_VLLM_STANDBY "
+        "tunelabs_zoo.vllm_utils dropped the TUNELABS_VLLM_STANDBY "
         "version-gate against vLLM 0.10.x / 0.14.x; that re-introduces the "
         "std::bad_alloc and cudaErrorIllegalAddress crashes the team fixed "
-        "in unsloth-zoo commits 664e52ea / fa82dcc2."
+        "in tunelabs-zoo commits 664e52ea / fa82dcc2."
     )

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Copyright 2026-present the Unsloth AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+# Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
 """End-to-end Studio API & Auth HTTP integration tests against an externally-booted Studio."""
 
@@ -17,9 +17,9 @@ OLD = os.environ["STUDIO_OLD_PW"]
 NEW = os.environ.get("STUDIO_NEW_PW", "ApiSmoke-NEW-2026!")
 NEW2 = os.environ.get("STUDIO_NEW2_PW", "ApiSmoke-NEW2-2026!")
 AUTH_DIR = Path(
-    os.environ.get("STUDIO_AUTH_DIR", str(Path.home() / ".unsloth" / "studio" / "auth"))
+    os.environ.get("STUDIO_AUTH_DIR", str(Path.home() / ".tunelabs" / "studio" / "auth"))
 )
-GGUF_REPO = os.environ.get("GGUF_REPO", "unsloth/gemma-3-270m-it-GGUF")
+GGUF_REPO = os.environ.get("GGUF_REPO", "tunelabs/gemma-3-270m-it-GGUF")
 
 _section = [0]
 _failed: list[str] = []
@@ -106,7 +106,7 @@ def login(password: str) -> tuple[int, str | None]:
     code, body = http(
         "POST",
         "/api/auth/login",
-        body = {"username": "unsloth", "password": password},
+        body = {"username": "tunelabs", "password": password},
     )
     if code == 200 and isinstance(body, dict):
         return code, body.get("access_token")
@@ -253,7 +253,7 @@ else:
 def _login_with_headers(password: str) -> tuple[int, str | None]:
     """Like ``login`` but returns ``(status, retry_after_header)``."""
     url = f"{BASE}/api/auth/login"
-    data = json.dumps({"username": "unsloth", "password": password}).encode()
+    data = json.dumps({"username": "tunelabs", "password": password}).encode()
     req = urllib.request.Request(
         url,
         data = data,
@@ -294,15 +294,15 @@ else:
 # ─────────────────────────────────────────────────────────────────────────
 section("JWT expiry")
 # Forge a JWT with exp=now-1 using the install's signing secret.
-# get_user_and_secret('unsloth') returns (salt, hash, jwt_secret, must_change_pw).
+# get_user_and_secret('tunelabs') returns (salt, hash, jwt_secret, must_change_pw).
 try:
     sys.path.insert(
         0,
         str(
             Path.home()
-            / ".unsloth"
+            / ".tunelabs"
             / "studio"
-            / "unsloth_studio"
+            / "tunelabs_studio"
             / "lib"
             / f"python{sys.version_info.major}.{sys.version_info.minor}"
             / "site-packages"
@@ -314,13 +314,13 @@ try:
     import jwt  # type: ignore[import-not-found]
     from auth import storage  # type: ignore[import-not-found]
 
-    rec = storage.get_user_and_secret("unsloth")
+    rec = storage.get_user_and_secret("tunelabs")
     if rec is None:
         fail("get_user_and_secret returned None; can't forge JWT")
     else:
         _, _, jwt_secret, _ = rec
         expired = jwt.encode(
-            {"sub": "unsloth", "exp": int(time.time()) - 1},
+            {"sub": "tunelabs", "exp": int(time.time()) - 1},
             jwt_secret,
             algorithm = "HS256",
         )
