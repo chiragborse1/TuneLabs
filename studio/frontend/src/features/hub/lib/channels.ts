@@ -1,0 +1,98 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
+
+import type { HfSortKey } from "@/features/hub/hooks/use-hub-model-search";
+import {
+  NewReleasesIcon,
+  SlidersHorizontalIcon,
+  SparklesIcon,
+} from "@hugeicons/core-free-icons";
+import type { IconSvgElement } from "@hugeicons/react";
+import type { ModelFormatFilter } from "../types";
+
+export type ChannelId =
+  | "tunelabs-trending"
+  | "tunelabs-latest"
+  | "tunelabs-safetensors";
+
+export interface ChannelPreset {
+  id: ChannelId;
+  label: string;
+  icon: IconSvgElement;
+  hint: string;
+  owner?: string;
+  tags?: readonly string[];
+  query?: string;
+  idSuffix?: string;
+  format: ModelFormatFilter;
+  sort: HfSortKey;
+  // Keep only formats TuneLabs can fine-tune (drops fp8, nvfp4, w4a16, etc.).
+  finetunableOnly?: boolean;
+}
+
+export const CHANNEL_PRESETS: readonly ChannelPreset[] = [
+  {
+    id: "tunelabs-trending",
+    label: "TuneLabs Trending",
+    icon: SparklesIcon,
+    hint: "Most trending models published by TuneLabs.",
+    owner: "tunelabs",
+    tags: ["gguf"],
+    format: "gguf",
+    sort: "trendingScore",
+  },
+  {
+    id: "tunelabs-latest",
+    label: "Latest TuneLabs",
+    icon: NewReleasesIcon,
+    hint: "Freshly released models from the TuneLabs channel.",
+    owner: "tunelabs",
+    format: "all",
+    sort: "lastModified",
+  },
+  {
+    id: "tunelabs-safetensors",
+    label: "Fine-tune ready",
+    icon: SlidersHorizontalIcon,
+    hint: "Checkpoints ready to fine-tune.",
+    owner: "tunelabs",
+    format: "checkpoint",
+    sort: "lastModified",
+    finetunableOnly: true,
+  },
+];
+
+export function findChannel(id: ChannelId | null): ChannelPreset | null {
+  if (!id) return null;
+  return CHANNEL_PRESETS.find((preset) => preset.id === id) ?? null;
+}
+
+export type HubSection = "trending" | "latest" | "finetune";
+
+export const HUB_SECTION_ORDER: readonly HubSection[] = [
+  "trending",
+  "latest",
+  "finetune",
+];
+
+export const SECTION_TO_CHANNEL: Record<HubSection, ChannelId> = {
+  trending: "tunelabs-trending",
+  latest: "tunelabs-latest",
+  finetune: "tunelabs-safetensors",
+};
+
+export const CHANNEL_TO_SECTION: Record<ChannelId, HubSection> = {
+  "tunelabs-trending": "trending",
+  "tunelabs-latest": "latest",
+  "tunelabs-safetensors": "finetune",
+};
+
+export const HUB_SECTION_TITLE: Record<HubSection, string> = {
+  trending: "Trending Now",
+  latest: "Latest TuneLabs Models",
+  finetune: "Fine-tune Ready",
+};
+
+export function isHubSection(value: unknown): value is HubSection {
+  return value === "trending" || value === "latest" || value === "finetune";
+}

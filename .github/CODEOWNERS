@@ -1,0 +1,62 @@
+# Inspired from https://github.com/vllm-project/vllm/blob/main/.github/CODEOWNERS
+
+/tunelabs/models/loader.py @danielhanchen @mmathew23
+/tunelabs/models/llama.py @Datta0 @danielhanchen @mmathew23
+/tunelabs/models/rl.py @Datta0 @pluesclues @danielhanchen
+/tunelabs/models/rl_replacements.py @Datta0 @pluesclues @danielhanchen
+/tunelabs/trainer.py @danielhanchen
+/tunelabs/models/sentence_transformer.py @Etherll @danielhanchen
+/tunelabs/save.py @danielhanchen
+/tunelabs/tokenizer_utils.py @mmathew23 @danielhanchen
+/tunelabs/chat_templates.py @danielhanchen
+/tunelabs/ollama_template_mappers.py @danielhanchen
+/tunelabs/kernels/moe/*.py @Datta0
+/tunelabs/import_fixes.py @danielhanchen
+/tunelabs/device_type.py @danielhanchen
+/tunelabs/_auto_install.py @danielhanchen
+/tunelabs/dataprep/*.py @danielhanchen
+/tunelabs/kernels/cross_entropy_loss.py @danielhanchen
+/tunelabs/kernels/fast_lora.py @danielhanchen
+/tunelabs/kernels/flex_attention.py @danielhanchen
+/tunelabs/kernels/fp8.py @Datta0
+/tunelabs/kernels/geglu.py @danielhanchen
+/tunelabs/kernels/layernorm.py @danielhanchen
+/tunelabs/kernels/rms_layernorm.py @danielhanchen
+/tunelabs/kernels/rope_embedding.py @danielhanchen
+/tunelabs/kernels/swiglu.py @danielhanchen
+/tunelabs/kernels/utils.py @danielhanchen @Datta0
+/tunelabs/models/_utils.py @danielhanchen @mmathew23
+/tunelabs/models/cohere.py @danielhanchen
+/tunelabs/models/dpo.py @danielhanchen
+/tunelabs/models/falcon_h1.py @danielhanchen
+/tunelabs/models/gemma.py @danielhanchen
+/tunelabs/models/gemma2.py @danielhanchen
+/tunelabs/models/glm4_moe.py @Datta0
+/tunelabs/models/granite.py @danielhanchen
+/tunelabs/models/llama4.py @danielhanchen
+/tunelabs/models/loader_utils.py @Datta0 @danielhanchen
+/tunelabs/models/mapper.py @danielhanchen
+/tunelabs/models/mistral.py @danielhanchen
+/tunelabs/models/qwen2.py @danielhanchen
+/tunelabs/models/qwen3.py @Datta0
+/tunelabs/models/qwen3_moe.py @Datta0
+/tunelabs/models/vision.py @mmathew23 @danielhanchen
+/tunelabs/utils/attention_dispatch.py @mmathew23
+/tunelabs/utils/hf_hub.py @mmathew23
+/tunelabs/utils/packing.py @mmathew23
+
+/cli/ @Manan17
+/studio/frontend/ @Shine1i @Manan17
+/studio/frontend/public/ @Shine1i
+/studio/backend/
+/studio/backend/core/data_recipe/
+/studio/backend/tests/ @danielhanchen
+/tests/ @danielhanchen
+/scripts/ @danielhanchen
+
+# Snapshot data for the notebook linter / Colab oracle. Drift in these
+# files changes the pin floor for every TuneLabs notebook, so refreshes
+# must be reviewed by the notebook owners directly. CODEOWNERS later
+# wins, so this overrides the broader /scripts/ rule above.
+/scripts/data/colab_*.txt  @danielhanchen @shimmyshimmer
+/scripts/data/colab_*.json @danielhanchen @shimmyshimmer
