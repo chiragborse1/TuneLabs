@@ -20,11 +20,11 @@ const STEP_COMPONENTS = {
 } as const;
 
 const STEP_MASCOTS: Record<StepNumber, string> = {
-  1: "Sloth emojis/large sloth wave.png",
-  2: "Sloth emojis/sloth magnify final.png",
-  3: "Sloth emojis/sloth huglove large.png",
-  4: "Sloth emojis/large sloth glasses.png",
-  5: "Sloth emojis/large sloth yay.png",
+  1: "/Minions.jpeg",
+  2: "/Minions.jpeg",
+  3: "/Minions.jpeg",
+  4: "/Minions.jpeg",
+  5: "/Minions.jpeg",
 };
 
 export function WizardContent() {

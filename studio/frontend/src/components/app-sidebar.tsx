@@ -958,7 +958,7 @@ export function AppSidebar() {
             aria-label={t("shell.aria.home")}
           >
             <img
-              src="/circle-logo-small.png"
+              src="/TuneLab_logo.png"
               alt="TuneLabs"
               className="h-[34px] w-[34px] rounded-full object-cover"
             />

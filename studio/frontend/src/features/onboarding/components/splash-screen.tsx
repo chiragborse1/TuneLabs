@@ -30,7 +30,7 @@ export function SplashScreen({
               delay: 0.1,
             }}
           >
-            <MascotImg src="Sloth emojis/Sloth loca pc.png" className="size-30" />
+            <MascotImg src="/Minions.jpeg" className="size-30" />
           </motion.div>
         </div>
 

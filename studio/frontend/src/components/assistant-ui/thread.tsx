@@ -1318,7 +1318,7 @@ const ThreadWelcome: FC<{
     setWelcome(buildWelcome(new Date().getHours(), name));
   }, [displayName, nickname]);
 
-  const currentEmojiSrc = `Sloth emojis/${welcome.sloth}`;
+  const currentEmojiSrc = "/Minions.jpeg";
 
   return (
     <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-(--thread-max-width) grow flex-col">
