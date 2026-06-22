@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 Note: Please do not remove the questions. Answer beside them.
-1. Did you update? `pip install --upgrade tunelabs tunelabs_zoo`
+1. Did you update? `pip install --upgrade tunelabs tunelabs-zoo`
 2. `Colab` or `Kaggle` or local / cloud
 3. Number GPUs used, use `nvidia-smi`
 4. Which notebook? Please link!

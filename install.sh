@@ -2516,7 +2516,7 @@ esac
 # ── Install tunelabs directly into the venv (no activation needed) ──
 tauri_log "STEP" "Installing PyTorch"
 _VENV_PY="$VENV_DIR/bin/python"
-ZOO_BACKEND_PACKAGE="un""sloth""-zoo"
+ZOO_BACKEND_PACKAGE="tunelabs-zoo"
 if [ "$STUDIO_LOCAL_INSTALL" = true ]; then
     TUNELABS_INSTALL_SPEC="$_REPO_ROOT"
 else

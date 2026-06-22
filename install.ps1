@@ -149,7 +149,7 @@ function Install-TuneLabsStudio {
     # the live python.org listing can't be fetched. The installer URL scheme is
     # stable so an older patch still installs. Bump alongside $PythonVersion.
     $PythonFallbackFullVersion = "3.13.13"
-    $ZooBackendPackage = ("un" + "sloth" + "-zoo")
+    $ZooBackendPackage = "tunelabs-zoo"
 
     # Resolve install destinations. Priority: TUNELABS_STUDIO_HOME, then
     # STUDIO_HOME alias, then USERPROFILE-redirect, then default.

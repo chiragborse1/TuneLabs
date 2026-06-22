@@ -42,7 +42,7 @@ IS_MACOS = sys.platform == "darwin"
 IS_MAC_INTEL = IS_MACOS and platform.machine() == "x86_64"
 IS_MAC_ARM = IS_MACOS and platform.machine() == "arm64"
 IS_LINUX = sys.platform.startswith("linux")
-ZOO_BACKEND_PACKAGE = "un" + "sloth" + "-zoo"
+ZOO_BACKEND_PACKAGE = "tunelabs-zoo"
 
 # DiskPart-prompt suppression: amd-smi auto-elevates on Windows, popping a
 # UAC/DiskPart prompt mid-install. This installer only spawns probes and pip/uv

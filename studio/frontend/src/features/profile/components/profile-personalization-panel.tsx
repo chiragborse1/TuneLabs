@@ -138,7 +138,7 @@ export function ProfilePersonalizationPanel() {
     }
   };
 
-  // Use a bundled sloth sticker as the avatar.
+  // Use a bundled sticker as the avatar.
   const pickSloth = (path: string) => {
     setImageError(null);
     applyAvatar(publicAssetUrl(path));
