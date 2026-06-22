@@ -44,7 +44,6 @@ export const zhCN = {
       api: "API",
       lightMode: "浅色模式",
       darkMode: "深色模式",
-      guidedTour: "引导教程",
       help: "帮助",
       logOut: "退出登录",
       shutdown: "关闭服务",
@@ -786,9 +785,6 @@ export const zhCN = {
       startingTraining: "正在开始训练...",
       dataset: "数据集",
       modelWeights: "模型权重",
-    },
-    tour: {
-      guidedTour: "引导教程",
     },
   },
 } satisfies DeepPartialMessageTree<typeof en>;

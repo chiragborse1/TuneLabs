@@ -44,7 +44,6 @@ export const en = {
       api: "API",
       lightMode: "Light Mode",
       darkMode: "Dark Mode",
-      guidedTour: "Guided Tour",
       help: "Help",
       logOut: "Log out",
       shutdown: "Shutdown",
@@ -846,9 +845,6 @@ export const en = {
       startingTraining: "starting training...",
       dataset: "Dataset",
       modelWeights: "Model weights",
-    },
-    tour: {
-      guidedTour: "Guided Tour",
     },
   },
 } as const;

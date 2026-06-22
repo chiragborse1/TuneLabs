@@ -110,7 +110,6 @@ import { useSettingsDialogStore } from "@/features/settings";
 import { useEffectiveProfile, UserAvatar } from "@/features/profile";
 import { fetchDeviceType, usePlatformStore } from "@/config/env";
 import { clearAuthTokens, logout } from "@/features/auth";
-import { TOUR_OPEN_EVENT } from "@/features/tour";
 import {
   deleteTrainingRun,
   emitTrainingRunDeleted,
@@ -149,13 +148,6 @@ function renderEmphasizedTranslation(
     }
   });
   return nodes;
-}
-
-function getTourId(pathname: string): string | null {
-  if (pathname.startsWith("/studio")) return "studio";
-  if (pathname.startsWith("/export")) return "export";
-  if (pathname.startsWith("/chat")) return "chat";
-  return null;
 }
 
 // TestTube01Icon's last 2 paths are interior bubbles; slice to the first
@@ -208,7 +200,6 @@ function NavItem({
   disabled,
   onClick,
   children,
-  dataTour,
   className,
   spinner,
   tooltip,
@@ -219,7 +210,6 @@ function NavItem({
   disabled?: boolean;
   onClick: () => void;
   children?: ReactNode;
-  dataTour?: string;
   className?: string;
   spinner?: boolean;
   // Overrides the hover tooltip (defaults to `label`). Used to explain why a
@@ -234,7 +224,6 @@ function NavItem({
           disabled={disabled}
           onClick={onClick}
           isActive={active}
-          data-tour={dataTour}
           className="sidebar-nav-btn h-[33px] rounded-full gap-[8.5px] pl-3 pr-2.5 font-medium group-data-[collapsible=icon]:px-2.5 group-data-[collapsible=icon]:!w-[32px] group-data-[collapsible=icon]:mx-auto"
         >
           <HugeiconsIcon icon={icon} strokeWidth={1.75} className="size-icon! shrink-0 group-hover/menu-button:animate-icon-pop" />
@@ -1150,7 +1139,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <Collapsible open={trainOpen} onOpenChange={setTrainOpen} asChild>
-          <SidebarGroup data-tour="navbar" className="group-data-[collapsible=icon]:hidden px-0 py-0">
+          <SidebarGroup className="group-data-[collapsible=icon]:hidden px-0 py-0">
             <SidebarGroupLabel className={cn("sidebar-sticky-label sidebar-sticky-label-following", scrolled && "is-scrolled")} asChild>
               <CollapsibleTrigger className="cursor-pointer flex w-full items-center gap-1 group/sb-collap">
                 {t("shell.navigation.train")}
@@ -1422,22 +1411,6 @@ export function AppSidebar() {
                         : t("shell.navigation.darkMode")}
                     </span>
                   </DropdownMenuItem>
-                  {getTourId(pathname) && (
-                    <DropdownMenuItem
-                      onSelect={() => {
-                        const tourId = getTourId(pathname);
-                        if (!tourId) return;
-                        window.dispatchEvent(
-                          new CustomEvent(TOUR_OPEN_EVENT, {
-                            detail: { id: tourId },
-                          }),
-                        );
-                      }}
-                    >
-                      <HugeiconsIcon icon={CursorInfo02Icon} strokeWidth={1.75} className="size-icon" />
-                      <span>{t("shell.navigation.guidedTour")}</span>
-                    </DropdownMenuItem>
-                  )}
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator className="mx-1! my-2.5! h-0! border-t border-border/70 bg-transparent!" />
                 <DropdownMenuItem

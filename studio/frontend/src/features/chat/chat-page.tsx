@@ -26,7 +26,6 @@ import {
   useNativeModelDrop,
   useNativePathLeasesSupported,
 } from "@/features/native-intents";
-import { GuidedTour, useGuidedTourController } from "@/features/tour";
 import { isTauri } from "@/lib/api-base";
 import { cn } from "@/lib/utils";
 import {
@@ -106,7 +105,6 @@ import {
 } from "./stores/chat-runtime-store";
 import { useChatPreferencesStore } from "./stores/chat-preferences-store";
 import { useExternalProvidersStore } from "./stores/external-providers-store";
-import { buildChatTourSteps } from "./tour";
 import { ArtifactSurface } from "./artifacts/artifact-surface";
 import {
   clearAutoOpenedArtifacts,
@@ -2199,44 +2197,6 @@ export function ChatPage({
     };
   }, [active, navigate]);
 
-  const tourSteps = useMemo(
-    () =>
-      // eslint-disable-next-line react-hooks/refs -- buildChatTourSteps stores callbacks without invoking them during render.
-      buildChatTourSteps({
-        canCompare,
-        openModelSelector,
-        closeModelSelector,
-        openSettings,
-        closeSettings,
-        enterCompare,
-        exitCompare,
-      }),
-    [
-      canCompare,
-      closeModelSelector,
-      closeSettings,
-      enterCompare,
-      exitCompare,
-      openModelSelector,
-      openSettings,
-    ],
-  );
-
-  const tour = useGuidedTourController({
-    id: "chat",
-    steps: tourSteps,
-  });
-
-  useEffect(() => {
-    if (tour.open) return;
-    if (!modelSelectorLocked) return;
-    const timeoutId = window.setTimeout(() => {
-      setModelSelectorLocked(false);
-      setModelSelectorOpen(false);
-    }, 0);
-    return () => window.clearTimeout(timeoutId);
-  }, [modelSelectorLocked, tour.open]);
-
   const showArtifactOverlay = Boolean(
     selectedArtifact &&
       (view.mode === "compare" || artifactSurface === "overlay"),
@@ -2249,12 +2209,6 @@ export function ChatPage({
     <div className="flex min-h-0 min-w-0 flex-1 basis-0 bg-background overflow-hidden">
       {/* Portaled surfaces render to document.body, escaping the parent's hidden
           wrapper, so gate them on `active` to keep them off other tabs. */}
-      {active && <GuidedTour {...tour.tourProps} />}
-      {/* Single app-level mount for the Bypass permissions warning. It is driven
-          by global store state, so it must live at one stable root (not inside a
-          Composer) -- otherwise Compare mode's multiple composers would each
-          render their own copy and the shared-composer menu would have none. It
-          also portals to body, so gate it on `active` like the tour above. */}
       {active && <BypassPermissionsConfirmDialog />}
       <div className="relative flex min-h-0 min-w-0 flex-1 basis-0 flex-col overflow-hidden">
         <NativeModelDropOverlay state={nativeModelDropState} />
@@ -2293,8 +2247,6 @@ export function ChatPage({
                 variant="ghost"
                 open={active && modelSelectorOpen}
                 onOpenChange={handleModelSelectorOpenChange}
-                triggerDataTour="chat-model-selector"
-                contentDataTour="chat-model-selector-popover"
                 showCloudIndicator={isExternalModel}
                 className="max-w-[62vw] !pr-3 sm:max-w-none !h-[34px]"
               />

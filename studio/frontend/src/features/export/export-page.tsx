@@ -71,8 +71,7 @@ import {
   useExportRuntimeStore,
 } from "./stores/export-runtime-store";
 import { useExportSizeEstimate } from "./hooks/use-export-size-estimate";
-import { GuidedTour, useGuidedTourController } from "@/features/tour";
-import { exportTourSteps } from "./tour";
+
 
 const SEARCH_INPUT_REASONS = new Set(["input-change", "input-paste", "input-clear"]);
 
@@ -179,11 +178,6 @@ export function ExportPage() {
   const selectingHfModelRef = useRef(false);
   const hfModelInputRef = useRef("");
   const localModelInputRef = useRef("");
-
-  const tour = useGuidedTourController({
-    id: "export",
-    steps: exportTourSteps,
-  });
 
   // ---- Fetch checkpoints on mount ----
   useEffect(() => {
@@ -638,8 +632,6 @@ export function ExportPage() {
   return (
     <div className="min-h-[calc(100dvh-var(--studio-titlebar-height,0px))] bg-background">
       <main className="mx-auto max-w-7xl px-5 py-8 sm:px-9">
-        <GuidedTour {...tour.tourProps} />
-
         <div className="mb-8 flex flex-col gap-0.5">
           <h1 className="text-[30px] font-semibold leading-[1.04] tracking-[-0.028em] text-foreground sm:text-[34px]">
             Export Model

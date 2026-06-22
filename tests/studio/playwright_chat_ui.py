@@ -468,12 +468,7 @@ with sync_playwright() as p:
     # this just catches picker-mount / debounced HF-search regressions.
     # ─────────────────────────────────────────────────────
     step("model picker: open + drive search bar")
-    # Prefer the guided-tour anchor [data-tour="chat-model-selector"]
-    # (app-sidebar.tsx) -- as stable as anything in the codebase.
-    picker_btn = page.locator('[data-tour="chat-model-selector"]').first
-    if picker_btn.count() == 0:
-        # Fall back to text-based locators for older Studio builds.
-        picker_btn = page.locator(
+    picker_btn = page.locator(
             'button:has-text("gemma-3-270m"), '
             'button:has-text("Gemma 3"), '
             'button:has-text("Select model")'

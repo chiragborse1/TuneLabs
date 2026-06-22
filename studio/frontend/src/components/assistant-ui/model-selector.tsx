@@ -125,8 +125,6 @@ interface ModelSelectorProps {
   contentClassName?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  triggerDataTour?: string;
-  contentDataTour?: string;
   showCloudIndicator?: boolean;
 }
 
@@ -137,7 +135,6 @@ function ModelSelectorTrigger({
   variant = "outline",
   size = "default",
   className,
-  dataTour,
 }: {
   currentModel?: ModelOption;
   isLoaded: boolean;
@@ -145,13 +142,11 @@ function ModelSelectorTrigger({
   variant?: "outline" | "ghost" | "muted";
   size?: "sm" | "default" | "lg";
   className?: string;
-  dataTour?: string;
 }) {
   return (
     <PopoverTrigger asChild={true}>
       <button
         type="button"
-        data-tour={dataTour}
         className={cn(
           "tunelabs-model-selector-trigger flex min-w-0 items-center gap-2 transition-colors",
           variant === "outline" &&
@@ -220,7 +215,6 @@ function ModelSelectorContent({
   loadOnSelection,
   onLoadOnSelectionChange,
   className,
-  dataTour,
 }: {
   models: ModelOption[];
   loraModels: LoraModelOption[];
@@ -235,7 +229,6 @@ function ModelSelectorContent({
   loadOnSelection?: boolean;
   onLoadOnSelectionChange?: (value: boolean) => void;
   className?: string;
-  dataTour?: string;
 }) {
   const hasSelection = Boolean(value);
   const chatOnly = usePlatformStore((s) => s.isChatOnly());
@@ -301,7 +294,6 @@ function ModelSelectorContent({
     <PopoverContent
       align="start"
       alignOffset={10}
-      data-tour={dataTour}
       onKeyDown={handlePickerEntryKeyDown}
       className={cn(
         "tunelabs-model-selector-menu menu-soft-surface ring-0 w-[min(440px,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] min-w-0 gap-0 px-3 pt-3 pb-2",
@@ -445,8 +437,6 @@ export function ModelSelector({
   contentClassName,
   open: controlledOpen,
   onOpenChange,
-  triggerDataTour,
-  contentDataTour,
   showCloudIndicator = false,
 }: ModelSelectorProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
@@ -544,7 +534,6 @@ export function ModelSelector({
         variant={variant}
         size={size}
         className={className}
-        dataTour={triggerDataTour}
       />
       <ModelSelectorContent
         models={models}
@@ -560,7 +549,6 @@ export function ModelSelector({
         loadOnSelection={loadOnSelection}
         onLoadOnSelectionChange={onLoadOnSelectionChange}
         className={contentClassName}
-        dataTour={contentDataTour}
       />
     </Popover>
   );

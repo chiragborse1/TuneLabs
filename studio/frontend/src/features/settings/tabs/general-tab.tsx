@@ -77,8 +77,6 @@ const PREFS_KEYS: string[] = [
   "tunelabs_prev_save_steps",
   // Profile personalization
   "tunelabs_user_profile",
-  // Guided tour flags
-  "tour:studio:v1",
   // Update notifications
   "tunelabs_show_llama_update_banner",
 ];

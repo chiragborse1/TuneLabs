@@ -303,18 +303,14 @@ with sync_playwright() as p:
     else:
         page.wait_for_timeout(1500)
         shoot("02-compare-opened")
-        view = page.locator('[data-tour="chat-compare-view"]').first
-        if view.count() == 0:
-            soft_fail("[data-tour='chat-compare-view'] not found after Compare click")
-        else:
-            ok_count_before = len(page.locator('[data-role="assistant"]').all())
-            # Composer placeholder in compare-mode is "Send to both models...".
-            cmp_composer = page.get_by_placeholder(
-                re.compile(r"Send to both models", re.I),
-            ).first
-            if cmp_composer.count() == 0:
-                # Fall back to any textarea inside the compare view.
-                cmp_composer = view.locator("textarea").first
+        ok_count_before = len(page.locator('[data-role="assistant"]').all())
+        # Composer placeholder in compare-mode is "Send to both models...".
+        cmp_composer = page.get_by_placeholder(
+            re.compile(r"Send to both models", re.I),
+        ).first
+        if cmp_composer.count() == 0:
+            # Fall back to any textarea inside the compare view.
+            cmp_composer = page.locator('[class*="compare"] textarea').first
             if cmp_composer.count() == 0:
                 soft_fail("compare composer textarea not found")
             else:
@@ -415,11 +411,11 @@ with sync_playwright() as p:
             info(f"OK chat-only redirected /export -> {page.url}")
     else:
         # Non-chat-only: verify the export-cta button + HF token field.
-        cta = page.locator('[data-tour="export-cta"]').first
+        cta = page.get_by_role("button", name=re.compile(r"export", re.I)).first
         if cta.count() == 0:
-            soft_fail("[data-tour='export-cta'] not found in /export")
+            soft_fail("Export button not found in /export")
         else:
-            info("OK [data-tour='export-cta'] visible")
+            info("OK Export button visible")
         # HF-token field is lazy-loaded behind a disclosure; poll multiple selectors for ~8s.
         # Logged as info (not soft_fail) since it doesn't block the export workflow.
         hf_token = None
@@ -465,12 +461,12 @@ with sync_playwright() as p:
                 soft_fail(f"tab '{tab_name}' not found in /studio")
             else:
                 info(f"OK tab '{tab_name}' visible")
-        for anchor in ("studio-model", "studio-dataset", "studio-params"):
-            el = page.locator(f'[data-tour="{anchor}"]').first
+        for heading in ("Model", "Dataset", "Parameters"):
+            el = page.get_by_role("heading", name=re.compile(heading, re.I)).first
             if el.count() == 0:
-                soft_fail(f"[data-tour='{anchor}'] not found")
+                soft_fail(f"Section '{heading}' not found in /studio")
             else:
-                info(f"OK [data-tour='{anchor}'] visible")
+                info(f"OK section '{heading}' visible")
 
     # ─────────────────────────────────────────────────────
     # 5. Settings dialog tabs.

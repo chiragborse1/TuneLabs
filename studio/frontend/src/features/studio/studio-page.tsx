@@ -8,8 +8,6 @@ import {
   useTrainingRuntimeLifecycle,
   useTrainingRuntimeStore,
 } from "@/features/training";
-import { GuidedTour, useGuidedTourController } from "@/features/tour";
-import { studioTourSteps, studioTrainingTourSteps } from "./tour";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
@@ -81,28 +79,6 @@ export function StudioPage(): ReactElement {
   const { setPinned } = useSidebar();
   const pinSidebar = useCallback(() => setPinned(true), [setPinned]);
 
-  const tourEnabled = hasHydratedRuntime && !isHydratingRuntime;
-  const isConfigTour = activeTab === "configure";
-  const baseTourSteps = activeTab === "current-run" ? studioTrainingTourSteps : studioTourSteps;
-  // Inject onEnter for navbar-targeting steps so the sidebar expands during the tour.
-  const tourSteps = useMemo(
-    () =>
-      baseTourSteps.map((step) =>
-        step.target === "navbar" ? { ...step, onEnter: pinSidebar } : step,
-      ),
-    [baseTourSteps, pinSidebar],
-  );
-  const tour = useGuidedTourController({
-    id: "studio",
-    steps: tourSteps,
-    enabled: tourEnabled,
-  });
-
-  const setTourOpen = tour.setOpen;
-  useEffect(() => {
-    setTourOpen(false);
-  }, [activeTab, setTourOpen]);
-
   // When training auto-switches us to "current-run", persist that in
   // requestedTab so the user stays on results after training ends.
   useEffect(() => {
@@ -145,8 +121,6 @@ export function StudioPage(): ReactElement {
   return (
     <div className="relative min-h-[calc(100dvh-var(--studio-titlebar-height,0px))] bg-background">
       <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6">
-        <GuidedTour {...tour.tourProps} celebrate={isConfigTour} />
-
         <DatasetPreviewDialog
           open={dialogOpen}
           onOpenChange={(open) => {
