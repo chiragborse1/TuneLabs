@@ -4,7 +4,6 @@
 import { Switch } from "@/components/ui/switch";
 import { useSidebarPin } from "@/hooks/use-sidebar-pin";
 import { useT } from "@/i18n";
-import { LanguageSelect } from "../components/language-select";
 import { SettingsRow } from "../components/settings-row";
 import { SettingsSection } from "../components/settings-section";
 import { ThemeSegmented } from "../components/theme-segmented";
@@ -29,15 +28,6 @@ export function AppearanceTab() {
           description={t("settings.appearance.theme.description")}
         >
           <ThemeSegmented />
-        </SettingsRow>
-      </SettingsSection>
-
-      <SettingsSection title={t("settings.appearance.language.title")}>
-        <SettingsRow
-          label={t("settings.appearance.language.label")}
-          description={t("settings.appearance.language.description")}
-        >
-          <LanguageSelect />
         </SettingsRow>
       </SettingsSection>
 

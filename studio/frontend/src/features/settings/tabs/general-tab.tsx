@@ -36,7 +36,7 @@ import {
   type UploadLimitSettings,
 } from "../api/upload-limit";
 import { useSettingsDialogStore } from "../stores/settings-dialog-store";
-import { LOCALE_STORAGE_KEY, useT } from "@/i18n";
+import { useT } from "@/i18n";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
@@ -52,12 +52,10 @@ import { StudioVersionSection } from "../components/studio-version-section";
 const PREFS_KEYS: string[] = [
   // Appearance
   "theme",
-  LOCALE_STORAGE_KEY,
   // UI state
   "sidebar_pinned",
   "tunelabs_sidebar_navigate_open",
   "tunelabs_settings_active_tab",
-  // Chat runtime prefs
   "tunelabs_chat_auto_title",
   "tunelabs_hf_token",
   "tunelabs_auto_heal_tool_calls",

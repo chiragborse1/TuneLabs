@@ -1,20 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright 2026-present the TuneLabs AI Inc. team. All rights reserved. See /studio/LICENSE.AGPL-3.0
 
-import { getLocale } from "./locale-store";
 import { en } from "./locales/en";
-import { zhCN } from "./locales/zh-CN";
 import type { InterpolationValues, MessageKey } from "./types";
 
-export const LOCALES = {
-  en: { label: "English", nativeLabel: "English" },
-  "zh-CN": { label: "Chinese (Simplified)", nativeLabel: "简体中文" },
-} as const;
-
-export type Locale = keyof typeof LOCALES;
 export type TranslationKey = MessageKey<typeof en>;
-
-export const messages = { en, "zh-CN": zhCN } as const;
 
 const PLACEHOLDER_PATTERN = /\{([a-zA-Z0-9_]+)\}/g;
 
@@ -55,22 +45,13 @@ function warnMissingEnglishMessage(key: string): void {
 export function translate(
   key: TranslationKey,
   values?: InterpolationValues,
-  locale: Locale = getLocale(),
 ): string {
-  const localized = readMessage(messages[locale], key);
-  const fallback = localized ?? readMessage(messages.en, key);
+  const localized = readMessage(en, key);
 
-  if (fallback === undefined) {
+  if (localized === undefined) {
     warnMissingEnglishMessage(key);
     return key;
   }
 
-  return interpolate(fallback, values);
-}
-
-export function isSupportedLocale(value: unknown): value is Locale {
-  return (
-    typeof value === "string" &&
-    Object.prototype.hasOwnProperty.call(LOCALES, value)
-  );
+  return interpolate(localized, values);
 }
