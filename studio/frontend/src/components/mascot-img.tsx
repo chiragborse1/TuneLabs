@@ -5,7 +5,7 @@ import { type ComponentProps, useState } from "react";
 
 // Bundled as a data URI so the fallback ships inside the JS bundle and can
 // never 404, unlike the public-folder originals.
-import fallbackMascot from "@/assets/mascot-fallback.webp?inline";
+import fallbackMascot from "@/assets/TuneLab_logo.png?inline";
 
 const LEADING_SLASH = /^\//;
 
