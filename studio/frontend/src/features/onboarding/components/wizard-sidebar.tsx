@@ -18,7 +18,7 @@ export function WizardSidebar({ returnTo }: { returnTo: string }) {
     <aside className="w-full shrink-0 bg-muted/70 p-4 md:w-64 md:p-6">
       <div className="flex items-center gap-3 py-1 md:py-2">
         <img
-          src={`${import.meta.env.BASE_URL}TuneLab_logo.png`}
+          src={`${import.meta.env.BASE_URL}sticker.png`}
           alt="TuneLabs"
           className="size-12"
         />
