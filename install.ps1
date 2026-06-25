@@ -566,7 +566,7 @@ function Install-TuneLabsStudio {
             if ($PSScriptRoot -and $PSScriptRoot.Trim()) {
                 $bundledIcon = Join-Path $PSScriptRoot "studio\frontend\public\tunelabs.ico"
             }
-            $iconUrl = "https://raw.githubusercontent.com/tunelabsai/tunelabs/main/studio/frontend/public/tunelabs.ico"
+            $iconUrl = "https://raw.githubusercontent.com/chiragborse1/TuneLabs/main/studio/frontend/public/tunelabs.ico"
 
             if (-not (Test-Path -LiteralPath $appDir)) {
                 [System.IO.Directory]::CreateDirectory($appDir) | Out-Null

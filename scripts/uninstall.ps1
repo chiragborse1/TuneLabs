@@ -7,7 +7,7 @@
 # registry key. Honors custom roots set via TUNELABS_STUDIO_HOME / STUDIO_HOME
 # at install time (read back from share\studio.conf).
 #
-# Usage:  irm https://raw.githubusercontent.com/tunelabsai/tunelabs/main/scripts/uninstall.ps1 | iex
+# Usage:  irm https://raw.githubusercontent.com/chiragborse1/TuneLabs/main/scripts/uninstall.ps1 | iex
 # Local:  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; .\scripts\uninstall.ps1
 
 function Uninstall-TuneLabsStudio {
@@ -426,7 +426,7 @@ function Uninstall-TuneLabsStudio {
         Write-Host "If you installed TuneLabs Studio with TUNELABS_STUDIO_HOME or STUDIO_HOME"
         Write-Host "pointing at a custom directory, re-run this script with the same variable"
         Write-Host "set to also remove that install tree, e.g.:"
-        Write-Host "  `$env:TUNELABS_STUDIO_HOME = 'C:\your\path'; irm https://raw.githubusercontent.com/tunelabsai/tunelabs/main/scripts/uninstall.ps1 | iex"
+        Write-Host "  `$env:TUNELABS_STUDIO_HOME = 'C:\your\path'; irm https://raw.githubusercontent.com/chiragborse1/TuneLabs/main/scripts/uninstall.ps1 | iex"
     }
 }
 

@@ -1304,7 +1304,7 @@ rocm711-torch2100 = [
 [project.urls]
 homepage = "https://tunelabs.ai"
 documentation = "https://tunelabs.ai/docs"
-repository = "https://github.com/tunelabsai/tunelabs"
+repository = "https://github.com/chiragborse1/TuneLabs"
 
 [tool.ruff]
 target-version = "py311"

@@ -1049,7 +1049,7 @@ LAUNCHER_EOF
         cp "$_css_found_icon" "$_css_icon_png" 2>/dev/null || true
         cp "$_css_found_icon" "$_css_gem_png" 2>/dev/null || true
     else
-        download "https://raw.githubusercontent.com/tunelabsai/tunelabs/main/studio/frontend/public/rounded-512.png" "$_css_icon_png" 2>/dev/null || true
+        download "https://raw.githubusercontent.com/chiragborse1/TuneLabs/main/studio/frontend/public/rounded-512.png" "$_css_icon_png" 2>/dev/null || true
         cp "$_css_icon_png" "$_css_gem_png" 2>/dev/null || true
     fi
 
@@ -1268,7 +1268,7 @@ if (Test-Path -LiteralPath \$iconPath) {
 if (-not (Test-Path -LiteralPath \$iconPath)) {
     try {
         New-Item -ItemType Directory -Force -Path \$iconDir | Out-Null
-        Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/tunelabsai/tunelabs/main/studio/frontend/public/tunelabs.ico' -OutFile \$iconPath -UseBasicParsing -ErrorAction Stop
+        Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/chiragborse1/TuneLabs/main/studio/frontend/public/tunelabs.ico' -OutFile \$iconPath -UseBasicParsing -ErrorAction Stop
     } catch {}
 }
 \$hasIcon = \$false
@@ -2231,7 +2231,7 @@ _maybe_bootstrap_rocm_wsl() {
     _rw_tmp=""
     if [ ! -r "$_rw_helper" ]; then
         _rw_tmp="$(mktemp 2>/dev/null || echo /tmp/_tunelabs_rocm_wsl.sh)"
-        if download "https://raw.githubusercontent.com/tunelabsai/tunelabs/main/scripts/install_rocm_wsl_strixhalo.sh" "$_rw_tmp" 2>/dev/null; then
+        if download "https://raw.githubusercontent.com/chiragborse1/TuneLabs/main/scripts/install_rocm_wsl_strixhalo.sh" "$_rw_tmp" 2>/dev/null; then
             _rw_helper="$_rw_tmp"
         else
             substep "Could not fetch the ROCm-on-WSL helper; using CPU fallback." "$C_WARN"

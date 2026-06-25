@@ -8,7 +8,7 @@
 # Honors custom roots set via TUNELABS_STUDIO_HOME / STUDIO_HOME at
 # install time (read back from studio.conf).
 #
-# Usage: curl -fsSL https://raw.githubusercontent.com/tunelabsai/tunelabs/main/scripts/uninstall.sh | sh
+# Usage: curl -fsSL https://raw.githubusercontent.com/chiragborse1/TuneLabs/main/scripts/uninstall.sh | sh
 
 set -e
 
@@ -376,5 +376,5 @@ if [ -z "${TUNELABS_STUDIO_HOME:-}" ] && [ -z "${STUDIO_HOME:-}" ]; then
     echo "If you installed TuneLabs Studio with TUNELABS_STUDIO_HOME or STUDIO_HOME"
     echo "pointing at a custom directory, re-run this script with the same variable"
     echo "set to also remove that install tree, e.g.:"
-    echo "  TUNELABS_STUDIO_HOME=/your/path sh -c \"\$(curl -fsSL https://raw.githubusercontent.com/tunelabsai/tunelabs/main/scripts/uninstall.sh)\""
+    echo "  TUNELABS_STUDIO_HOME=/your/path sh -c \"\$(curl -fsSL https://raw.githubusercontent.com/chiragborse1/TuneLabs/main/scripts/uninstall.sh)\""
 fi
