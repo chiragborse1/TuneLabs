@@ -355,16 +355,6 @@ export const en = {
       whatsNew: "What's new",
       feedback: "Feedback",
       reportIssue: "Report an issue",
-      license: {
-        sectionTitle: "License",
-        studioLabel: "TuneLabs Studio",
-        studioLicense: "AGPL-3.0",
-        studioDescription:
-          "Open source under the GNU AGPL v3.0.",
-        libraryLabel: "TuneLabs Core",
-        libraryLicense: "Apache-2.0",
-        libraryDescription: "Licensed under Apache 2.0.",
-      },
       dangerZone: "Danger zone",
       shutDownStudio: "Shut down TuneLabs Studio",
       shutDownStudioDescription:

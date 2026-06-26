@@ -197,37 +197,6 @@ export function AboutTab() {
         </SettingsRow>
       </SettingsSection>
 
-      <SettingsSection title={t("settings.about.license.sectionTitle")}>
-        <SettingsRow
-          label={t("settings.about.license.studioLabel")}
-          description={t("settings.about.license.studioDescription")}
-        >
-          <a
-            href="https://github.com/tunelabsai/tunelabs/blob/main/studio/LICENSE.AGPL-3.0"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 font-mono text-xs font-medium text-muted-foreground hover:text-foreground"
-          >
-            {t("settings.about.license.studioLicense")}
-            <HugeiconsIcon icon={ArrowUpRight01Icon} className="size-3" />
-          </a>
-        </SettingsRow>
-        <SettingsRow
-          label={t("settings.about.license.libraryLabel")}
-          description={t("settings.about.license.libraryDescription")}
-        >
-          <a
-            href="https://github.com/tunelabsai/tunelabs/blob/main/LICENSE"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 font-mono text-xs font-medium text-muted-foreground hover:text-foreground"
-          >
-            {t("settings.about.license.libraryLicense")}
-            <HugeiconsIcon icon={ArrowUpRight01Icon} className="size-3" />
-          </a>
-        </SettingsRow>
-      </SettingsSection>
-
       <SettingsSection title={t("settings.about.dangerZone")}>
         <SettingsRow
           destructive={true}
